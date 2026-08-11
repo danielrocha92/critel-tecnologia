@@ -20,6 +20,8 @@ export const metadata: Metadata = {
 };
 
 import FloatingActions from "@/components/FloatingActions/FloatingActions";
+import Header from "@/components/Header/Header";
+import Footer from "@/components/Footer/Footer";
 
 export default function RootLayout({
   children,
@@ -29,7 +31,11 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className={`${inter.variable} ${montserrat.variable}`}>
       <body>
-        {children}
+        <Header />
+        <main style={{ paddingTop: '80px' }}>
+          {children}
+        </main>
+        <Footer />
         <FloatingActions />
       </body>
     </html>

@@ -7,13 +7,13 @@ export default function Institutional() {
       <ScrollReveal animation="fadeInLeft" className={styles.imageHalf}>
       </ScrollReveal>
       <ScrollReveal animation="fadeInRight" className={styles.textHalf}>
-        <h2 className={styles.title}>A Empresa</h2>
-        <p className={styles.subtitle}>Engenharia real. Resultados visíveis.</p>
+        <h2 className={styles.title}>Sobre a Critel</h2>
+        <p className={styles.subtitle}>Sólida expertise em Infraestrutura de TI.</p>
         <p className={styles.description}>
-          <strong>30 ANOS resolvendo problemas de TI para redes varejistas de todo o Brasil.</strong>
+          <strong>Soluções Integradas para Setor Público e Privado.</strong>
         </p>
         <p className={styles.description}>
-          A Critel integra help desk, field service, segurança eletrônica e cabeamento sob um único parceiro técnico. Com atendimento nacional e soluções personalizadas por unidade, sua operação se torna padronizada, segura e escalável. Com a Critel, você não depende da sorte — você conta com experiência comprovada.
+          A Critel Tecnologia é especializada em oferecer soluções integradas em infraestrutura e segurança de TI. Focamos em inovação, excelência operacional e na proteção dos dados dos nossos clientes. Nossos serviços são desenhados para atender necessidades específicas, proporcionando resultados que alavancam sua produtividade.
         </p>
         <div className={styles.stats}>
           <div className={styles.statItem}>

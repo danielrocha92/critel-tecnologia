@@ -11,10 +11,24 @@ export default function Header() {
         </div>
         <nav className={styles.nav}>
           <ul className={styles.navList}>
-            <li><Link href="#empresa">Empresa</Link></li>
-            <li><Link href="#servicos">Serviços</Link></li>
-            <li><Link href="#clientes">Clientes</Link></li>
-            <li><Link href="#contato">Contato</Link></li>
+            <li><Link href="/">Home</Link></li>
+            <li className={styles.hasDropdown}>
+              <span>Quem Somos</span>
+              <ul className={styles.dropdown}>
+                <li><Link href="/#empresa">Sobre a Critel</Link></li>
+              </ul>
+            </li>
+            <li className={styles.hasDropdown}>
+              <span>Soluções</span>
+              <ul className={styles.dropdown}>
+                <li><Link href="/solucoes/seguranca-da-informacao">Segurança da Informação</Link></li>
+                <li><Link href="/solucoes/ativos-de-rede">Ativos de Rede</Link></li>
+                <li><Link href="/solucoes/cabeamento-estruturado">Cabeamento Estruturado</Link></li>
+                <li><Link href="/solucoes/tecnologia-predial">Tecnologia Predial</Link></li>
+              </ul>
+            </li>
+            <li><Link href="/#clientes">Clientes</Link></li>
+            <li><Link href="/#formulario">Contato</Link></li>
           </ul>
         </nav>
         <div className={styles.actions}>

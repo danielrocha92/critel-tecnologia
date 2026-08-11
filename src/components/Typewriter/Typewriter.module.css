@@ -1,0 +1,18 @@
+.typewriter {
+  display: inline-block;
+}
+
+.cursor {
+  display: inline-block;
+  width: 3px;
+  height: 1.1em;
+  background-color: var(--accent-neon);
+  margin-left: 2px;
+  vertical-align: middle;
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
