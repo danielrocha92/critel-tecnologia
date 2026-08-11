@@ -1,0 +1,98 @@
+.institutional {
+  display: flex;
+  min-height: 80vh;
+  background-color: var(--bg-primary);
+}
+
+.imageHalf {
+  flex: 1;
+  background-image: url('https://images.unsplash.com/photo-1573164713988-8665fc963095?q=80&w=2069&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.imageHalf::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(10, 15, 24, 0.4);
+}
+
+.textHalf {
+  flex: 1;
+  padding: 6rem 4rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.title {
+  font-size: 2.5rem;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  color: var(--accent-neon);
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.description {
+  color: var(--text-secondary);
+  font-size: 1.125rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  max-width: 600px;
+}
+
+.stats {
+  display: flex;
+  gap: 3rem;
+  margin-top: 3rem;
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.statNumber {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: var(--text-primary);
+  font-family: var(--font-montserrat);
+}
+
+.statLabel {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+@media (max-width: 992px) {
+  .institutional {
+    flex-direction: column;
+  }
+  .imageHalf {
+    min-height: 400px;
+  }
+  .textHalf {
+    padding: 4rem 2rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .stats {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+}

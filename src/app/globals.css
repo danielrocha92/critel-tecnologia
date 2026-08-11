@@ -1,0 +1,61 @@
+:root {
+  /* Colors - Dark Theme (Default for Critel) */
+  --bg-primary: #0a0f18; /* Navy Blue / Very Dark Blue */
+  --bg-secondary: #121927; /* Lighter Navy for cards */
+  --bg-tertiary: #1b2438;
+  --text-primary: #f0f4f8;
+  --text-secondary: #a0aec0;
+  
+  /* Accents */
+  --accent-neon: #00ff66; /* Neon Green (connectivity/status online) */
+  --accent-cyan: #00d2ff; /* Cyan (IoT feel) */
+  --accent-hover: #00e65c;
+  
+  /* Layout */
+  --container-width: 1200px;
+  --border-radius: 8px;
+  --header-height: 80px;
+
+  /* Transitions */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html, body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-inter), sans-serif;
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-montserrat), sans-serif;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+/* Base Utility Classes */
+.container {
+  max-width: var(--container-width);
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.text-gradient {
+  background: linear-gradient(90deg, var(--accent-neon), var(--accent-cyan));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}

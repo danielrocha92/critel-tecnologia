@@ -1,0 +1,75 @@
+.socialProof {
+  background-color: var(--bg-tertiary);
+  padding: 2rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.label {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.logos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.logoItem {
+  color: var(--text-secondary);
+  font-family: var(--font-montserrat);
+  font-weight: 700;
+  font-size: 1.25rem;
+  opacity: 0.6;
+  transition: var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 50px;
+  cursor: default;
+}
+
+.logoItem:hover {
+  opacity: 1;
+  color: var(--accent-neon);
+  transform: translateY(-2px);
+}
+
+.logoImage {
+  max-height: 40px;
+  max-width: 140px;
+  object-fit: contain;
+  /* Make the logos grayscale to blend with the dark theme */
+  filter: grayscale(100%) brightness(150%);
+  transition: var(--transition-normal);
+}
+
+.logoItem:hover .logoImage {
+  /* Reveal the original colors on hover */
+  filter: grayscale(0%) brightness(100%);
+}
+
+@media (max-width: 1024px) {
+  .container {
+    flex-direction: column;
+    gap: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .logos {
+    gap: 1.5rem;
+  }
+}
