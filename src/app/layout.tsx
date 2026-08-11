@@ -19,6 +19,8 @@ export const metadata: Metadata = {
   description: "Conectando Negócios. Protegendo o Futuro. Soluções corporativas em Infraestrutura de TI, Segurança Eletrônica, IoT e Outsourcing desde 1994.",
 };
 
+import FloatingActions from "@/components/FloatingActions/FloatingActions";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -26,7 +28,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" className={`${inter.variable} ${montserrat.variable}`}>
-      <body>{children}</body>
+      <body>
+        {children}
+        <FloatingActions />
+      </body>
     </html>
   );
 }

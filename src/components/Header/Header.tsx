@@ -1,5 +1,6 @@
 import styles from './Header.module.css';
 import Link from 'next/link';
+import { Globe } from 'lucide-react';
 
 export default function Header() {
   return (
@@ -17,6 +18,14 @@ export default function Header() {
           </ul>
         </nav>
         <div className={styles.actions}>
+          <div className={styles.langSelector}>
+            <Globe size={18} className={styles.globeIcon} />
+            <select aria-label="Seletor de idioma">
+              <option value="pt">PT</option>
+              <option value="en">EN</option>
+              <option value="es">ES</option>
+            </select>
+          </div>
           <Link href="#contato" className={styles.btnAction}>Fale Conosco</Link>
         </div>
       </div>

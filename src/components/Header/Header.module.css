@@ -48,6 +48,46 @@
   color: var(--accent-neon);
 }
 
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.langSelector {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: rgba(255, 255, 255, 0.6);
+  transition: var(--transition-fast, 0.2s ease);
+}
+
+.langSelector:hover {
+  color: var(--text-primary, #fff);
+}
+
+.globeIcon {
+  color: inherit;
+}
+
+.langSelector select {
+  background: transparent;
+  border: none;
+  color: inherit;
+  font-size: 0.85rem;
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  padding-right: 0.2rem;
+}
+
+.langSelector select option {
+  background-color: #0a0f18; /* Dark background to match header */
+  color: #fff;
+}
+
 .btnAction {
   background-color: transparent;
   color: var(--accent-neon);

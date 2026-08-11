@@ -1,0 +1,27 @@
+.revealWrapper {
+  opacity: 0;
+  will-change: transform, opacity;
+  transition-property: transform, opacity;
+  transition-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.fadeInUp {
+  transform: translateY(40px);
+}
+
+.fadeInLeft {
+  transform: translateX(-40px);
+}
+
+.fadeInRight {
+  transform: translateX(40px);
+}
+
+.zoomIn {
+  transform: scale(0.9);
+}
+
+.visible {
+  opacity: 1;
+  transform: translate(0) scale(1);
+}

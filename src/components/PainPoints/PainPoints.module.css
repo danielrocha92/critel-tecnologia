@@ -1,0 +1,118 @@
+.painPoints {
+  background-color: var(--bg-secondary);
+  padding: 6rem 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.container {
+  position: relative;
+  z-index: 2;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+.title {
+  font-size: 2.5rem;
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+}
+
+.description {
+  font-size: 1.125rem;
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+.highlight {
+  background: rgba(0, 255, 102, 0.05);
+  border-left: 4px solid var(--accent-neon);
+  padding: 1.5rem;
+  border-radius: 0 8px 8px 0;
+  margin-bottom: 2.5rem;
+}
+
+.highlight p {
+  color: var(--text-primary);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.highlight strong {
+  color: var(--accent-neon);
+}
+
+.btn {
+  display: inline-block;
+  background-color: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--accent-neon);
+  padding: 0.875rem 2rem;
+  border-radius: var(--border-radius);
+  font-weight: 600;
+  transition: var(--transition-normal);
+}
+
+.btn:hover {
+  background-color: var(--accent-neon);
+  color: #000;
+  box-shadow: 0 4px 14px rgba(0, 255, 102, 0.3);
+}
+
+.imageContainer {
+  position: relative;
+}
+
+.imageWrapper {
+  position: relative;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-deep);
+}
+
+.image {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.imageWrapper:hover .image {
+  transform: scale(1.05);
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, rgba(0, 255, 102, 0.2) 0%, rgba(10, 15, 24, 0.1) 100%);
+  pointer-events: none;
+}
+
+@media (max-width: 992px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  .imageContainer {
+    order: -1; /* Image appears first on mobile */
+  }
+}
+
+@media (max-width: 768px) {
+  .title {
+    font-size: 2rem;
+  }
+  .painPoints {
+    padding: 4rem 0;
+  }
+}

@@ -1,29 +1,31 @@
 import styles from './Institutional.module.css';
+import ScrollReveal from '../ScrollReveal/ScrollReveal';
 
 export default function Institutional() {
   return (
     <section className={styles.institutional} id="empresa">
-      <div className={styles.imageHalf}></div>
-      <div className={styles.textHalf}>
+      <ScrollReveal animation="fadeInLeft" className={styles.imageHalf}>
+      </ScrollReveal>
+      <ScrollReveal animation="fadeInRight" className={styles.textHalf}>
         <h2 className={styles.title}>A Empresa</h2>
-        <p className={styles.subtitle}>Engenharia e Tecnologia desde 1994.</p>
+        <p className={styles.subtitle}>Engenharia real. Resultados visíveis.</p>
         <p className={styles.description}>
-          A Critel Tecnologia oferece aos seus clientes produtos e serviços de Infraestrutura, Field Services e Projetos de TI, através de uma atuação humana e comprometida com as necessidades do negócio.
+          <strong>30 ANOS resolvendo problemas de TI para redes varejistas de todo o Brasil.</strong>
         </p>
         <p className={styles.description}>
-          Desde 1994 no mercado, baseamos nossa oferta em metodologia sólida, experiência, criatividade e, acima de tudo, no comprometimento de nossa equipe com os resultados dos nossos clientes.
+          A Critel integra help desk, field service, segurança eletrônica e cabeamento sob um único parceiro técnico. Com atendimento nacional e soluções personalizadas por unidade, sua operação se torna padronizada, segura e escalável. Com a Critel, você não depende da sorte — você conta com experiência comprovada.
         </p>
         <div className={styles.stats}>
           <div className={styles.statItem}>
-            <span className={styles.statNumber}>+30</span>
+            <span className={styles.statNumber}>30</span>
             <span className={styles.statLabel}>Anos de Mercado</span>
           </div>
           <div className={styles.statItem}>
-            <span className={styles.statNumber}>Top</span>
-            <span className={styles.statLabel}>Comprometimento</span>
+            <span className={styles.statNumber}>+1.000</span>
+            <span className={styles.statLabel}>Projetos Executados</span>
           </div>
         </div>
-      </div>
+      </ScrollReveal>
     </section>
   );
 }

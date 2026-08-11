@@ -1,0 +1,96 @@
+.floatingBtn {
+  position: fixed;
+  bottom: 2rem;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  z-index: 9999;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.floatingBtn:hover {
+  transform: translateY(-5px) scale(1.05);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.floatingBtn:active {
+  transform: translateY(2px) scale(0.95);
+}
+
+.whatsappBtn {
+  left: 2rem;
+  background: rgba(10, 15, 24, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 255, 102, 0.3);
+  color: var(--accent-neon);
+}
+
+.whatsappBtn:hover {
+  background: var(--accent-neon);
+  color: #000;
+  border-color: var(--accent-neon);
+  box-shadow: 0 0 20px rgba(0, 255, 102, 0.4);
+}
+
+.backToTopBtn {
+  right: 2rem;
+  background: rgba(10, 15, 24, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 210, 255, 0.3);
+  color: var(--accent-cyan);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px);
+}
+
+.backToTopBtn.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.backToTopBtn:hover {
+  background: var(--accent-cyan);
+  color: #000;
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
+}
+
+@media (max-width: 768px) {
+  .floatingBtn {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .whatsappBtn {
+    left: auto;
+    right: 1.5rem;
+    bottom: 1.5rem;
+  }
+  
+  /* Initial mobile state: left side */
+  .backToTopBtn {
+    right: auto;
+    left: 1.5rem;
+    bottom: 1.5rem;
+  }
+
+  /* Scrolled down mobile state: right side, above WhatsApp */
+  .backToTopBtn.visible {
+    left: auto;
+    right: 1.5rem;
+    bottom: calc(1.5rem + 48px + 1rem);
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+}

@@ -1,0 +1,119 @@
+.contactFormSection {
+  background-color: var(--bg-tertiary);
+  padding: 6rem 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.title {
+  font-size: 2rem;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  line-height: 1.3;
+}
+
+.subtitle {
+  color: var(--accent-neon);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.formWrapper {
+  background-color: var(--bg-secondary);
+  padding: 3rem;
+  border-radius: var(--border-radius);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: var(--shadow-deep);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.formGroup label {
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.formGroup input,
+.formGroup textarea {
+  width: 100%;
+  padding: 1rem;
+  background-color: var(--bg-primary);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 1rem;
+  transition: var(--transition-fast);
+}
+
+.formGroup input:focus,
+.formGroup textarea:focus {
+  outline: none;
+  border-color: var(--accent-neon);
+  box-shadow: 0 0 0 2px rgba(0, 255, 102, 0.2);
+}
+
+.formGroup input::placeholder,
+.formGroup textarea::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.7;
+}
+
+.submitBtn {
+  margin-top: 1rem;
+  background-color: var(--accent-neon);
+  color: #000;
+  border: none;
+  padding: 1rem 2rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: var(--transition-normal);
+  box-shadow: 0 4px 14px rgba(0, 255, 102, 0.3);
+}
+
+.submitBtn:hover {
+  background-color: var(--accent-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 255, 102, 0.4);
+}
+
+@media (max-width: 768px) {
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+  .formWrapper {
+    padding: 2rem 1.5rem;
+  }
+  .title {
+    font-size: 1.5rem;
+  }
+}

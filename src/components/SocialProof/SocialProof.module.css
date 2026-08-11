@@ -14,7 +14,7 @@
 .label {
   color: var(--text-secondary);
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
@@ -32,33 +32,35 @@
   font-family: var(--font-montserrat);
   font-weight: 700;
   font-size: 1.25rem;
-  opacity: 0.6;
+  opacity: 0.85;
   transition: var(--transition-fast);
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 50px;
+  height: 80px;
   cursor: default;
+  background-color: rgba(255, 255, 255, 0.95);
+  padding: 10px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .logoItem:hover {
   opacity: 1;
-  color: var(--accent-neon);
-  transform: translateY(-2px);
+  color: var(--accent-hover);
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
 }
 
 .logoImage {
-  max-height: 40px;
-  max-width: 140px;
+  max-height: 55px;
+  max-width: 180px;
   object-fit: contain;
-  /* Make the logos grayscale to blend with the dark theme */
-  filter: grayscale(100%) brightness(150%);
   transition: var(--transition-normal);
 }
 
 .logoItem:hover .logoImage {
-  /* Reveal the original colors on hover */
-  filter: grayscale(0%) brightness(100%);
+  /* Scale effect handled by logoItem now */
 }
 
 @media (max-width: 1024px) {

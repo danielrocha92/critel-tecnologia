@@ -7,12 +7,12 @@ export default function SocialProof() {
     { name: 'Bradesco', desc: 'Infraestrutura corporativa e suporte.', logoSrc: '/bradesco.sgv.svg' },
     { name: 'Bacio di Latte', desc: 'Aberturas de loja, service desk e Field Services.', logoSrc: '/Bacio-di-latte.sgv.svg' },
     { name: 'Ofner', desc: 'Suporte especializado em infraestrutura.', logoSrc: '/ofner.png' },
-    { name: 'Engemon', desc: 'Infraestrutura de rede e Field Services nos clientes da Engemon.', logoSrc: '/engemon.webp' },
+    { name: 'Engemon', desc: 'Infraestrutura de rede e Field Services nos clientes da Engemon.', logoSrc: '/engemon.svg' },
     { name: 'Sonda IT', desc: 'Infraestrutura de rede e Field Services.', logoSrc: '/sonda.jpg' },
     { name: 'Connectcom', desc: 'Infraestrutura de rede e Field Services.', logoSrc: null },
     { name: 'Tecnocomp', desc: 'Infraestrutura de rede e Field Services.', logoSrc: null },
-    { name: 'Pizza Hut', desc: 'Montagem de novas lojas (Grupo IMC).', logoSrc: null },
-    { name: 'KFC', desc: 'Montagem de novas lojas (Grupo IMC).', logoSrc: null }
+    { name: 'Pizza Hut', desc: 'Montagem de novas lojas (Grupo IMC).', logoSrc: '/pizza-hut.svg' },
+    { name: 'KFC', desc: 'Montagem de novas lojas (Grupo IMC).', logoSrc: '/kfc.svg' }
   ];
   
   return (
