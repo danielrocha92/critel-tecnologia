@@ -37,7 +37,7 @@
 }
 
 .subtitle {
-  color: var(--accent-brand);
+  color: var(--accent-brand-text);
   font-size: 1.125rem;
   font-weight: 600;
   margin-bottom: 2rem;

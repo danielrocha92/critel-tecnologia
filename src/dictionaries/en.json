@@ -1,0 +1,142 @@
+{
+  "hero": {
+    "badge": "Excellence in Technology",
+    "titlePrefix": "We boost your business performance with",
+    "typewriter": [
+      "integrated IT solutions.",
+      "information security.",
+      "corporate network assets.",
+      "structured cabling."
+    ],
+    "subtitle": "Data protection, robust infrastructure, and custom services to drive your company's operations with maximum efficiency.",
+    "primaryBtn": "Request Free Diagnosis",
+    "secondaryBtn": "Explore our Solutions"
+  },
+  "nav": {
+    "home": "Home",
+    "about": "About Us",
+    "aboutCritel": "About Critel",
+    "solutions": "Solutions",
+    "clients": "Clients",
+    "contact": "Contact",
+    "talkToUs": "Talk to Us",
+    "sol_security": "Information Security",
+    "sol_network": "Network Assets",
+    "sol_cabling": "Structured Cabling",
+    "sol_building": "Building Technology"
+  },
+  "highlights": {
+    "card1": {
+      "title": "CONSTANT INNOVATION",
+      "desc": "Applying the best market technologies to drive continuous results."
+    },
+    "card2": {
+      "title": "COMMITMENT TO TOMORROW",
+      "desc": "Responsible practices that ensure long-term security and efficiency for your business."
+    },
+    "card3": {
+      "title": "TECHNICAL EXPERTISE",
+      "desc": "Consultative approach and fully tailored execution for corporate demands."
+    }
+  },
+  "innovation": {
+    "title": "Our Methodology",
+    "desc": "We guarantee the excellence of our services through 5 fundamental pillars, tracking your project from end to end.",
+    "p1_title": "1. Consulting:",
+    "p1_desc": "Deep understanding of the business",
+    "p2_title": "2. Technical Analysis:",
+    "p2_desc": "Diagnosis and solution design",
+    "p3_title": "3. Scope:",
+    "p3_desc": "Detailed project planning",
+    "p4_title": "4. Implementation:",
+    "p4_desc": "Agile and standardized execution",
+    "p5_title": "5. Maintenance:",
+    "p5_desc": "Preventive and corrective support",
+    "dash1": "Completed Stages",
+    "dash2": "Satisfaction",
+    "dash3": "Project Progress"
+  },
+  "institutional": {
+    "title": "About Critel",
+    "subtitle": "Solid expertise in IT Infrastructure.",
+    "desc1": "Integrated Solutions for Public and Private Sectors.",
+    "desc2": "Critel Tecnologia specializes in offering integrated solutions in IT infrastructure and security. We focus on innovation, operational excellence, and protecting our clients' data. Our services are designed to meet specific needs, delivering results that boost your productivity.",
+    "stat1_num": "30",
+    "stat1_label": "Years in the Market",
+    "stat2_num": "+1,000",
+    "stat2_label": "Executed Projects"
+  },
+  "verticals": {
+    "title": "Our Solutions",
+    "learnMore": "Learn more →",
+    "card1_title": "Information Security",
+    "card1_desc": "Protect your company's data with the best tools and strategies in the corporate market.",
+    "card2_title": "Network Assets",
+    "card2_desc": "Guaranteed connectivity and performance with market-leading equipment for your business.",
+    "card3_title": "Structured Cabling",
+    "card3_desc": "Organized, stable networks with guaranteed performance for voice, data, and image transmission.",
+    "card4_title": "Building Technology",
+    "card4_desc": "Complete CCTV, access control, biometrics, and automation projects for your infrastructure."
+  },
+  "socialProof": {
+    "label": "Our Clients and Partners"
+  },
+  "contactForm": {
+    "title": "Let's understand your scenario and propose a custom technical solution, with no obligation.",
+    "subtitle": "Consultative approach • Response within 24 business hours • No obligation",
+    "labels": {
+      "name": "Full Name",
+      "role": "Role",
+      "company": "Company Name",
+      "email": "Corporate E-mail",
+      "challenge": "What is your current IT challenge?"
+    },
+    "placeholders": {
+      "name": "How should we call you?",
+      "role": "E.g., IT Director, Manager...",
+      "company": "Your company",
+      "email": "your.name@company.com",
+      "challenge": "Briefly tell us what you need to solve..."
+    },
+    "submitBtn": "Request Free Diagnosis via WhatsApp"
+  },
+  "footer": {
+    "menuTitle": "Menu",
+    "socialTitle": "Social Media",
+    "lgpdSeal": "✓ Infrastructure Specialists",
+    "lgpdText": "Human approach committed to the business needs of its clients since 1994.",
+    "rights": "Critel Tecnologia. All rights reserved.",
+    "madeBy": "Made by:"
+  },
+  "solutionPage": {
+    "badge": "Our Solutions",
+    "overview": "Solution Overview",
+    "featuresTitle": "Key Features:"
+  },
+  "solutionsData": {
+    "seguranca-da-informacao": {
+      "title": "Information Security",
+      "description": "Complete and advanced protection for your operation's critical data. We mitigate risks and ensure your business continuity.",
+      "detailedText": "In the current corporate landscape, data protection is not just a technical need, but a strategic pillar. Our Information Security solutions are based on Gartner Magic Quadrant leading technologies, offering multi-layered defense against cyber threats. From initial audit to Zero Trust access policies implementation, our team acts proactively to identify vulnerabilities and shield your infrastructure against invasions, ransomware, and data leaks.",
+      "features": ["Next-Generation Firewalls (NGFW)", "Network Access Control (NAC)", "Intrusion Prevention (IPS/IDS)", "Audit, Compliance and LGPD", "Endpoint Protection (EDR/XDR)"]
+    },
+    "ativos-de-rede": {
+      "title": "Network Assets",
+      "description": "Uninterrupted connectivity and high performance with cutting-edge equipment to support your company's growth.",
+      "detailedText": "The backbone of any modern operation is its data network. We provide and configure high availability Network Assets that ensure your communication and mission-critical systems never stop. We work with intelligent routing, high-density switching and next-generation wireless connectivity (Wi-Fi 6). Our consultancy helps to exactly dimension the equipment you need, optimizing your investment (ROI) and ensuring future scalability.",
+      "features": ["L2/L3 Managed Switches", "High Capacity Routers", "Enterprise Wireless Networks (Wi-Fi 6)", "Load Balancers", "SD-WAN and Secure Connectivity"]
+    },
+    "tecnologia-predial": {
+      "title": "Building Technology",
+      "description": "Intelligence and physical security integrated into a single ecosystem for corporate and industrial environments.",
+      "detailedText": "We transform traditional spaces into smart and highly secure environments. Our Building Technology vertical integrates all vital systems of your building: from rigorous control of who enters and leaves, to analytic video monitoring and fire alarm systems. With building automation (BMS), your company not only gains in asset security, but also in energy efficiency and centralized management, significantly reducing operational costs.",
+      "features": ["AI CCTV Monitoring", "Biometric and Facial Access Control", "Fire Alarm and Detection Systems", "Building Automation (BMS)", "Sound and Visual Communication"]
+    },
+    "cabeamento-estruturado": {
+      "title": "Structured Cabling",
+      "description": "The highly reliable physical basis for data, voice and image transmission in your infrastructure.",
+      "detailedText": "An IT system is only as strong as its physical infrastructure. Our engineering team designs and executes Structured Cabling solutions following the strictest international standards (EIA/TIA, ISO, ABNT). Whether in metallic cable (Cat6, Cat6A) or ultra-high speed optical fiber, we guarantee an organized, documented and bottleneck-free network. We deliver from complete Data Center assembly to office horizontal cabling, always with certification and performance guarantee.",
+      "features": ["Logical Network Projects and Execution", "Network Certification (Fluke Networks)", "Racks and Data Centers Assembly", "Optical Fiber Launch and Fusion", "As-built and Technical Documentation"]
+    }
+  }
+}

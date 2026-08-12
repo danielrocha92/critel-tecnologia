@@ -46,7 +46,7 @@
 }
 
 .highlight strong {
-  color: var(--accent-brand);
+  color: var(--accent-brand-text);
 }
 
 .btn {
@@ -61,7 +61,7 @@
 }
 
 .btn:hover {
-  background-color: var(--accent-brand);
+  background-color: var(--accent-brand-text);
   color: #000;
   box-shadow: 0 4px 14px rgba(0, 255, 102, 0.3);
 }

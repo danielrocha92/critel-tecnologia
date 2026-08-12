@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Montserrat } from "next/font/google";
-import "./globals.css";
+import "../globals.css";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -23,20 +23,27 @@ import FloatingActions from "@/components/FloatingActions/FloatingActions";
 import Header from "@/components/Header/Header";
 import Footer from "@/components/Footer/Footer";
 
-export default function RootLayout({
+import { getDictionary } from "@/dictionaries";
+
+export default async function RootLayout({
   children,
+  params,
 }: Readonly<{
   children: React.ReactNode;
+  params: Promise<{ lang: string }>;
 }>) {
+  const resolvedParams = await params;
+  const dict = await getDictionary(resolvedParams.lang as any);
+
   return (
-    <html lang="pt-BR" className={`${inter.variable} ${montserrat.variable}`}>
+    <html lang={resolvedParams.lang} className={`${inter.variable} ${montserrat.variable}`}>
       <body>
-        <Header />
+        <Header lang={resolvedParams.lang} dict={dict.nav} />
         <main style={{ paddingTop: '80px' }}>
           {children}
         </main>
-        <Footer />
-        <FloatingActions />
+        <Footer dict={dict.footer} lang={resolvedParams.lang} />
+        <FloatingActions lang={resolvedParams.lang} />
       </body>
     </html>
   );

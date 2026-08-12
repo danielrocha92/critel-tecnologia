@@ -1,3 +1,6 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import styles from './Footer.module.css';
 
 const LinkedinIcon = () => (
@@ -12,7 +15,13 @@ const FacebookIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
 );
 
-export default function Footer() {
+export default function Footer({ dict, lang }: { dict: any, lang: string }) {
+  const [year, setYear] = useState<number | string>("");
+
+  useEffect(() => {
+    setYear(new Date().getFullYear());
+  }, []);
+
   return (
     <footer className={styles.footer} id="contato">
       <div className={`container ${styles.container}`}>
@@ -29,17 +38,17 @@ export default function Footer() {
         </div>
         
         <div className={styles.linksBlock}>
-          <h4 className={styles.title}>Menu</h4>
+          <h4 className={styles.title}>{dict.menuTitle}</h4>
           <ul className={styles.linksList}>
-            <li><a href="#empresa">Empresa</a></li>
-            <li><a href="#servicos">Serviços</a></li>
-            <li><a href="#clientes">Clientes</a></li>
-            <li><a href="#contato">Contato</a></li>
+            <li><a href={`/${lang}/#empresa`}>Empresa</a></li>
+            <li><a href={`/${lang}/#solucoes`}>Serviços</a></li>
+            <li><a href={`/${lang}/#clientes`}>Clientes</a></li>
+            <li><a href={`/${lang}/#formulario`}>Contato</a></li>
           </ul>
         </div>
         
         <div className={styles.socialBlock}>
-          <h4 className={styles.title}>Redes Sociais</h4>
+          <h4 className={styles.title}>{dict.socialTitle}</h4>
           <div className={styles.socialLinks}>
             <a href="https://www.linkedin.com/in/critel-tecnologia-3802a2363/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
               <LinkedinIcon />
@@ -55,16 +64,17 @@ export default function Footer() {
         
         <div className={styles.lgpdBlock}>
           <div className={styles.lgpdSeal}>
-            <span>✓</span> Especialistas em Infraestrutura
+            {dict.lgpdSeal}
           </div>
           <p className={styles.lgpdText}>
-            Atuação humana e comprometida com as necessidades do negócio de seus clientes desde 1994.
+            {dict.lgpdText}
           </p>
         </div>
       </div>
       <div className={styles.bottomBar}>
-        <div className="container">
-          <p>&copy; {new Date().getFullYear()} Critel Tecnologia. Todos os direitos reservados.</p>
+        <div className={`container ${styles.bottomBarContent}`}>
+          <p>&copy; {year || 2026} {dict.rights}</p>
+          <p>{dict.madeBy} <a href="https://rocha-tech-solutions.vercel.app/" target="_blank" rel="noopener noreferrer" className={styles.authorLink}>Rocha Tech Solution</a></p>
         </div>
       </div>
     </footer>

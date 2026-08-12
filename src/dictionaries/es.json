@@ -1,0 +1,142 @@
+{
+  "hero": {
+    "badge": "Excelencia en Tecnología",
+    "titlePrefix": "Potenciamos el rendimiento de su negocio con",
+    "typewriter": [
+      "soluciones integradas de TI.",
+      "seguridad de la información.",
+      "activos de red corporativos.",
+      "cableado estructurado."
+    ],
+    "subtitle": "Protección de datos, infraestructura robusta y servicios personalizados para impulsar la operación de su empresa con máxima eficiencia.",
+    "primaryBtn": "Solicitar Diagnóstico Gratuito",
+    "secondaryBtn": "Conozca nuestras Soluciones"
+  },
+  "nav": {
+    "home": "Inicio",
+    "about": "Quiénes Somos",
+    "aboutCritel": "Sobre Critel",
+    "solutions": "Soluciones",
+    "clients": "Clientes",
+    "contact": "Contacto",
+    "talkToUs": "Contáctenos",
+    "sol_security": "Seguridad de la Información",
+    "sol_network": "Activos de Red",
+    "sol_cabling": "Cableado Estructurado",
+    "sol_building": "Tecnología de Edificios"
+  },
+  "highlights": {
+    "card1": {
+      "title": "INNOVACIÓN CONSTANTE",
+      "desc": "Aplicando las mejores tecnologías del mercado para impulsar resultados continuos."
+    },
+    "card2": {
+      "title": "COMPROMISO CON EL MAÑANA",
+      "desc": "Prácticas responsables que garantizan seguridad y eficiencia a largo plazo para su negocio."
+    },
+    "card3": {
+      "title": "EXPERIENCIA TÉCNICA",
+      "desc": "Enfoque consultivo y ejecución totalmente a medida para las demandas corporativas."
+    }
+  },
+  "innovation": {
+    "title": "Nuestra Metodología",
+    "desc": "Garantizamos la excelencia de nuestros servicios a través de 5 pilares fundamentales, acompañando su proyecto de principio a fin.",
+    "p1_title": "1. Consultoría:",
+    "p1_desc": "Profundo entendimiento del negocio",
+    "p2_title": "2. Análisis Técnico:",
+    "p2_desc": "Diagnóstico y diseño de la solución",
+    "p3_title": "3. Alcance:",
+    "p3_desc": "Planificación detallada del proyecto",
+    "p4_title": "4. Implementación:",
+    "p4_desc": "Ejecución ágil y estandarizada",
+    "p5_title": "5. Mantenimiento:",
+    "p5_desc": "Soporte preventivo y correctivo",
+    "dash1": "Etapas Completadas",
+    "dash2": "Satisfacción",
+    "dash3": "Progreso del Proyecto"
+  },
+  "institutional": {
+    "title": "Sobre Critel",
+    "subtitle": "Sólida experiencia en Infraestructura de TI.",
+    "desc1": "Soluciones Integradas para el Sector Público y Privado.",
+    "desc2": "Critel Tecnología se especializa en ofrecer soluciones integradas en infraestructura y seguridad de TI. Nos enfocamos en innovación, excelencia operativa y protección de los datos de nuestros clientes. Nuestros servicios están diseñados para satisfacer necesidades específicas, ofreciendo resultados que impulsan su productividad.",
+    "stat1_num": "30",
+    "stat1_label": "Años en el Mercado",
+    "stat2_num": "+1.000",
+    "stat2_label": "Proyectos Ejecutados"
+  },
+  "verticals": {
+    "title": "Nuestras Soluciones",
+    "learnMore": "Saber más →",
+    "card1_title": "Seguridad de la Información",
+    "card1_desc": "Proteja los datos de su empresa con las mejores herramientas y estrategias del mercado corporativo.",
+    "card2_title": "Activos de Red",
+    "card2_desc": "Conectividad y rendimiento garantizados con equipos líderes del mercado para su negocio.",
+    "card3_title": "Cableado Estructurado",
+    "card3_desc": "Redes organizadas, estables y con rendimiento garantizado para la transmisión de voz, datos e imagen.",
+    "card4_title": "Tecnología de Edificios",
+    "card4_desc": "Proyectos completos de CCTV, control de acceso, biometría y automatización para su infraestructura."
+  },
+  "socialProof": {
+    "label": "Nuestros Clientes y Socios"
+  },
+  "contactForm": {
+    "title": "Entendamos su escenario y propongamos una solución técnica personalizada, sin compromiso.",
+    "subtitle": "Atención consultiva • Respuesta en hasta 24h hábiles • Sin compromiso",
+    "labels": {
+      "name": "Nombre completo",
+      "role": "Cargo",
+      "company": "Nombre de la empresa",
+      "email": "E-mail corporativo",
+      "challenge": "¿Cuál es su desafío actual en TI?"
+    },
+    "placeholders": {
+      "name": "¿Cómo podemos llamarle?",
+      "role": "Ej: Director de TI, Gerente...",
+      "company": "Su empresa",
+      "email": "su.nombre@empresa.com",
+      "challenge": "Cuéntenos brevemente qué necesita resolver..."
+    },
+    "submitBtn": "Solicitar Diagnóstico Gratuito por WhatsApp"
+  },
+  "footer": {
+    "menuTitle": "Menú",
+    "socialTitle": "Redes Sociales",
+    "lgpdSeal": "✓ Especialistas en Infraestructura",
+    "lgpdText": "Actuación humana y comprometida con las necesidades comerciales de sus clientes desde 1994.",
+    "rights": "Critel Tecnología. Todos los derechos reservados.",
+    "madeBy": "Hecho por:"
+  },
+  "solutionPage": {
+    "badge": "Nuestras Soluciones",
+    "overview": "Descripción General de la Solución",
+    "featuresTitle": "Características Principales:"
+  },
+  "solutionsData": {
+    "seguranca-da-informacao": {
+      "title": "Seguridad de la Información",
+      "description": "Protección completa y avanzada para los datos críticos de su operación. Mitigamos riesgos y garantizamos la continuidad de su negocio.",
+      "detailedText": "En el panorama corporativo actual, la protección de datos no es solo una necesidad técnica, sino un pilar estratégico. Nuestras soluciones de Seguridad de la Información se basan en tecnologías líderes del Cuadrante Mágico de Gartner, ofreciendo defensa en múltiples capas contra amenazas cibernéticas. Desde la auditoría inicial hasta la implementación de políticas de acceso Zero Trust, nuestro equipo actúa proactivamente para identificar vulnerabilidades y blindar su infraestructura contra invasiones, ransomware y fugas de datos.",
+      "features": ["Firewalls de Próxima Generación (NGFW)", "Control de Acceso de Red (NAC)", "Prevención de Intrusiones (IPS/IDS)", "Auditoría, Cumplimiento y LGPD", "Protección de Endpoints (EDR/XDR)"]
+    },
+    "ativos-de-rede": {
+      "title": "Activos de Red",
+      "description": "Conectividad ininterrumpida y alto rendimiento con equipos de última generación para respaldar el crecimiento de su empresa.",
+      "detailedText": "La columna vertebral de cualquier operación moderna es su red de datos. Suministramos y configuramos Activos de Red de alta disponibilidad que garantizan que su comunicación y sistemas de misión crítica nunca se detengan. Trabajamos con enrutamiento inteligente, conmutación de alta densidad y conectividad inalámbrica de próxima generación (Wi-Fi 6). Nuestra consultoría ayuda a dimensionar exactamente el equipo que necesita, optimizando su inversión (ROI) y garantizando escalabilidad futura.",
+      "features": ["Switches Administrables L2/L3", "Routers de Alta Capacidad", "Redes Inalámbricas Corporativas (Wi-Fi 6)", "Balanceadores de Carga", "SD-WAN y Conectividad Segura"]
+    },
+    "tecnologia-predial": {
+      "title": "Tecnología de Edificios",
+      "description": "Inteligencia y seguridad física integradas en un solo ecosistema para entornos corporativos e industriales.",
+      "detailedText": "Transformamos espacios tradicionales en entornos inteligentes y altamente seguros. Nuestra vertical de Tecnología de Edificios integra todos los sistemas vitales de su edificio: desde el control riguroso de quién entra y sale, hasta la supervisión analítica de video y sistemas de alarma contra incendios. Con la automatización de edificios (BMS), su empresa no solo gana en seguridad de activos, sino también en eficiencia energética y gestión centralizada, reduciendo significativamente los costos operativos.",
+      "features": ["Monitoreo CCTV con IA", "Control de Acceso Biométrico y Facial", "Sistemas de Alarma y Detección de Incendios", "Automatización de Edificios (BMS)", "Comunicación Sonora y Visual"]
+    },
+    "cabeamento-estruturado": {
+      "title": "Cableado Estructurado",
+      "description": "La base física altamente confiable para la transmisión de datos, voz e imagen en su infraestructura.",
+      "detailedText": "Un sistema de TI es tan fuerte como su infraestructura física. Nuestro equipo de ingeniería diseña y ejecuta soluciones de Cableado Estructurado siguiendo las normas internacionales más estrictas (EIA/TIA, ISO, ABNT). Ya sea en cable metálico (Cat6, Cat6A) o fibra óptica de ultra alta velocidad, garantizamos una red organizada, documentada y libre de cuellos de botella. Entregamos desde el ensamblaje completo de Centros de Datos hasta el cableado horizontal de oficinas, siempre con certificación y garantía de rendimiento.",
+      "features": ["Proyectos y Ejecución de Redes Lógicas", "Certificación de Redes (Fluke Networks)", "Montaje de Racks y Centros de Datos", "Lanzamiento y Fusión de Fibra Óptica", "As-built y Documentación Técnica"]
+    }
+  }
+}

@@ -12,7 +12,7 @@
 .badge {
   display: inline-block;
   background-color: rgba(183, 28, 28, 0.1);
-  color: var(--accent-brand);
+  color: var(--accent-brand-text);
   padding: 0.5rem 1rem;
   border-radius: 50px;
   font-size: 0.875rem;
@@ -86,7 +86,7 @@
 }
 
 .checkIcon {
-  color: var(--accent-brand);
+  color: var(--accent-brand-text);
   font-weight: 700;
   background-color: rgba(183, 28, 28, 0.1);
   width: 24px;

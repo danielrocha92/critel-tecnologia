@@ -25,23 +25,24 @@
 }
 
 .whatsappBtn {
-  left: 2rem;
+  right: 2rem;
   background: rgba(10, 15, 24, 0.6);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(183, 28, 28, 0.3);
-  color: var(--accent-brand);
+  color: var(--accent-brand-text);
 }
 
 .whatsappBtn:hover {
   background: var(--accent-brand);
   color: #000;
-  border-color: var(--accent-brand);
+  border-color: var(--accent-brand-text);
   box-shadow: 0 0 20px rgba(183, 28, 28, 0.4);
 }
 
 .backToTopBtn {
   right: 2rem;
+  bottom: calc(2rem + 56px + 1rem);
   background: rgba(10, 15, 24, 0.6);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -77,18 +78,14 @@
     bottom: 1.5rem;
   }
   
-  /* Initial mobile state: left side */
+  /* Initial mobile state */
   .backToTopBtn {
-    right: auto;
-    left: 1.5rem;
-    bottom: 1.5rem;
-  }
-
-  /* Scrolled down mobile state: right side, above WhatsApp */
-  .backToTopBtn.visible {
-    left: auto;
     right: 1.5rem;
     bottom: calc(1.5rem + 48px + 1rem);
+  }
+
+  /* Scrolled down mobile state */
+  .backToTopBtn.visible {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);

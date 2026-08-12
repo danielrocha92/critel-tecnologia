@@ -1,12 +1,12 @@
 .typewriter {
-  display: inline-block;
+  display: inline;
 }
 
 .cursor {
   display: inline-block;
   width: 3px;
   height: 1.1em;
-  background-color: var(--accent-brand);
+  background-color: var(--accent-brand-text);
   margin-left: 2px;
   vertical-align: middle;
   animation: blink 1s step-end infinite;

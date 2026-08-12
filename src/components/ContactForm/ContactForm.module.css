@@ -23,7 +23,7 @@
 }
 
 .subtitle {
-  color: var(--accent-brand);
+  color: var(--accent-brand-text);
   font-size: 1rem;
   font-weight: 600;
 }
@@ -77,7 +77,7 @@
 .formGroup input:focus,
 .formGroup textarea:focus {
   outline: none;
-  border-color: var(--accent-brand);
+  border-color: var(--accent-brand-text);
   box-shadow: 0 0 0 2px rgba(183, 28, 28, 0.2);
 }
 
@@ -89,7 +89,7 @@
 
 .submitBtn {
   margin-top: 1rem;
-  background-color: var(--accent-brand);
+  background-color: var(--accent-brand-text);
   color: #fff;
   border: none;
   padding: 1rem 2rem;

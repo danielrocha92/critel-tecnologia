@@ -24,7 +24,7 @@
 
 .card:hover {
   transform: translateY(-8px);
-  border-color: var(--accent-brand);
+  border-color: var(--accent-brand-text);
   box-shadow: 0 15px 35px rgba(183, 28, 28, 0.15), 0 5px 15px rgba(0,0,0,0.4);
 }
 
@@ -35,7 +35,7 @@
   width: 64px;
   height: 64px;
   background: rgba(183, 28, 28, 0.1);
-  color: var(--accent-brand);
+  color: var(--accent-brand-text);
   border-radius: 50%;
   margin-bottom: 1.5rem;
   transition: var(--transition-fast);

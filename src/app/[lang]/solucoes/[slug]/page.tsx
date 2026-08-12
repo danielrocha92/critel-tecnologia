@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import styles from './Solution.module.css';
 import ScrollReveal from '@/components/ScrollReveal/ScrollReveal';
+import { getDictionary } from '@/dictionaries';
 
 const solutions = {
   'seguranca-da-informacao': {
@@ -33,20 +34,32 @@ const solutions = {
   }
 };
 
-export default async function SolutionPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function SolutionPage({ params }: { params: Promise<{ slug: string, lang: string }> }) {
   const resolvedParams = await params;
-  const solution = solutions[resolvedParams.slug as keyof typeof solutions];
+  const dict = await getDictionary(resolvedParams.lang as any);
+  
+  // Acessa as soluções traduzidas
+  const solutions = dict.solutionsData as Record<string, any>;
+  const solution = solutions[resolvedParams.slug];
 
   if (!solution) {
     notFound();
   }
+
+  // Fallback se a imagem não estiver no dicionário (pois não coloquei as imagens no dict)
+  const imageMap: Record<string, string> = {
+    'seguranca-da-informacao': '/images/seguranca.png',
+    'ativos-de-rede': '/images/rede.png',
+    'tecnologia-predial': '/images/predial.png',
+    'cabeamento-estruturado': '/images/cabeamento.png'
+  };
 
   return (
     <div className={styles.pageContainer}>
       <section className={styles.hero}>
         <div className="container">
           <ScrollReveal animation="fadeInUp">
-            <div className={styles.badge}>Nossas Soluções</div>
+            <div className={styles.badge}>{dict.solutionPage.badge}</div>
             <h1 className={styles.title}>{solution.title}</h1>
             <p className={styles.subtitle}>{solution.description}</p>
           </ScrollReveal>
@@ -57,13 +70,13 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
         <div className="container">
           <div className={styles.grid}>
             <ScrollReveal animation="fadeInLeft" className={styles.textContent}>
-              <h2>Visão Geral da Solução</h2>
+              <h2>{dict.solutionPage.overview}</h2>
               <p>
                 {solution.detailedText}
               </p>
-              <h3 className={styles.featuresTitle}>Principais Recursos:</h3>
+              <h3 className={styles.featuresTitle}>{dict.solutionPage.featuresTitle}</h3>
               <ul className={styles.featureList}>
-                {solution.features.map((feat, idx) => (
+                {solution.features.map((feat: string, idx: number) => (
                   <li key={idx}>
                     <span className={styles.checkIcon}>✓</span> {feat}
                   </li>
@@ -71,7 +84,7 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
               </ul>
             </ScrollReveal>
             <ScrollReveal animation="fadeInRight" className={styles.imageContent}>
-              <img src={solution.image} alt={solution.title} className={styles.image} />
+              <img src={imageMap[resolvedParams.slug]} alt={solution.title} className={styles.image} />
             </ScrollReveal>
           </div>
         </div>

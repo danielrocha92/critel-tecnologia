@@ -2,7 +2,7 @@ import styles from './Highlights.module.css';
 import ScrollReveal from '../ScrollReveal/ScrollReveal';
 import { Target, Leaf, Briefcase } from 'lucide-react';
 
-export default function Highlights() {
+export default function Highlights({ dict }: { dict: any }) {
   return (
     <section className={styles.highlights}>
       <div className={`container ${styles.container}`}>
@@ -11,9 +11,9 @@ export default function Highlights() {
             <div className={styles.iconWrapper}>
               <Target size={32} strokeWidth={1.5} />
             </div>
-            <h3 className={styles.title}>INOVAÇÃO CONSTANTE</h3>
+            <h3 className={styles.title}>{dict.card1.title}</h3>
             <p className={styles.description}>
-              Aplicando as melhores tecnologias do mercado para impulsionar resultados contínuos.
+              {dict.card1.desc}
             </p>
           </ScrollReveal>
 
@@ -21,9 +21,9 @@ export default function Highlights() {
             <div className={styles.iconWrapper}>
               <Leaf size={32} strokeWidth={1.5} />
             </div>
-            <h3 className={styles.title}>COMPROMISSO COM O AMANHÃ</h3>
+            <h3 className={styles.title}>{dict.card2.title}</h3>
             <p className={styles.description}>
-              Práticas responsáveis que garantem segurança e eficiência a longo prazo para o seu negócio.
+              {dict.card2.desc}
             </p>
           </ScrollReveal>
 
@@ -31,9 +31,9 @@ export default function Highlights() {
             <div className={styles.iconWrapper}>
               <Briefcase size={32} strokeWidth={1.5} />
             </div>
-            <h3 className={styles.title}>EXPERTISE TÉCNICA</h3>
+            <h3 className={styles.title}>{dict.card3.title}</h3>
             <p className={styles.description}>
-              Abordagem consultiva e execução totalmente sob medida para as demandas corporativas.
+              {dict.card3.desc}
             </p>
           </ScrollReveal>
         </div>

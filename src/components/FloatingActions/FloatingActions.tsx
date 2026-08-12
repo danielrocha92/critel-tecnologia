@@ -5,7 +5,7 @@ import styles from './FloatingActions.module.css';
 import { ArrowUp, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 
-export default function FloatingActions() {
+export default function FloatingActions({ lang }: { lang?: string }) {
   const [showBackToTop, setShowBackToTop] = useState(false);
 
   useEffect(() => {

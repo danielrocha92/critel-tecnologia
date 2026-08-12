@@ -22,7 +22,7 @@ export default function PainPoints() {
           </div>
           
           <div className={styles.imageContainer}>
-            <ScrollReveal animation="fadeInRight" delay={200}>
+            <ScrollReveal animation="fadeInRight" delay={0.2}>
               <div className={styles.imageWrapper}>
                 <img 
                   src="https://images.unsplash.com/photo-1573164713988-8665fc963095?q=80&w=2069&auto=format&fit=crop" 

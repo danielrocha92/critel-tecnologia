@@ -10,6 +10,8 @@
   background-image: url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop');
   background-size: cover;
   background-position: center;
+  padding-top: 80px; /* Compensa o Header fixo */
+  padding-bottom: 4rem; /* Garante espaço para a seção de Destaques que sobe 3rem */
 }
 
 .overlay {
@@ -31,7 +33,7 @@
 .badge {
   display: inline-block;
   background-color: rgba(183, 28, 28, 0.1);
-  color: var(--accent-brand);
+  color: var(--accent-brand-text);
   padding: 0.5rem 1rem;
   border-radius: 4px;
   border: 1px solid rgba(183, 28, 28, 0.2);
@@ -46,7 +48,15 @@
   font-size: 3.5rem;
   margin-bottom: 1.5rem;
   color: var(--text-primary);
-  min-height: 140px; /* Previne pulos de layout devido ao typewriter */
+}
+
+.typewriterWrapper {
+  display: block;
+  height: 150px; /* Trava a altura para suportar até 2 linhas completas, evitando o "pulo" no Desktop */
+}
+
+.typewriterText {
+  color: var(--accent-brand-text);
 }
 
 .subtitle {
@@ -76,7 +86,7 @@
 }
 
 .primaryBtn {
-  background-color: var(--accent-brand);
+  background-color: var(--accent-brand-text);
   color: #fff;
   box-shadow: 0 4px 14px rgba(183, 28, 28, 0.3);
 }
@@ -102,7 +112,9 @@
 @media (max-width: 768px) {
   .title {
     font-size: 2rem; /* Reduzido para melhor quebra no mobile */
-    min-height: 120px;
+  }
+  .typewriterWrapper {
+    height: 100px; /* Trava altura no mobile para evitar pulo */
   }
   .subtitle {
     font-size: 1.1rem;

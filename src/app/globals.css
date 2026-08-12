@@ -7,7 +7,8 @@
   --text-secondary: #94a3b8;
   
   /* Accents */
-  --accent-brand: #b71c1c; /* Deep Red from Logo */
+  --accent-brand: #b71c1c; /* Deep Red from Logo (for backgrounds/buttons) */
+  --accent-brand-text: #ff5252; /* Brighter red for text on dark backgrounds */
   --accent-cyan: #00d2ff; /* Cyan (IoT feel) */
   --accent-hover: #d32f2f;
   
@@ -58,4 +59,6 @@ h1, h2, h3, h4, h5, h6 {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
 }

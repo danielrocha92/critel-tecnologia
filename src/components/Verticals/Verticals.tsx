@@ -2,31 +2,31 @@ import styles from './Verticals.module.css';
 import { Cctv, Wifi, Network, ShieldCheck, Building2 } from 'lucide-react';
 import Link from 'next/link';
 
-export default function Verticals() {
+export default function Verticals({ dict, lang }: { dict: any, lang: string }) {
   const cards = [
     {
-      title: 'Segurança da Informação',
-      description: 'Proteja os dados da sua empresa com as melhores ferramentas e estratégias do mercado corporativo.',
+      title: dict.card1_title,
+      description: dict.card1_desc,
       icon: <ShieldCheck size={46} strokeWidth={1.5} />,
-      link: '/solucoes/seguranca-da-informacao'
+      link: `/${lang}/solucoes/seguranca-da-informacao`
     },
     {
-      title: 'Ativos de Rede',
-      description: 'Conectividade e performance garantidas com equipamentos líderes de mercado para o seu negócio.',
+      title: dict.card2_title,
+      description: dict.card2_desc,
       icon: <Wifi size={46} strokeWidth={1.5} />,
-      link: '/solucoes/ativos-de-rede'
+      link: `/${lang}/solucoes/ativos-de-rede`
     },
     {
-      title: 'Cabeamento Estruturado',
-      description: 'Redes organizadas, estáveis e com performance garantida para transmissão de voz, dados e imagem.',
+      title: dict.card3_title,
+      description: dict.card3_desc,
       icon: <Network size={46} strokeWidth={1.5} />,
-      link: '/solucoes/cabeamento-estruturado'
+      link: `/${lang}/solucoes/cabeamento-estruturado`
     },
     {
-      title: 'Tecnologia Predial',
-      description: 'Projetos completos de CFTV, controle de acesso, biometria e automação para a sua infraestrutura.',
+      title: dict.card4_title,
+      description: dict.card4_desc,
       icon: <Building2 size={46} strokeWidth={1.5} />,
-      link: '/solucoes/tecnologia-predial'
+      link: `/${lang}/solucoes/tecnologia-predial`
     }
   ];
 
@@ -34,7 +34,7 @@ export default function Verticals() {
     <section className={styles.verticals} id="solucoes">
       <div className={`container`}>
         <div className={styles.header}>
-          <h2 className={styles.title}>Nossas Soluções</h2>
+          <h2 className={styles.title}>{dict.title}</h2>
         </div>
         
         <div className={styles.grid}>
@@ -44,7 +44,7 @@ export default function Verticals() {
                 <div className={styles.icon}>{card.icon}</div>
                 <h3 className={styles.cardTitle}>{card.title}</h3>
                 <p className={styles.cardDesc}>{card.description}</p>
-                <div className={styles.cardAction}>Saiba mais →</div>
+                <div className={styles.cardAction}>{dict.learnMore}</div>
               </div>
             </Link>
           ))}
