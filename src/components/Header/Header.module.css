@@ -19,16 +19,16 @@
   width: 100%;
 }
 
-.logo a {
-  font-family: var(--font-montserrat);
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--text-primary);
+.logoImage {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+  filter: brightness(0) invert(1); /* Faz a logo preta ficar totalmente branca */
+  transition: opacity var(--transition-fast);
 }
 
-.logo span {
-  color: var(--accent-neon);
-  font-weight: 400;
+.logoImage:hover {
+  opacity: 0.8;
 }
 
 .navList {
@@ -48,7 +48,7 @@
 
 .navList a:hover,
 .hasDropdown:hover > span {
-  color: var(--accent-neon);
+  color: var(--accent-brand);
 }
 
 .hasDropdown {
@@ -86,7 +86,7 @@
 }
 
 .dropdown li a:hover {
-  background-color: rgba(0, 255, 102, 0.05);
+  background-color: rgba(183, 28, 28, 0.05);
   padding-left: 1.75rem; /* slight indent on hover */
 }
 
@@ -132,8 +132,8 @@
 
 .btnAction {
   background-color: transparent;
-  color: var(--accent-neon);
-  border: 1px solid var(--accent-neon);
+  color: var(--accent-brand);
+  border: 1px solid var(--accent-brand);
   padding: 0.5rem 1.5rem;
   border-radius: 4px;
   font-weight: 600;
@@ -142,12 +142,70 @@
 }
 
 .btnAction:hover {
-  background-color: var(--accent-neon);
+  background-color: var(--accent-brand);
   color: #000;
 }
 
+.mobileMenuBtn {
+  display: none;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  z-index: 1001; /* Above mobile menu */
+}
+
 @media (max-width: 768px) {
+  .mobileMenuBtn {
+    display: block;
+  }
+
   .nav {
-    display: none;
+    position: fixed;
+    top: var(--header-height);
+    left: 0;
+    width: 100%;
+    height: calc(100vh - var(--header-height));
+    background-color: rgba(10, 15, 24, 0.98);
+    backdrop-filter: blur(15px);
+    display: flex;
+    flex-direction: column;
+    padding: 2rem;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    overflow-y: auto;
+  }
+
+  .mobileNavOpen {
+    transform: translateX(0);
+  }
+
+  .navList {
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 100%;
+  }
+
+  .hasDropdown .dropdown {
+    position: static;
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    box-shadow: none;
+    background: transparent;
+    border: none;
+    padding-left: 1rem;
+    margin-top: 0.5rem;
+    display: none; /* Can be toggled if needed, but for now we just show it flat or hide it */
+  }
+
+  /* Show dropdowns statically on mobile when hovering/active */
+  .hasDropdown:active .dropdown,
+  .hasDropdown:hover .dropdown {
+    display: block;
+  }
+
+  .actions {
+    display: none; /* Hide actions in header on mobile */
   }
 }

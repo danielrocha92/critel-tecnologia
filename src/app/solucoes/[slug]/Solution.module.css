@@ -11,8 +11,8 @@
 
 .badge {
   display: inline-block;
-  background-color: rgba(0, 255, 102, 0.1);
-  color: var(--accent-neon);
+  background-color: rgba(183, 28, 28, 0.1);
+  color: var(--accent-brand);
   padding: 0.5rem 1rem;
   border-radius: 50px;
   font-size: 0.875rem;
@@ -20,7 +20,7 @@
   text-transform: uppercase;
   letter-spacing: 1px;
   margin-bottom: 1.5rem;
-  border: 1px solid rgba(0, 255, 102, 0.2);
+  border: 1px solid rgba(183, 28, 28, 0.2);
 }
 
 .title {
@@ -38,7 +38,7 @@
 }
 
 .contentSection {
-  padding: 6rem 0;
+  padding: 8rem 0;
   background-color: var(--bg-primary);
 }
 
@@ -86,9 +86,9 @@
 }
 
 .checkIcon {
-  color: var(--accent-neon);
+  color: var(--accent-brand);
   font-weight: 700;
-  background-color: rgba(0, 255, 102, 0.1);
+  background-color: rgba(183, 28, 28, 0.1);
   width: 24px;
   height: 24px;
   flex-shrink: 0;

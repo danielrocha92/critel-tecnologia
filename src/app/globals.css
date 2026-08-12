@@ -1,15 +1,15 @@
 :root {
-  /* Colors - Dark Theme (Default for Critel) */
-  --bg-primary: #0a0f18; /* Navy Blue / Very Dark Blue */
-  --bg-secondary: #121927; /* Lighter Navy for cards */
-  --bg-tertiary: #1b2438;
-  --text-primary: #f0f4f8;
-  --text-secondary: #a0aec0;
+  /* Colors - Corporate Dark Theme */
+  --bg-primary: #0f172a; /* Deep Navy Blue / Dark Slate */
+  --bg-secondary: #1e293b; /* Lighter Slate for cards */
+  --bg-tertiary: #334155;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
   
   /* Accents */
-  --accent-neon: #00ff66; /* Neon Green (connectivity/status online) */
+  --accent-brand: #b71c1c; /* Deep Red from Logo */
   --accent-cyan: #00d2ff; /* Cyan (IoT feel) */
-  --accent-hover: #00e65c;
+  --accent-hover: #d32f2f;
   
   /* Layout */
   --container-width: 1200px;
@@ -54,7 +54,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .text-gradient {
-  background: linear-gradient(90deg, var(--accent-neon), var(--accent-cyan));
+  background: linear-gradient(90deg, var(--accent-brand), var(--accent-cyan));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

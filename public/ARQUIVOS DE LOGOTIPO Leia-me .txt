@@ -1,0 +1,18 @@
+Obrigado pela sua compra recente de arquivo(s) de logotipo. Abaixo encontram-se breves definições dos diferentes tipos e tamanhos de arquivos incluídos no seu pacote:
+
+.JPG: esses arquivos de logotipo vêm com um plano de fundo branco opaco atrás do seu logotipo, que aparece como uma caixa branca ao redor do seu logotipo.
+
+.PNG: esses arquivos de logotipo permitem transparência, já que eles não têm um plano de fundo e/ou caixa brancos. Você deve usar esses arquivos quando for fazer o upload do seu logotipo em um site ou colocá-lo em um arquivo que tenha uma cor ou um padrão de plano de fundo que você queira mostrar por trás do seu logotipo.
+
+.EPS (Encapsulated PostScript): esse arquivo é para uso de impressoras e/ou designers. Esses arquivos foram fornecidos a você com a imagem do seu logotipo e o seu logotipo e fontes como formas. Alguns computadores e dispositivos móveis podem não oferecer um recurso de pré-visualização para esses tipos de arquivo.
+
+.SVG (Scalable Vector Graphics): esses arquivos são para uso de impressoras e/ou designers. Esses arquivos são os arquivos de design originais que incluem as fontes usadas no seu logotipo também. Alguns computadores e dispositivos móveis podem não oferecer um recurso de pré-visualização para esses tipos de arquivo.
+
+.PDF (Portable Document Format): esse arquivo é usado para preservar o layout do formato do seu logotipo em todos os computadores e dispositivos móveis. Às vezes, eles podem ser um formato aceitável para impressoras.
+
+dpi (dots per inch, ou pontos por polegada): é uma medida de resolução para textos ou imagens impressos. Quanto mais pontos por polegada, maior é a resolução.
+
+px (pixels): uma área mínima de iluminação em uma tela, uma de várias das quais uma imagem é composta.
+
+
+

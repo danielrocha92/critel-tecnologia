@@ -17,7 +17,7 @@ export default function Footer() {
     <footer className={styles.footer} id="contato">
       <div className={`container ${styles.container}`}>
         <div className={styles.brandInfo}>
-          <h2 className={styles.brandName}>Critel Tecnologia</h2>
+          <img src="/400PngdpiLogoCroppedBW.png" alt="Critel Tecnologia" className={styles.logoImage} />
           <p className={styles.address}>
             R. Homero Vaz do Amaral, 35 - Veleiros<br />
             São Paulo - SP, 04774-030
@@ -41,7 +41,7 @@ export default function Footer() {
         <div className={styles.socialBlock}>
           <h4 className={styles.title}>Redes Sociais</h4>
           <div className={styles.socialLinks}>
-            <a href="https://br.linkedin.com/in/critel-tecnologia" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+            <a href="https://www.linkedin.com/in/critel-tecnologia-3802a2363/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
               <LinkedinIcon />
             </a>
             <a href="https://www.instagram.com/criteltecnologia/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
