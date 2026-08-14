@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" fill="none">
+  <g transform="translate(10, 5)">
+    <!-- Elegant script Ofner styling with traditional crown/flourish -->
+    <path d="M42 22C42 16.5 45.5 12 51 12C56.5 12 60 16.5 60 22C60 27.5 56.5 32 51 32C45.5 32 42 27.5 42 22ZM47 22C47 25.5 48.8 28.5 51 28.5C53.2 28.5 55 25.5 55 22C55 18.5 53.2 15.5 51 15.5C48.8 15.5 47 18.5 47 22Z" fill="#D4AF37"/>
+    <path d="M64 12.5H74V16H69V21.5H73.5V25H69V31.5H64V12.5Z" fill="#D4AF37"/>
+    <path d="M78 12.5H83L90 23V12.5H95V31.5H90L83 21V31.5H78V12.5Z" fill="#D4AF37"/>
+    <path d="M99 12.5H110V16H104V20.2H109.5V23.7H104V28H110.5V31.5H99V12.5Z" fill="#D4AF37"/>
+    <path d="M114 12.5H122.5C125.8 12.5 128 14.5 128 17.8C128 20.2 126.5 22 124.2 22.7L128.5 31.5H123L119.2 23.5H119V31.5H114V12.5ZM119 20H122.2C123.5 20 124.5 19.2 124.5 17.8C124.5 16.4 123.5 15.6 122.2 15.6H119V20Z" fill="#D4AF37"/>
+    <!-- Elegant underline flourish -->
+    <path d="M30 38C60 41 120 41 150 38C130 43 50 43 30 38Z" fill="#D4AF37"/>
+    <circle cx="28" cy="22" r="3" fill="#D4AF37"/>
+    <circle cx="152" cy="22" r="3" fill="#D4AF37"/>
+  </g>
+</svg>

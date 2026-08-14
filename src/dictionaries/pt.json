@@ -81,6 +81,29 @@
   "socialProof": {
     "label": "Nossos Clientes e Parceiros"
   },
+  "trustBadges": {
+    "badge1_title": "30 Anos de Mercado",
+    "badge1_sub": "Solidez e excelência desde 1994",
+    "badge2_title": "Atendimento com SLA",
+    "badge2_sub": "Resposta ágil e suporte consultivo",
+    "badge3_title": "Engenharia Certificada",
+    "badge3_sub": "Conformidade ABNT, TIA e Fluke",
+    "badge4_title": "Contratos Flexíveis",
+    "badge4_sub": "Projetos Turnkey ou Suporte Contínuo"
+  },
+  "diagnosticBanner": {
+    "badge": "Diagnóstico Especializado",
+    "title": "Sua infraestrutura de TI está preparada para o futuro?",
+    "desc": "Evite paradas não programadas, lentidão na rede e vulnerabilidades de segurança. Solicite uma avaliação técnica gratuita e descubra onde sua operação pode ganhar máxima performance.",
+    "ctaPrimary": "Solicitar Diagnóstico Gratuito",
+    "ctaSecondary": "Falar com Especialista",
+    "point1_title": "Auditoria de Rede e Cabeamento",
+    "point1_desc": "Mapeamento de pontos críticos, certificação e identificação de gargalos de tráfego.",
+    "point2_title": "Análise de Riscos e Segurança",
+    "point2_desc": "Avaliação de vulnerabilidades físicas e lógicas contra invasões e perda de dados.",
+    "point3_title": "Plano Técnico Sob Medida",
+    "point3_desc": "Relatório executivo com ações práticas para otimizar custos e elevar a disponibilidade."
+  },
   "contactForm": {
     "title": "Vamos entender seu cenário e propor uma solução técnica personalizada, sem compromisso.",
     "subtitle": "Atendimento consultivo • Resposta em até 24h úteis • Sem compromisso",

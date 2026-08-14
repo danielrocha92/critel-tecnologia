@@ -81,6 +81,29 @@
   "socialProof": {
     "label": "Our Clients and Partners"
   },
+  "trustBadges": {
+    "badge1_title": "30 Years in the Market",
+    "badge1_sub": "Solid performance since 1994",
+    "badge2_title": "SLA-Backed Service",
+    "badge2_sub": "Agile response & consultative support",
+    "badge3_title": "Certified Engineering",
+    "badge3_sub": "ABNT, TIA & Fluke compliance",
+    "badge4_title": "Flexible Contracts",
+    "badge4_sub": "Turnkey Projects or Managed Support"
+  },
+  "diagnosticBanner": {
+    "badge": "Specialized Diagnosis",
+    "title": "Is your IT infrastructure ready for the future?",
+    "desc": "Avoid unscheduled downtime, network slowness, and security vulnerabilities. Request a free technical evaluation and discover where your operation can gain maximum performance.",
+    "ctaPrimary": "Request Free Diagnosis",
+    "ctaSecondary": "Talk to a Specialist",
+    "point1_title": "Network & Cabling Audit",
+    "point1_desc": "Mapping critical points, certification, and identifying traffic bottlenecks.",
+    "point2_title": "Risk & Security Analysis",
+    "point2_desc": "Assessment of physical and logical vulnerabilities against intrusions and data loss.",
+    "point3_title": "Tailored Technical Plan",
+    "point3_desc": "Executive report with actionable steps to optimize costs and maximize uptime."
+  },
   "contactForm": {
     "title": "Let's understand your scenario and propose a custom technical solution, with no obligation.",
     "subtitle": "Consultative approach • Response within 24 business hours • No obligation",

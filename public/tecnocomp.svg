@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 50" fill="none">
+  <!-- Tecnocomp stylized icon -->
+  <path d="M12 25L24 13L36 25L24 37L12 25Z" fill="#DC2626"/>
+  <path d="M24 17L32 25L24 33L16 25L24 17Z" fill="#991B1B"/>
+  <circle cx="24" cy="25" r="3" fill="white"/>
+  <!-- Typography -->
+  <text x="48" y="32" font-family="Montserrat, Arial, sans-serif" font-size="19" font-weight="900" fill="#DC2626" letter-spacing="0.5">TECNO</text>
+  <text x="132" y="32" font-family="Montserrat, Arial, sans-serif" font-size="19" font-weight="500" fill="#CBD5E1" letter-spacing="0.5">COMP</text>
+</svg>

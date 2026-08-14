@@ -4,13 +4,13 @@ import styles from './SocialProof.module.css';
 
 export default function SocialProof({ dict }: { dict: any }) {
   const partners = [
-    { name: 'Bradesco', desc: 'Infraestrutura corporativa e suporte.', logoSrc: '/bradesco.sgv.svg' },
-    { name: 'Bacio di Latte', desc: 'Aberturas de loja, service desk e Field Services.', logoSrc: '/Bacio-di-latte.sgv.svg' },
-    { name: 'Ofner', desc: 'Suporte especializado em infraestrutura.', logoSrc: '/ofner.png' },
+    { name: 'Bradesco', desc: 'Infraestrutura corporativa e suporte.', logoSrc: '/bradesco.svg' },
+    { name: 'Bacio di Latte', desc: 'Aberturas de loja, service desk e Field Services.', logoSrc: '/bacio-di-latte.svg' },
+    { name: 'Ofner', desc: 'Suporte especializado em infraestrutura.', logoSrc: '/ofner.svg' },
     { name: 'Engemon', desc: 'Infraestrutura de rede e Field Services nos clientes da Engemon.', logoSrc: '/engemon.svg' },
-    { name: 'Sonda IT', desc: 'Infraestrutura de rede e Field Services.', logoSrc: '/sonda.jpg' },
-    { name: 'Connectcom', desc: 'Infraestrutura de rede e Field Services.', logoSrc: null },
-    { name: 'Tecnocomp', desc: 'Infraestrutura de rede e Field Services.', logoSrc: null },
+    { name: 'Sonda IT', desc: 'Infraestrutura de rede e Field Services.', logoSrc: '/sonda.svg' },
+    { name: 'Connectcom', desc: 'Infraestrutura de rede e Field Services.', logoSrc: '/connectcom.svg' },
+    { name: 'Tecnocomp', desc: 'Infraestrutura de rede e Field Services.', logoSrc: '/tecnocomp.svg' },
     { name: 'Pizza Hut', desc: 'Montagem de novas lojas (Grupo IMC).', logoSrc: '/pizza-hut.svg' },
     { name: 'KFC', desc: 'Montagem de novas lojas (Grupo IMC).', logoSrc: '/kfc.svg' }
   ];
@@ -18,7 +18,10 @@ export default function SocialProof({ dict }: { dict: any }) {
   return (
     <div className={styles.socialProof} id="clientes">
       <div className={`container ${styles.container}`}>
-        <p className={styles.label}>{dict.label}</p>
+        <div className={styles.labelWrapper}>
+          <span className={styles.labelDot}></span>
+          <p className={styles.label}>{dict.label}</p>
+        </div>
         <div className={styles.carouselContainer}>
           <div className={styles.carouselTrack}>
             {/* Primeira Tropa de Logos */}

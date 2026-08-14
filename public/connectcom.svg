@@ -1,8 +1,10 @@
-<html>
-<head><title>404 Not Found</title></head>
-<body>
-<center><h1>404 Not Found</h1></center>
-<hr><center>nginx</center>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"21eb8b87745342dd8aad63d5d3bcbfd5"}' crossorigin="anonymous"></script>
-</body>
-</html>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 50" fill="none">
+  <!-- Connectcom network icon -->
+  <circle cx="16" cy="25" r="7" fill="#0284C7"/>
+  <circle cx="34" cy="14" r="5" fill="#0EA5E9"/>
+  <circle cx="34" cy="36" r="5" fill="#38BDF8"/>
+  <path d="M16 25L34 14M16 25L34 36" stroke="#0284C7" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Typography -->
+  <text x="50" y="32" font-family="Montserrat, Arial, sans-serif" font-size="20" font-weight="800" fill="#0284C7" letter-spacing="-0.5">connect</text>
+  <text x="146" y="32" font-family="Montserrat, Arial, sans-serif" font-size="20" font-weight="400" fill="#38BDF8" letter-spacing="-0.5">com</text>
+</svg>
