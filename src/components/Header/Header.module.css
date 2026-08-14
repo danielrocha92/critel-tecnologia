@@ -4,12 +4,14 @@
   left: 0;
   width: 100%;
   height: var(--header-height);
-  background-color: rgba(10, 15, 24, 0.9);
-  backdrop-filter: blur(10px);
+  background-color: var(--header-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   z-index: 1000;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--header-border);
   display: flex;
   align-items: center;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .container {
@@ -20,34 +22,39 @@
 }
 
 .logoImage {
-  height: 40px;
+  height: 52px;
   width: auto;
   object-fit: contain;
-  filter: brightness(0) invert(1); /* Faz a logo preta ficar totalmente branca */
-  transition: opacity var(--transition-fast);
+  transition: transform 0.25s ease, opacity 0.25s ease;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.25));
 }
 
 .logoImage:hover {
-  opacity: 0.8;
+  opacity: 0.95;
+  transform: scale(1.02);
 }
 
 .navList {
   display: flex;
   list-style: none;
   gap: 2rem;
+  align-items: center;
 }
 
 .navList a,
-.hasDropdown span {
+.dropdownToggle {
   font-size: 0.95rem;
   font-weight: 500;
   color: var(--text-primary);
   transition: var(--transition-fast);
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 .navList a:hover,
-.hasDropdown:hover > span {
+.dropdownToggle:hover {
   color: var(--accent-brand-text);
 }
 
@@ -55,22 +62,37 @@
   position: relative;
 }
 
+.dropdownArrow {
+  transition: transform 0.25s ease;
+}
+
+.hasDropdown:hover .dropdownArrow {
+  transform: rotate(180deg);
+}
+
 .dropdown {
   position: absolute;
   top: 100%;
   left: 0;
-  background-color: rgba(10, 15, 24, 0.95);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 4px;
+  background-color: #0b1120;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
   list-style: none;
-  padding: 0.5rem 0;
-  min-width: 250px;
+  padding: 0.6rem 0;
+  min-width: 270px;
   opacity: 0;
   visibility: hidden;
   transform: translateY(10px);
-  transition: all 0.3s ease;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  transition: all 0.25s ease;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme='light'] .dropdown {
+  background-color: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 }
 
 .hasDropdown:hover .dropdown {
@@ -82,18 +104,31 @@
 .dropdown li a {
   display: block;
   padding: 0.75rem 1.5rem;
-  font-size: 0.9rem;
+  font-size: 0.925rem;
+  color: #94a3b8;
+  transition: all 0.2s ease;
+}
+
+[data-theme='light'] .dropdown li a {
+  color: #475569;
 }
 
 .dropdown li a:hover {
-  background-color: rgba(183, 28, 28, 0.05);
-  padding-left: 1.75rem; /* slight indent on hover */
+  background-color: rgba(183, 28, 28, 0.2);
+  color: #ffffff;
+  padding-left: 1.85rem;
+}
+
+[data-theme='light'] .dropdown li a:hover {
+  background-color: rgba(183, 28, 28, 0.08);
+  color: #b71c1c;
+  padding-left: 1.85rem;
 }
 
 .actions {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1.25rem;
 }
 
 .customLangSelector {
@@ -113,12 +148,12 @@
 }
 
 .langBtn {
-  background-color: #0d47a1; /* Azul corporativo da referência */
+  background-color: #0d47a1;
   color: #ffffff;
   border: none;
   border-radius: 4px;
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -138,9 +173,10 @@
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  background-color: rgba(10, 15, 24, 0.98);
+  background-color: var(--dropdown-bg);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   list-style: none;
   padding: 0.4rem;
@@ -148,7 +184,8 @@
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  z-index: 1002;
 }
 
 .langMenu button {
@@ -165,29 +202,32 @@
 }
 
 .langMenu button:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background-color: rgba(125, 125, 125, 0.15);
+  color: var(--text-primary);
 }
 
 .langMenu .activeLang {
   color: var(--accent-brand-text);
-  background-color: rgba(255, 82, 82, 0.1);
+  background-color: rgba(255, 82, 82, 0.15);
 }
 
 .btnAction {
   background-color: transparent;
   color: var(--accent-brand-text);
   border: 1px solid var(--accent-brand);
-  padding: 0.5rem 1.5rem;
-  border-radius: 4px;
+  padding: 0.6rem 1.5rem;
+  border-radius: 6px;
   font-weight: 600;
+  font-size: 0.9rem;
   transition: var(--transition-fast);
   display: inline-block;
+  white-space: nowrap;
 }
 
 .btnAction:hover {
   background-color: var(--accent-brand-text);
-  color: #000;
+  color: #fff;
+  border-color: var(--accent-brand-text);
 }
 
 .mobileMenuBtn {
@@ -196,12 +236,26 @@
   border: none;
   color: var(--text-primary);
   cursor: pointer;
-  z-index: 1001; /* Above mobile menu */
+  padding: 0.5rem;
+  margin-right: -0.5rem;
+  z-index: 1001;
+  min-height: 48px;
+  min-width: 48px;
+  align-items: center;
+  justify-content: center;
 }
 
-@media (max-width: 768px) {
+.mobileActions {
+  display: none;
+}
+
+@media (max-width: 900px) {
   .mobileMenuBtn {
-    display: block;
+    display: flex;
+  }
+
+  .actions {
+    display: none;
   }
 
   .nav {
@@ -210,14 +264,18 @@
     left: 0;
     width: 100%;
     height: calc(100vh - var(--header-height));
-    background-color: rgba(10, 15, 24, 0.98);
-    backdrop-filter: blur(15px);
+    height: calc(100dvh - var(--header-height));
+    background-color: var(--header-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     display: flex;
     flex-direction: column;
-    padding: 2rem;
+    justify-content: space-between;
+    padding: 2rem 1.5rem 3rem 1.5rem;
     transform: translateX(100%);
-    transition: transform 0.3s ease;
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     overflow-y: auto;
+    border-top: 1px solid var(--header-border);
   }
 
   .mobileNavOpen {
@@ -226,30 +284,130 @@
 
   .navList {
     flex-direction: column;
-    gap: 1.5rem;
+    align-items: flex-start;
+    gap: 1.25rem;
     width: 100%;
   }
 
-  .hasDropdown .dropdown {
+  .navList li {
+    width: 100%;
+  }
+
+  .navList a,
+  .dropdownToggle {
+    font-size: 1.15rem;
+    font-weight: 600;
+    padding: 0.5rem 0;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .dropdown {
     position: static;
     opacity: 1;
     visibility: visible;
     transform: none;
     box-shadow: none;
-    background: transparent;
-    border: none;
-    padding-left: 1rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
     margin-top: 0.5rem;
-    display: none; /* Can be toggled if needed, but for now we just show it flat or hide it */
+    display: none;
+    min-width: 100%;
   }
 
-  /* Show dropdowns statically on mobile when hovering/active */
-  .hasDropdown:active .dropdown,
-  .hasDropdown:hover .dropdown {
+  .mobileDropdownOpen .dropdown {
     display: block;
   }
 
-  .actions {
-    display: none; /* Hide actions in header on mobile */
+  .mobileDropdownOpen .dropdownArrow {
+    transform: rotate(180deg);
+  }
+
+  .dropdown li a {
+    font-size: 1rem;
+    padding: 0.6rem 0.5rem;
+  }
+
+  .mobileActions {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+    width: 100%;
+  }
+
+  .mobileThemeRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .mobileActionLabel {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    font-weight: 500;
+  }
+
+  .mobileLangSelector {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+  }
+
+  .mobileLangHeader {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .langPills {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .langPill, .activeLangPill {
+    padding: 0.35rem 0.75rem;
+    border-radius: 4px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    border: 1px solid var(--border-color);
+  }
+
+  .langPill {
+    background: var(--card-bg);
+    color: var(--text-secondary);
+  }
+
+  .activeLangPill {
+    background: var(--accent-brand);
+    color: #fff;
+    border-color: var(--accent-brand-text);
+  }
+
+  .mobileBtnAction {
+    background-color: var(--accent-brand);
+    color: #fff;
+    text-align: center;
+    padding: 0.9rem;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 1rem;
+    display: block;
+    width: 100%;
+    box-shadow: 0 4px 15px rgba(183, 28, 28, 0.3);
+  }
+}
+
+@media (max-width: 480px) {
+  .logoImage {
+    height: 42px;
   }
 }

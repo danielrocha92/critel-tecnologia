@@ -26,16 +26,16 @@
 
 .whatsappBtn {
   right: 2rem;
-  background: rgba(10, 15, 24, 0.6);
+  background: var(--header-bg);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(183, 28, 28, 0.3);
+  border: 1px solid rgba(183, 28, 28, 0.4);
   color: var(--accent-brand-text);
 }
 
 .whatsappBtn:hover {
   background: var(--accent-brand);
-  color: #000;
+  color: #fff;
   border-color: var(--accent-brand-text);
   box-shadow: 0 0 20px rgba(183, 28, 28, 0.4);
 }
@@ -43,10 +43,10 @@
 .backToTopBtn {
   right: 2rem;
   bottom: calc(2rem + 56px + 1rem);
-  background: rgba(10, 15, 24, 0.6);
+  background: var(--header-bg);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(0, 210, 255, 0.3);
+  border: 1px solid rgba(0, 210, 255, 0.4);
   color: var(--accent-cyan);
   opacity: 0;
   visibility: hidden;
@@ -61,7 +61,7 @@
 
 .backToTopBtn:hover {
   background: var(--accent-cyan);
-  color: #000;
+  color: #fff;
   border-color: var(--accent-cyan);
   box-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
 }

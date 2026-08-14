@@ -124,10 +124,34 @@
     "submitBtn": "Request Free Diagnosis via WhatsApp"
   },
   "footer": {
-    "menuTitle": "Menu",
-    "socialTitle": "Social Media",
-    "lgpdSeal": "✓ Infrastructure Specialists",
-    "lgpdText": "Human approach committed to the business needs of its clients since 1994.",
+    "brandTitle": "Critel Tecnologia",
+    "brandDesc": "30 years transforming technology into competitive advantage for companies across Brazil.",
+    "servicesTitle": "Services",
+    "services": {
+      "support": "Enterprise IT Support",
+      "cabling": "Structured Cabling",
+      "network": "Network Assets",
+      "security": "Information Security",
+      "building": "Building Technology & CCTV",
+      "field": "Field Services & Maintenance"
+    },
+    "institutionalTitle": "Institutional",
+    "institutional": {
+      "about": "About Critel",
+      "clients": "Our Clients",
+      "methodology": "Our Methodology",
+      "contact": "Contact",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Use"
+    },
+    "contactTitle": "Contact",
+    "contact": {
+      "address": "R. Homero Vaz do Amaral, 35 - Veleiros, São Paulo - SP",
+      "phone": "+55 (11) 3136-2592",
+      "whatsapp": "WhatsApp",
+      "email": "comercial@criteltecnologia.com.br",
+      "hours": "Mon-Fri: 8am to 6pm"
+    },
     "rights": "Critel Tecnologia. All rights reserved.",
     "madeBy": "Made by:"
   },
@@ -157,9 +181,72 @@
     },
     "cabeamento-estruturado": {
       "title": "Structured Cabling",
-      "description": "The highly reliable physical basis for data, voice and image transmission in your infrastructure.",
-      "detailedText": "An IT system is only as strong as its physical infrastructure. Our engineering team designs and executes Structured Cabling solutions following the strictest international standards (EIA/TIA, ISO, ABNT). Whether in metallic cable (Cat6, Cat6A) or ultra-high speed optical fiber, we guarantee an organized, documented and bottleneck-free network. We deliver from complete Data Center assembly to office horizontal cabling, always with certification and performance guarantee.",
-      "features": ["Logical Network Projects and Execution", "Network Certification (Fluke Networks)", "Racks and Data Centers Assembly", "Optical Fiber Launch and Fusion", "As-built and Technical Documentation"]
+      "description": "The high-reliability physical foundation for data, voice, and video transmission across your infrastructure.",
+      "detailedText": "An IT system is only as strong as its physical infrastructure. Our engineering team designs and executes Structured Cabling solutions adhering to the strictest international standards (EIA/TIA, ISO, ABNT). Whether utilizing metallic cabling (Cat6, Cat6A) or high-speed optical fiber, we ensure an organized, documented, bottleneck-free network. We deliver full Data Center setups to office horizontal cabling, certified and performance-guaranteed.",
+      "features": ["Logical Network Design & Execution", "Fluke Networks Certification", "Rack Assembly & Data Centers", "Fiber Optic Pulling & Fusion", "As-built Technical Documentation"]
+    },
+    "suporte-ti-empresarial": {
+      "title": "Enterprise IT Support",
+      "description": "Comprehensive IT management and continuous consultative support ensuring maximum uptime and team productivity.",
+      "detailedText": "Our Enterprise IT Support is tailor-made for corporate environments requiring high availability and rapid SLA response times. We deliver Tier 1, 2, and 3 Service Desk, proactive NOC monitoring for servers and network assets, cloud backup management, and preventive maintenance routines. We allow your staff to focus on your core business while we take care of all technological stability.",
+      "features": ["Specialized N1, N2 & N3 Service Desk", "Proactive Server & Network NOC Monitoring", "Preventive & Corrective Hardware Maintenance", "Corporate Cloud Backup & Disaster Recovery", "On-site & Remote Support with Guaranteed SLA"]
+    },
+    "field-services": {
+      "title": "Field Services & Site Deployment",
+      "description": "Technical reach and on-site expertise for seamless rollouts, store openings, and nationwide corporate branch support.",
+      "detailedText": "For enterprises and retail chains with multiple branches, franchises, or industrial plants, our Field Services team delivers rapid, standardized deployments. From full store rollouts — including POS infrastructure, cabling, Wi-Fi, and CCTV cameras — to on-site technical support and swift hardware swap in the field, we are the trusted partner of leading brands like IMC Group (Pizza Hut, KFC), Bacio di Latte, and Sonda.",
+      "features": ["Full Store & Branch Rollout and Setup", "POS Infrastructure Deployment & Support", "On-site Hardware Swap & Maintenance", "Infrastructure Standardization for Franchises", "Nationwide Technical Coverage & Swift Response"]
     }
+  },
+  "aboutPage": {
+    "badge": "30 Years of Excellence",
+    "title": "Connecting Businesses. Protecting Your Company's Future.",
+    "subtitle": "Three decades transforming IT infrastructure and security into real competitive advantage for corporate and government clients.",
+    "historyTitle": "Our Journey",
+    "historyP1": "Founded in 1994, Critel Tecnologia was created with the purpose of providing network engineering and infrastructure solutions with technical excellence and human commitment. Over 30 years, we established ourselves as one of Brazil's most solid partners in corporate connectivity, information security, and building technology.",
+    "historyP2": "We work side by side with the biggest players in financial, retail, telecom, and services markets — such as Bradesco, IMC Group (Pizza Hut, KFC), Bacio di Latte, Ofner, Engemon, and Sonda IT —, executing high-complexity, mission-critical projects.",
+    "missionTitle": "Mission",
+    "missionDesc": "Deliver integrated IT infrastructure and security solutions ensuring maximum availability, productivity, and protection for our clients.",
+    "visionTitle": "Vision",
+    "visionDesc": "To be the leading benchmark in IT engineering, connectivity, and high-standard enterprise support in Brazil.",
+    "valuesTitle": "Values",
+    "values": [
+      "Technical Excellence & Standards Compliance",
+      "Ethical Commitment & Long-term Relationships",
+      "Continuous Innovation & Focus on Client Business",
+      "Operational Transparency & Rigor"
+    ]
+  },
+  "clientsPage": {
+    "badge": "Success Stories",
+    "title": "Companies that Trust Critel Tecnologia",
+    "subtitle": "Over 1,000 projects successfully delivered for leading market brands.",
+    "casesTitle": "Our Major Partnerships",
+    "ctaTitle": "Join market leaders and elevate your IT infrastructure standard.",
+    "ctaBtn": "Request a Proposal"
+  },
+  "privacyPage": {
+    "badge": "Data Privacy & Compliance",
+    "title": "Privacy and Data Protection Policy",
+    "subtitle": "At Critel Tecnologia, information security and data privacy are treated with the highest technical and ethical standards.",
+    "section1Title": "1. Commitment to Privacy",
+    "section1Text": "Critel Tecnologia is committed to protecting the personal data of its clients, partners, and site visitors in strict compliance with data privacy regulations (LGPD).",
+    "section2Title": "2. Data Collection and Usage",
+    "section2Text": "We only collect necessary information voluntarily provided through our contact forms (such as name, corporate email, company, and phone) exclusively for commercial inquiries and proposal drafting.",
+    "section3Title": "3. Information Security",
+    "section3Text": "We adopt advanced information security practices, encryption, firewalls, and restricted access controls to prevent unauthorized access, loss, or data leaks.",
+    "section4Title": "4. Your Rights",
+    "section4Text": "You may request confirmation, access, correction, or deletion of your personal data at any time via comercial@criteltecnologia.com.br."
+  },
+  "termsPage": {
+    "badge": "Terms of Use",
+    "title": "Website Terms of Use",
+    "subtitle": "General guidelines and conditions for navigating the Critel Tecnologia portal.",
+    "section1Title": "1. Acceptance of Terms",
+    "section1Text": "By accessing and browsing the Critel Tecnologia website, you expressly agree to the terms and conditions outlined herein.",
+    "section2Title": "2. Intellectual Property",
+    "section2Text": "All contents, trademarks, logos, texts, and graphics available on this portal are the exclusive property of Critel Tecnologia or its respective partners.",
+    "section3Title": "3. Limitation of Liability",
+    "section3Text": "Critel Tecnologia aims to keep all information updated and accurate, reserving the right to update contents and specifications without prior notice."
   }
 }

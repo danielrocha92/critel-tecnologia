@@ -1,5 +1,5 @@
 .innovation {
-  padding: 6rem 0;
+  padding: 5rem 0;
   background-color: var(--bg-tertiary);
   overflow: hidden;
 }
@@ -7,7 +7,7 @@
 .container {
   display: flex;
   align-items: center;
-  gap: 4rem;
+  gap: 3.5rem;
 }
 
 .content {
@@ -15,14 +15,14 @@
 }
 
 .title {
-  font-size: 2.5rem;
+  font-size: clamp(1.85rem, 4.5vw, 2.5rem);
   color: var(--text-primary);
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
 }
 
 .description {
   color: var(--text-secondary);
-  font-size: 1.125rem;
+  font-size: 1.05rem;
   line-height: 1.6;
   margin-bottom: 2rem;
 }
@@ -36,31 +36,37 @@
 
 .features li {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.75rem;
   color: var(--text-primary);
   font-weight: 500;
+  font-size: 0.95rem;
+  line-height: 1.5;
 }
 
 .features li::before {
   content: '✓';
   color: var(--accent-brand-text);
   font-weight: bold;
+  flex-shrink: 0;
+  margin-top: 1px;
 }
 
 .mockup {
   flex: 1;
   perspective: 1000px;
+  width: 100%;
 }
 
 .screen {
   background-color: var(--bg-primary);
   border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.1);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-  transform: rotateY(-10deg) rotateX(5deg);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  transform: rotateY(-8deg) rotateX(4deg);
   transition: transform 0.5s ease;
   overflow: hidden;
+  width: 100%;
 }
 
 .screen:hover {
@@ -72,7 +78,12 @@
   padding: 10px 15px;
   display: flex;
   gap: 8px;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+[data-theme='light'] .screenHeader {
+  background-color: #e2e8f0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .dot {
@@ -87,17 +98,17 @@
 .dot:nth-child(3) { background-color: #27c93f; }
 
 .dashboardGrid {
-  padding: 2rem;
+  padding: 1.75rem;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
+  gap: 1.25rem;
 }
 
 .dashCard, .dashCardLarge {
   background-color: var(--bg-secondary);
-  padding: 1.5rem;
+  padding: 1.25rem;
   border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.05);
+  border: 1px solid var(--border-color);
 }
 
 .dashCardLarge {
@@ -105,15 +116,17 @@
 }
 
 .dashCard h4, .dashCardLarge h4 {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   color: var(--text-secondary);
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .statusOn {
   color: var(--accent-brand-text);
   font-weight: bold;
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -122,167 +135,30 @@
 .statusOn::before {
   content: '';
   display: inline-block;
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   background-color: var(--accent-brand-text);
   border-radius: 50%;
   box-shadow: 0 0 10px var(--accent-brand);
 }
 
 .statValue {
-  font-size: 1.5rem;
+  font-size: 1.35rem;
   color: var(--text-primary);
   font-weight: bold;
 }
 
 .chart {
-.innovation {
-  padding: 6rem 0;
-  background-color: var(--bg-tertiary);
-  overflow: hidden;
-}
-
-.container {
-  display: flex;
-  align-items: center;
-  gap: 4rem;
-}
-
-.content {
-  flex: 1;
-}
-
-.title {
-  font-size: 2.5rem;
-  color: var(--text-primary);
-  margin-bottom: 1.5rem;
-}
-
-.description {
-  color: var(--text-secondary);
-  font-size: 1.125rem;
-  line-height: 1.6;
-  margin-bottom: 2rem;
-}
-
-.features {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.features li {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  color: var(--text-primary);
-  font-weight: 500;
-}
-
-.features li::before {
-  content: '✓';
-  color: var(--accent-brand-text);
-  font-weight: bold;
-}
-
-.mockup {
-  flex: 1;
-  perspective: 1000px;
-}
-
-.screen {
-  background-color: var(--bg-primary);
-  border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.1);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-  transform: rotateY(-10deg) rotateX(5deg);
-  transition: transform 0.5s ease;
-  overflow: hidden;
-}
-
-.screen:hover {
-  transform: rotateY(0) rotateX(0);
-}
-
-.screenHeader {
-  background-color: #1a2235;
-  padding: 10px 15px;
-  display: flex;
-  gap: 8px;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-}
-
-.dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background-color: #4a5568;
-}
-
-.dot:nth-child(1) { background-color: #ff5f56; }
-.dot:nth-child(2) { background-color: #ffbd2e; }
-.dot:nth-child(3) { background-color: #27c93f; }
-
-.dashboardGrid {
-  padding: 2rem;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
-}
-
-.dashCard, .dashCardLarge {
-  background-color: var(--bg-secondary);
-  padding: 1.5rem;
-  border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.05);
-}
-
-.dashCardLarge {
-  grid-column: span 2;
-}
-
-.dashCard h4, .dashCardLarge h4 {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-  margin-bottom: 1rem;
-}
-
-.statusOn {
-  color: var(--accent-brand-text);
-  font-weight: bold;
-  font-size: 1.25rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.statusOn::before {
-  content: '';
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  background-color: var(--accent-brand-text);
-  border-radius: 50%;
-  box-shadow: 0 0 10px var(--accent-brand);
-}
-
-.statValue {
-  font-size: 1.5rem;
-  color: var(--text-primary);
-  font-weight: bold;
-}
-
-.chart {
-  height: 100px;
-  background: linear-gradient(180deg, rgba(0,255,102,0.2) 0%, rgba(0,255,102,0) 100%);
-  border-bottom: 2px solid var(--accent-brand);
+  height: 80px;
+  background: linear-gradient(180deg, rgba(0, 210, 255, 0.2) 0%, rgba(0, 210, 255, 0) 100%);
+  border-bottom: 2px solid var(--accent-cyan);
   border-radius: 4px;
 }
 
 @media (max-width: 992px) {
   .container {
     flex-direction: column;
+    gap: 2.5rem;
   }
   .screen {
     transform: none;
@@ -291,6 +167,19 @@
 
 @media (max-width: 768px) {
   .innovation {
-    padding: 4rem 0;
+    padding: 3.5rem 0;
+  }
+  .dashboardGrid {
+    padding: 1.25rem;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 500px) {
+  .dashboardGrid {
+    grid-template-columns: 1fr;
+  }
+  .dashCardLarge {
+    grid-column: span 1;
   }
 }

@@ -36,7 +36,26 @@ export default async function RootLayout({
   const dict = await getDictionary(resolvedParams.lang as any);
 
   return (
-    <html lang={resolvedParams.lang} className={`${inter.variable} ${montserrat.variable}`}>
+    <html lang={resolvedParams.lang} className={`${inter.variable} ${montserrat.variable}`} suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var saved = localStorage.getItem('theme');
+                  if (saved) {
+                    document.documentElement.setAttribute('data-theme', saved);
+                  } else {
+                    var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
       <body>
         <Header lang={resolvedParams.lang} dict={dict.nav} />
         <main style={{ paddingTop: '80px' }}>

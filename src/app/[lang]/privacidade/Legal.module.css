@@ -1,0 +1,119 @@
+.page {
+  background-color: var(--bg-primary);
+  min-height: 100vh;
+}
+
+.hero {
+  background: var(--bg-tertiary);
+  padding: 5rem 0 3.5rem;
+  border-bottom: 1px solid var(--border-color);
+  text-align: center;
+}
+
+.heroContainer {
+  max-width: 800px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 1rem;
+  background: rgba(255, 82, 82, 0.12);
+  border: 1px solid rgba(255, 82, 82, 0.3);
+  border-radius: 9999px;
+  color: var(--accent-brand-text);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 1.25rem;
+}
+
+.title {
+  font-size: clamp(2rem, 5vw, 3rem);
+  color: var(--text-primary);
+  margin-bottom: 1.25rem;
+  line-height: 1.2;
+}
+
+.subtitle {
+  color: var(--text-secondary);
+  font-size: clamp(1rem, 2.5vw, 1.15rem);
+  line-height: 1.6;
+}
+
+.contentSection {
+  padding: 5rem 0;
+}
+
+.legalContainer {
+  max-width: 850px;
+}
+
+.legalBox {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 3.5rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+}
+
+.legalBox h2 {
+  font-size: 1.35rem;
+  color: var(--text-primary);
+  margin-top: 1rem;
+}
+
+.legalBox h2:first-of-type {
+  margin-top: 0;
+}
+
+.legalBox p {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.dpoBox {
+  margin-top: 2rem;
+  padding: 1.75rem;
+  background: rgba(183, 28, 28, 0.08);
+  border: 1px solid rgba(183, 28, 28, 0.2);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.dpoBox h3 {
+  color: #ffffff;
+  font-size: 1.1rem;
+}
+
+.dpoBox p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.contactBtn {
+  color: var(--accent-brand-text);
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 1rem;
+  margin-top: 0.25rem;
+}
+
+.contactBtn:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .legalBox {
+    padding: 2rem 1.25rem;
+    border-radius: 12px;
+  }
+}

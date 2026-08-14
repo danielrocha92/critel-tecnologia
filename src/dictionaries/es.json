@@ -124,11 +124,35 @@
     "submitBtn": "Solicitar Diagnóstico Gratuito por WhatsApp"
   },
   "footer": {
-    "menuTitle": "Menú",
-    "socialTitle": "Redes Sociales",
-    "lgpdSeal": "✓ Especialistas en Infraestructura",
-    "lgpdText": "Actuación humana y comprometida con las necesidades comerciales de sus clientes desde 1994.",
-    "rights": "Critel Tecnología. Todos los derechos reservados.",
+    "brandTitle": "Critel Tecnologia",
+    "brandDesc": "30 años transformando tecnología en ventaja competitiva para empresas en todo Brasil.",
+    "servicesTitle": "Servicios",
+    "services": {
+      "support": "Soporte de TI Empresarial",
+      "cabling": "Cableado Estructurado",
+      "network": "Activos de Red",
+      "security": "Seguridad de la Información",
+      "building": "Tecnología de Edificios y CCTV",
+      "field": "Field Services y Mantenimiento"
+    },
+    "institutionalTitle": "Institucional",
+    "institutional": {
+      "about": "Sobre Critel",
+      "clients": "Nuestros Clientes",
+      "methodology": "Nuestra Metodología",
+      "contact": "Contacto",
+      "privacy": "Política de Privacidad",
+      "terms": "Términos de Uso"
+    },
+    "contactTitle": "Contacto",
+    "contact": {
+      "address": "R. Homero Vaz do Amaral, 35 - Veleiros, São Paulo - SP",
+      "phone": "+55 (11) 3136-2592",
+      "whatsapp": "WhatsApp",
+      "email": "comercial@criteltecnologia.com.br",
+      "hours": "Lun-Vie: 8h a 18h"
+    },
+    "rights": "Critel Tecnologia. Todos los derechos reservados.",
     "madeBy": "Hecho por:"
   },
   "solutionPage": {
@@ -157,9 +181,72 @@
     },
     "cabeamento-estruturado": {
       "title": "Cableado Estructurado",
-      "description": "La base física altamente confiable para la transmisión de datos, voz e imagen en su infraestructura.",
-      "detailedText": "Un sistema de TI es tan fuerte como su infraestructura física. Nuestro equipo de ingeniería diseña y ejecuta soluciones de Cableado Estructurado siguiendo las normas internacionales más estrictas (EIA/TIA, ISO, ABNT). Ya sea en cable metálico (Cat6, Cat6A) o fibra óptica de ultra alta velocidad, garantizamos una red organizada, documentada y libre de cuellos de botella. Entregamos desde el ensamblaje completo de Centros de Datos hasta el cableado horizontal de oficinas, siempre con certificación y garantía de rendimiento.",
-      "features": ["Proyectos y Ejecución de Redes Lógicas", "Certificación de Redes (Fluke Networks)", "Montaje de Racks y Centros de Datos", "Lanzamiento y Fusión de Fibra Óptica", "As-built y Documentación Técnica"]
+      "description": "La base física de alta confiabilidad para transmisión de datos, voz e imagen en su infraestructura.",
+      "detailedText": "Un sistema de TI es tan fuerte como su infraestructura física. Nuestro equipo de ingeniería diseña y ejecuta soluciones de Cableado Estructurado siguiendo las más rigurosas normas internacionales (EIA/TIA, ISO, ABNT). Ya sea en cable metálico (Cat6, Cat6A) o fibra óptica de altísima velocidad, garantizamos una red organizada, documentada y libre de cuellos de botella. Entregamos desde Data Centers completos hasta cableado horizontal de oficinas, con certificación y garantía de rendimiento.",
+      "features": ["Diseño y Ejecución de Red Lógica", "Certificación de Redes (Fluke Networks)", "Montaje de Racks y Data Centers", "Tendido y Fusión de Fibra Óptica", "Documentación Técnica As-built"]
+    },
+    "suporte-ti-empresarial": {
+      "title": "Soporte de TI Empresarial",
+      "description": "Gestión completa y soporte consultivo continuo para mantener la operación de su empresa siempre productiva.",
+      "detailedText": "Nuestro Soporte de TI Empresarial está diseñado exclusivamente para entornos corporativos que demandan alta disponibilidad y atención ágil con SLA riguroso. Ofrecemos Service Desk N1, N2 y N3, monitoreo proactivo de servidores y redes (NOC), gestión de copias de seguridad en la nube y mantenimiento preventivo.",
+      "features": ["Help Desk y Service Desk Especializado N1, N2 y N3", "Monitoreo Proactivo de Servidores y Redes (NOC)", "Mantenimiento Preventivo y Correctivo de Hardware", "Gestión de Backups y Disaster Recovery", "Atención Presencial y Remota con SLA Garantizado"]
+    },
+    "field-services": {
+      "title": "Field Services y Montaje de Unidades",
+      "description": "Capilaridad técnica y atención presencial especializada para expansión de sucursales, franquicias y oficinas.",
+      "detailedText": "Para empresas y grandes cadenas con múltiples sucursales o plantas industriales, nuestro equipo de Field Services entrega rapidez y estandarización impecable. Realizamos desde el montaje completo de nuevas tiendas (rollout) — incluyendo TPVs, cableado, Wi-Fi y CCTV — hasta soporte presencial para reemplazo rápido de hardware.",
+      "features": ["Rollout y Montaje Completo de Nuevas Tiendas y Sucursales", "Instalación y Soporte de Infraestructura de TPV", "Mantenimiento y Reemplazo Rápido en Campo", "Estandarización de Infraestructura para Franquicias", "Cobertura Técnica con Respuesta Rápida"]
     }
+  },
+  "aboutPage": {
+    "badge": "30 Años de Historia",
+    "title": "Conectando Negocios. Protegiendo el Futuro de su Empresa.",
+    "subtitle": "Tres décadas transformando la infraestructura de TI y la seguridad en ventajas competitivas reales.",
+    "historyTitle": "Nuestra Trayectoria",
+    "historyP1": "Fundada en 1994, Critel Tecnologia nació con el propósito de ofrecer soluciones de ingeniería de redes e infraestructura con rigor técnico y atención humana. A lo largo de 30 años, nos hemos consolidado como uno de los socios más sólidos de Brasil en conectividad corporativa, seguridad de la información y tecnología edilicia.",
+    "historyP2": "Trabajamos junto a grandes líderes del mercado como Bradesco, Grupo IMC (Pizza Hut, KFC), Bacio di Latte, Ofner, Engemon y Sonda IT, ejecutando proyectos de misión crítica.",
+    "missionTitle": "Misión",
+    "missionDesc": "Proveer soluciones integradas de infraestructura y seguridad de TI que garanticen máxima disponibilidad, productividad y protección.",
+    "visionTitle": "Visión",
+    "visionDesc": "Ser el principal referente en ingeniería de TI, conectividad y soporte corporativo de alto estándar en Brasil.",
+    "valuesTitle": "Valores",
+    "values": [
+      "Excelencia Técnica y Conformidad con Normas",
+      "Compromiso Ético y Relaciones a Largo Plazo",
+      "Innovación Continua y Enfoque en el Negocio",
+      "Transparencia y Rigor Operacional"
+    ]
+  },
+  "clientsPage": {
+    "badge": "Casos de Éxito",
+    "title": "Empresas que Confían en Critel Tecnologia",
+    "subtitle": "Más de 1.000 proyectos ejecutados con éxito para marcas líderes en sus segmentos.",
+    "casesTitle": "Nuestras Principales Alianzas",
+    "ctaTitle": "Únase a grandes marcas y eleve el estándar de su infraestructura de TI.",
+    "ctaBtn": "Solicitar Propuesta Comercial"
+  },
+  "privacyPage": {
+    "badge": "Conformidad LGPD",
+    "title": "Política de Privacidad y Protección de Datos",
+    "subtitle": "En Critel Tecnologia, tratamos la seguridad y privacidad de la información con el más alto rigor técnico y ético.",
+    "section1Title": "1. Compromiso con la Privacidad",
+    "section1Text": "Critel Tecnologia se compromete con la protección de los datos personales de sus clientes y visitantes de acuerdo con la legislación vigente.",
+    "section2Title": "2. Recopilación y Uso de Datos",
+    "section2Text": "Recopilamos únicamente la información necesaria proporcionada voluntariamente a través de nuestros formularios para atención comercial.",
+    "section3Title": "3. Seguridad de la Información",
+    "section3Text": "Adoptamos prácticas avanzadas de seguridad, cifrado y cortafuegos para proteger sus datos.",
+    "section4Title": "4. Sus Derechos",
+    "section4Text": "Puede solicitar la confirmación, acceso, rectificación o eliminación de sus datos personales en qualquer momento vía comercial@criteltecnologia.com.br."
+  },
+  "termsPage": {
+    "badge": "Términos de Uso",
+    "title": "Términos de Uso del Sitio Web",
+    "subtitle": "Directrices y condiciones generales de navegación en el portal de Critel Tecnologia.",
+    "section1Title": "1. Aceptación de Términos",
+    "section1Text": "Al acceder y navegar en el sitio web de Critel Tecnologia, usted acepta expresamente las condiciones aquí establecidas.",
+    "section2Title": "2. Propiedad Intelectual",
+    "section2Text": "Todos los contenidos, marcas y logotipos disponibles en este portal son propiedad exclusiva de Critel Tecnologia o de sus respectivos socios.",
+    "section3Title": "3. Limitación de Responsabilidad",
+    "section3Text": "Critel Tecnologia se reserva el derecho de actualizar contenidos y especificaciones de servicios sin previo aviso."
   }
 }

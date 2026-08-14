@@ -16,8 +16,8 @@
 }
 
 .badgeCard {
-  background: rgba(30, 41, 59, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 1.25rem 1.5rem;
   display: flex;
@@ -25,13 +25,27 @@
   gap: 1.25rem;
   transition: all 0.3s ease;
   backdrop-filter: blur(8px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
 
 .badgeCard:hover {
-  background: rgba(30, 41, 59, 0.85);
-  border-color: rgba(255, 255, 255, 0.2);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.3);
+  background: #080d19;
+  border-color: var(--accent-brand-text);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.45), 0 0 15px rgba(183, 28, 28, 0.15);
+}
+
+[data-theme='light'] .badgeCard {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme='light'] .badgeCard:hover {
+  background: #ffffff;
+  border-color: #b71c1c;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px -4px rgba(183, 28, 28, 0.12), 0 4px 12px rgba(0, 0, 0, 0.04);
 }
 
 .iconWrapper {
@@ -48,9 +62,20 @@
   transition: all 0.3s ease;
 }
 
+[data-theme='light'] .iconWrapper {
+  background: rgba(183, 28, 28, 0.08);
+  border: 1px solid rgba(183, 28, 28, 0.18);
+  color: #b71c1c;
+}
+
 .badgeCard:hover .iconWrapper {
   background: linear-gradient(135deg, rgba(183, 28, 28, 0.3), rgba(0, 210, 255, 0.2));
   color: var(--accent-cyan);
+}
+
+[data-theme='light'] .badgeCard:hover .iconWrapper {
+  background: rgba(183, 28, 28, 0.14);
+  color: #b71c1c;
 }
 
 .content {
@@ -60,31 +85,25 @@
 }
 
 .title {
-  color: var(--text-primary);
-  font-family: var(--font-montserrat);
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 700;
-  line-height: 1.2;
+  color: var(--text-primary);
 }
 
-.subtitle {
+.description {
+  font-size: 0.825rem;
   color: var(--text-secondary);
-  font-size: 0.8125rem;
-  line-height: 1.35;
+  line-height: 1.4;
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1024px) {
   .grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 640px) {
   .grid {
     grid-template-columns: 1fr;
-  }
-  
-  .badgeCard {
-    padding: 1rem 1.25rem;
   }
 }
