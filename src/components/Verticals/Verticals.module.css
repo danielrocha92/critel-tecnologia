@@ -99,7 +99,7 @@
 
 .card:hover .link {
   gap: 0.75rem;
-  color: var(--text-primary);
+  color: var(--accent-hover);
 }
 
 @media (max-width: 1024px) {

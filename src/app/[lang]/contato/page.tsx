@@ -44,10 +44,10 @@ export default async function ContactPage({ params }: { params: Promise<{ lang: 
               </div>
               <h3>WhatsApp Comercial</h3>
               <p>Resposta ágil com engenharia consultiva</p>
-              <a 
-                href="https://wa.me/5511999999999?text=Ol%C3%A1!%20Gostaria%20de%20um%20atendimento%20para%20minha%20empresa." 
-                target="_blank" 
-                rel="noopener noreferrer" 
+              <a
+                href="https://wa.me/5511996839480?text=Ol%C3%A1!%20Gostaria%20de%20um%20atendimento%20para%20minha%20empresa."
+                target="_blank"
+                rel="noopener noreferrer"
                 className={styles.cardLink}
               >
                 Conversar pelo WhatsApp →

@@ -1,5 +1,5 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styles from './Header.module.css';
 import Link from 'next/link';
 import { Globe, Menu, X, ChevronDown } from 'lucide-react';
@@ -10,8 +10,17 @@ export default function Header({ dict, lang }: { dict: any, lang: string }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
   const [isMobileSolutionsOpen, setIsMobileSolutionsOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
@@ -25,30 +34,48 @@ export default function Header({ dict, lang }: { dict: any, lang: string }) {
     closeMobileMenu();
   };
 
+  const isSolutionsActive = pathname?.includes('/solucoes');
+
   return (
-    <header className={styles.header}>
+    <header className={`${styles.header} ${isScrolled ? styles.headerScrolled : ''}`}>
       <div className={`container ${styles.container}`}>
         <div className={styles.logo}>
-          <Link href={`/${lang}`} onClick={closeMobileMenu}>
-            <img src="/400PngdpiLogoCropped.png" alt="Critel Tecnologia" className={styles.logoImage} />
+          <Link href={`/${lang}`} className={styles.logoLink} onClick={closeMobileMenu}>
+            <img 
+              src="/400PngdpiLogoCropped.png" 
+              alt="Critel Tecnologia" 
+              className={styles.logoImage} 
+            />
           </Link>
         </div>
         
         <nav className={`${styles.nav} ${isMobileMenuOpen ? styles.mobileNavOpen : ''}`}>
           <ul className={styles.navList}>
             <li>
-              <Link href={`/${lang}`} onClick={closeMobileMenu}>{dict.home}</Link>
+              <Link 
+                href={`/${lang}`} 
+                className={`${styles.navLink} ${pathname === `/${lang}` ? styles.activeLink : ''}`}
+                onClick={closeMobileMenu}
+              >
+                {dict.home}
+              </Link>
             </li>
-            <li className={styles.hasDropdown}>
-              <Link href={`/${lang}/sobre`} onClick={closeMobileMenu}>{dict.about}</Link>
+            <li>
+              <Link 
+                href={`/${lang}/sobre`} 
+                className={`${styles.navLink} ${pathname === `/${lang}/sobre` ? styles.activeLink : ''}`}
+                onClick={closeMobileMenu}
+              >
+                {dict.about}
+              </Link>
             </li>
             <li className={`${styles.hasDropdown} ${isMobileSolutionsOpen ? styles.mobileDropdownOpen : ''}`}>
               <div 
-                className={styles.dropdownToggle}
+                className={`${styles.dropdownToggle} ${isSolutionsActive ? styles.activeLink : ''}`}
                 onClick={() => setIsMobileSolutionsOpen(!isMobileSolutionsOpen)}
               >
                 <span>{dict.solutions}</span>
-                <ChevronDown size={16} className={styles.dropdownArrow} />
+                <ChevronDown size={14} className={styles.dropdownArrow} />
               </div>
               <ul className={styles.dropdown}>
                 <li><Link href={`/${lang}/solucoes/suporte-ti-empresarial`} onClick={closeMobileMenu}>Suporte de TI Empresarial</Link></li>
@@ -56,11 +83,27 @@ export default function Header({ dict, lang }: { dict: any, lang: string }) {
                 <li><Link href={`/${lang}/solucoes/ativos-de-rede`} onClick={closeMobileMenu}>{dict.sol_network}</Link></li>
                 <li><Link href={`/${lang}/solucoes/seguranca-da-informacao`} onClick={closeMobileMenu}>{dict.sol_security}</Link></li>
                 <li><Link href={`/${lang}/solucoes/tecnologia-predial`} onClick={closeMobileMenu}>{dict.sol_building}</Link></li>
-                <li><Link href={`/${lang}/solucoes/field-services`} onClick={closeMobileMenu}>Field Services & Lojas</Link></li>
+                <li><Link href={`/${lang}/solucoes/field-services`} onClick={closeMobileMenu}>Field Services &amp; Lojas</Link></li>
               </ul>
             </li>
-            <li><Link href={`/${lang}/clientes`} onClick={closeMobileMenu}>{dict.clients}</Link></li>
-            <li><Link href={`/${lang}/contato`} onClick={closeMobileMenu}>{dict.contact}</Link></li>
+            <li>
+              <Link 
+                href={`/${lang}/clientes`} 
+                className={`${styles.navLink} ${pathname === `/${lang}/clientes` ? styles.activeLink : ''}`}
+                onClick={closeMobileMenu}
+              >
+                {dict.clients}
+              </Link>
+            </li>
+            <li>
+              <Link 
+                href={`/${lang}/contato`} 
+                className={`${styles.navLink} ${pathname === `/${lang}/contato` ? styles.activeLink : ''}`}
+                onClick={closeMobileMenu}
+              >
+                {dict.contact}
+              </Link>
+            </li>
           </ul>
 
           {/* Ações adicionais no menu mobile */}
@@ -99,14 +142,16 @@ export default function Header({ dict, lang }: { dict: any, lang: string }) {
 
           {/* Seletor de Idioma Desktop */}
           <div className={styles.customLangSelector}>
-            <Globe size={20} className={styles.globeIcon} />
             <div className={styles.langDropdownContainer}>
               <button 
                 className={styles.langBtn} 
                 onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
                 aria-expanded={isLangMenuOpen}
+                aria-label="Selecionar Idioma"
               >
-                {lang.toUpperCase()}
+                <Globe size={15} className={styles.langGlobeIcon} />
+                <span>{lang.toUpperCase()}</span>
+                <ChevronDown size={13} className={`${styles.langArrow} ${isLangMenuOpen ? styles.langArrowOpen : ''}`} />
               </button>
               
               {isLangMenuOpen && (
@@ -117,7 +162,7 @@ export default function Header({ dict, lang }: { dict: any, lang: string }) {
                         onClick={() => changeLanguage(l)}
                         className={lang === l ? styles.activeLang : ''}
                       >
-                        {l.toUpperCase()}
+                        {l === 'pt' ? 'Português (PT)' : l === 'en' ? 'English (EN)' : 'Español (ES)'}
                       </button>
                     </li>
                   ))}
@@ -125,7 +170,11 @@ export default function Header({ dict, lang }: { dict: any, lang: string }) {
               )}
             </div>
           </div>
-          <Link href={`/${lang}/#formulario`} className={styles.btnAction}>{dict.talkToUs}</Link>
+
+          {/* CTA Principal */}
+          <Link href={`/${lang}/#formulario`} className={styles.btnAction}>
+            {dict.talkToUs}
+          </Link>
         </div>
         
         <button 

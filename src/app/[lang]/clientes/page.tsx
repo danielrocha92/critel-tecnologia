@@ -20,6 +20,7 @@ export default async function ClientsPage({ params }: { params: Promise<{ lang: 
     {
       name: 'Bacio di Latte',
       logo: '/bacio-di-latte.svg',
+      logoLight: '/bacio-di-latte-dark.svg',
       tag: 'Varejo & Franquias Premium',
       desc: 'Field Services contínuos e montagem completa de conectividade, PDVs e tecnologia predial em expansão de lojas.',
       scope: ['Rollout de Novas Unidades', 'Suporte Técnico em Campo', 'CFTV & Controle de Acesso']
@@ -34,6 +35,7 @@ export default async function ClientsPage({ params }: { params: Promise<{ lang: 
     {
       name: 'Engemon',
       logo: '/engemon.svg',
+      logoLight: '/engemon-dark.svg',
       tag: 'Engenharia & Soluções Integradas',
       desc: 'Parceria técnica em engenharia de redes, automação e implementação de infraestrutura de telecom.',
       scope: ['Grandes Obras de Infraestrutura', 'Fusão e Lançamento de Fibra', 'Projetos Críticos']
@@ -48,6 +50,7 @@ export default async function ClientsPage({ params }: { params: Promise<{ lang: 
     {
       name: 'Pizza Hut & KFC (IMC)',
       logo: '/pizza-hut.svg',
+      logoLight: '/pizza-hut-dark.svg',
       tag: 'Food Service & Redes de Fast Food',
       desc: 'Infraestrutura tecnológica completa de PDV, rede estruturada e conectividade de alta disponibilidade para franquias.',
       scope: ['Abertura de Lojas Rápidas', 'Infraestrutura de PDV', 'Monitoramento CFTV']
@@ -76,7 +79,18 @@ export default async function ClientsPage({ params }: { params: Promise<{ lang: 
               <ScrollReveal key={idx} animation="fadeInUp" className={styles.caseCard}>
                 <div className={styles.cardHeader}>
                   <div className={styles.logoBox}>
-                    <img src={c.logo} alt={c.name} className={styles.logoImg} />
+                    <img 
+                      src={c.logo} 
+                      alt={c.name} 
+                      className={`${styles.logoImg} ${c.logoLight ? styles.logoForDark : ''}`} 
+                    />
+                    {c.logoLight && (
+                      <img 
+                        src={c.logoLight} 
+                        alt={c.name} 
+                        className={`${styles.logoImg} ${styles.logoForLight}`} 
+                      />
+                    )}
                   </div>
                   <span className={styles.tagBadge}>{c.tag}</span>
                 </div>

@@ -85,8 +85,9 @@
 }
 
 .secondaryBtn:hover {
-  background: rgba(125, 125, 125, 0.18);
+  background: rgba(183, 28, 28, 0.08);
   border-color: var(--accent-brand-text);
+  color: var(--accent-brand-text);
   transform: translateY(-2px);
 }
 

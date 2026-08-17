@@ -13,19 +13,19 @@ export default function DiagnosticBanner({ dict }: { dict: any }) {
               <ShieldAlert size={18} className={styles.badgeIcon} />
               <span>{dict.badge}</span>
             </div>
-            
+
             <h3 className={styles.title}>{dict.title}</h3>
             <p className={styles.description}>{dict.desc}</p>
-            
+
             <div className={styles.actions}>
               <Link href="#contato" className={styles.primaryBtn}>
                 <span>{dict.ctaPrimary}</span>
                 <ArrowRight size={18} />
               </Link>
-              <a 
-                href="https://wa.me/5511999999999?text=Ol%C3%A1!%20Gostaria%20de%20solicitar%20um%20diagn%C3%B3stico%20gratuito%20de%20TI." 
-                target="_blank" 
-                rel="noopener noreferrer" 
+              <a
+                href="https://wa.me/5511996839480?text=Ol%C3%A1!%20Gostaria%20de%20solicitar%20um%20diagn%C3%B3stico%20gratuito%20de%20TI."
+                target="_blank"
+                rel="noopener noreferrer"
                 className={styles.secondaryBtn}
               >
                 <MessageSquareCheck size={18} />
@@ -42,7 +42,7 @@ export default function DiagnosticBanner({ dict }: { dict: any }) {
                 <p>{dict.point1_desc}</p>
               </div>
             </div>
-            
+
             <div className={styles.highlightItem}>
               <div className={styles.checkIcon}>✓</div>
               <div>
@@ -50,7 +50,7 @@ export default function DiagnosticBanner({ dict }: { dict: any }) {
                 <p>{dict.point2_desc}</p>
               </div>
             </div>
-            
+
             <div className={styles.highlightItem}>
               <div className={styles.checkIcon}>✓</div>
               <div>

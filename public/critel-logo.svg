@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 54" fill="none">
+  <!-- Critel Emblem / Symbol -->
+  <g transform="translate(4, 2)">
+    <!-- Top Orbit Arc -->
+    <path d="M 25 4 C 36 4 45.5 12 48 23 L 42 23 C 39.8 15 33 9.5 25 9.5 C 17 9.5 10.2 15 8 23 L 2 23 C 4.5 12 14 4 25 4 Z" fill="url(#arcGradient)" />
+    <!-- Bottom Orbit Arc -->
+    <path d="M 25 46 C 14 46 4.5 38 2 27 L 8 27 C 10.2 35 17 40.5 25 40.5 C 33 40.5 39.8 35 42 27 L 48 27 C 45.5 38 36 46 25 46 Z" fill="url(#arcGradient)" />
+    <!-- Center Core Glow & Sphere -->
+    <circle cx="25" cy="25" r="14" fill="url(#coreGradient)" />
+    <circle cx="25" cy="25" r="13" stroke="#ef4444" stroke-width="1.5" stroke-opacity="0.4" fill="none" />
+    <!-- Modern Tech Intersection Dot -->
+    <circle cx="25" cy="25" r="5" fill="#ef4444" />
+    <circle cx="25" cy="25" r="2.5" fill="#ffffff" />
+  </g>
+
+  <!-- Brand Typography -->
+  <!-- "Critel" -->
+  <text x="64" y="31" font-family="Montserrat, Inter, system-ui, sans-serif" font-size="24" font-weight="900" letter-spacing="-0.5" fill="#ef4444">Critel</text>
+  <!-- "Tecnologia" -->
+  <text x="138" y="31" font-family="Montserrat, Inter, system-ui, sans-serif" font-size="24" font-weight="700" letter-spacing="-0.2" fill="#ffffff">Tecnologia</text>
+  
+  <!-- Subtitle Tagline -->
+  <text x="65" y="45" font-family="Inter, system-ui, sans-serif" font-size="8" font-weight="700" letter-spacing="3" fill="#94a3b8">INFRAESTRUTURA &amp; TI</text>
+
+  <!-- Gradients -->
+  <defs>
+    <linearGradient id="arcGradient" x1="0" y1="0" x2="50" y2="50" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="50%" stop-color="#0284c7" />
+      <stop offset="100%" stop-color="#dc2626" />
+    </linearGradient>
+    <linearGradient id="coreGradient" x1="11" y1="11" x2="39" y2="39" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+  </defs>
+</svg>

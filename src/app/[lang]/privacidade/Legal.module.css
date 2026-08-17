@@ -90,7 +90,7 @@
 }
 
 .dpoBox h3 {
-  color: #ffffff;
+  color: var(--text-primary);
   font-size: 1.1rem;
 }
 
@@ -105,9 +105,11 @@
   text-decoration: none;
   font-size: 1rem;
   margin-top: 0.25rem;
+  transition: color 0.2s ease;
 }
 
 .contactBtn:hover {
+  color: var(--accent-hover);
   text-decoration: underline;
 }
 

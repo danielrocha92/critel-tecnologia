@@ -8,7 +8,7 @@ import Link from 'next/link';
 export default async function SolutionPage({ params }: { params: Promise<{ slug: string, lang: string }> }) {
   const resolvedParams = await params;
   const dict = await getDictionary(resolvedParams.lang as any);
-  
+
   // Acessa as soluções traduzidas
   const solutions = dict.solutionsData as Record<string, any>;
   const solution = solutions[resolvedParams.slug];
@@ -42,10 +42,10 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
               <Link href={`/${resolvedParams.lang}/#formulario`} className={styles.primaryBtn}>
                 Solicitar Proposta Técnica
               </Link>
-              <a 
-                href="https://wa.me/5511999999999?text=Ol%C3%A1!%20Gostaria%20de%20um%20diagn%C3%B3stico%20t%C3%A9cnico%20de%20infraestrutura." 
-                target="_blank" 
-                rel="noopener noreferrer" 
+              <a
+                href="https://wa.me/5511996839480?text=Ol%C3%A1!%20Gostaria%20de%20um%20diagn%C3%B3stico%20t%C3%A9cnico%20de%20infraestrutura."
+                target="_blank"
+                rel="noopener noreferrer"
                 className={styles.secondaryBtn}
               >
                 <PhoneCall size={16} /> Atendimento WhatsApp
@@ -64,7 +64,7 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
               <p>
                 {solution.detailedText}
               </p>
-              
+
               <h3 className={styles.featuresTitle}>{dict.solutionPage.featuresTitle}</h3>
               <ul className={styles.featureList}>
                 {solution.features.map((feat: string, idx: number) => (

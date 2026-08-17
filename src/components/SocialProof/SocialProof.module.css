@@ -132,7 +132,23 @@
   opacity: 1;
 }
 
+.logoForDark {
+  display: block;
+}
+
+.logoForLight {
+  display: none;
+}
+
 /* Modo Claro */
+[data-theme='light'] .logoForDark {
+  display: none;
+}
+
+[data-theme='light'] .logoForLight {
+  display: block;
+}
+
 [data-theme='light'] .logoItem {
   background: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.08);
@@ -147,12 +163,12 @@
 }
 
 [data-theme='light'] .logoImage {
-  filter: grayscale(100%) brightness(0.3);
-  opacity: 0.8;
+  filter: grayscale(100%) opacity(0.7);
+  opacity: 1;
 }
 
 [data-theme='light'] .logoItem:hover .logoImage {
-  filter: grayscale(0%) brightness(1);
+  filter: grayscale(0%) opacity(1);
   opacity: 1;
 }
 

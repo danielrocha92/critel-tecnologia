@@ -30,6 +30,12 @@
   margin-bottom: 1.25rem;
 }
 
+[data-theme='light'] .badge {
+  background: rgba(183, 28, 28, 0.1);
+  border: 1px solid rgba(183, 28, 28, 0.25);
+  color: #b71c1c;
+}
+
 .title {
   font-size: clamp(2rem, 5vw, 3.25rem);
   color: var(--text-primary);
@@ -56,33 +62,45 @@
 .infoCard {
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
-  padding: 2rem 1.5rem;
+  border-radius: 14px;
+  padding: 2.25rem 1.5rem;
   display: flex;
   flex-direction: column;
-  transition: transform 0.3s ease, border-color 0.3s ease;
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
 
 .infoCard:hover {
   transform: translateY(-5px);
   border-color: var(--accent-brand-text);
+  box-shadow: 0 15px 35px rgba(183, 28, 28, 0.15), 0 5px 15px rgba(0, 0, 0, 0.08);
 }
 
 .iconBox {
-  width: 50px;
-  height: 50px;
-  border-radius: 10px;
-  background: rgba(183, 28, 28, 0.15);
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background: rgba(183, 28, 28, 0.12);
+  border: 1px solid rgba(183, 28, 28, 0.2);
   color: var(--accent-brand-text);
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 1.25rem;
+  transition: all 0.3s ease;
+}
+
+.infoCard:hover .iconBox {
+  background: var(--accent-brand);
+  color: #ffffff;
+  border-color: var(--accent-brand);
+  box-shadow: 0 4px 12px rgba(183, 28, 28, 0.35);
+  transform: scale(1.05);
 }
 
 .infoCard h3 {
-  font-size: 1.15rem;
+  font-size: 1.2rem;
+  font-weight: 700;
   color: var(--text-primary);
   margin-bottom: 0.5rem;
 }
@@ -90,8 +108,8 @@
 .infoCard p {
   color: var(--text-secondary);
   font-size: 0.875rem;
-  line-height: 1.5;
-  margin-bottom: 1rem;
+  line-height: 1.55;
+  margin-bottom: 1.25rem;
   flex-grow: 1;
 }
 
@@ -100,18 +118,60 @@
   font-weight: 700;
   font-size: 0.95rem;
   text-decoration: none;
-  transition: color 0.2s ease;
+  transition: all 0.2s ease;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  display: inline-block;
 }
 
 .cardLink:hover {
-  color: #ffffff;
+  color: var(--accent-hover);
   text-decoration: underline;
 }
 
 .cardSubtext {
   color: var(--text-primary);
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
+}
+
+/* Modo Claro Explícito */
+[data-theme='light'] .infoCard {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme='light'] .infoCard:hover {
+  background: #ffffff;
+  border-color: #b71c1c;
+  box-shadow: 0 15px 35px rgba(183, 28, 28, 0.12), 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme='light'] .iconBox {
+  background: rgba(183, 28, 28, 0.08);
+  border: 1px solid rgba(183, 28, 28, 0.18);
+  color: #b71c1c;
+}
+
+[data-theme='light'] .infoCard:hover .iconBox {
+  background: #b71c1c;
+  color: #ffffff;
+  border-color: #b71c1c;
+  box-shadow: 0 4px 12px rgba(183, 28, 28, 0.25);
+}
+
+[data-theme='light'] .cardLink {
+  color: #b71c1c;
+}
+
+[data-theme='light'] .cardLink:hover {
+  color: #991b1b;
+  text-decoration: underline;
+}
+
+[data-theme='light'] .cardSubtext {
+  color: #0f172a;
 }
 
 .formSection {
@@ -130,6 +190,6 @@
     gap: 1.25rem;
   }
   .infoCard {
-    padding: 1.5rem 1.25rem;
+    padding: 1.75rem 1.25rem;
   }
 }

@@ -159,9 +159,11 @@
 }
 
 [data-theme='light'] .secondaryBtn:hover {
-  background-color: #f1f5f9;
-  border-color: #0f172a;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+  background-color: rgba(183, 28, 28, 0.06);
+  border-color: var(--accent-brand);
+  color: var(--accent-brand);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(183, 28, 28, 0.15);
 }
 
 @media (max-width: 768px) {

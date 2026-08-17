@@ -153,6 +153,7 @@
 .mvvCard:hover {
   transform: translateY(-5px);
   border-color: var(--accent-brand-text);
+  box-shadow: 0 12px 30px rgba(183, 28, 28, 0.12);
 }
 
 .iconCircle {
