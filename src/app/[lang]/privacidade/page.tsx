@@ -1,16 +1,66 @@
+import type { Metadata } from 'next';
 import styles from './Legal.module.css';
 import ScrollReveal from '@/components/ScrollReveal/ScrollReveal';
+import JsonLd, { getBreadcrumbSchema } from '@/components/JsonLd/JsonLd';
 import { getDictionary } from '@/dictionaries';
-import { Shield, Sparkles } from 'lucide-react';
-import Link from 'next/link';
+import { Shield } from 'lucide-react';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const resolvedParams = await params;
+  const dict = await getDictionary(resolvedParams.lang as any);
+  const privacySeo = dict.seo?.privacy;
+
+  const title = privacySeo?.title ?? 'Política de Privacidade e Proteção de Dados (LGPD)';
+  const description =
+    privacySeo?.description ??
+    'Saiba como a Critel Tecnologia trata e protege os dados pessoais em conformidade com a LGPD (Lei nº 13.709/2018).';
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: `/${resolvedParams.lang}/privacidade`,
+      languages: {
+        'pt-BR': '/pt/privacidade',
+        'en-US': '/en/privacidade',
+        'es-ES': '/es/privacidade',
+        'x-default': '/pt/privacidade',
+      },
+    },
+    openGraph: {
+      title,
+      description,
+      url: `https://criteltecnologia.com.br/${resolvedParams.lang}/privacidade`,
+    },
+    twitter: {
+      title,
+      description,
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
+  };
+}
 
 export default async function PrivacyPage({ params }: { params: Promise<{ lang: string }> }) {
   const resolvedParams = await params;
   const dict = await getDictionary(resolvedParams.lang as any);
   const legal = dict.privacyPage;
 
+  const breadcrumbs = [
+    { name: dict.nav?.home ?? 'Home', url: `/${resolvedParams.lang}` },
+    { name: dict.footer?.institutional?.privacy ?? 'Privacidade', url: `/${resolvedParams.lang}/privacidade` },
+  ];
+
   return (
     <div className={styles.page}>
+      <JsonLd data={getBreadcrumbSchema(breadcrumbs)} />
+
       <section className={styles.hero}>
         <div className={`container ${styles.heroContainer}`}>
           <ScrollReveal animation="fadeInUp">

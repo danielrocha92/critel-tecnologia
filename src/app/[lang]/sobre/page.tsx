@@ -1,16 +1,63 @@
+import type { Metadata } from 'next';
 import styles from './About.module.css';
 import ScrollReveal from '@/components/ScrollReveal/ScrollReveal';
+import JsonLd, { getBreadcrumbSchema } from '@/components/JsonLd/JsonLd';
 import { getDictionary } from '@/dictionaries';
-import { Award, ShieldCheck, Cpu, Users, Target, Eye, Sparkles } from 'lucide-react';
+import { ShieldCheck, Target, Eye, Sparkles } from 'lucide-react';
 import Link from 'next/link';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const resolvedParams = await params;
+  const dict = await getDictionary(resolvedParams.lang as any);
+  const aboutSeo = dict.seo?.about;
+
+  const title = aboutSeo?.title ?? 'Quem Somos | 30 Anos de Excelência em TI';
+  const description =
+    aboutSeo?.description ??
+    'Conheça a história de 30 anos da Critel Tecnologia: transformando infraestrutura e segurança em vantagens competitivas para grandes empresas.';
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: `/${resolvedParams.lang}/sobre`,
+      languages: {
+        'pt-BR': '/pt/sobre',
+        'en-US': '/en/sobre',
+        'es-ES': '/es/sobre',
+        'x-default': '/pt/sobre',
+      },
+    },
+    openGraph: {
+      title,
+      description,
+      url: `https://criteltecnologia.com.br/${resolvedParams.lang}/sobre`,
+    },
+    twitter: {
+      title,
+      description,
+    },
+  };
+}
 
 export default async function AboutPage({ params }: { params: Promise<{ lang: string }> }) {
   const resolvedParams = await params;
   const dict = await getDictionary(resolvedParams.lang as any);
   const about = dict.aboutPage;
 
+  const breadcrumbs = [
+    { name: dict.nav?.home ?? 'Home', url: `/${resolvedParams.lang}` },
+    { name: dict.nav?.about ?? 'Quem Somos', url: `/${resolvedParams.lang}/sobre` },
+  ];
+
   return (
     <div className={styles.page}>
+      <JsonLd data={getBreadcrumbSchema(breadcrumbs)} />
+
       {/* Hero */}
       <section className={styles.hero}>
         <div className={`container ${styles.heroContainer}`}>

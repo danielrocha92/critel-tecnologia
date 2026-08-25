@@ -1,13 +1,58 @@
+import type { Metadata } from 'next';
 import styles from './Clients.module.css';
 import ScrollReveal from '@/components/ScrollReveal/ScrollReveal';
+import JsonLd, { getBreadcrumbSchema } from '@/components/JsonLd/JsonLd';
 import { getDictionary } from '@/dictionaries';
-import { Sparkles, Building2, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Sparkles, CheckCircle2, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const resolvedParams = await params;
+  const dict = await getDictionary(resolvedParams.lang as any);
+  const clientsSeo = dict.seo?.clients;
+
+  const title = clientsSeo?.title ?? 'Clientes e Casos de Sucesso | Critel Tecnologia';
+  const description =
+    clientsSeo?.description ??
+    'Empresas líderes como Bradesco, Grupo IMC (Pizza Hut e KFC), Bacio di Latte, Ofner e Sonda confiam na engenharia e suporte da Critel Tecnologia.';
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: `/${resolvedParams.lang}/clientes`,
+      languages: {
+        'pt-BR': '/pt/clientes',
+        'en-US': '/en/clientes',
+        'es-ES': '/es/clientes',
+        'x-default': '/pt/clientes',
+      },
+    },
+    openGraph: {
+      title,
+      description,
+      url: `https://criteltecnologia.com.br/${resolvedParams.lang}/clientes`,
+    },
+    twitter: {
+      title,
+      description,
+    },
+  };
+}
 
 export default async function ClientsPage({ params }: { params: Promise<{ lang: string }> }) {
   const resolvedParams = await params;
   const dict = await getDictionary(resolvedParams.lang as any);
   const clientsData = dict.clientsPage;
+
+  const breadcrumbs = [
+    { name: dict.nav?.home ?? 'Home', url: `/${resolvedParams.lang}` },
+    { name: dict.nav?.clients ?? 'Clientes', url: `/${resolvedParams.lang}/clientes` },
+  ];
 
   const clientCases = [
     {
@@ -59,6 +104,8 @@ export default async function ClientsPage({ params }: { params: Promise<{ lang: 
 
   return (
     <div className={styles.page}>
+      <JsonLd data={getBreadcrumbSchema(breadcrumbs)} />
+
       <section className={styles.hero}>
         <div className={`container ${styles.heroContainer}`}>
           <ScrollReveal animation="fadeInUp">
@@ -81,20 +128,20 @@ export default async function ClientsPage({ params }: { params: Promise<{ lang: 
                   <div className={styles.logoBox}>
                     <img 
                       src={c.logo} 
-                      alt={c.name} 
+                      alt={`Logo ${c.name}`} 
                       className={`${styles.logoImg} ${c.logoLight ? styles.logoForDark : ''}`} 
                     />
                     {c.logoLight && (
                       <img 
                         src={c.logoLight} 
-                        alt={c.name} 
+                        alt={`Logo ${c.name}`} 
                         className={`${styles.logoImg} ${styles.logoForLight}`} 
                       />
                     )}
                   </div>
                   <span className={styles.tagBadge}>{c.tag}</span>
                 </div>
-                <h3 className={styles.clientName}>{c.name}</h3>
+                <h2 className={styles.clientName}>{c.name}</h2>
                 <p className={styles.clientDesc}>{c.desc}</p>
                 <div className={styles.scopeList}>
                   {c.scope.map((s, i) => (
@@ -111,11 +158,13 @@ export default async function ClientsPage({ params }: { params: Promise<{ lang: 
       </section>
 
       <section className={styles.ctaSection}>
-        <div className={`container ${styles.ctaBox}`}>
-          <h2>{clientsData.ctaTitle}</h2>
-          <Link href={`/${resolvedParams.lang}/#formulario`} className={styles.ctaBtn}>
-            {clientsData.ctaBtn} <ArrowRight size={18} />
-          </Link>
+        <div className="container">
+          <div className={styles.ctaBox}>
+            <h2>{clientsData.ctaTitle}</h2>
+            <Link href={`/${resolvedParams.lang}/#formulario`} className={styles.ctaBtn}>
+              {clientsData.ctaBtn} <ArrowRight size={18} />
+            </Link>
+          </div>
         </div>
       </section>
     </div>

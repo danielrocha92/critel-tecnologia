@@ -9,6 +9,7 @@ import ThemeToggle from '../ThemeToggle/ThemeToggle';
 export default function Header({ dict, lang }: { dict: any, lang: string }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
+  const [isMobileAboutOpen, setIsMobileAboutOpen] = useState(false);
   const [isMobileSolutionsOpen, setIsMobileSolutionsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const router = useRouter();
@@ -23,7 +24,11 @@ export default function Header({ dict, lang }: { dict: any, lang: string }) {
   }, []);
 
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
-  const closeMobileMenu = () => setIsMobileMenuOpen(false);
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
+    setIsMobileAboutOpen(false);
+    setIsMobileSolutionsOpen(false);
+  };
 
   const changeLanguage = (newLang: string) => {
     if (!pathname) return;
@@ -34,6 +39,7 @@ export default function Header({ dict, lang }: { dict: any, lang: string }) {
     closeMobileMenu();
   };
 
+  const isAboutActive = pathname === `/${lang}/sobre` || pathname?.includes('/sobre/');
   const isSolutionsActive = pathname?.includes('/solucoes');
 
   return (
@@ -60,14 +66,26 @@ export default function Header({ dict, lang }: { dict: any, lang: string }) {
                 {dict.home}
               </Link>
             </li>
-            <li>
-              <Link 
-                href={`/${lang}/sobre`} 
-                className={`${styles.navLink} ${pathname === `/${lang}/sobre` ? styles.activeLink : ''}`}
-                onClick={closeMobileMenu}
+            <li className={`${styles.hasDropdown} ${isMobileAboutOpen ? styles.mobileDropdownOpen : ''}`}>
+              <div 
+                className={`${styles.dropdownToggle} ${isAboutActive ? styles.activeLink : ''}`}
+                onClick={() => setIsMobileAboutOpen(!isMobileAboutOpen)}
               >
-                {dict.about}
-              </Link>
+                <span>{dict.about}</span>
+                <ChevronDown size={14} className={styles.dropdownArrow} />
+              </div>
+              <ul className={styles.dropdown}>
+                <li>
+                  <Link href={`/${lang}/sobre`} onClick={closeMobileMenu}>
+                    {dict.aboutCritel || 'Sobre a Critel'}
+                  </Link>
+                </li>
+                <li>
+                  <Link href={`/${lang}/sobre/certificacoes-e-premios`} onClick={closeMobileMenu}>
+                    {dict.certifications || 'Certificações e Prêmios'}
+                  </Link>
+                </li>
+              </ul>
             </li>
             <li className={`${styles.hasDropdown} ${isMobileSolutionsOpen ? styles.mobileDropdownOpen : ''}`}>
               <div 
@@ -78,6 +96,7 @@ export default function Header({ dict, lang }: { dict: any, lang: string }) {
                 <ChevronDown size={14} className={styles.dropdownArrow} />
               </div>
               <ul className={styles.dropdown}>
+                <li><Link href={`/${lang}/solucoes`} onClick={closeMobileMenu} style={{ borderBottom: '1px solid var(--border-color)', marginBottom: '4px', paddingBottom: '8px', color: 'var(--accent-brand-text)', fontWeight: 600 }}>{dict.allSolutions || 'Ver Todas as Soluções'} →</Link></li>
                 <li><Link href={`/${lang}/solucoes/suporte-ti-empresarial`} onClick={closeMobileMenu}>Suporte de TI Empresarial</Link></li>
                 <li><Link href={`/${lang}/solucoes/cabeamento-estruturado`} onClick={closeMobileMenu}>{dict.sol_cabling}</Link></li>
                 <li><Link href={`/${lang}/solucoes/ativos-de-rede`} onClick={closeMobileMenu}>{dict.sol_network}</Link></li>

@@ -13,9 +13,10 @@
     "secondaryBtn": "Conozca nuestras Soluciones"
   },
   "nav": {
-    "home": "Inicio",
+    "home": "Home",
     "about": "Quiénes Somos",
     "aboutCritel": "Sobre Critel",
+    "certifications": "Certificaciones y Premios",
     "solutions": "Soluciones",
     "clients": "Clientes",
     "contact": "Contacto",
@@ -23,7 +24,8 @@
     "sol_security": "Seguridad de la Información",
     "sol_network": "Activos de Red",
     "sol_cabling": "Cableado Estructurado",
-    "sol_building": "Tecnología de Edificios"
+    "sol_building": "Tecnología Edilicia",
+    "allSolutions": "Ver Todas las Soluciones"
   },
   "highlights": {
     "card1": {
@@ -31,7 +33,7 @@
       "desc": "Aplicando las mejores tecnologías del mercado para impulsar resultados continuos."
     },
     "card2": {
-      "title": "COMPROMISO CON EL MAÑANA",
+      "title": "COMPROMISO CON EL FUTURO",
       "desc": "Prácticas responsables que garantizan seguridad y eficiencia a largo plazo para su negocio."
     },
     "card3": {
@@ -43,24 +45,24 @@
     "title": "Nuestra Metodología",
     "desc": "Garantizamos la excelencia de nuestros servicios a través de 5 pilares fundamentales, acompañando su proyecto de principio a fin.",
     "p1_title": "1. Consultoría:",
-    "p1_desc": "Profundo entendimiento del negocio",
+    "p1_desc": "Entendimiento profundo del negocio",
     "p2_title": "2. Análisis Técnico:",
     "p2_desc": "Diagnóstico y diseño de la solución",
     "p3_title": "3. Alcance:",
     "p3_desc": "Planificación detallada del proyecto",
-    "p4_title": "4. Implementación:",
+    "p4_title": "4. Implantación:",
     "p4_desc": "Ejecución ágil y estandarizada",
     "p5_title": "5. Mantenimiento:",
     "p5_desc": "Soporte preventivo y correctivo",
-    "dash1": "Etapas Completadas",
+    "dash1": "Etapas Concluidas",
     "dash2": "Satisfacción",
     "dash3": "Progreso del Proyecto"
   },
   "institutional": {
     "title": "Sobre Critel",
     "subtitle": "Sólida experiencia en Infraestructura de TI.",
-    "desc1": "Soluciones Integradas para el Sector Público y Privado.",
-    "desc2": "Critel Tecnología se especializa en ofrecer soluciones integradas en infraestructura y seguridad de TI. Nos enfocamos en innovación, excelencia operativa y protección de los datos de nuestros clientes. Nuestros servicios están diseñados para satisfacer necesidades específicas, ofreciendo resultados que impulsan su productividad.",
+    "desc1": "Soluciones Integradas para Sector Público y Privado.",
+    "desc2": "Critel Tecnologia se especializa en ofrecer soluciones integradas en infraestructura y seguridad de TI. Nos enfocamos en innovación, excelencia operativa y en la protección de los datos de nuestros clientes. Nuestros servicios están diseñados para satisfacer necesidades específicas, brindando resultados que impulsan su productividad.",
     "stat1_num": "30",
     "stat1_label": "Años en el Mercado",
     "stat2_num": "+1.000",
@@ -68,14 +70,14 @@
   },
   "verticals": {
     "title": "Nuestras Soluciones",
-    "learnMore": "Saber más →",
+    "learnMore": "Sepa más →",
     "card1_title": "Seguridad de la Información",
     "card1_desc": "Proteja los datos de su empresa con las mejores herramientas y estrategias del mercado corporativo.",
     "card2_title": "Activos de Red",
-    "card2_desc": "Conectividad y rendimiento garantizados con equipos líderes del mercado para su negocio.",
+    "card2_desc": "Conectividad y rendimiento garantizados con equipos líderes de mercado para su negocio.",
     "card3_title": "Cableado Estructurado",
-    "card3_desc": "Redes organizadas, estables y con rendimiento garantizado para la transmisión de voz, datos e imagen.",
-    "card4_title": "Tecnología de Edificios",
+    "card3_desc": "Redes organizadas, estables y con rendimiento garantizado para transmisión de voz, datos e imagen.",
+    "card4_title": "Tecnología Edilicia",
     "card4_desc": "Proyectos completos de CCTV, control de acceso, biometría y automatización para su infraestructura."
   },
   "socialProof": {
@@ -87,31 +89,31 @@
     "badge2_title": "Atención con SLA",
     "badge2_sub": "Respuesta ágil y soporte consultivo",
     "badge3_title": "Ingeniería Certificada",
-    "badge3_sub": "Cumplimiento ABNT, TIA y Fluke",
+    "badge3_sub": "Conformidad ABNT, TIA y Fluke",
     "badge4_title": "Contratos Flexibles",
-    "badge4_sub": "Proyectos Llave en Mano o Soporte Continuo"
+    "badge4_sub": "Proyectos Turnkey o Soporte Continuo"
   },
   "diagnosticBanner": {
     "badge": "Diagnóstico Especializado",
-    "title": "¿Está su infraestructura de TI lista para el futuro?",
-    "desc": "Evite interrupciones no programadas, lentitud en la red y vulnerabilidades de seguridad. Solicite una evaluación técnica gratuita y descubra dónde su operación puede alcanzar el máximo rendimiento.",
+    "title": "¿Su infraestructura de TI está preparada para el futuro?",
+    "desc": "Evite paradas no programadas, lentitud en la red y vulnerabilidades de seguridad. Solicite una evaluación técnica gratuita y descubra dónde su operación puede ganar máximo rendimiento.",
     "ctaPrimary": "Solicitar Diagnóstico Gratuito",
     "ctaSecondary": "Hablar con un Especialista",
     "point1_title": "Auditoría de Red y Cableado",
-    "point1_desc": "Mapeo de puntos críticos, certificación e identificación de cuellos de botella.",
+    "point1_desc": "Mapeo de puntos críticos, certificación e identificación de cuellos de botella de tráfico.",
     "point2_title": "Análisis de Riesgos y Seguridad",
     "point2_desc": "Evaluación de vulnerabilidades físicas y lógicas contra intrusiones y pérdida de datos.",
     "point3_title": "Plan Técnico a Medida",
-    "point3_desc": "Informe ejecutivo con acciones prácticas para optimizar costos y elevar la disponibilidad."
+    "point3_desc": "Informe ejecutivo con acciones prácticas para optimizar costos y maximizar la disponibilidad."
   },
   "contactForm": {
     "title": "Entendamos su escenario y propongamos una solución técnica personalizada, sin compromiso.",
-    "subtitle": "Atención consultiva • Respuesta en hasta 24h hábiles • Sin compromiso",
+    "subtitle": "Atención consultiva • Respuesta en 24h hábiles • Sin compromiso",
     "labels": {
       "name": "Nombre completo",
       "role": "Cargo",
       "company": "Nombre de la empresa",
-      "email": "E-mail corporativo",
+      "email": "Correo corporativo",
       "challenge": "¿Cuál es su desafío actual en TI?"
     },
     "placeholders": {
@@ -119,25 +121,26 @@
       "role": "Ej: Director de TI, Gerente...",
       "company": "Su empresa",
       "email": "su.nombre@empresa.com",
-      "challenge": "Cuéntenos brevemente qué necesita resolver..."
+      "challenge": "Cuéntenos brevemente lo que necesita resolver..."
     },
     "submitBtn": "Solicitar Diagnóstico Gratuito por WhatsApp"
   },
   "footer": {
     "brandTitle": "Critel Tecnologia",
-    "brandDesc": "30 años transformando tecnología en ventaja competitiva para empresas en todo Brasil.",
+    "brandDesc": "30 años transformando la tecnología en ventaja competitiva para empresas en todo Brasil.",
     "servicesTitle": "Servicios",
     "services": {
       "support": "Soporte de TI Empresarial",
       "cabling": "Cableado Estructurado",
       "network": "Activos de Red",
       "security": "Seguridad de la Información",
-      "building": "Tecnología de Edificios y CCTV",
-      "field": "Field Services y Mantenimiento"
+      "building": "Tecnología Edilicia & CCTV",
+      "field": "Field Services & Mantenimiento"
     },
     "institutionalTitle": "Institucional",
     "institutional": {
       "about": "Sobre Critel",
+      "certifications": "Certificaciones y Premios",
       "clients": "Nuestros Clientes",
       "methodology": "Nuestra Metodología",
       "contact": "Contacto",
@@ -157,64 +160,64 @@
   },
   "solutionPage": {
     "badge": "Nuestras Soluciones",
-    "overview": "Descripción General de la Solución",
-    "featuresTitle": "Características Principales:"
+    "overview": "Visión General de la Solución",
+    "featuresTitle": "Principales Características:"
   },
   "solutionsData": {
     "seguranca-da-informacao": {
       "title": "Seguridad de la Información",
-      "description": "Protección completa y avanzada para los datos críticos de su operación. Mitigamos riesgos y garantizamos la continuidad de su negocio.",
-      "detailedText": "En el panorama corporativo actual, la protección de datos no es solo una necesidad técnica, sino un pilar estratégico. Nuestras soluciones de Seguridad de la Información se basan en tecnologías líderes del Cuadrante Mágico de Gartner, ofreciendo defensa en múltiples capas contra amenazas cibernéticas. Desde la auditoría inicial hasta la implementación de políticas de acceso Zero Trust, nuestro equipo actúa proactivamente para identificar vulnerabilidades y blindar su infraestructura contra invasiones, ransomware y fugas de datos.",
-      "features": ["Firewalls de Próxima Generación (NGFW)", "Control de Acceso de Red (NAC)", "Prevención de Intrusiones (IPS/IDS)", "Auditoría, Cumplimiento y LGPD", "Protección de Endpoints (EDR/XDR)"]
+      "description": "Protección completa y avanzada para los datos críticos de su operación. Mitigamos riesgos y garantizamos la continuidad del negocio.",
+      "detailedText": "En el panorama corporativo actual, la protección de datos no es solo una necesidad técnica, sino un pilar estratégico. Nuestras soluciones de Seguridad de la Información se basan en tecnologías líderes del Cuadrante Mágico de Gartner, ofreciendo defensa multicapa contra ciberamenazas. Desde la auditoría inicial hasta la implementación de políticas de acceso Zero Trust, nuestro equipo actúa proactivamente para identificar vulnerabilidades y blindar su infraestructura contra intrusiones, ransomware y fugas de datos.",
+      "features": ["Firewalls de Próxima Generación (NGFW)", "Control de Acceso a la Red (NAC)", "Prevención de Intrusiones (IPS/IDS)", "Auditoría, Cumplimiento y Privacidad", "Protección de Endpoints (EDR/XDR)"]
     },
     "ativos-de-rede": {
       "title": "Activos de Red",
-      "description": "Conectividad ininterrumpida y alto rendimiento con equipos de última generación para respaldar el crecimiento de su empresa.",
-      "detailedText": "La columna vertebral de cualquier operación moderna es su red de datos. Suministramos y configuramos Activos de Red de alta disponibilidad que garantizan que su comunicación y sistemas de misión crítica nunca se detengan. Trabajamos con enrutamiento inteligente, conmutación de alta densidad y conectividad inalámbrica de próxima generación (Wi-Fi 6). Nuestra consultoría ayuda a dimensionar exactamente el equipo que necesita, optimizando su inversión (ROI) y garantizando escalabilidad futura.",
-      "features": ["Switches Administrables L2/L3", "Routers de Alta Capacidad", "Redes Inalámbricas Corporativas (Wi-Fi 6)", "Balanceadores de Carga", "SD-WAN y Conectividad Segura"]
+      "description": "Conectividad ininterrumpida y alto rendimiento con equipos de vanguardia para soportar el crecimiento de su empresa.",
+      "detailedText": "La columna vertebral de cualquier operación moderna es su red de datos. Suministramos y configuramos Activos de Red de alta disponibilidad que aseguran que su comunicación y sistemas de misión crítica nunca se detengan. Trabajamos con enrutamiento inteligente, conmutación de alta densidad y conectividad inalámbrica de última generación (Wi-Fi 6). Nuestra consultoría ayuda a dimensionar el equipo exacto que necesita, optimizando su inversión (ROI) y asegurando escalabilidad futura.",
+      "features": ["Switches Gestionables L2/L3", "Enrutadores de Alta Capacidad", "Redes Inalámbricas Enterprise (Wi-Fi 6)", "Balanceadores de Carga", "SD-WAN y Conectividad Segura"]
     },
     "tecnologia-predial": {
-      "title": "Tecnología de Edificios",
-      "description": "Inteligencia y seguridad física integradas en un solo ecosistema para entornos corporativos e industriales.",
-      "detailedText": "Transformamos espacios tradicionales en entornos inteligentes y altamente seguros. Nuestra vertical de Tecnología de Edificios integra todos los sistemas vitales de su edificio: desde el control riguroso de quién entra y sale, hasta la supervisión analítica de video y sistemas de alarma contra incendios. Con la automatización de edificios (BMS), su empresa no solo gana en seguridad de activos, sino también en eficiencia energética y gestión centralizada, reduciendo significativamente los costos operativos.",
-      "features": ["Monitoreo CCTV con IA", "Control de Acceso Biométrico y Facial", "Sistemas de Alarma y Detección de Incendios", "Automatización de Edificios (BMS)", "Comunicación Sonora y Visual"]
+      "title": "Tecnología Edilicia",
+      "description": "Inteligencia y seguridad física integradas en un único ecosistema para entornos corporativos e industriales.",
+      "detailedText": "Transformamos espacios tradicionales en entornos inteligentes y altamente seguros. Nuestra vertical de Tecnología Edilicia integra todos los sistemas vitales de su edificio: desde el control riguroso de accesos, hasta el monitoreo por video analítico y sistemas de alarma contra incendios. Con la automatización edilicia (BMS), su empresa gana en seguridad patrimonial, eficiencia energética y gestión centralizada, reduciendo significativamente los costos operativos.",
+      "features": ["Monitoreo por CCTV con IA", "Control de Acceso Biométrico y Facial", "Sistemas de Alarma y Detección de Incendio", "Automatización Edilicia (BMS)", "Sonorización y Comunicación Visual"]
     },
     "cabeamento-estruturado": {
       "title": "Cableado Estructurado",
       "description": "La base física de alta confiabilidad para transmisión de datos, voz e imagen en su infraestructura.",
-      "detailedText": "Un sistema de TI es tan fuerte como su infraestructura física. Nuestro equipo de ingeniería diseña y ejecuta soluciones de Cableado Estructurado siguiendo las más rigurosas normas internacionales (EIA/TIA, ISO, ABNT). Ya sea en cable metálico (Cat6, Cat6A) o fibra óptica de altísima velocidad, garantizamos una red organizada, documentada y libre de cuellos de botella. Entregamos desde Data Centers completos hasta cableado horizontal de oficinas, con certificación y garantía de rendimiento.",
-      "features": ["Diseño y Ejecución de Red Lógica", "Certificación de Redes (Fluke Networks)", "Montaje de Racks y Data Centers", "Tendido y Fusión de Fibra Óptica", "Documentación Técnica As-built"]
+      "detailedText": "Un sistema de TI es tan fuerte como su infraestructura física. Nuestro equipo de ingeniería diseña y ejecuta soluciones de Cableado Estructurado siguiendo las normas internacionales más estrictas (EIA/TIA, ISO, ABNT). Ya sea en cable metálico (Cat6, Cat6A) o en fibra óptica de alta velocidad, garantizamos una red organizada, documentada y libre de cuellos de botella. Entregamos desde Data Centers completos hasta cableado horizontal de oficinas, siempre certificado y garantizado.",
+      "features": ["Diseño y Ejecución de Red Lógica", "Certificación Fluke Networks", "Montaje de Racks y Data Centers", "Tendido y Fusión de Fibra Óptica", "Documentación Técnica As-built"]
     },
     "suporte-ti-empresarial": {
       "title": "Soporte de TI Empresarial",
-      "description": "Gestión completa y soporte consultivo continuo para mantener la operación de su empresa siempre productiva.",
-      "detailedText": "Nuestro Soporte de TI Empresarial está diseñado exclusivamente para entornos corporativos que demandan alta disponibilidad y atención ágil con SLA riguroso. Ofrecemos Service Desk N1, N2 y N3, monitoreo proactivo de servidores y redes (NOC), gestión de copias de seguridad en la nube y mantenimiento preventivo.",
-      "features": ["Help Desk y Service Desk Especializado N1, N2 y N3", "Monitoreo Proactivo de Servidores y Redes (NOC)", "Mantenimiento Preventivo y Correctivo de Hardware", "Gestión de Backups y Disaster Recovery", "Atención Presencial y Remota con SLA Garantizado"]
+      "description": "Gestión integral y soporte consultivo continuo para mantener la operación de su empresa siempre productiva y sin interrupciones.",
+      "detailedText": "Nuestro Soporte de TI Empresarial está diseñado para entornos corporativos que demandan alta disponibilidad y atención ágil con rigurosos acuerdos de nivel de servicio (SLA). Actuamos con Service Desk en niveles 1, 2 y 3, monitoreo proactivo de servidores y redes (NOC), gestión de copias de seguridad en la nube y mantenimiento preventivo. Permitimos que su equipo se concentre en el negocio principal mientras nosotros cuidamos de toda la estabilidad tecnológica.",
+      "features": ["Service Desk Especializado N1, N2 y N3", "Monitoreo Proactivo de Servidores y Redes (NOC)", "Mantenimiento Preventivo y Correctivo", "Gestión de Backups Corporativos y Disaster Recovery", "Atención Presencial y Remota con SLA Garantizado"]
     },
     "field-services": {
-      "title": "Field Services y Montaje de Unidades",
-      "description": "Capilaridad técnica y atención presencial especializada para expansión de sucursales, franquicias y oficinas.",
-      "detailedText": "Para empresas y grandes cadenas con múltiples sucursales o plantas industriales, nuestro equipo de Field Services entrega rapidez y estandarización impecable. Realizamos desde el montaje completo de nuevas tiendas (rollout) — incluyendo TPVs, cableado, Wi-Fi y CCTV — hasta soporte presencial para reemplazo rápido de hardware.",
-      "features": ["Rollout y Montaje Completo de Nuevas Tiendas y Sucursales", "Instalación y Soporte de Infraestructura de TPV", "Mantenimiento y Reemplazo Rápido en Campo", "Estandarización de Infraestructura para Franquicias", "Cobertura Técnica con Respuesta Rápida"]
+      "title": "Field Services & Despliegue de Sedes",
+      "description": "Capilaridad técnica y atención presencial especializada para expansión de tiendas, sucursales y plantas corporativas.",
+      "detailedText": "Para empresas y grandes cadenas con múltiples sucursales, franquicias o plantas industriales, nuestro equipo de Field Services ofrece rapidez y estandarización impecable. Realizamos desde la apertura completa de nuevas tiendas (rollout) — incluyendo infraestructura de punto de venta (POS), cableado, Wi-Fi y cámaras CCTV — hasta el soporte presencial para mantenimiento y recambio rápido de equipos en campo. Somos el socio técnico de confianza de marcas líderes como Grupo IMC (Pizza Hut y KFC), Bacio di Latte y Sonda.",
+      "features": ["Rollout y Montaje Integral de Nuevas Tiendas y Sucursales", "Instalación y Soporte de Infraestructura de POS", "Mantenimiento y Recambio Rápido de Activos en Campo", "Estandarización de Infraestructura para Franquicias", "Cobertura Técnica Nacional y Respuesta Rápida"]
     }
   },
   "aboutPage": {
     "badge": "30 Años de Historia",
     "title": "Conectando Negocios. Protegiendo el Futuro de su Empresa.",
-    "subtitle": "Tres décadas transformando la infraestructura de TI y la seguridad en ventajas competitivas reales.",
+    "subtitle": "Tres décadas transformando la infraestructura de TI y la seguridad en ventajas competitivas reales para el mercado corporativo y gubernamental.",
     "historyTitle": "Nuestra Trayectoria",
-    "historyP1": "Fundada en 1994, Critel Tecnologia nació con el propósito de ofrecer soluciones de ingeniería de redes e infraestructura con rigor técnico y atención humana. A lo largo de 30 años, nos hemos consolidado como uno de los socios más sólidos de Brasil en conectividad corporativa, seguridad de la información y tecnología edilicia.",
-    "historyP2": "Trabajamos junto a grandes líderes del mercado como Bradesco, Grupo IMC (Pizza Hut, KFC), Bacio di Latte, Ofner, Engemon y Sonda IT, ejecutando proyectos de misión crítica.",
+    "historyP1": "Fundada en 1994, Critel Tecnologia nació con el propósito de proveer soluciones de ingeniería de redes e infraestructura con rigor técnico y trato humano. A lo largo de 30 años, nos consolidamos como uno de los socios más sólidos de Brasil en conectividad corporativa, seguridad de la información y tecnología edilicia.",
+    "historyP2": "Trabajamos junto a los mayores actores del sector financiero, minorista, telecomunicaciones y servicios — como Bradesco, Grupo IMC (Pizza Hut, KFC), Bacio di Latte, Ofner, Engemon y Sonda IT —, ejecutando proyectos de alta complejidad y misión crítica.",
     "missionTitle": "Misión",
-    "missionDesc": "Proveer soluciones integradas de infraestructura y seguridad de TI que garanticen máxima disponibilidad, productividad y protección.",
+    "missionDesc": "Proveer soluciones integradas de infraestructura y seguridad de TI que garanticen máxima disponibilidad, productividad y protección a nuestros clientes.",
     "visionTitle": "Visión",
-    "visionDesc": "Ser el principal referente en ingeniería de TI, conectividad y soporte corporativo de alto estándar en Brasil.",
+    "visionDesc": "Ser la principal referencia en ingeniería de TI, conectividad y soporte corporativo de alto estándar en Brasil.",
     "valuesTitle": "Valores",
     "values": [
-      "Excelencia Técnica y Conformidad con Normas",
+      "Excelencia Técnica y Conformidad Normativa",
       "Compromiso Ético y Relaciones a Largo Plazo",
-      "Innovación Continua y Enfoque en el Negocio",
-      "Transparencia y Rigor Operacional"
+      "Innovación Continua y Enfoque en el Negocio del Cliente",
+      "Transparencia y Rigor Operativo"
     ]
   },
   "clientsPage": {
@@ -226,27 +229,323 @@
     "ctaBtn": "Solicitar Propuesta Comercial"
   },
   "privacyPage": {
-    "badge": "Conformidad LGPD",
+    "badge": "Privacidad y Cumplimiento",
     "title": "Política de Privacidad y Protección de Datos",
-    "subtitle": "En Critel Tecnologia, tratamos la seguridad y privacidad de la información con el más alto rigor técnico y ético.",
+    "subtitle": "En Critel Tecnologia, la seguridad y la privacidad de la información se tratan con el más alto rigor técnico y ético.",
     "section1Title": "1. Compromiso con la Privacidad",
-    "section1Text": "Critel Tecnologia se compromete con la protección de los datos personales de sus clientes y visitantes de acuerdo con la legislación vigente.",
+    "section1Text": "Critel Tecnologia se compromete a proteger los datos personales de sus clientes, socios y visitantes del sitio, en estricta conformidad con las leyes de protección de datos.",
     "section2Title": "2. Recopilación y Uso de Datos",
-    "section2Text": "Recopilamos únicamente la información necesaria proporcionada voluntariamente a través de nuestros formularios para atención comercial.",
+    "section2Text": "Solo recopilamos la información necesaria proporcionada voluntariamente por usted a través de nuestros formularios de contacto para fines de atención comercial y elaboración de propuestas.",
     "section3Title": "3. Seguridad de la Información",
-    "section3Text": "Adoptamos prácticas avanzadas de seguridad, cifrado y cortafuegos para proteger sus datos.",
+    "section3Text": "Adoptamos prácticas avanzadas de seguridad de la información, cifrado, firewalls y controles de acceso restringido para proteger sus datos contra accesos no autorizados o fugas.",
     "section4Title": "4. Sus Derechos",
-    "section4Text": "Puede solicitar la confirmación, acceso, rectificación o eliminación de sus datos personales en qualquer momento vía comercial@criteltecnologia.com.br."
+    "section4Text": "Puede solicitar la confirmación, acceso, rectificación o eliminación de sus datos personales en cualquier momento a través de comercial@criteltecnologia.com.br."
   },
   "termsPage": {
     "badge": "Términos de Uso",
     "title": "Términos de Uso del Sitio Web",
-    "subtitle": "Directrices y condiciones generales de navegación en el portal de Critel Tecnologia.",
-    "section1Title": "1. Aceptación de Términos",
-    "section1Text": "Al acceder y navegar en el sitio web de Critel Tecnologia, usted acepta expresamente las condiciones aquí establecidas.",
+    "subtitle": "Directrices y condiciones generales para navegar en el portal de Critel Tecnologia.",
+    "section1Title": "1. Aceptación de los Términos",
+    "section1Text": "Al acceder y navegar en el sitio web de Critel Tecnologia, usted acepta expresamente las disposiciones y condiciones aquí establecidas.",
     "section2Title": "2. Propiedad Intelectual",
-    "section2Text": "Todos los contenidos, marcas y logotipos disponibles en este portal son propiedad exclusiva de Critel Tecnologia o de sus respectivos socios.",
+    "section2Text": "Todos los contenidos, marcas, logotipos, textos, gráficos y códigos disponibles en este portal son propiedad exclusiva de Critel Tecnologia o sus socios.",
     "section3Title": "3. Limitación de Responsabilidad",
     "section3Text": "Critel Tecnologia se reserva el derecho de actualizar contenidos y especificaciones de servicios sin previo aviso."
+  },
+  "solutionsIndexPage": {
+    "badge": "Portafolio Completo",
+    "title": "Soluciones de Ingeniería de TI y Seguridad",
+    "subtitle": "Proyectos de alta confiabilidad, soporte proactivo y tecnologías líderes para potenciar la operación de su empresa.",
+    "ctaTitle": "¿Necesita un diagnóstico técnico para su infraestructura de TI?",
+    "ctaBtn": "Hablar con un Ingeniero Especialista",
+    "viewMore": "Saber Más"
+  },
+  "certificationsPage": {
+    "badge": "Excelencia, Conformidad & Rigor Técnico",
+    "title": "Certificaciones, Normas Reguladoras y Premios",
+    "subtitle": "A lo largo de más de 30 años de experiencia corporativa, hemos obtenido las certificaciones más importantes de los principales fabricantes mundiales y mantenemos un 100% de cumplimiento con las Normas Reguladoras (NRs), garantizando seguridad jurídica, integridad física y máxima confiabilidad en cada entrega.",
+    "stat1_num": "100%",
+    "stat1_label": "Cumplimiento de NRs",
+    "stat2_num": "+25",
+    "stat2_label": "Certificaciones Oficiales",
+    "stat3_num": "30 Años",
+    "stat3_label": "Sin Accidentes Graves",
+    "stat4_num": "99.8%",
+    "stat4_label": "Adherencia a SLAs",
+    "filters": {
+      "all": "Todas las Credenciales",
+      "nrs": "Normas Reguladoras (NRs)",
+      "cabling": "Cableado & Óptica",
+      "network": "Redes & Ciberseguridad",
+      "governance": "Gestión & Gobernanza",
+      "building": "Tecnología Edilicia & CCTV"
+    },
+    "nrsSectionTitle": "Normas Reguladoras (NRs de Seguridad y Salud en el Trabajo)",
+    "nrsSectionDesc": "La seguridad de nuestro equipo técnico y la conformidad del entorno de nuestros clientes son prioridades absolutas. Nuestros ingenieros y técnicos cuentan con capacitaciones vigentes y certificadas.",
+    "nrs": [
+      {
+        "code": "NR-05",
+        "name": "CIPA",
+        "title": "Comisión Interna de Prevención de Accidentes",
+        "desc": "Equipo capacitado y activo en la identificación y mitigación proactiva de riesgos ambientales y laborales."
+      },
+      {
+        "code": "NR-06",
+        "name": "EPP",
+        "title": "Equipos de Protección Personal",
+        "desc": "Capacitación rigurosa, suministro y auditoría continua en el uso obligatorio de EPPs certificados para cada tarea."
+      },
+      {
+        "code": "NR-10",
+        "name": "Electricidad",
+        "title": "Seguridad en Instalaciones y Servicios en Electricidad",
+        "desc": "Habilitación completa para maniobras e intervenciones seguras en tableros eléctricos, UPS, generadores y salas de TI."
+      },
+      {
+        "code": "NR-18",
+        "name": "Construcción Civil",
+        "title": "Seguridad y Salud en la Industria de la Construcción",
+        "desc": "Planificación y ejecución segura de infraestructura física, montaje de centros de datos y remodelaciones corporativas."
+      },
+      {
+        "code": "NR-20",
+        "name": "Inflamables",
+        "title": "Seguridad con Inflamables y Combustibles",
+        "desc": "Capacitación técnica para operaciones seguras en salas técnicas con grupos electrógenos y almacenamiento de combustible."
+      },
+      {
+        "code": "NR-33",
+        "name": "Espacios Confinados",
+        "title": "Seguridad y Salud en Espacios Confinados",
+        "desc": "Protocolos estrictos de acceso, ventilación y rescate para trabajos en shafts, ductos y cámaras subterráneas."
+      },
+      {
+        "code": "NR-35",
+        "name": "Trabajo en Altura",
+        "title": "Capacitación para Trabajo en Altura",
+        "desc": "Sistemas de retención de caídas, anclaje y seguridad para montaje de infraestructura aérea, bandejas portacables y torres."
+      }
+    ],
+    "techSectionTitle": "Certificaciones Técnicas & Fabricantes Líderes",
+    "techSectionDesc": "Ingeniería certificada por los principales fabricantes globales de tecnología y conectividad para diseñar, implementar y certificar su infraestructura con garantía oficial.",
+    "certifications": [
+      {
+        "category": "cabling",
+        "categoryLabel": "Cableado & Óptica",
+        "title": "Furukawa FCP Master",
+        "issuer": "Furukawa Electric",
+        "desc": "Máximo nivel de certificación en diseño, ingeniería e instalación de sistemas de cableado estructurado de alto rendimiento.",
+        "highlight": "Máximo Nivel de Ingeniería"
+      },
+      {
+        "category": "cabling",
+        "categoryLabel": "Cableado & Óptica",
+        "title": "Furukawa FCP Data Cabling System",
+        "issuer": "Data Cabling Systems",
+        "desc": "Especialización en cableado metálico de alta densidad (Cat6, Cat6A y Cat8) para entornos de misión crítica y Data Centers.",
+        "highlight": "Data Centers & Alta Densidad"
+      },
+      {
+        "category": "cabling",
+        "categoryLabel": "Cableado & Óptica",
+        "title": "Furukawa Laserway GPON",
+        "issuer": "Redes Ópticas Pasivas (POL)",
+        "desc": "Especialistas en la tecnología 100% óptica Laserway, reduciendo espacio y consumo energético en edificios inteligentes.",
+        "highlight": "Eficiencia Energética & GPON"
+      },
+      {
+        "category": "cabling",
+        "categoryLabel": "Cableado & Óptica",
+        "title": "Fluke Networks CCTT Certified",
+        "issuer": "Fluke Networks",
+        "desc": "Certified Cabling Test Technician para certificación y homologación de enlaces de cobre y fibra óptica con informes oficiales.",
+        "highlight": "Informes Técnicos Oficiales"
+      },
+      {
+        "category": "network",
+        "categoryLabel": "Redes & Ciberseguridad",
+        "title": "Cisco Certified (CCNA / CCNP)",
+        "issuer": "Cisco Systems",
+        "desc": "Capacidad técnica comprobada en conmutación empresarial, enrutamiento avanzado, redes inalámbricas y SD-WAN.",
+        "highlight": "Redes Enterprise"
+      },
+      {
+        "category": "network",
+        "categoryLabel": "Redes & Ciberseguridad",
+        "title": "Fortinet NSE Certified",
+        "issuer": "Fortinet Security",
+        "desc": "Arquitectura e implementación de Next-Generation Firewalls (NGFW), VPNs corporativas y seguridad Zero Trust integral.",
+        "highlight": "Ciberseguridad Avanzada"
+      },
+      {
+        "category": "network",
+        "categoryLabel": "Redes & Ciberseguridad",
+        "title": "RUCKUS Wireless Professional",
+        "issuer": "CommScope RUCKUS",
+        "desc": "Planificación de radiofrecuencia y despliegue de redes Wi-Fi de ultra alta densidad para oficinas corporativas e industrias.",
+        "highlight": "Wi-Fi de Alta Densidad"
+      },
+      {
+        "category": "network",
+        "categoryLabel": "Redes & Ciberseguridad",
+        "title": "Ubiquiti Enterprise Wireless (UEWA)",
+        "issuer": "Ubiquiti Networks",
+        "desc": "Despliegue y administración centralizada de redes corporativas UniFi con alto rendimiento y rentabilidad estratégica.",
+        "highlight": "Gestión Centralizada"
+      },
+      {
+        "category": "network",
+        "categoryLabel": "Redes & Ciberseguridad",
+        "title": "MikroTik Certified (MTCNA / MTCRE)",
+        "issuer": "MikroTik RouterOS",
+        "desc": "Ingeniería de tráfico avanzada, failover de enlaces, balanceo de carga y túneles VPN seguros.",
+        "highlight": "Enrutamiento Avanzado"
+      },
+      {
+        "category": "governance",
+        "categoryLabel": "Gestión & Gobernanza",
+        "title": "PMP® - Project Management Professional",
+        "issuer": "Project Management Institute (PMI)",
+        "desc": "Metodología comprobada de gestión y gobernanza de proyectos corporativos con estricta previsibilidad de plazos y costos.",
+        "highlight": "Gestión con Previsibilidad"
+      },
+      {
+        "category": "governance",
+        "categoryLabel": "Gestão & Governança",
+        "title": "ITIL® v4 Foundation",
+        "issuer": "AXELOS / PeopleCert",
+        "desc": "Mejores prácticas globales para Service Desk corporativo, gestión ágil de incidentes, problemas y cambios de TI.",
+        "highlight": "Service Desk Corporativo"
+      },
+      {
+        "category": "governance",
+        "categoryLabel": "Gestión & Gobernanza",
+        "title": "COBIT Governance Framework",
+        "issuer": "ISACA",
+        "desc": "Marco internacional de gobernanza de TI alineando la infraestructura técnica directamente con los objetivos del negocio.",
+        "highlight": "Gobernanza Estratégica"
+      },
+      {
+        "category": "governance",
+        "categoryLabel": "Gestión & Gobernanza",
+        "title": "Conformidad LGPD & ISO 27001",
+        "issuer": "Seguridad de la Información",
+        "desc": "Prácticas rigurosas de privacidad y protección de datos corporativos en total cumplimiento con estándares internacionales.",
+        "highlight": "Protección y Privacidad"
+      },
+      {
+        "category": "building",
+        "categoryLabel": "Tecnología Edilicia & CCTV",
+        "title": "Schneider Electric SmartStruxure",
+        "issuer": "Schneider Electric",
+        "desc": "Soluciones integradas de automatización edilicia (BMS), medición inteligente de energía y climatización crítica.",
+        "highlight": "Automatización y Eficiencia"
+      },
+      {
+        "category": "building",
+        "categoryLabel": "Tecnología Edilicia & CCTV",
+        "title": "Pelco Video Security Professional",
+        "issuer": "Pelco by Motorola",
+        "desc": "Sistemas corporativos de videovigilancia de misión crítica, cámaras térmicas y analíticas avanzadas de imagen.",
+        "highlight": "CCTV de Misión Crítica"
+      },
+      {
+        "category": "building",
+        "categoryLabel": "Tecnología Edilicia & CCTV",
+        "title": "Tyco / Johnson Controls C•CURE 9000",
+        "issuer": "Johnson Controls",
+        "desc": "Plataforma de control de acceso de alta seguridad con integración a biometría, reconocimiento facial y torniquetes.",
+        "highlight": "Control de Acceso Corporativo"
+      },
+      {
+        "category": "building",
+        "categoryLabel": "Tecnología Edilicia & CCTV",
+        "title": "AxxonSoft AI Video Management",
+        "issuer": "AxxonSoft",
+        "desc": "Sistemas de videovigilancia con Inteligencia Artificial para reconocimiento facial, lectura de placas (LPR) y analíticas.",
+        "highlight": "Inteligencia Artificial"
+      },
+      {
+        "category": "building",
+        "categoryLabel": "Tecnología Edilicia & CCTV",
+        "title": "Segware & Scati Suite",
+        "issuer": "Sistemas de Seguridad Física",
+        "desc": "Integración completa de centros de monitoreo de alarmas y video corporativo 24/7 con alta confiabilidad.",
+        "highlight": "Monitoreo 24/7"
+      }
+    ],
+    "awardsSectionTitle": "Premios y Reconocimientos Operativos",
+    "awardsSectionDesc": "Resultados concretos avalados por nuestros clientes corporativos y socios tecnológicos a lo largo de más de 3 décadas.",
+    "awards": [
+      {
+        "title": "Excelencia en SLA Corporativo",
+        "category": "Calidad de Servicio",
+        "desc": "Reconocimiento continuo por parte de grandes cadenas comerciales e instituciones financieras con cumplimiento de SLA superior al 99.8%."
+      },
+      {
+        "title": "Top Partner en Ingeniería de Redes",
+        "category": "Ingeniería e Instalación",
+        "desc": "Desempeño técnico sobresaliente en proyectos de infraestructura óptica y cableado estructurado con 100% de aprobación en auditorías."
+      },
+      {
+        "title": "30 Años de Seguridad y Cero Accidentes Graves",
+        "category": "Seguridad Laboral",
+        "desc": "Historial ejemplar con estricta aplicación de todas las NRs en más de 1.000 proyectos de alta complejidad a nivel nacional."
+      }
+    ],
+    "ctaTitle": "¿Necesita un equipo técnico certificado para su proyecto?",
+    "ctaSubtitle": "Hable con nuestros ingenieros y descubra cómo Critel garantiza conformidad técnica, plazos rigurosos y seguridad total para su empresa.",
+    "ctaPrimary": "Hablar con un Ingeniero Especialista",
+    "ctaSecondary": "Conocer Nuestras Soluciones"
+  },
+  "seo": {
+    "siteName": "Critel Tecnologia",
+    "defaultTitle": "Critel Tecnologia | Infraestructura de TI, Seguridad y Conectividad Empresarial",
+    "defaultDescription": "Conectando Negocios. Protegiendo el Futuro. Soluciones corporativas en Infraestructura de TI, Seguridad de la Información, Cableado Estructurado, Activos de Red y Field Services desde 1994.",
+    "keywords": [
+      "Infraestructura de TI",
+      "Seguridad de la Información",
+      "Cableado Estructurado",
+      "Activos de Red",
+      "Soporte de TI Empresarial",
+      "Field Services",
+      "Tecnología Edilicia",
+      "CCTV Corporativo",
+      "Control de Acceso",
+      "Rollout de Tiendas",
+      "TI Brasil"
+    ],
+    "home": {
+      "title": "Critel Tecnologia | Infraestructura de TI y Seguridad Corporativa",
+      "description": "Potenciamos el rendimiento de su negocio con soluciones integradas de TI, ciberseguridad, redes empresariales y cableado estructurado."
+    },
+    "about": {
+      "title": "Quiénes Somos | 30 Años de Excelencia en TI",
+      "description": "Conozca la historia de 30 años de Critel Tecnologia: transformando infraestructura y seguridad en ventajas competitivas para grandes empresas."
+    },
+    "solutions": {
+      "title": "Nuestras Soluciones Corporativas en TI e Seguridad",
+      "description": "Explore nuestras soluciones completas en Seguridad de la Información, Activos de Red, Cableado Estructurado, Tecnología Edilicia, Soporte de TI y Field Services."
+    },
+    "clients": {
+      "title": "Clientes y Casos de Éxito",
+      "description": "Empresas líderes como Bradesco, Grupo IMC (Pizza Hut y KFC), Bacio di Latte, Ofner y Sonda confían en la ingeniería y soporte de Critel Tecnologia."
+    },
+    "contact": {
+      "title": "Hable con un Especialista | Contacto y Cotizaciones",
+      "description": "Póngase en contacto con el equipo técnico y comercial de Critel Tecnologia. Solicite una propuesta técnica o diagnóstico de infraestructura."
+    },
+    "privacy": {
+      "title": "Política de Privacidad y Protección de Datos (LGPD)",
+      "description": "Sepa cómo Critel Tecnologia procesa y protege los datos personales en cumplimiento con las regulaciones de privacidad."
+    },
+    "terms": {
+      "title": "Términos de Uso del Sitio Web",
+      "description": "Directrices, responsabilidades y condiciones generales de uso del portal de Critel Tecnologia."
+    },
+    "certifications": {
+      "title": "Certificaciones, Normas y Premios | Critel Tecnologia",
+      "description": "Conozca las certificaciones técnicas (Furukawa, Cisco, Fortinet, Fluke, PMP), conformidad con NRs (NR-10, NR-35, NR-18) y premios de Critel Tecnologia."
+    }
   }
 }

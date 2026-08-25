@@ -1,16 +1,63 @@
+import type { Metadata } from 'next';
 import styles from './Contact.module.css';
 import ScrollReveal from '@/components/ScrollReveal/ScrollReveal';
 import ContactForm from '@/components/ContactForm/ContactForm';
+import JsonLd, { getBreadcrumbSchema } from '@/components/JsonLd/JsonLd';
 import { getDictionary } from '@/dictionaries';
-import { MapPin, Phone, Mail, Clock, MessageSquare, Sparkles } from 'lucide-react';
+import { MapPin, Phone, Mail, MessageSquare, Sparkles } from 'lucide-react';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const resolvedParams = await params;
+  const dict = await getDictionary(resolvedParams.lang as any);
+  const contactSeo = dict.seo?.contact;
+
+  const title = contactSeo?.title ?? 'Fale com um Especialista | Contato e Orçamentos';
+  const description =
+    contactSeo?.description ??
+    'Entre em contato com a equipe técnica e comercial da Critel Tecnologia. Solicite uma proposta técnica ou diagnóstico de infraestrutura.';
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: `/${resolvedParams.lang}/contato`,
+      languages: {
+        'pt-BR': '/pt/contato',
+        'en-US': '/en/contato',
+        'es-ES': '/es/contato',
+        'x-default': '/pt/contato',
+      },
+    },
+    openGraph: {
+      title,
+      description,
+      url: `https://criteltecnologia.com.br/${resolvedParams.lang}/contato`,
+    },
+    twitter: {
+      title,
+      description,
+    },
+  };
+}
 
 export default async function ContactPage({ params }: { params: Promise<{ lang: string }> }) {
   const resolvedParams = await params;
   const dict = await getDictionary(resolvedParams.lang as any);
   const footerDict = dict.footer;
 
+  const breadcrumbs = [
+    { name: dict.nav?.home ?? 'Home', url: `/${resolvedParams.lang}` },
+    { name: dict.nav?.contact ?? 'Contato', url: `/${resolvedParams.lang}/contato` },
+  ];
+
   return (
     <div className={styles.page}>
+      <JsonLd data={getBreadcrumbSchema(breadcrumbs)} />
+
       <section className={styles.hero}>
         <div className={`container ${styles.heroContainer}`}>
           <ScrollReveal animation="fadeInUp">

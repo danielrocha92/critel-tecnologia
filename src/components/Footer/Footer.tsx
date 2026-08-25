@@ -118,6 +118,11 @@ export default function Footer({ dict, lang }: { dict: any, lang: string }) {
               </Link>
             </li>
             <li>
+              <Link href={`/${lang}/sobre/certificacoes-e-premios`}>
+                {dict.institutional.certifications || 'Certificações e Prêmios'}
+              </Link>
+            </li>
+            <li>
               <Link href={`/${lang}/clientes`}>
                 {dict.institutional.clients}
               </Link>
