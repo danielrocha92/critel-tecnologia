@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import styles from './SolutionsIndex.module.css';
 import ScrollReveal from '@/components/ScrollReveal/ScrollReveal';
 import JsonLd, { getBreadcrumbSchema } from '@/components/JsonLd/JsonLd';
@@ -13,6 +14,10 @@ import {
   Sparkles,
   ArrowRight,
   CheckCircle2,
+  Wifi,
+  Briefcase,
+  Car,
+  Cctv,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -104,6 +109,26 @@ export default async function SolutionsIndexPage({
       icon: Truck,
       data: solutionsData['field-services'],
     },
+    {
+      slug: 'wifi-social',
+      icon: Wifi,
+      data: solutionsData['wifi-social'],
+    },
+    {
+      slug: 'outsourcing',
+      icon: Briefcase,
+      data: solutionsData['outsourcing'],
+    },
+    {
+      slug: 'automacao-estacionamento',
+      icon: Car,
+      data: solutionsData['automacao-estacionamento'],
+    },
+    {
+      slug: 'seguranca-eletronica',
+      icon: Cctv,
+      data: solutionsData['seguranca-eletronica'],
+    },
   ];
 
   const breadcrumbs = [
@@ -117,7 +142,16 @@ export default async function SolutionsIndexPage({
 
       {/* Hero */}
       <section className={styles.hero}>
-        <div className="container">
+        <Image 
+          src="/images/banners/solutions_hero.webp"
+          alt={content.title}
+          fill
+          priority
+          quality={80}
+          className={styles.heroImage}
+        />
+        <div className={styles.heroOverlay} />
+        <div className={`container ${styles.heroContainer}`}>
           <ScrollReveal animation="fadeInUp">
             <div className={styles.badge}>
               <Sparkles size={14} />

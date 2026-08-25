@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import styles from './Certifications.module.css';
 import ScrollReveal from '@/components/ScrollReveal/ScrollReveal';
 import JsonLd, { getBreadcrumbSchema } from '@/components/JsonLd/JsonLd';
@@ -69,6 +70,15 @@ export default async function CertificationsPage({
 
       {/* Hero Section */}
       <section className={styles.hero}>
+        <Image 
+          src="/images/banners/certs_hero.webp"
+          alt={certPage.title}
+          fill
+          priority
+          quality={80}
+          className={styles.heroImage}
+        />
+        <div className={styles.heroOverlay} />
         <div className={`container ${styles.heroContainer}`}>
           <ScrollReveal animation="fadeInUp">
             <div className={styles.badge}>

@@ -4,13 +4,29 @@
 }
 
 .hero {
+  position: relative;
   background: var(--bg-tertiary);
-  padding: 5rem 0 4rem;
+  padding: 8rem 0 6rem;
   border-bottom: 1px solid var(--border-color);
   text-align: center;
+  overflow: hidden;
+}
+
+.heroImage {
+  object-fit: cover;
+  z-index: 0;
+}
+
+.heroOverlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  z-index: 1;
 }
 
 .heroContainer {
+  position: relative;
+  z-index: 2;
   max-width: 850px;
 }
 
@@ -37,10 +53,18 @@
   line-height: 1.2;
 }
 
+.hero .title {
+  color: #fff;
+}
+
 .subtitle {
   color: var(--text-secondary);
   font-size: clamp(1rem, 2.5vw, 1.2rem);
   line-height: 1.6;
+}
+
+.hero .subtitle {
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .historySection {

@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import styles from './About.module.css';
 import ScrollReveal from '@/components/ScrollReveal/ScrollReveal';
 import JsonLd, { getBreadcrumbSchema } from '@/components/JsonLd/JsonLd';
 import { getDictionary } from '@/dictionaries';
-import { ShieldCheck, Target, Eye, Sparkles } from 'lucide-react';
+import { ShieldCheck, Target, Eye, Sparkles, Building2 } from 'lucide-react';
 import Link from 'next/link';
 
 export async function generateMetadata({
@@ -60,10 +61,19 @@ export default async function AboutPage({ params }: { params: Promise<{ lang: st
 
       {/* Hero */}
       <section className={styles.hero}>
+        <Image 
+          src="/images/banners/about_hero.webp"
+          alt={about.title}
+          fill
+          priority
+          quality={80}
+          className={styles.heroImage}
+        />
+        <div className={styles.heroOverlay} />
         <div className={`container ${styles.heroContainer}`}>
           <ScrollReveal animation="fadeInUp">
             <div className={styles.badge}>
-              <Sparkles size={14} />
+              <Building2 size={14} />
               <span>{about.badge}</span>
             </div>
             <h1 className={styles.title}>{about.title}</h1>

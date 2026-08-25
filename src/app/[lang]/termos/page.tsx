@@ -47,6 +47,8 @@ export async function generateMetadata({
   };
 }
 
+import Image from 'next/image';
+
 export default async function TermsPage({ params }: { params: Promise<{ lang: string }> }) {
   const resolvedParams = await params;
   const dict = await getDictionary(resolvedParams.lang as any);
@@ -62,6 +64,15 @@ export default async function TermsPage({ params }: { params: Promise<{ lang: st
       <JsonLd data={getBreadcrumbSchema(breadcrumbs)} />
 
       <section className={styles.hero}>
+        <Image 
+          src="/images/banners/terms_hero.webp"
+          alt={terms.title}
+          fill
+          priority
+          quality={80}
+          className={styles.heroImage}
+        />
+        <div className={styles.heroOverlay} />
         <div className={`container ${styles.heroContainer}`}>
           <ScrollReveal animation="fadeInUp">
             <div className={styles.badge}>

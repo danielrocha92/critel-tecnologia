@@ -103,6 +103,10 @@ export default function Header({ dict, lang }: { dict: any, lang: string }) {
                 <li><Link href={`/${lang}/solucoes/seguranca-da-informacao`} onClick={closeMobileMenu}>{dict.sol_security}</Link></li>
                 <li><Link href={`/${lang}/solucoes/tecnologia-predial`} onClick={closeMobileMenu}>{dict.sol_building}</Link></li>
                 <li><Link href={`/${lang}/solucoes/field-services`} onClick={closeMobileMenu}>Field Services &amp; Lojas</Link></li>
+                <li><Link href={`/${lang}/solucoes/wifi-social`} onClick={closeMobileMenu}>Wi-Fi Social</Link></li>
+                <li><Link href={`/${lang}/solucoes/outsourcing`} onClick={closeMobileMenu}>Outsourcing de TI</Link></li>
+                <li><Link href={`/${lang}/solucoes/automacao-estacionamento`} onClick={closeMobileMenu}>Automação de Estacionamento</Link></li>
+                <li><Link href={`/${lang}/solucoes/seguranca-eletronica`} onClick={closeMobileMenu}>Segurança Eletrônica (CFTV)</Link></li>
               </ul>
             </li>
             <li>

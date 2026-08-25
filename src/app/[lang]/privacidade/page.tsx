@@ -47,6 +47,8 @@ export async function generateMetadata({
   };
 }
 
+import Image from 'next/image';
+
 export default async function PrivacyPage({ params }: { params: Promise<{ lang: string }> }) {
   const resolvedParams = await params;
   const dict = await getDictionary(resolvedParams.lang as any);
@@ -62,6 +64,15 @@ export default async function PrivacyPage({ params }: { params: Promise<{ lang: 
       <JsonLd data={getBreadcrumbSchema(breadcrumbs)} />
 
       <section className={styles.hero}>
+        <Image 
+          src="/images/banners/privacy_hero.webp"
+          alt={legal.title}
+          fill
+          priority
+          quality={80}
+          className={styles.heroImage}
+        />
+        <div className={styles.heroOverlay} />
         <div className={`container ${styles.heroContainer}`}>
           <ScrollReveal animation="fadeInUp">
             <div className={styles.badge}>
@@ -77,17 +88,12 @@ export default async function PrivacyPage({ params }: { params: Promise<{ lang: 
       <section className={styles.contentSection}>
         <div className={`container ${styles.legalContainer}`}>
           <div className={styles.legalBox}>
-            <h2>{legal.section1Title}</h2>
-            <p>{legal.section1Text}</p>
-
-            <h2>{legal.section2Title}</h2>
-            <p>{legal.section2Text}</p>
-
-            <h2>{legal.section3Title}</h2>
-            <p>{legal.section3Text}</p>
-
-            <h2>{legal.section4Title}</h2>
-            <p>{legal.section4Text}</p>
+            {legal.sections?.map((section: any, index: number) => (
+              <div key={index} style={{ marginBottom: '2rem' }}>
+                <h2>{section.title}</h2>
+                <p>{section.text}</p>
+              </div>
+            ))}
 
             <div className={styles.dpoBox}>
               <h3>Canal de Privacidade e DPO</h3>

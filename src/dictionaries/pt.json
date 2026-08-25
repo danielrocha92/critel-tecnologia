@@ -199,6 +199,30 @@
       "description": "Capilaridade técnica e atendimento presencial especializado para expansão de lojas, filiais e plantas corporativas.",
       "detailedText": "Para empresas e grandes redes com múltiplas filiais, franquias ou plantas industriais, nosso time de Field Services entrega rapidez e padronização impecável. Realizamos desde a montagem completa de novas lojas (rollout) — incluindo infraestrutura de PDV, cabeamento, rede Wi-Fi e câmeras CFTV — até o suporte técnico presencial para manutenção e troca rápida de equipamentos em campo. Somos o braço técnico de confiança de grandes grupos como Grupo IMC (Pizza Hut e KFC), Bacio di Latte e Sonda.",
       "features": ["Rollout e Montagem Completa de Novas Lojas e Filiais", "Instalação e Suporte a Infraestrutura de PDVs", "Manutenção e Troca Rápida de Ativos em Campo", "Padronização de Infraestrutura para Franquias e Redes", "Cobertura Técnica com Atendimento Rápido"]
+    },
+    "wifi-social": {
+      "title": "Wi-Fi Social",
+      "description": "O Wi-Fi Social pode ser usado por estabelecimentos comerciais, como restaurantes, clínicas, hotéis, escolas e universidades.",
+      "detailedText": "O Wi-Fi Social transforma a conexão de internet do seu estabelecimento em uma poderosa ferramenta de marketing e relacionamento. Ao fornecer acesso gratuito aos seus clientes, você coleta dados valiosos de forma automatizada e em conformidade com a LGPD, permitindo campanhas direcionadas e engajamento real com seu público-alvo.",
+      "features": ["Login via Redes Sociais ou Formulário", "Captura de Leads e Dados Demográficos", "Dashboard de Analytics em Tempo Real", "Adequação total à LGPD e Marco Civil", "Gestão de Banda e Segurança de Rede"]
+    },
+    "outsourcing": {
+      "title": "Outsourcing de TI",
+      "description": "Adotar o Outsourcing de TI permite que sua empresa tenha especialistas cuidando de toda a operação e garantindo alta disponibilidade.",
+      "detailedText": "Diante de cenários cada vez mais complexos, adotar o Outsourcing de TI permite que sua empresa terceirize parcial ou totalmente a gestão tecnológica. Disponibilizamos especialistas alocados (residentes) ou remotos cuidando de toda a operação, garantindo segurança contínua, alta disponibilidade, além da inovação e modernização da sua infraestrutura. Reduza custos trabalhistas e foque 100% no core business da sua empresa.",
+      "features": ["Alocação de Profissionais Residentes N1/N2/N3", "Gestão de Ativos (Hardware e Software)", "Redução de Custos Operacionais (OPEX)", "Suporte Técnico Especializado Contínuo", "Garantia de Qualidade e SLA Contratual"]
+    },
+    "automacao-estacionamento": {
+      "title": "Automação de Estacionamento",
+      "description": "Facilita o contato com fornecedores e padroniza serviços, gerando maior qualidade e segurança no controle de veículos.",
+      "detailedText": "Por meio da Automação de Estacionamento, entregamos soluções completas para a gestão de pátios e garagens. Desde cancelas inteligentes com leitura de placas (LPR) até sistemas de cobrança automatizada. Isso facilita o controle de fornecedores de serviços e equipamentos conforme a necessidade de seu negócio, padronizando acessos e gerando a maior qualidade e segurança nas operações do dia a dia.",
+      "features": ["Cancelas Automáticas e Totens Expedidores", "Câmeras com Leitura de Placas (LPR/OCR)", "Sistemas Integrados de Pagamento e Gestão", "Controle de Acesso de Mensalistas e Visitantes", "Sensores de Vagas e Sinalização Inteligente"]
+    },
+    "seguranca-eletronica": {
+      "title": "Segurança Eletrônica - CFTV/Controle de Acesso",
+      "description": "Monitoramento eficaz do interior e exterior de empresas, condomínios empresariais, residenciais e galpões de armazenagem.",
+      "detailedText": "A Segurança Eletrônica é fundamental para proteger o patrimônio físico e humano do seu negócio. Projetamos e implementamos sistemas avançados de CFTV com inteligência artificial, capazes de identificar intrusões, contar pessoas e gerar alertas em tempo real. Além disso, nossos sistemas de Controle de Acesso (biometria, facial, RFID) garantem que apenas pessoas autorizadas circulem em áreas restritas, promovendo tranquilidade total.",
+      "features": ["Câmeras IP de Alta Definição (CFTV)", "Análise de Vídeo e Inteligência Artificial", "Controle de Acesso Biométrico e Facial", "Catracas, Torniquetes e Fechaduras Eletroímãs", "Integração com Centrais de Monitoramento"]
     }
   },
   "aboutPage": {
@@ -231,15 +255,37 @@
   "privacyPage": {
     "badge": "Conformidade LGPD",
     "title": "Política de Privacidade e Proteção de Dados",
-    "subtitle": "Na Critel Tecnologia, levamos a segurança e a privacidade das informações com o mais alto rigor técnico e ético.",
-    "section1Title": "1. Compromisso com a Privacidade",
-    "section1Text": "A Critel Tecnologia compromete-se com a proteção dos dados pessoais de seus clientes, parceiros e visitantes do site, em estrita conformidade com a Lei Geral de Proteção de Dados Pessoais (LGPD - Lei nº 13.709/2018).",
-    "section2Title": "2. Coleta e Uso de Dados",
-    "section2Text": "Coletamos apenas as informações necessárias fornecidas voluntariamente por você através de nossos formulários de contato (como nome, e-mail corporativo, empresa e telefone) exclusivamente para fins de atendimento comercial, suporte e elaboração de propostas técnicas.",
-    "section3Title": "3. Segurança das Informações",
-    "section3Text": "Adotamos práticas avançadas de segurança da informação, criptografia, firewalls e controle de acesso restrito para proteger seus dados contra acessos não autorizados, perdas ou vazamentos.",
-    "section4Title": "4. Seus Direitos",
-    "section4Text": "Você tem o direito de solicitar a confirmação da existência de tratamento, o acesso, a correção ou a exclusão dos seus dados pessoais a qualquer momento através do e-mail comercial@criteltecnologia.com.br."
+    "subtitle": "Na Critel Tecnologia, levamos a segurança e a privacidade das informações corporativas com o mais alto rigor técnico e ético.",
+    "sections": [
+      {
+        "title": "1. Introdução e Compromisso com a Privacidade",
+        "text": "A Critel Tecnologia (\"nós\", \"nosso\") valoriza e respeita a privacidade de seus clientes, parceiros e usuários. Esta Política de Privacidade descreve de forma clara e transparente como coletamos, utilizamos, armazenamos e protegemos seus Dados Pessoais, em estrita conformidade com a Lei Geral de Proteção de Dados Pessoais (LGPD - Lei nº 13.709/2018)."
+      },
+      {
+        "title": "2. Dados Pessoais que Coletamos",
+        "text": "Coletamos os dados estritamente necessários para a execução de nossas atividades comerciais e prestação de serviços. Isso inclui dados fornecidos voluntariamente por você ao preencher nossos formulários de contato ou solicitar propostas (como Nome Completo, E-mail Corporativo, Empresa, Cargo e Telefone), além de dados de navegação anonimizados essenciais para o funcionamento seguro do nosso portal."
+      },
+      {
+        "title": "3. Finalidade do Tratamento dos Dados",
+        "text": "Os dados coletados têm propósitos específicos, legítimos e explícitos. Utilizamos suas informações para: (a) responder às suas solicitações comerciais e de suporte; (b) elaborar propostas técnicas e orçamentárias personalizadas; (c) cumprir obrigações legais ou regulatórias; e (d) enviar comunicações institucionais de seu interesse, sempre oferecendo a opção de descadastramento (opt-out)."
+      },
+      {
+        "title": "4. Compartilhamento de Dados",
+        "text": "A Critel Tecnologia não comercializa seus Dados Pessoais. O compartilhamento ocorre apenas com fornecedores de infraestrutura em nuvem e sistemas de gestão estritamente necessários para a nossa operação, os quais também estão sujeitos a rigorosos contratos de confidencialidade e adequação à LGPD. Também podemos compartilhar dados mediante exigência legal ou ordem judicial."
+      },
+      {
+        "title": "5. Segurança e Proteção da Informação",
+        "text": "Sendo uma empresa especializada em Segurança da Informação, aplicamos os mais altos padrões e frameworks de segurança corporativa (como ISO 27001). Empregamos criptografia, firewalls de próxima geração, proteção contra invasões (IPS/IDS) e controle de acesso restrito (Zero Trust) para garantir a integridade, confidencialidade e disponibilidade dos seus dados."
+      },
+      {
+        "title": "6. Retenção dos Dados",
+        "text": "Armazenamos seus Dados Pessoais apenas pelo tempo necessário para cumprir as finalidades para as quais foram coletados, respeitando os prazos de guarda estabelecidos por obrigações legais ou regulatórias, ou até que você solicite a exclusão definitiva, quando aplicável."
+      },
+      {
+        "title": "7. Seus Direitos como Titular",
+        "text": "Em conformidade com o Art. 18 da LGPD, você possui o direito de solicitar a qualquer momento: a confirmação da existência de tratamento, o acesso aos dados, a correção de dados incompletos ou desatualizados, a anonimização ou exclusão de dados desnecessários, e a revogação do consentimento."
+      }
+    ]
   },
   "termsPage": {
     "badge": "Termos de Uso",

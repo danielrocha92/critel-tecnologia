@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import styles from './Solution.module.css';
 import ScrollReveal from '@/components/ScrollReveal/ScrollReveal';
@@ -104,7 +105,16 @@ export default async function SolutionPage({
 
       {/* Hero da Solução */}
       <section className={styles.hero}>
-        <div className="container">
+        <Image 
+          src="/images/banners/solutions_hero.webp"
+          alt={solution.title}
+          fill
+          priority
+          quality={80}
+          className={styles.heroImage}
+        />
+        <div className={styles.heroOverlay} />
+        <div className={`container ${styles.heroContainer}`}>
           <ScrollReveal animation="fadeInUp">
             <div className={styles.badge}>
               <Sparkles size={14} />

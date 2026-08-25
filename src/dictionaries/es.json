@@ -195,10 +195,34 @@
       "features": ["Service Desk Especializado N1, N2 y N3", "Monitoreo Proactivo de Servidores y Redes (NOC)", "Mantenimiento Preventivo y Correctivo", "Gestión de Backups Corporativos y Disaster Recovery", "Atención Presencial y Remota con SLA Garantizado"]
     },
     "field-services": {
-      "title": "Field Services & Despliegue de Sedes",
-      "description": "Capilaridad técnica y atención presencial especializada para expansión de tiendas, sucursales y plantas corporativas.",
-      "detailedText": "Para empresas y grandes cadenas con múltiples sucursales, franquicias o plantas industriales, nuestro equipo de Field Services ofrece rapidez y estandarización impecable. Realizamos desde la apertura completa de nuevas tiendas (rollout) — incluyendo infraestructura de punto de venta (POS), cableado, Wi-Fi y cámaras CCTV — hasta el soporte presencial para mantenimiento y recambio rápido de equipos en campo. Somos el socio técnico de confianza de marcas líderes como Grupo IMC (Pizza Hut y KFC), Bacio di Latte y Sonda.",
-      "features": ["Rollout y Montaje Integral de Nuevas Tiendas y Sucursales", "Instalación y Soporte de Infraestructura de POS", "Mantenimiento y Recambio Rápido de Activos en Campo", "Estandarización de Infraestructura para Franquicias", "Cobertura Técnica Nacional y Respuesta Rápida"]
+      "title": "Field Services & Montaje de Unidades",
+      "description": "Capilaridad técnica y soporte presencial especializado para la expansión de tiendas, sucursales y plantas corporativas.",
+      "detailedText": "Para empresas y grandes redes con múltiples sucursales, franquicias o plantas industriales, nuestro equipo de Field Services ofrece rapidez y una estandarización impecable. Realizamos desde el montaje completo de nuevas tiendas (rollout)—incluyendo infraestructura de TPV, cableado, redes Wi-Fi y cámaras CCTV—hasta el soporte técnico presencial para el mantenimiento y el reemplazo rápido de equipos en campo. Somos el brazo técnico de confianza de grandes grupos como Grupo IMC (Pizza Hut y KFC), Bacio di Latte y Sonda.",
+      "features": ["Rollout y Montaje Completo de Nuevas Tiendas y Sucursales", "Instalación y Soporte para Infraestructura de TPV", "Mantenimiento y Reemplazo Rápido de Activos en Campo", "Estandarización de Infraestructura para Franquicias y Redes", "Cobertura Técnica con Respuesta Rápida"]
+    },
+    "wifi-social": {
+      "title": "Wi-Fi Social",
+      "description": "El Wi-Fi Social puede ser utilizado por establecimientos comerciales, como restaurantes, clínicas, hoteles, escuelas y universidades.",
+      "detailedText": "El Wi-Fi Social transforma la conexión a internet de su establecimiento en una poderosa herramienta de marketing y relaciones. Al proporcionar acceso gratuito a sus clientes, recopila datos valiosos de forma automatizada y en cumplimiento con la LGPD, permitiendo campañas dirigidas y un compromiso real con su público objetivo.",
+      "features": ["Inicio de Sesión a través de Redes Sociales o Formulario", "Captura de Leads y Datos Demográficos", "Panel de Análisis en Tiempo Real", "Cumplimiento Total con la LGPD", "Gestión de Ancho de Banda y Seguridad de Red"]
+    },
+    "outsourcing": {
+      "title": "Outsourcing de TI",
+      "description": "Adoptar el Outsourcing de TI permite que su empresa tenga especialistas cuidando de toda la operación y garantizando alta disponibilidad.",
+      "detailedText": "Ante escenarios cada vez más complejos, adoptar el Outsourcing de TI permite que su empresa tercerice parcial o totalmente la gestión tecnológica. Proporcionamos especialistas asignados (residentes) o remotos que se encargan de toda la operación, garantizando seguridad continua, alta disponibilidad, además de la innovación y modernización de su infraestructura. Reduzca costos laborales y concéntrese al 100% en el negocio principal de su empresa.",
+      "features": ["Asignación de Profesionales Residentes N1/N2/N3", "Gestión de Activos (Hardware y Software)", "Reducción de Costos Operativos (OPEX)", "Soporte Técnico Especializado Continuo", "Garantía de Calidad y SLA Contractual"]
+    },
+    "automacao-estacionamento": {
+      "title": "Automatización de Estacionamientos",
+      "description": "Facilita el contacto con proveedores y estandariza servicios, generando mayor calidad y seguridad en el control de vehículos.",
+      "detailedText": "A través de la Automatización de Estacionamientos, ofrecemos soluciones completas para la gestión de patios y garajes. Desde barreras inteligentes con lectura de matrículas (LPR) hasta sistemas de cobro automatizado. Esto facilita el control de proveedores de servicios y equipos según las necesidades de su negocio, estandarizando los accesos y generando la mayor calidad y seguridad en las operaciones diarias.",
+      "features": ["Barreras Automáticas y Tótems Distribuidores", "Cámaras con Lectura de Matrículas (LPR/OCR)", "Sistemas Integrados de Pago y Gestión", "Control de Acceso de Suscriptores y Visitantes", "Sensores de Espacio y Señalización Inteligente"]
+    },
+    "seguranca-eletronica": {
+      "title": "Seguridad Electrónica - CCTV/Control de Acceso",
+      "description": "Monitoreo efectivo del interior y exterior de empresas, condominios corporativos, áreas residenciales y almacenes.",
+      "detailedText": "La Seguridad Electrónica es fundamental para proteger los activos físicos y humanos de su negocio. Diseñamos e implementamos sistemas avanzados de CCTV con inteligencia artificial, capaces de identificar intrusiones, contar personas y generar alertas en tiempo real. Además, nuestros sistemas de Control de Acceso (biometría, reconocimiento facial, RFID) garantizan que solo el personal autorizado circule en áreas restringidas, promoviendo total tranquilidad.",
+      "features": ["Cámaras IP de Alta Definición (CCTV)", "Análisis de Video e Inteligencia Artificial", "Control de Acceso Biométrico y Facial", "Torniquetes y Cerraduras Electromagnéticas", "Integración con Centros de Monitoreo"]
     }
   },
   "aboutPage": {
@@ -229,17 +253,39 @@
     "ctaBtn": "Solicitar Propuesta Comercial"
   },
   "privacyPage": {
-    "badge": "Privacidad y Cumplimiento",
+    "badge": "Privacidad de Datos y Cumplimiento",
     "title": "Política de Privacidad y Protección de Datos",
-    "subtitle": "En Critel Tecnologia, la seguridad y la privacidad de la información se tratan con el más alto rigor técnico y ético.",
-    "section1Title": "1. Compromiso con la Privacidad",
-    "section1Text": "Critel Tecnologia se compromete a proteger los datos personales de sus clientes, socios y visitantes del sitio, en estricta conformidad con las leyes de protección de datos.",
-    "section2Title": "2. Recopilación y Uso de Datos",
-    "section2Text": "Solo recopilamos la información necesaria proporcionada voluntariamente por usted a través de nuestros formularios de contacto para fines de atención comercial y elaboración de propuestas.",
-    "section3Title": "3. Seguridad de la Información",
-    "section3Text": "Adoptamos prácticas avanzadas de seguridad de la información, cifrado, firewalls y controles de acceso restringido para proteger sus datos contra accesos no autorizados o fugas.",
-    "section4Title": "4. Sus Derechos",
-    "section4Text": "Puede solicitar la confirmación, acceso, rectificación o eliminación de sus datos personales en cualquier momento a través de comercial@criteltecnologia.com.br."
+    "subtitle": "En Critel Tecnologia, la seguridad de la información y la privacidad de los datos corporativos se tratan con los más altos estándares técnicos y éticos.",
+    "sections": [
+      {
+        "title": "1. Introducción y Compromiso con la Privacidad",
+        "text": "Critel Tecnologia (\"nosotros\", \"nuestro\") valora y respeta la privacidad de sus clientes, socios y usuarios. Esta Política de Privacidad describe de forma clara y transparente cómo recopilamos, utilizamos, almacenamos y protegemos sus Datos Personales, en estricto cumplimiento de la Ley General de Protección de Datos Personales (LGPD - Ley nº 13.709/2018) y los estándares internacionales de privacidad."
+      },
+      {
+        "title": "2. Datos Personales que Recopilamos",
+        "text": "Recopilamos los datos estrictamente necesarios para la ejecución de nuestras actividades comerciales y prestación de servicios. Esto incluye datos proporcionados voluntariamente por usted al completar nuestros formularios de contacto o solicitar propuestas (como Nombre Completo, Correo Corporativo, Empresa, Cargo y Teléfono), además de datos de navegación anonimizados esenciales para el funcionamiento seguro de nuestro portal."
+      },
+      {
+        "title": "3. Finalidad del Tratamiento de los Datos",
+        "text": "Los datos recopilados tienen propósitos específicos, legítimos y explícitos. Utilizamos su información para: (a) responder a sus solicitudes comerciales y de soporte; (b) elaborar propuestas técnicas y presupuestarias personalizadas; (c) cumplir con obligaciones legales o regulatorias; y (d) enviar comunicaciones institucionales de su interés, siempre ofreciendo la opción de exclusión voluntaria (opt-out)."
+      },
+      {
+        "title": "4. Intercambio de Datos",
+        "text": "Critel Tecnologia no comercializa sus Datos Personales. El intercambio ocurre solo con proveedores de infraestructura en la nube y sistemas de gestión estrictamente necesarios para nuestra operación, los cuales también están sujetos a rigurosos acuerdos de confidencialidad y adecuación a la LGPD. También podemos compartir datos mediante exigencia legal o orden judicial."
+      },
+      {
+        "title": "5. Seguridad y Protección de la Información",
+        "text": "Como empresa especializada en Seguridad de la Información, aplicamos los más altos estándares y marcos de seguridad corporativa (como ISO 27001). Empleamos encriptación, firewalls de próxima generación, protección contra intrusiones (IPS/IDS) y control de acceso restringido (Zero Trust) para garantizar la integridad, confidencialidad y disponibilidad de sus datos."
+      },
+      {
+        "title": "6. Retención de Datos",
+        "text": "Almacenamos sus Datos Personales solo por el tiempo necesario para cumplir con las finalidades para las que fueron recopilados, respetando los plazos de retención establecidos por obligaciones legales o regulatorias brasileñas, o hasta que usted solicite la eliminación definitiva, cuando corresponda."
+      },
+      {
+        "title": "7. Sus Derechos como Titular",
+        "text": "De acuerdo con el Art. 18 de la LGPD, usted tiene el derecho de solicitar en cualquier momento: la confirmación de la existencia del tratamiento, el acceso a los datos, la corrección de datos incompletos o desactualizados, la anonimización o eliminación de datos innecesarios, y la revocación del consentimiento."
+      }
+    ]
   },
   "termsPage": {
     "badge": "Términos de Uso",

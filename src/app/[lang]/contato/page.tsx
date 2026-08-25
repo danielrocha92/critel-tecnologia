@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import styles from './Contact.module.css';
 import ScrollReveal from '@/components/ScrollReveal/ScrollReveal';
 import ContactForm from '@/components/ContactForm/ContactForm';
@@ -59,6 +60,15 @@ export default async function ContactPage({ params }: { params: Promise<{ lang: 
       <JsonLd data={getBreadcrumbSchema(breadcrumbs)} />
 
       <section className={styles.hero}>
+        <Image 
+          src="/images/banners/contact_hero.webp"
+          alt="Fale com Nossos Especialistas"
+          fill
+          priority
+          quality={80}
+          className={styles.heroImage}
+        />
+        <div className={styles.heroOverlay} />
         <div className={`container ${styles.heroContainer}`}>
           <ScrollReveal animation="fadeInUp">
             <div className={styles.badge}>
