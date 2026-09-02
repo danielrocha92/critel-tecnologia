@@ -65,7 +65,7 @@ export default async function TermsPage({ params }: { params: Promise<{ lang: st
 
       <section className={styles.hero}>
         <Image 
-          src="/images/banners/terms_hero.webp"
+          src="/images/banners/terms_hero.jpg"
           alt={terms.title}
           fill
           priority

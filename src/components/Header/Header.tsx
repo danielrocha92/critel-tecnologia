@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import styles from './Header.module.css';
 import Link from 'next/link';
-import { Globe, Menu, X, ChevronDown } from 'lucide-react';
+import { Globe, Menu, X, ChevronDown, Laptop, Network, Router, ShieldCheck, Building, Store, Wifi, Users, CarFront, Cctv } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import ThemeToggle from '../ThemeToggle/ThemeToggle';
 
@@ -97,16 +97,16 @@ export default function Header({ dict, lang }: { dict: any, lang: string }) {
               </div>
               <ul className={styles.dropdown}>
                 <li><Link href={`/${lang}/solucoes`} onClick={closeMobileMenu} style={{ borderBottom: '1px solid var(--border-color)', marginBottom: '4px', paddingBottom: '8px', color: 'var(--accent-brand-text)', fontWeight: 600 }}>{dict.allSolutions || 'Ver Todas as Soluções'} →</Link></li>
-                <li><Link href={`/${lang}/solucoes/suporte-ti-empresarial`} onClick={closeMobileMenu}>Suporte de TI Empresarial</Link></li>
-                <li><Link href={`/${lang}/solucoes/cabeamento-estruturado`} onClick={closeMobileMenu}>{dict.sol_cabling}</Link></li>
-                <li><Link href={`/${lang}/solucoes/ativos-de-rede`} onClick={closeMobileMenu}>{dict.sol_network}</Link></li>
-                <li><Link href={`/${lang}/solucoes/seguranca-da-informacao`} onClick={closeMobileMenu}>{dict.sol_security}</Link></li>
-                <li><Link href={`/${lang}/solucoes/tecnologia-predial`} onClick={closeMobileMenu}>{dict.sol_building}</Link></li>
-                <li><Link href={`/${lang}/solucoes/field-services`} onClick={closeMobileMenu}>Field Services &amp; Lojas</Link></li>
-                <li><Link href={`/${lang}/solucoes/wifi-social`} onClick={closeMobileMenu}>Wi-Fi Social</Link></li>
-                <li><Link href={`/${lang}/solucoes/outsourcing`} onClick={closeMobileMenu}>Outsourcing de TI</Link></li>
-                <li><Link href={`/${lang}/solucoes/automacao-estacionamento`} onClick={closeMobileMenu}>Automação de Estacionamento</Link></li>
-                <li><Link href={`/${lang}/solucoes/seguranca-eletronica`} onClick={closeMobileMenu}>Segurança Eletrônica (CFTV)</Link></li>
+                <li><Link href={`/${lang}/solucoes/suporte-ti-empresarial`} onClick={closeMobileMenu}><Laptop size={14} className={styles.menuIcon} /> Suporte de TI Empresarial</Link></li>
+                <li><Link href={`/${lang}/solucoes/cabeamento-estruturado`} onClick={closeMobileMenu}><Network size={14} className={styles.menuIcon} /> {dict.sol_cabling}</Link></li>
+                <li><Link href={`/${lang}/solucoes/ativos-de-rede`} onClick={closeMobileMenu}><Router size={14} className={styles.menuIcon} /> {dict.sol_network}</Link></li>
+                <li><Link href={`/${lang}/solucoes/seguranca-da-informacao`} onClick={closeMobileMenu}><ShieldCheck size={14} className={styles.menuIcon} /> {dict.sol_security}</Link></li>
+                <li><Link href={`/${lang}/solucoes/tecnologia-predial`} onClick={closeMobileMenu}><Building size={14} className={styles.menuIcon} /> {dict.sol_building}</Link></li>
+                <li><Link href={`/${lang}/solucoes/field-services`} onClick={closeMobileMenu}><Store size={14} className={styles.menuIcon} /> Field Services &amp; Lojas</Link></li>
+                <li><Link href={`/${lang}/solucoes/wifi-social`} onClick={closeMobileMenu}><Wifi size={14} className={styles.menuIcon} /> Wi-Fi Social</Link></li>
+                <li><Link href={`/${lang}/solucoes/outsourcing`} onClick={closeMobileMenu}><Users size={14} className={styles.menuIcon} /> Outsourcing de TI</Link></li>
+                <li><Link href={`/${lang}/solucoes/automacao-estacionamento`} onClick={closeMobileMenu}><CarFront size={14} className={styles.menuIcon} /> Automação de Estacionamento</Link></li>
+                <li><Link href={`/${lang}/solucoes/seguranca-eletronica`} onClick={closeMobileMenu}><Cctv size={14} className={styles.menuIcon} /> Segurança Eletrônica (CFTV)</Link></li>
               </ul>
             </li>
             <li>

@@ -65,7 +65,7 @@ export default async function PrivacyPage({ params }: { params: Promise<{ lang: 
 
       <section className={styles.hero}>
         <Image 
-          src="/images/banners/privacy_hero.webp"
+          src="/images/banners/privacy_hero.jpg"
           alt={legal.title}
           fill
           priority

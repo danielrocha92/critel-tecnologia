@@ -61,7 +61,7 @@ export default async function ContactPage({ params }: { params: Promise<{ lang: 
 
       <section className={styles.hero}>
         <Image 
-          src="/images/banners/contact_hero.webp"
+          src="/images/banners/contact_hero.jpg"
           alt="Fale com Nossos Especialistas"
           fill
           priority

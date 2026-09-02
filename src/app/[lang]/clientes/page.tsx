@@ -109,7 +109,7 @@ export default async function ClientsPage({ params }: { params: Promise<{ lang: 
 
       <section className={styles.hero}>
         <Image 
-          src="/images/banners/clients_hero.webp"
+          src="/images/banners/clients_hero.jpg"
           alt={clientsData.title}
           fill
           priority

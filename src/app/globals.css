@@ -13,6 +13,7 @@
   --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
   --border-color: rgba(255, 255, 255, 0.08);
+  --hero-overlay-bg: rgba(0, 0, 0, 0.75);
   
   /* Accents */
   --accent-brand: #b71c1c; /* Deep Red */
@@ -45,6 +46,7 @@
   --text-primary: #0f172a; /* Slate 900 */
   --text-secondary: #475569; /* Slate 600 */
   --border-color: rgba(0, 0, 0, 0.08);
+  --hero-overlay-bg: rgba(0, 0, 0, 0.35);
   
   /* Accents on Light Background (WCAG AA Compliant) */
   --accent-brand: #b71c1c;

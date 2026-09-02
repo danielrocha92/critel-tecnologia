@@ -76,12 +76,12 @@ export default async function SolutionPage({
   }
 
   const imageMap: Record<string, string> = {
-    'seguranca-da-informacao': '/images/seguranca.png',
-    'ativos-de-rede': '/images/rede.png',
-    'tecnologia-predial': '/images/predial.png',
-    'cabeamento-estruturado': '/images/cabeamento.png',
-    'suporte-ti-empresarial': '/images/rede.png',
-    'field-services': '/images/cabeamento.png',
+    'seguranca-da-informacao': '/images/seguranca.jpg',
+    'ativos-de-rede': '/images/rede.jpg',
+    'tecnologia-predial': '/images/predial.jpg',
+    'cabeamento-estruturado': '/images/cabeamento.jpg',
+    'suporte-ti-empresarial': '/images/rede.jpg',
+    'field-services': '/images/cabeamento.jpg',
   };
 
   const currentUrl = `/${resolvedParams.lang}/solucoes/${resolvedParams.slug}`;
@@ -106,7 +106,7 @@ export default async function SolutionPage({
       {/* Hero da Solução */}
       <section className={styles.hero}>
         <Image 
-          src="/images/banners/solutions_hero.webp"
+          src="/images/banners/solutions_hero.jpg"
           alt={solution.title}
           fill
           priority
@@ -166,7 +166,7 @@ export default async function SolutionPage({
             <ScrollReveal animation="fadeInRight" className={styles.imageContent}>
               <div className={styles.imageWrapper}>
                 <img
-                  src={imageMap[resolvedParams.slug] || '/images/rede.png'}
+                  src={imageMap[resolvedParams.slug] || '/images/rede.jpg'}
                   alt={solution.title}
                   className={styles.image}
                 />

@@ -62,7 +62,7 @@ export default async function AboutPage({ params }: { params: Promise<{ lang: st
       {/* Hero */}
       <section className={styles.hero}>
         <Image 
-          src="/images/banners/about_hero.webp"
+          src="/images/banners/about_hero.jpg"
           alt={about.title}
           fill
           priority

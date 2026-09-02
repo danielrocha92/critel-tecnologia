@@ -71,7 +71,7 @@ export default async function CertificationsPage({
       {/* Hero Section */}
       <section className={styles.hero}>
         <Image 
-          src="/images/banners/certs_hero.webp"
+          src="/images/banners/certs_hero.jpg"
           alt={certPage.title}
           fill
           priority

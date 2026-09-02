@@ -143,7 +143,7 @@ export default async function SolutionsIndexPage({
       {/* Hero */}
       <section className={styles.hero}>
         <Image 
-          src="/images/banners/solutions_hero.webp"
+          src="/images/banners/solutions_hero.jpg"
           alt={content.title}
           fill
           priority

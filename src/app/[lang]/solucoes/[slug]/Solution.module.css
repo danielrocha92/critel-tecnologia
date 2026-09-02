@@ -20,7 +20,7 @@
 .heroOverlay {
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0, 0, 0, 0.75);
+  background: var(--hero-overlay-bg);
   z-index: 1;
 }
 
@@ -109,6 +109,19 @@
   font-size: 0.95rem;
   transition: all 0.3s ease;
   min-height: 48px;
+}
+
+.hero .secondaryBtn {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.hero .secondaryBtn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #fff;
+  transform: translateY(-2px);
 }
 
 .secondaryBtn:hover {
