@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Montserrat } from "next/font/google";
 import "../globals.css";
-import FloatingActions from "@/components/FloatingActions/FloatingActions";
-import Header from "@/components/Header/Header";
-import Footer from "@/components/Footer/Footer";
 import JsonLd, { getOrganizationSchema } from "@/components/JsonLd/JsonLd";
 import { getDictionary } from "@/dictionaries";
 
@@ -139,12 +136,7 @@ export default async function RootLayout({
         />
       </head>
       <body>
-        <Header lang={resolvedParams.lang} dict={dict.nav} />
-        <main style={{ paddingTop: "80px" }}>
-          {children}
-        </main>
-        <Footer dict={dict.footer} lang={resolvedParams.lang} />
-        <FloatingActions lang={resolvedParams.lang} />
+        {children}
       </body>
     </html>
   );
