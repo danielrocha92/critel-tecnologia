@@ -17,15 +17,25 @@ export async function POST(request: Request) {
     console.log(`[Milvus On-Demand] Checando status do PDV: ${loja}...`);
 
     // Aqui faremos a chamada HTTP real para o Milvus usando a API Key no futuro.
-    // Simulação por enquanto (Mock):
-    const statusRandomico = Math.random() > 0.3 ? 'ONLINE' : 'OFFLINE';
+    // Simulação por enquanto (Mock): Gerar uma quantidade aleatória de PDVs (1 a 4)
+    const qtdPdvs = Math.floor(Math.random() * 4) + 1;
+    const pdvsMockados = [];
+    for (let i = 1; i <= qtdPdvs; i++) {
+      pdvsMockados.push({
+        nome: `Caixa 0${i}`,
+        status: Math.random() > 0.3 ? 'ONLINE' : 'OFFLINE'
+      });
+    }
 
     const supabase = getSupabaseAdmin();
     
-    // Atualiza a tabela com o status real (Mockado) que a API retornou
+    // Atualiza a tabela com o array de PDVs convertido em String (JSON)
     const { error } = await supabase
       .from('status_pdv')
-      .upsert({ loja, status_conexao: statusRandomico }, { onConflict: 'loja' });
+      .upsert({ 
+        loja, 
+        status_conexao: JSON.stringify(pdvsMockados) 
+      }, { onConflict: 'loja' });
 
     if (error) {
       console.error('[Milvus] Erro ao salvar banco:', error);

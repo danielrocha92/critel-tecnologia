@@ -465,13 +465,27 @@ export default function CentralAtendimento() {
                 if (!pdvAtual) {
                   return <span className={styles.cofreDesc}>Buscando disponibilidade da loja no Milvus...</span>;
                 }
+
+                let pdvsList = [];
+                try {
+                  // O novo mock guarda o array de PDVs dentro da string
+                  pdvsList = JSON.parse(pdvAtual.status_conexao);
+                } catch {
+                  // Fallback para os dados antigos antes dessa modificação
+                  pdvsList = [{ nome: 'Caixa Principal', status: pdvAtual.status_conexao }];
+                }
+
                 return (
-                  <div key={pdvAtual.id} className={styles.pdvItem}>
-                    <span className={pdvAtual.status_conexao === 'ONLINE' ? styles.dotGreen : styles.dotRed}></span>
-                    <span className={styles.pdvName}>{pdvAtual.loja}</span>
-                    <span className={styles.pdvStatusText} style={{ color: pdvAtual.status_conexao === 'ONLINE' ? '#10b981' : '#ef4444' }}>
-                      {pdvAtual.status_conexao}
-                    </span>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
+                    {pdvsList.map((p, idx) => (
+                      <div key={idx} className={styles.pdvItem}>
+                        <span className={p.status === 'ONLINE' ? styles.dotGreen : styles.dotRed}></span>
+                        <span className={styles.pdvName}>{p.nome}</span>
+                        <span className={styles.pdvStatusText} style={{ color: p.status === 'ONLINE' ? '#10b981' : '#ef4444' }}>
+                          {p.status}
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 );
               })()
