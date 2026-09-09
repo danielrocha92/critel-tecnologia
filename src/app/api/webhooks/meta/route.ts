@@ -4,10 +4,15 @@ import { createClient } from '@supabase/supabase-js';
 const VERIFY_TOKEN = 'critel_whatsapp_verificacao';
 
 // Cliente Supabase com permissões de Admin (Service Role)
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+const getSupabaseAdmin = () => {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error('Supabase environment variables are missing');
+  }
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  );
+};
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -25,6 +30,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    const supabase = getSupabaseAdmin();
     const body = await request.json();
 
     if (body.object === 'whatsapp_business_account') {
