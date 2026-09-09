@@ -313,6 +313,70 @@
   background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
 }
 
+.crmContainer {
+  margin-top: 1.5rem;
+}
+
+.crmForm {
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.crmInput {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  outline: none;
+  flex: 1;
+}
+
+.crmInput:focus {
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+}
+
+.btnCancel {
+  background: rgba(255, 255, 255, 0.1);
+  color: #e2e8f0;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.btnCancel:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.crmActive {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btnEdit {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 6px;
+  padding: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btnEdit:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
 .chatSubHeader {
   padding: 12px 1.5rem;
   background: rgba(30, 41, 59, 0.7);

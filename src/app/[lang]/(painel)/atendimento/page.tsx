@@ -23,6 +23,12 @@ export default function CentralAtendimento() {
   // Status PDV
   const [pdvs, setPdvs] = useState<any[]>([]);
   
+  // CRM Lojas (Contatos Dinâmicos)
+  const [lojaContato, setLojaContato] = useState<any | null>(null);
+  const [isEditingContact, setIsEditingContact] = useState(false);
+  const [newPhoneValue, setNewPhoneValue] = useState('');
+  const [isLoadingContact, setIsLoadingContact] = useState(false);
+
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // 1. Carregar fila de Tickets (TomTicket Webhooks)
@@ -45,6 +51,34 @@ export default function CentralAtendimento() {
 
     return () => { supabase.removeChannel(subTickets); };
   }, []);
+
+  // 1.5. Carregar Contato Dinâmico da Loja (Micro-CRM)
+  useEffect(() => {
+    if (!ticketAtivo) {
+      setLojaContato(null);
+      setIsEditingContact(false);
+      return;
+    }
+    const fetchContato = async () => {
+      setIsLoadingContact(true);
+      const { data, error } = await supabase
+        .from('lojas_contatos')
+        .select('*')
+        .eq('nome_loja', ticketAtivo.cliente)
+        .single();
+      
+      if (data) {
+        setLojaContato(data);
+        setNewPhoneValue(data.telefone_whatsapp);
+      } else {
+        setLojaContato(null);
+        setNewPhoneValue('');
+      }
+      setIsEditingContact(false);
+      setIsLoadingContact(false);
+    };
+    fetchContato();
+  }, [ticketAtivo]);
 
   // 2. Carregar Conversas do WhatsApp
   useEffect(() => {
@@ -84,6 +118,32 @@ export default function CentralAtendimento() {
 
     return () => { supabase.removeChannel(subMensagens); };
   }, [conversaAtiva?.id]);
+
+  // 4. Salvar/Atualizar Contato da Loja (Micro-CRM)
+  const handleSaveContact = async () => {
+    if (!newPhoneValue) return;
+    setIsLoadingContact(true);
+    
+    // Upsert the contact info
+    const { error } = await supabase
+      .from('lojas_contatos')
+      .upsert({
+        nome_loja: ticketAtivo.cliente,
+        telefone_whatsapp: newPhoneValue.replace(/\D/g, '') // Only numbers
+      }, { onConflict: 'nome_loja' });
+      
+    if (!error) {
+      setLojaContato({
+        nome_loja: ticketAtivo.cliente,
+        telefone_whatsapp: newPhoneValue.replace(/\D/g, '')
+      });
+      setIsEditingContact(false);
+    } else {
+      console.error('Erro ao salvar contato', error);
+      alert('Erro ao salvar o contato. Verifique as permissões.');
+    }
+    setIsLoadingContact(false);
+  };
 
   // 4. Carregar Status de PDV
   useEffect(() => {
@@ -203,17 +263,62 @@ export default function CentralAtendimento() {
             <div className={styles.chatHeader}>
               <h2 className={styles.chatHeaderTitle}>{ticketAtivo.titulo}</h2>
               <p className={styles.chatHeaderDesc}>{ticketAtivo.descricao}</p>
-              
-              <button 
-                className={styles.btnAction}
-                onClick={() => {
-                  // Módulo de Contato Dinâmico (Mock)
-                  const conversa = conversas.find(c => c.telefone === '5511999999999'); 
-                  if (conversa) setConversaAtiva(conversa);
-                }}
-              >
-                <Phone size={18} /> Acionar WhatsApp (Contato da Loja)
-              </button>
+              {/* Módulo CRM Lojas (Contatos Dinâmicos) */}
+              <div className={styles.crmContainer}>
+                {isLoadingContact ? (
+                  <p style={{ fontSize: '0.85rem', color: '#8b9bb4' }}>Buscando contato da loja...</p>
+                ) : (
+                  (!lojaContato || isEditingContact) ? (
+                    <div className={styles.crmForm}>
+                      <span style={{ fontSize: '0.85rem', color: '#e2e8f0', marginBottom: '4px', display: 'block' }}>
+                        {!lojaContato ? 'Loja sem contato cadastrado. Adicione um número (com DDD):' : 'Editar contato da loja:'}
+                      </span>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <input 
+                          type="text" 
+                          value={newPhoneValue}
+                          onChange={(e) => setNewPhoneValue(e.target.value)}
+                          placeholder="Ex: 5511999999999"
+                          className={styles.crmInput}
+                        />
+                        <button className={styles.btnAction} onClick={handleSaveContact} disabled={!newPhoneValue}>
+                          Salvar
+                        </button>
+                        {isEditingContact && lojaContato && (
+                          <button className={styles.btnCancel} onClick={() => { setIsEditingContact(false); setNewPhoneValue(lojaContato.telefone_whatsapp); }}>
+                            Cancelar
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className={styles.crmActive}>
+                      <button 
+                        className={styles.btnAction}
+                        onClick={() => {
+                          const conversa = conversas.find(c => c.telefone === lojaContato.telefone_whatsapp); 
+                          if (conversa) {
+                            setConversaAtiva(conversa);
+                          } else {
+                            // Se não tiver conversa prévia, simulamos a abertura criando uma localmente pro atendente chamar (na v2 isso faria o envio ativo via API da Meta)
+                            setConversaAtiva({
+                              id: 'nova',
+                              telefone: lojaContato.telefone_whatsapp,
+                              nome_perfil: ticketAtivo.cliente
+                            });
+                            setMensagens([]);
+                          }
+                        }}
+                      >
+                        <Phone size={18} /> Acionar WhatsApp (+{lojaContato.telefone_whatsapp})
+                      </button>
+                      <button className={styles.btnEdit} onClick={() => setIsEditingContact(true)} title="Alterar contato">
+                        ✏️
+                      </button>
+                    </div>
+                  )
+                )}
+              </div>
             </div>
 
             {/* Interface WhatsApp */}
