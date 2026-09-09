@@ -9,7 +9,7 @@ CREATE TABLE public.tickets (
     titulo TEXT NOT NULL,
     descricao TEXT,
     status VARCHAR(50) DEFAULT 'NOVO',
-    analista_id UUID, -- Será referenciado à tabela de perfis de usuários no futuro
+    analista_id UUID REFERENCES public.perfis(id),
     criado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     atualizado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -77,4 +77,58 @@ ON public.whatsapp_conversas FOR ALL USING (true);
 
 CREATE POLICY "Permitir full access anônimo temporário mensagens" 
 ON public.whatsapp_mensagens FOR ALL USING (true);
+
+-- =========================================================================
+-- FASE 1: AUTENTICAÇÃO E COFRE DE SENHAS
+-- =========================================================================
+
+-- 6. Tabela de Perfis de Usuário (Estendendo auth.users do Supabase)
+CREATE TABLE public.perfis (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    nome VARCHAR(150) NOT NULL,
+    cargo VARCHAR(50) DEFAULT 'ANALISTA', -- ADMIN, ANALISTA, TECNICO
+    criado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 7. Tabela do Cofre de Credenciais
+CREATE TABLE public.cofre_credenciais (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    sistema VARCHAR(100) NOT NULL, -- Ex: 'Stoq', 'Milvus'
+    usuario_login VARCHAR(150) NOT NULL,
+    senha_criptografada TEXT NOT NULL,
+    criado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    atualizado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Habilitar RLS nas novas tabelas
+ALTER TABLE public.perfis ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.cofre_credenciais ENABLE ROW LEVEL SECURITY;
+
+-- Políticas para Perfis
+CREATE POLICY "Permitir leitura de perfis para autenticados" 
+ON public.perfis FOR SELECT USING (auth.role() = 'authenticated');
+
+-- Políticas para Cofre de Credenciais (Apenas Service Role / Backend pode ler)
+-- Usuários normais NÃO têm acesso direto a essa tabela pelo front-end (Zero Trust)
+CREATE POLICY "Bloquear acesso direto ao cofre pelo client" 
+ON public.cofre_credenciais FOR ALL USING (false);
+
+-- =========================================================================
+-- FASE 2: MÓDULO DE CONTATOS DINÂMICOS
+-- =========================================================================
+
+-- 8. Tabela de Relacionamento Lojas e Contatos
+CREATE TABLE public.lojas_contatos (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    loja VARCHAR(150) UNIQUE NOT NULL, -- O nome ou ID da loja vindo do TomTicket
+    gerente_nome VARCHAR(150),
+    whatsapp_numero VARCHAR(30) NOT NULL,
+    atualizado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+ALTER TABLE public.lojas_contatos ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Permitir leitura e escrita para analistas" 
+ON public.lojas_contatos FOR ALL USING (auth.role() = 'authenticated');
 
