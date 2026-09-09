@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import styles from './atendimento.module.css';
-import { Send, User, Phone, Clock, Search, Bot, Server, Key, Video } from 'lucide-react';
+import { Send, User, Phone, Clock, Search, Bot, Server, Key, Video, Activity, Inbox, Settings } from 'lucide-react';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
@@ -107,7 +107,6 @@ export default function CentralAtendimento() {
     const texto = inputMensagem;
     setInputMensagem(''); 
 
-    // Interceptador para geração de link de vídeo Jitsi (RF06)
     let body = { to: conversaAtiva.telefone, message: texto, conversaId: conversaAtiva.id };
     
     if (texto.trim() === '/video') {
@@ -130,23 +129,26 @@ export default function CentralAtendimento() {
     <div className={styles.container}>
       {/* Coluna 1: Menu Lateral */}
       <aside className={styles.menuArea}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '2rem' }}>
-          <div style={{ width: '40px', height: '40px', backgroundColor: '#2b6cb0', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+        <div className={styles.logoContainer}>
+          <div className={styles.logoIcon}>
             <Bot size={24} />
           </div>
-          <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 600 }}>Intranet Critel</h2>
+          <h2 className={styles.logoText}>Critel Core</h2>
         </div>
         
         <nav>
-          <ul style={{ listStyle: 'none', padding: 0 }}>
-            <li style={{ padding: '10px', borderRadius: '8px', backgroundColor: '#2d3748', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
-              <Search size={18} /> Painel Central
+          <ul className={styles.navMenu}>
+            <li className={`${styles.navItem} ${styles.navItemActive}`}>
+              <Inbox size={18} /> Fila de Chamados
             </li>
-            <li style={{ padding: '10px', color: '#a0aec0', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', marginTop: '10px' }}>
-              <Server size={18} /> Monitoramento
+            <li className={styles.navItem}>
+              <Activity size={18} /> Monitoramento PDV
             </li>
-            <li style={{ padding: '10px', color: '#a0aec0', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', marginTop: '10px' }}>
-              <Clock size={18} /> Auditoria
+            <li className={styles.navItem}>
+              <Clock size={18} /> Auditoria (Admin)
+            </li>
+            <li className={styles.navItem}>
+              <Settings size={18} /> Configurações
             </li>
           </ul>
         </nav>
@@ -154,39 +156,36 @@ export default function CentralAtendimento() {
 
       {/* Coluna 2: Fila de Chamados */}
       <section className={styles.filaArea}>
-        <div style={{ padding: '1.5rem 1rem', borderBottom: '1px solid #e2e8f0', backgroundColor: '#fff', position: 'sticky', top: 0 }}>
-          <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#2d3748' }}>Fila de Atendimento ({tickets.length})</h3>
+        <div className={styles.filaHeader}>
+          <h3>Central de Tickets ({tickets.length})</h3>
         </div>
-        <div style={{ flex: 1, overflowY: 'auto' }}>
+        <div className={styles.ticketList}>
           {tickets.length === 0 ? (
-            <div style={{ padding: '2rem 1rem', textAlign: 'center', color: '#a0aec0' }}>
-              Nenhum chamado pendente.
+            <div className={styles.emptyState}>
+              <Inbox size={48} style={{ opacity: 0.2, margin: '0 auto 1rem' }} />
+              <p>Nenhum chamado pendente no momento.</p>
             </div>
           ) : (
             tickets.map((ticket) => (
               <div 
                 key={ticket.id} 
-                className={styles.ticketCard}
-                style={{ 
-                  borderLeft: ticketAtivo?.id === ticket.id ? '4px solid #3182ce' : '4px solid transparent',
-                  backgroundColor: ticketAtivo?.id === ticket.id ? '#ebf8ff' : '#fff'
-                }}
+                className={`${styles.ticketCard} ${ticketAtivo?.id === ticket.id ? styles.ticketCardActive : ''}`}
                 onClick={() => setTicketAtivo(ticket)}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <strong style={{ fontSize: '1rem', color: '#2d3748' }}>{ticket.cliente}</strong>
-                  <span style={{ fontSize: '0.7rem', color: '#a0aec0' }}>
+                <div className={styles.ticketTitleRow}>
+                  <strong className={styles.ticketClient}>{ticket.cliente}</strong>
+                  <span className={styles.ticketTime}>
                     {new Date(ticket.criado_em).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>
-                <div style={{ fontSize: '0.85rem', color: '#4a5568', marginTop: '4px', fontWeight: 500 }}>
+                <div className={styles.ticketSubject}>
                   {ticket.titulo}
                 </div>
-                <div style={{ fontSize: '0.8rem', color: '#718096', marginTop: '4px' }}>
-                  Protocolo: #{ticket.protocolo_origem}
+                <div className={styles.ticketProtocol}>
+                  #{ticket.protocolo_origem}
                 </div>
-                <div style={{ marginTop: '8px' }}>
-                  <span style={{ padding: '2px 8px', borderRadius: '12px', fontSize: '0.7rem', backgroundColor: ticket.status === 'NOVO' ? '#fed7d7' : '#c6f6d5', color: ticket.status === 'NOVO' ? '#c53030' : '#22543d' }}>
+                <div className={styles.ticketBadges}>
+                  <span className={`${styles.badge} ${ticket.status === 'NOVO' ? styles.badgeNovo : ticket.status === 'RADAR_OBRAS' ? styles.badgeRadar : styles.badgeNormal}`}>
                     {ticket.status}
                   </span>
                 </div>
@@ -199,132 +198,128 @@ export default function CentralAtendimento() {
       {/* Coluna 3: Chat e Detalhes */}
       <main className={styles.chatArea}>
         {ticketAtivo ? (
-          <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-            {/* Ticket Header */}
-            <div style={{ padding: '1.5rem', borderBottom: '1px solid #e2e8f0', backgroundColor: '#fff' }}>
-              <h2 style={{ margin: '0 0 10px 0', color: '#2d3748' }}>{ticketAtivo.titulo}</h2>
-              <p style={{ margin: 0, color: '#718096', fontSize: '0.9rem' }}>{ticketAtivo.descricao}</p>
+          <>
+            {/* Ticket Header (Contexto) */}
+            <div className={styles.chatHeader}>
+              <h2 className={styles.chatHeaderTitle}>{ticketAtivo.titulo}</h2>
+              <p className={styles.chatHeaderDesc}>{ticketAtivo.descricao}</p>
               
-              <div style={{ marginTop: '1rem', display: 'flex', gap: '10px' }}>
-                <button 
-                  onClick={() => {
-                    // Módulo de Contato Dinâmico (Mock por enquanto)
-                    const conversa = conversas.find(c => c.telefone === '5511999999999'); // Mock
-                    if (conversa) setConversaAtiva(conversa);
-                  }}
-                  style={{ padding: '8px 16px', backgroundColor: '#25D366', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600 }}
-                >
-                  <Phone size={16} /> Acionar WhatsApp (Contato)
-                </button>
-              </div>
+              <button 
+                className={styles.btnAction}
+                onClick={() => {
+                  // Módulo de Contato Dinâmico (Mock)
+                  const conversa = conversas.find(c => c.telefone === '5511999999999'); 
+                  if (conversa) setConversaAtiva(conversa);
+                }}
+              >
+                <Phone size={18} /> Acionar WhatsApp (Contato da Loja)
+              </button>
             </div>
 
-            {/* WhatsApp Interface Embedded */}
+            {/* Interface WhatsApp */}
             {conversaAtiva ? (
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', borderTop: '1px solid #e2e8f0' }}>
-                 <div style={{ padding: '10px 1.5rem', backgroundColor: '#f0f2f5', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
-                    <div style={{ width: '35px', height: '35px', backgroundColor: '#cbd5e0', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <User size={20} color="#fff" />
+              <>
+                 <div className={styles.chatSubHeader}>
+                  <div className={styles.chatProfile}>
+                    <div className={styles.chatAvatar}>
+                      {conversaAtiva.nome_perfil.substring(0, 2).toUpperCase()}
                     </div>
                     <div>
-                      <strong style={{ display: 'block', fontSize: '0.95rem', color: '#2d3748' }}>{conversaAtiva.nome_perfil}</strong>
-                      <span style={{ fontSize: '0.75rem', color: '#718096' }}>+{conversaAtiva.telefone}</span>
+                      <span className={styles.chatName}>{conversaAtiva.nome_perfil}</span>
+                      <span className={styles.chatPhone}>+{conversaAtiva.telefone}</span>
                     </div>
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: '#718096', cursor: 'help' }} title="Digite /video para gerar uma sala Jitsi">
-                     Dica: Digite /video
+                  <div className={styles.chatHint} title="Digite /video para gerar uma sala Jitsi segura">
+                     Dica de Ação rápida: /video
                   </div>
                 </div>
                 
-                <div ref={scrollRef} style={{ flex: 1, padding: '1.5rem', overflowY: 'auto', backgroundColor: '#efeae2', backgroundImage: 'url("https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png")', backgroundRepeat: 'repeat' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    {mensagens.map((msg) => {
+                <div ref={scrollRef} className={styles.chatMessages}>
+                  {mensagens.length === 0 ? (
+                    <div className={styles.chatEmpty}>Inicie o atendimento. Suas mensagens aparecerão aqui.</div>
+                  ) : (
+                    mensagens.map((msg) => {
                       const isInbound = msg.direcao === 'INBOUND';
                       return (
-                        <div key={msg.id} style={{ alignSelf: isInbound ? 'flex-start' : 'flex-end', maxWidth: '75%' }}>
-                          <div style={{ 
-                            backgroundColor: isInbound ? '#fff' : '#d9fdd3', 
-                            padding: '8px 12px', 
-                            borderRadius: '8px',
-                            boxShadow: '0 1px 1px rgba(0,0,0,0.1)',
-                            borderTopLeftRadius: isInbound ? '0px' : '8px',
-                            borderTopRightRadius: isInbound ? '8px' : '0px',
-                          }}>
-                            <span style={{ fontSize: '0.95rem', color: '#111b21', whiteSpace: 'pre-wrap' }}>
-                              {msg.conteudo}
-                            </span>
-                            <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
-                              <span style={{ fontSize: '0.65rem', color: '#667781' }}>
+                        <div key={msg.id} className={`${styles.messageWrapper} ${isInbound ? styles.msgInbound : styles.msgOutbound}`}>
+                          <div className={styles.messageBubble}>
+                            {msg.conteudo}
+                            <div className={styles.messageMeta}>
+                              <span className={styles.messageTime}>
                                 {new Date(msg.criado_em).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                               </span>
                             </div>
                           </div>
                         </div>
                       );
-                    })}
-                  </div>
+                    })
+                  )}
                 </div>
 
-                <div style={{ padding: '1rem', backgroundColor: '#f0f2f5' }}>
-                  <form onSubmit={handleEnviarMensagem} style={{ display: 'flex', gap: '10px' }}>
+                <div className={styles.chatInputArea}>
+                  <form onSubmit={handleEnviarMensagem} className={styles.chatForm}>
                     <input 
                       type="text" 
                       value={inputMensagem}
                       onChange={(e) => setInputMensagem(e.target.value)}
-                      placeholder="Digite uma mensagem ou /video..." 
-                      style={{ flex: 1, padding: '12px 16px', borderRadius: '8px', border: 'none', outline: 'none' }}
+                      placeholder="Digite uma mensagem ou comando /video..." 
+                      className={styles.chatInput}
                     />
-                    <button type="submit" style={{ width: '45px', height: '45px', backgroundColor: '#00a884', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>
-                      <Send size={20} />
+                    <button type="submit" className={styles.btnSend}>
+                      <Send size={18} />
                     </button>
                   </form>
                 </div>
-              </div>
+              </>
             ) : (
-              <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#a0aec0', backgroundColor: '#f7fafc' }}>
-                Clique em "Acionar WhatsApp" para abrir o canal de contato.
+              <div className={styles.chatEmpty}>
+                <Phone size={48} className={styles.chatEmptyIcon} />
+                <h3>Nenhum chat ativo</h3>
+                <p>Acione o WhatsApp do cliente para iniciar a conversa.</p>
               </div>
             )}
-          </div>
+          </>
         ) : (
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#a0aec0' }}>
-            <Server size={64} style={{ marginBottom: '1rem', opacity: 0.5 }} />
+          <div className={styles.chatEmpty}>
+            <Search size={48} className={styles.chatEmptyIcon} />
             <h2>Selecione um Chamado</h2>
-            <p>Os detalhes e o canal de contato aparecerão aqui.</p>
+            <p>O contexto e o canal de contato aparecerão aqui para você focar no atendimento.</p>
           </div>
         )}
       </main>
 
       {/* Coluna 4: Status e Acessos */}
       <section className={styles.statusArea}>
-        <div style={{ marginBottom: '2rem' }}>
-          <h3 style={{ fontSize: '1rem', color: '#2d3748', borderBottom: '1px solid #e2e8f0', paddingBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Key size={18} /> Cofre de Senhas
+        <div className={styles.statusSection}>
+          <h3 className={styles.statusTitle}>
+            <Key size={18} /> Cofre de Senhas (SSO)
           </h3>
-          <div style={{ marginTop: '1rem' }}>
-            <a href="/api/cofre/login-stoq" target="_blank" rel="noreferrer" style={{ display: 'block', padding: '12px', backgroundColor: '#3182ce', color: '#fff', textDecoration: 'none', borderRadius: '8px', textAlign: 'center', fontWeight: 'bold', fontSize: '0.9rem' }}>
-              Acessar Ajuda Stoq (SSO)
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <a href="/api/cofre/stoq" target="_blank" rel="noreferrer" className={styles.btnCofre}>
+              Abrir Stoq ERP
             </a>
-            <p style={{ fontSize: '0.75rem', color: '#718096', marginTop: '8px', textAlign: 'center' }}>
-              Credenciais injetadas automaticamente.
-            </p>
+            <a href="/api/cofre/milvus" target="_blank" rel="noreferrer" className={styles.btnCofre}>
+              Abrir Milvus Suite
+            </a>
           </div>
+          <p className={styles.cofreDesc}>
+            O login corporativo é injetado via proxy. Você não verá a senha.
+          </p>
         </div>
 
-        <div>
-          <h3 style={{ fontSize: '1rem', color: '#2d3748', borderBottom: '1px solid #e2e8f0', paddingBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Server size={18} /> Status de Rede (PDVs)
+        <div className={styles.statusSection}>
+          <h3 className={styles.statusTitle}>
+            <Server size={18} /> Radar de PDVs
           </h3>
-          <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div className={styles.pdvList}>
             {pdvs.length === 0 ? (
-              <span style={{ fontSize: '0.85rem', color: '#a0aec0' }}>Nenhum PDV monitorado.</span>
+              <span className={styles.cofreDesc}>Sem dados do Milvus.</span>
             ) : (
               pdvs.map(pdv => (
                 <div key={pdv.id} className={styles.pdvItem}>
                   <span className={pdv.status_conexao === 'ONLINE' ? styles.dotGreen : styles.dotRed}></span>
-                  <span style={{ flex: 1, color: '#4a5568' }}>{pdv.loja}</span>
-                  <span style={{ fontSize: '0.7rem', color: '#a0aec0' }}>
+                  <span className={styles.pdvName}>{pdv.loja}</span>
+                  <span className={styles.pdvStatusText} style={{ color: pdv.status_conexao === 'ONLINE' ? '#10b981' : '#ef4444' }}>
                     {pdv.status_conexao}
                   </span>
                 </div>

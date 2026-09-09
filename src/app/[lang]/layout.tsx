@@ -19,7 +19,7 @@ const montserrat = Montserrat({
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ lang: string }>;
+  params: any;
 }): Promise<Metadata> {
   const resolvedParams = await params;
   const dict = await getDictionary(resolvedParams.lang as any);
@@ -108,7 +108,7 @@ export default async function RootLayout({
   params,
 }: Readonly<{
   children: React.ReactNode;
-  params: Promise<{ lang: string }>;
+  params: any;
 }>) {
   const resolvedParams = await params;
   const dict = await getDictionary(resolvedParams.lang as any);

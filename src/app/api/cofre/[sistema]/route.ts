@@ -3,7 +3,13 @@ import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 
-export async function GET(request: Request) {
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ sistema: string }> }
+) {
+  // Extract dynamic segment
+  const { sistema } = await params;
+  
   // 1. Validar se o usuário está logado na Intranet
   const cookieStore = await cookies()
   const supabase = createServerClient(
@@ -39,36 +45,36 @@ export async function GET(request: Request) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
 
+  // Map URLs dynamically based on the system
+  let targetUrl = '';
+  // Resolve case insensitivity for 'Stoq', 'Zendesk', 'Milvus'
+  const targetSistema = sistema.charAt(0).toUpperCase() + sistema.slice(1).toLowerCase();
+
   const { data: credenciais, error } = await supabaseAdmin
     .from('cofre_credenciais')
     .select('*')
-    .eq('sistema', 'Stoq')
+    .eq('sistema', targetSistema)
     .single()
 
   if (error || !credenciais) {
-    return NextResponse.json({ error: 'Credenciais não encontradas no cofre' }, { status: 404 })
+    return NextResponse.json({ error: `Credenciais não encontradas no cofre para a plataforma: ${targetSistema}` }, { status: 404 })
   }
 
-  // 3. Fazer requisição de Login para a plataforma de destino (Stoq) a partir do Backend
-  // Exemplo estrutural de login (os endpoints exatos dependem da plataforma alvo)
-  /*
-  const loginResponse = await fetch('https://ajuda.stoq.com.br/api/login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      username: credenciais.usuario_login,
-      password: credenciais.senha_criptografada // Descriptografar se aplicável
-    })
-  })
-  
-  const targetCookies = loginResponse.headers.get('set-cookie')
-  */
+  // 3. Definir URL de Redirecionamento
+  if (targetSistema === 'Stoq') {
+    targetUrl = 'https://ajuda.stoq.com.br/hc/pt-br';
+  } else if (targetSistema === 'Milvus') {
+    targetUrl = 'https://app.milvus.com.br';
+  } else {
+    targetUrl = 'https://intranet.critel.com.br/pt/atendimento';
+  }
 
-  // 4. Retornar resposta injetando cookies ou redirecionando para a rota de proxy
+  // 4. Retornar resposta injetando cookies (Simulação Proxy SSO Backend)
   // O payload da senha NUNCA desce para o front-end (Prevenção de vazamento de DOM)
-  const response = NextResponse.redirect(new URL('/(painel)/atendimento', request.url))
+  const response = NextResponse.redirect(new URL(targetUrl))
   
-  // response.headers.set('Set-Cookie', `stoq_session=token_gerado_no_backend; HttpOnly; Secure; Path=/`)
+  // Set proxy authenticated session cookie logically in a real world proxy implementation.
+  response.headers.set('Set-Cookie', `${targetSistema.toLowerCase()}_session=proxy_token_backend_injected; HttpOnly; Secure; Path=/`)
 
   return response
 }

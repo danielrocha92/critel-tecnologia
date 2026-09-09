@@ -14,7 +14,7 @@ O sistema de Intranet da Critel atuará como o portal centralizador de acessos e
 ## 2. Requisitos Funcionais (RF)
 
 ### Autenticação e Governança:
-- **RF01 - Autenticação Única (SSO):** O sistema deve permitir que o usuário faça um único login na Intranet para acessar os demais sistemas (Zendesk, Stoq, Milvus) com um clique.
+- **RF01 - Autenticação Única (SSO):** O sistema deve permitir que o usuário faça um único login na Intranet para acessar os demais sistemas (Stoq, Milvus) com um clique.
 - **RF02 - Cofre de Senhas Mascarado:** O sistema deve armazenar as credenciais corporativas (como o e-mail genérico suporte.criitel@gmail.com) e injetá-las automaticamente nas sessões de destino. A senha em texto plano nunca deve ser exibida ao usuário final.
 - **RF03 - Gestão de Revogação Imediata:** O sistema deve possuir um "botão de pânico" no painel do Administrador que encerra todas as sessões ativas de um colaborador específico simultaneamente.
 
@@ -39,6 +39,6 @@ O sistema de Intranet da Critel atuará como o portal centralizador de acessos e
 - **RNF04 - Hardware de Atendimento:** O projeto exige a aquisição e utilização de headsets USB com cancelamento de ruído direcional para as chamadas de vídeo via web, isolando a acústica do ambiente de suporte.
 
 ## 4. Regras de Negócio e Segurança (RN)
-- **RN01 - Política de Confiança Zero (Zero Trust):** A propriedade das credenciais dos portais integrados (Zendesk, Stoq, etc.) é exclusiva da Critel.
+- **RN01 - Política de Confiança Zero (Zero Trust):** A propriedade das credenciais dos portais integrados (Stoq, Milvus, etc.) é exclusiva da Critel.
 - **RN02 - Prevenção contra Vazamento de DOM:** Se um colaborador tentar inspecionar o código da página (via DevTools) para capturar a senha injetada pelo SSO, o sistema utilizará rotas de proxy no back-end para gerar a sessão de destino, não permitindo que o payload da senha trafegue pelo navegador.
 - **RN03 - Desligamento em Cadeia:** Ao inativar um usuário na Intranet, o corte de acesso reflete instantaneamente em todas as ferramentas conectadas por SSO.

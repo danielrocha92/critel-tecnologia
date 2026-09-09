@@ -8,7 +8,7 @@ export default async function WebsiteLayout({
   params,
 }: {
   children: React.ReactNode;
-  params: Promise<{ lang: string }>;
+  params: any;
 }) {
   const resolvedParams = await params;
   const dict = await getDictionary(resolvedParams.lang as any);
