@@ -124,34 +124,74 @@ export default function CentralAtendimento() {
     if (!newPhoneValue) return;
     setIsLoadingContact(true);
     
-    // Upsert the contact info
-    const { error } = await supabase
-      .from('lojas_contatos')
-      .upsert({
-        nome_loja: ticketAtivo.cliente,
-        telefone_whatsapp: newPhoneValue.replace(/\D/g, '') // Only numbers
-      }, { onConflict: 'nome_loja' });
-      
-    if (!error) {
-      setLojaContato({
-        nome_loja: ticketAtivo.cliente,
-        telefone_whatsapp: newPhoneValue.replace(/\D/g, '')
+    try {
+      const response = await fetch('/api/contatos/save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          nome_loja: ticketAtivo.cliente,
+          telefone_whatsapp: newPhoneValue.replace(/\D/g, '') // Only numbers
+        })
       });
-      setIsEditingContact(false);
-    } else {
-      console.error('Erro ao salvar contato', error);
-      alert('Erro ao salvar o contato. Verifique as permissões.');
+
+      if (response.ok) {
+        setLojaContato({
+          nome_loja: ticketAtivo.cliente,
+          telefone_whatsapp: newPhoneValue.replace(/\D/g, '')
+        });
+        setIsEditingContact(false);
+      } else {
+        const errorData = await response.json();
+        console.error('Erro ao salvar contato:', errorData);
+        alert('Erro ao salvar o contato. Verifique as permissões.');
+      }
+    } catch (error) {
+      console.error('Erro na requisição:', error);
+      alert('Erro de conexão ao salvar o contato.');
     }
+    
     setIsLoadingContact(false);
   };
 
-  // 4. Carregar Status de PDV
+  // 5. Checagem On-Demand no Milvus (RF07)
+  useEffect(() => {
+    if (!ticketAtivo) return;
+    
+    // Dispara a consulta ao Milvus em background
+    const verificarMilvus = async () => {
+      try {
+        await fetch('/api/milvus/check', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ loja: ticketAtivo.cliente })
+        });
+        // A API vai atualizar o banco Supabase, o que disparará o WebSocket abaixo.
+      } catch (err) {
+        console.error('Erro ao consultar Milvus:', err);
+      }
+    };
+    verificarMilvus();
+  }, [ticketAtivo]);
+
+  // 6. Carregar Status de PDV (Com WebSockets Realtime do Milvus)
   useEffect(() => {
     const carregarPdvs = async () => {
-      const { data } = await supabase.from('status_pdv').select('*');
+      const { data } = await supabase.from('status_pdv').select('*').order('loja', { ascending: true });
       if (data) setPdvs(data);
     };
     carregarPdvs();
+
+    // Ouvinte em tempo real para quando o Cron Job / Worker do Milvus atualizar o banco
+    const subPdvs = supabase
+      .channel('lista-pdvs')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'status_pdv' }, (payload) => {
+        carregarPdvs(); // Recarrega a lista se houver alguma alteração (Mock ou Real)
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(subPdvs); };
   }, []);
 
   const rolarParaBaixo = () => {
@@ -417,18 +457,24 @@ export default function CentralAtendimento() {
             <Server size={18} /> Radar de PDVs
           </h3>
           <div className={styles.pdvList}>
-            {pdvs.length === 0 ? (
-              <span className={styles.cofreDesc}>Sem dados do Milvus.</span>
+            {!ticketAtivo ? (
+              <span className={styles.cofreDesc}>Selecione um chamado para ver o status do PDV.</span>
             ) : (
-              pdvs.map(pdv => (
-                <div key={pdv.id} className={styles.pdvItem}>
-                  <span className={pdv.status_conexao === 'ONLINE' ? styles.dotGreen : styles.dotRed}></span>
-                  <span className={styles.pdvName}>{pdv.loja}</span>
-                  <span className={styles.pdvStatusText} style={{ color: pdv.status_conexao === 'ONLINE' ? '#10b981' : '#ef4444' }}>
-                    {pdv.status_conexao}
-                  </span>
-                </div>
-              ))
+              (() => {
+                const pdvAtual = pdvs.find(p => p.loja === ticketAtivo.cliente);
+                if (!pdvAtual) {
+                  return <span className={styles.cofreDesc}>Buscando disponibilidade da loja no Milvus...</span>;
+                }
+                return (
+                  <div key={pdvAtual.id} className={styles.pdvItem}>
+                    <span className={pdvAtual.status_conexao === 'ONLINE' ? styles.dotGreen : styles.dotRed}></span>
+                    <span className={styles.pdvName}>{pdvAtual.loja}</span>
+                    <span className={styles.pdvStatusText} style={{ color: pdvAtual.status_conexao === 'ONLINE' ? '#10b981' : '#ef4444' }}>
+                      {pdvAtual.status_conexao}
+                    </span>
+                  </div>
+                );
+              })()
             )}
           </div>
         </div>
