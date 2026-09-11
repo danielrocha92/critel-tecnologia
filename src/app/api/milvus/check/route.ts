@@ -42,7 +42,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, status: statusRandomico });
+    return NextResponse.json({ success: true, pdvs: pdvsMockados });
   } catch (error) {
     console.error('[Milvus] Falha na consulta sob demanda:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

@@ -132,3 +132,50 @@ ALTER TABLE public.lojas_contatos ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Permitir leitura e escrita para analistas" 
 ON public.lojas_contatos FOR ALL USING (auth.role() = 'authenticated');
 
+-- =========================================================================
+-- FASE 4: INTRANET E GOVERNANÇA (SSO E COMUNICADOS)
+-- =========================================================================
+
+-- 9. Tabela de Log de Auditoria (Tracking SSO)
+CREATE TABLE public.auditoria_acessos (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    usuario_id UUID REFERENCES auth.users(id),
+    sistema_destino VARCHAR(100) NOT NULL,
+    ip_origem VARCHAR(50),
+    user_agent TEXT,
+    data_acesso TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 10. Tabela de Comunicados
+CREATE TABLE public.comunicados (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    titulo VARCHAR(255) NOT NULL,
+    mensagem TEXT NOT NULL,
+    tipo VARCHAR(50) DEFAULT 'INFO', -- INFO, ALERTA, MANUTENCAO
+    ativo BOOLEAN DEFAULT TRUE,
+    criado_por UUID REFERENCES auth.users(id),
+    criado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+ALTER TABLE public.auditoria_acessos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.comunicados ENABLE ROW LEVEL SECURITY;
+
+-- Políticas de Auditoria
+CREATE POLICY "Permitir inserção de auditoria pelo backend/usuário logado" 
+ON public.auditoria_acessos FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+
+CREATE POLICY "Apenas admin vê auditoria" 
+ON public.auditoria_acessos FOR SELECT USING (
+  EXISTS (SELECT 1 FROM public.perfis WHERE perfis.user_id = auth.uid() AND cargo = 'ADMIN')
+);
+
+-- Políticas de Comunicados
+CREATE POLICY "Leitura de comunicados para todos autenticados" 
+ON public.comunicados FOR SELECT USING (auth.role() = 'authenticated');
+
+CREATE POLICY "Apenas admin gerencia comunicados" 
+ON public.comunicados FOR ALL USING (
+  EXISTS (SELECT 1 FROM public.perfis WHERE perfis.user_id = auth.uid() AND cargo = 'ADMIN')
+);
+
+

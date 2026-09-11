@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { KeyRound, Lock, Eye, EyeOff, Save, ShieldCheck } from 'lucide-react';
+import { KeyRound, Lock, Eye, EyeOff, Save, ShieldCheck, Pencil, Trash2 } from 'lucide-react';
 import styles from './cofre.module.css';
 
 const supabase = createClient(
@@ -49,6 +49,33 @@ export default function CofreAdminPage() {
       alert('Erro ao salvar: ' + err.message);
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleEditar = (cred: any) => {
+    setSistema(cred.sistema);
+    setUsuarioLogin(cred.usuario_login);
+    setSenha(''); // Exigir que redigite a senha
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleExcluir = async (id: string, sistemaNome: string) => {
+    if (!window.confirm(`Tem certeza que deseja excluir a credencial da plataforma ${sistemaNome}?`)) return;
+    
+    try {
+      const { error } = await supabase.from('cofre_credenciais').delete().eq('id', id);
+      if (error) throw error;
+      
+      alert('Credencial excluída com sucesso!');
+      carregarCredenciais();
+      
+      // Limpa os campos se estiver editando a mesma credencial que excluiu
+      if (sistema === sistemaNome) {
+        setUsuarioLogin('');
+        setSenha('');
+      }
+    } catch (err: any) {
+      alert('Erro ao excluir: ' + err.message);
     }
   };
 
@@ -126,8 +153,16 @@ export default function CofreAdminPage() {
                   <h4>{cred.sistema}</h4>
                   <p>{cred.usuario_login}</p>
                 </div>
-                <div className={styles.credStatus}>
-                  <ShieldCheck size={16} /> Protegido
+                <div className={styles.credActions}>
+                  <div className={styles.credStatus}>
+                    <ShieldCheck size={16} /> Protegido
+                  </div>
+                  <button className={styles.btnEdit} onClick={() => handleEditar(cred)} title="Editar">
+                    <Pencil size={18} />
+                  </button>
+                  <button className={styles.btnDelete} onClick={() => handleExcluir(cred.id, cred.sistema)} title="Excluir">
+                    <Trash2 size={18} />
+                  </button>
                 </div>
               </div>
             ))

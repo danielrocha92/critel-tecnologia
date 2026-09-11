@@ -227,33 +227,6 @@ export default function CentralAtendimento() {
 
   return (
     <div className={styles.container}>
-      {/* Coluna 1: Menu Lateral */}
-      <aside className={styles.menuArea}>
-        <div className={styles.logoContainer}>
-          <div className={styles.logoIcon}>
-            <Bot size={24} />
-          </div>
-          <h2 className={styles.logoText}>Critel Core</h2>
-        </div>
-        
-        <nav>
-          <ul className={styles.navMenu}>
-            <li className={`${styles.navItem} ${styles.navItemActive}`}>
-              <Inbox size={18} /> Fila de Chamados
-            </li>
-            <li className={styles.navItem}>
-              <Activity size={18} /> Monitoramento PDV
-            </li>
-            <li className={styles.navItem}>
-              <Clock size={18} /> Auditoria (Admin)
-            </li>
-            <li className={styles.navItem}>
-              <Settings size={18} /> Configurações
-            </li>
-          </ul>
-        </nav>
-      </aside>
-
       {/* Coluna 2: Fila de Chamados */}
       <section className={styles.filaArea}>
         <div className={styles.filaHeader}>
@@ -477,7 +450,7 @@ export default function CentralAtendimento() {
 
                 return (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
-                    {pdvsList.map((p, idx) => (
+                    {pdvsList.map((p: any, idx: number) => (
                       <div key={idx} className={styles.pdvItem}>
                         <span className={p.status === 'ONLINE' ? styles.dotGreen : styles.dotRed}></span>
                         <span className={styles.pdvName}>{p.nome}</span>
