@@ -3,6 +3,7 @@ import { Inter, Montserrat } from "next/font/google";
 import "../globals.css";
 import JsonLd, { getOrganizationSchema } from "@/components/JsonLd/JsonLd";
 import { getDictionary } from "@/dictionaries";
+import Script from "next/script";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -117,7 +118,9 @@ export default async function RootLayout({
     <html lang={resolvedParams.lang} className={`${inter.variable} ${montserrat.variable}`} suppressHydrationWarning>
       <head>
         <JsonLd data={getOrganizationSchema()} />
-        <script
+        <Script
+          id="theme-script"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               (function() {

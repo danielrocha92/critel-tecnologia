@@ -35,7 +35,6 @@ export default function AdminPage() {
   const carregarUsuarios = async () => {
     try {
       setLoading(true);
-      // Aqui estamos buscando da tabela 'perfis' que mocka os dados principais do auth
       const { data, error } = await supabase
         .from('perfis')
         .select('*')
@@ -45,7 +44,13 @@ export default function AdminPage() {
       setUsuarios(data || []);
     } catch (err: any) {
       console.error(err);
-      setErrorMsg('Falha ao carregar lista de usuários.');
+      setErrorMsg('Tabela de usuários não encontrada no banco. Exibindo dados de teste.');
+      // Fallback para dados mockados caso a tabela não exista ainda no Supabase
+      setUsuarios([
+        { id: '1', user_id: 'u1', nome: 'João Técnico', email: 'joao@critel.com.br', cargo: 'TÉCNICO', status: 'ATIVO' },
+        { id: '2', user_id: 'u2', nome: 'Maria Admin', email: 'maria@critel.com.br', cargo: 'ADMIN', status: 'ATIVO' },
+        { id: '3', user_id: 'u3', nome: 'Carlos Desligado', email: 'carlos@critel.com.br', cargo: 'TÉCNICO', status: 'BANIDO' }
+      ]);
     } finally {
       setLoading(false);
     }

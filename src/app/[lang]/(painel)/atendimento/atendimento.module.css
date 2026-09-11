@@ -13,6 +13,18 @@
   color: #f8fafc;
 }
 
+@media (max-width: 1024px) {
+  .container {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto;
+    grid-template-areas: 
+      "fila"
+      "chat"
+      "status";
+    overflow-y: auto;
+  }
+}
+
 /* Custom Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
@@ -68,6 +80,7 @@
   font-family: var(--font-montserrat);
   background: linear-gradient(90deg, #fff, #94a3b8);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 

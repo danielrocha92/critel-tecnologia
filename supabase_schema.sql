@@ -2,7 +2,7 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- 1. Tabela Principal de Chamados (Fila de Atendimento)
-CREATE TABLE public.tickets (
+CREATE TABLE IF NOT EXISTS public.tickets (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     protocolo_origem VARCHAR(100) NOT NULL,
     cliente VARCHAR(150) NOT NULL,
@@ -15,7 +15,7 @@ CREATE TABLE public.tickets (
 );
 
 -- 2. Tabela Radar de Obras (Oportunidades Isoladas da Fila)
-CREATE TABLE public.radar_obras_mobilizacao (
+CREATE TABLE IF NOT EXISTS public.radar_obras_mobilizacao (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     ticket_origem_id UUID REFERENCES public.tickets(id),
     loja_afetada VARCHAR(150) NOT NULL,
@@ -25,7 +25,7 @@ CREATE TABLE public.radar_obras_mobilizacao (
 );
 
 -- 3. Tabela de Monitoramento de Rede (Proxy Milvus)
-CREATE TABLE public.status_pdv (
+CREATE TABLE IF NOT EXISTS public.status_pdv (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     loja VARCHAR(150) UNIQUE NOT NULL,
     status_conexao VARCHAR(20) DEFAULT 'OFFLINE', -- ONLINE ou OFFLINE
@@ -38,6 +38,7 @@ ALTER TABLE public.radar_obras_mobilizacao ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.status_pdv ENABLE ROW LEVEL SECURITY;
 
 -- Política inicial: Apenas leitura para usuários autenticados no Supabase
+DROP POLICY IF EXISTS "Permitir leitura para analistas logados" ON public.tickets;
 CREATE POLICY "Permitir leitura para analistas logados" 
 ON public.tickets FOR SELECT USING (auth.role() = 'authenticated');
 
@@ -46,7 +47,7 @@ ON public.tickets FOR SELECT USING (auth.role() = 'authenticated');
 -- =========================================================================
 
 -- 4. Tabela de Conversas (Lista de Contatos ativos)
-CREATE TABLE public.whatsapp_conversas (
+CREATE TABLE IF NOT EXISTS public.whatsapp_conversas (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     telefone VARCHAR(30) UNIQUE NOT NULL, -- Ex: 5511999999999
     nome_perfil VARCHAR(150),
@@ -56,7 +57,7 @@ CREATE TABLE public.whatsapp_conversas (
 );
 
 -- 5. Tabela de Mensagens do WhatsApp
-CREATE TABLE public.whatsapp_mensagens (
+CREATE TABLE IF NOT EXISTS public.whatsapp_mensagens (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     conversa_id UUID REFERENCES public.whatsapp_conversas(id) ON DELETE CASCADE,
     wa_message_id VARCHAR(150) UNIQUE, -- ID único da mensagem gerado pela Meta (wamid...)
@@ -72,9 +73,11 @@ ALTER TABLE public.whatsapp_conversas ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.whatsapp_mensagens ENABLE ROW LEVEL SECURITY;
 
 -- Políticas de desenvolvimento temporárias para as tabelas do WhatsApp (Desativar em produção)
+DROP POLICY IF EXISTS "Permitir full access anônimo temporário conversas" ON public.whatsapp_conversas;
 CREATE POLICY "Permitir full access anônimo temporário conversas" 
 ON public.whatsapp_conversas FOR ALL USING (true);
 
+DROP POLICY IF EXISTS "Permitir full access anônimo temporário mensagens" ON public.whatsapp_mensagens;
 CREATE POLICY "Permitir full access anônimo temporário mensagens" 
 ON public.whatsapp_mensagens FOR ALL USING (true);
 
@@ -83,16 +86,18 @@ ON public.whatsapp_mensagens FOR ALL USING (true);
 -- =========================================================================
 
 -- 6. Tabela de Perfis de Usuário (Estendendo auth.users do Supabase)
-CREATE TABLE public.perfis (
+CREATE TABLE IF NOT EXISTS public.perfis (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    email VARCHAR(150),
     nome VARCHAR(150) NOT NULL,
     cargo VARCHAR(50) DEFAULT 'ANALISTA', -- ADMIN, ANALISTA, TECNICO
+    status VARCHAR(50) DEFAULT 'ATIVO', -- ATIVO, BANIDO
     criado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- 7. Tabela do Cofre de Credenciais
-CREATE TABLE public.cofre_credenciais (
+CREATE TABLE IF NOT EXISTS public.cofre_credenciais (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     sistema VARCHAR(100) NOT NULL, -- Ex: 'Stoq', 'Milvus'
     usuario_login VARCHAR(150) NOT NULL,
@@ -106,11 +111,13 @@ ALTER TABLE public.perfis ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.cofre_credenciais ENABLE ROW LEVEL SECURITY;
 
 -- Políticas para Perfis
+DROP POLICY IF EXISTS "Permitir leitura de perfis para autenticados" ON public.perfis;
 CREATE POLICY "Permitir leitura de perfis para autenticados" 
 ON public.perfis FOR SELECT USING (auth.role() = 'authenticated');
 
 -- Políticas para Cofre de Credenciais (Apenas Service Role / Backend pode ler)
 -- Usuários normais NÃO têm acesso direto a essa tabela pelo front-end (Zero Trust)
+DROP POLICY IF EXISTS "Bloquear acesso direto ao cofre pelo client" ON public.cofre_credenciais;
 CREATE POLICY "Bloquear acesso direto ao cofre pelo client" 
 ON public.cofre_credenciais FOR ALL USING (false);
 
@@ -119,7 +126,7 @@ ON public.cofre_credenciais FOR ALL USING (false);
 -- =========================================================================
 
 -- 8. Tabela de Relacionamento Lojas e Contatos
-CREATE TABLE public.lojas_contatos (
+CREATE TABLE IF NOT EXISTS public.lojas_contatos (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     loja VARCHAR(150) UNIQUE NOT NULL, -- O nome ou ID da loja vindo do TomTicket
     gerente_nome VARCHAR(150),
@@ -129,6 +136,7 @@ CREATE TABLE public.lojas_contatos (
 
 ALTER TABLE public.lojas_contatos ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Permitir leitura e escrita para analistas" ON public.lojas_contatos;
 CREATE POLICY "Permitir leitura e escrita para analistas" 
 ON public.lojas_contatos FOR ALL USING (auth.role() = 'authenticated');
 
@@ -137,7 +145,7 @@ ON public.lojas_contatos FOR ALL USING (auth.role() = 'authenticated');
 -- =========================================================================
 
 -- 9. Tabela de Log de Auditoria (Tracking SSO)
-CREATE TABLE public.auditoria_acessos (
+CREATE TABLE IF NOT EXISTS public.auditoria_acessos (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     usuario_id UUID REFERENCES auth.users(id),
     sistema_destino VARCHAR(100) NOT NULL,
@@ -147,7 +155,7 @@ CREATE TABLE public.auditoria_acessos (
 );
 
 -- 10. Tabela de Comunicados
-CREATE TABLE public.comunicados (
+CREATE TABLE IF NOT EXISTS public.comunicados (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     titulo VARCHAR(255) NOT NULL,
     mensagem TEXT NOT NULL,
@@ -161,18 +169,22 @@ ALTER TABLE public.auditoria_acessos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.comunicados ENABLE ROW LEVEL SECURITY;
 
 -- Políticas de Auditoria
+DROP POLICY IF EXISTS "Permitir inserção de auditoria pelo backend/usuário logado" ON public.auditoria_acessos;
 CREATE POLICY "Permitir inserção de auditoria pelo backend/usuário logado" 
 ON public.auditoria_acessos FOR INSERT WITH CHECK (auth.role() = 'authenticated');
 
+DROP POLICY IF EXISTS "Apenas admin vê auditoria" ON public.auditoria_acessos;
 CREATE POLICY "Apenas admin vê auditoria" 
 ON public.auditoria_acessos FOR SELECT USING (
   EXISTS (SELECT 1 FROM public.perfis WHERE perfis.user_id = auth.uid() AND cargo = 'ADMIN')
 );
 
 -- Políticas de Comunicados
+DROP POLICY IF EXISTS "Leitura de comunicados para todos autenticados" ON public.comunicados;
 CREATE POLICY "Leitura de comunicados para todos autenticados" 
 ON public.comunicados FOR SELECT USING (auth.role() = 'authenticated');
 
+DROP POLICY IF EXISTS "Apenas admin gerencia comunicados" ON public.comunicados;
 CREATE POLICY "Apenas admin gerencia comunicados" 
 ON public.comunicados FOR ALL USING (
   EXISTS (SELECT 1 FROM public.perfis WHERE perfis.user_id = auth.uid() AND cargo = 'ADMIN')

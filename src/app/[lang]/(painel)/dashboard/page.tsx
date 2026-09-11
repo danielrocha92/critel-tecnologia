@@ -15,7 +15,7 @@ async function getComunicados() {
     .limit(5);
 
   if (error) {
-    console.error('Erro ao buscar comunicados', error);
+    // A tabela 'comunicados' ainda não existe no banco de dados.
     return [];
   }
   return data || [];
@@ -25,7 +25,7 @@ export default async function DashboardPage() {
   const comunicados = await getComunicados();
 
   return (
-    <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto', fontFamily: 'Inter, sans-serif' }}>
+    <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0', fontFamily: 'Inter, sans-serif' }}>
       <header style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)', paddingBottom: '1rem', marginBottom: '2rem' }}>
         <h1 style={{ fontSize: '2rem', color: '#f8fafc', margin: 0 }}>Portal de Acessos Critel</h1>
         <p style={{ color: '#94a3b8', marginTop: '0.5rem' }}>Acesse seus sistemas com apenas um clique.</p>
@@ -61,8 +61,6 @@ export default async function DashboardPage() {
               boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
               transition: 'transform 0.2s',
             }}
-            onMouseOver={(e) => (e.currentTarget.style.transform = 'translateY(-2px)')}
-            onMouseOut={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
             >
               <h3 style={{ margin: '0 0 1rem 0', color: '#f8fafc' }}>{sistema}</h3>
               <form action={`/api/sso`} method="POST">
@@ -79,8 +77,6 @@ export default async function DashboardPage() {
                   transition: 'all 0.2s',
                   boxShadow: '0 4px 12px rgba(0, 210, 255, 0.3)'
                 }}
-                onMouseOver={(e) => (e.currentTarget.style.boxShadow = '0 6px 16px rgba(0, 210, 255, 0.5)')}
-                onMouseOut={(e) => (e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 210, 255, 0.3)')}
                 >
                   Acessar
                 </button>

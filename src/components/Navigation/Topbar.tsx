@@ -1,14 +1,15 @@
 'use client';
 
 import { Bell, User } from 'lucide-react';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
 
 export default function Topbar() {
+  const params = useParams();
   return (
-    <header style={{
+    <header className="topbar-header" style={{
       height: '70px',
-      background: 'rgba(15, 23, 42, 0.6)',
-      backdropFilter: 'blur(12px)',
-      WebkitBackdropFilter: 'blur(12px)',
+      background: 'transparent',
       borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
       display: 'flex',
       alignItems: 'center',
@@ -26,22 +27,24 @@ export default function Topbar() {
         <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#cbd5e1' }}>
           <Bell size={20} />
         </button>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-          <div style={{
-            width: '35px',
-            height: '35px',
-            borderRadius: '50%',
-            background: 'linear-gradient(135deg, #00d2ff 0%, #0284c7 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'white',
-            boxShadow: '0 2px 10px rgba(0, 210, 255, 0.3)'
-          }}>
-            <User size={18} />
+        <Link href={`/${params.lang}/conta`} style={{ textDecoration: 'none' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+            <div style={{
+              width: '35px',
+              height: '35px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #00d2ff 0%, #0284c7 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'white',
+              boxShadow: '0 2px 10px rgba(0, 210, 255, 0.3)'
+            }}>
+              <User size={18} />
+            </div>
+            <span className="topbar-user-text" style={{ fontWeight: '500', fontSize: '0.9rem', color: '#f8fafc' }}>Minha Conta</span>
           </div>
-          <span style={{ fontWeight: '500', fontSize: '0.9rem', color: '#f8fafc' }}>Minha Conta</span>
-        </div>
+        </Link>
       </div>
     </header>
   );
