@@ -1,9 +1,6 @@
 /* admin.module.css - Glassmorphism & Admin Panel */
 
 .container {
-  min-height: 100vh;
-  width: 100vw;
-  background: linear-gradient(135deg, #0b1120 0%, #162032 50%, #0f172a 100%);
   padding: 3rem 2rem;
   font-family: var(--font-inter), system-ui, sans-serif;
   color: #f8fafc;
