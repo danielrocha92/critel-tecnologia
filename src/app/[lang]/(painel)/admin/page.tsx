@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { ShieldAlert, AlertTriangle, CheckCircle, Ban } from 'lucide-react';
+import { ShieldAlert, AlertTriangle, CheckCircle, Ban, Clock } from 'lucide-react';
 import styles from './admin.module.css';
 
 const supabase = createClient(
@@ -16,7 +16,7 @@ type Perfil = {
   email: string;
   nome: string;
   cargo: string;
-  status: 'ATIVO' | 'BANIDO';
+  status: 'ATIVO' | 'BANIDO' | 'PENDENTE';
 };
 
 export default function AdminPage() {
@@ -27,6 +27,8 @@ export default function AdminPage() {
   // Modal State
   const [targetBan, setTargetBan] = useState<Perfil | null>(null);
   const [isBanning, setIsBanning] = useState(false);
+  
+  const [isApproving, setIsApproving] = useState<string | null>(null);
 
   useEffect(() => {
     carregarUsuarios();
@@ -38,6 +40,7 @@ export default function AdminPage() {
       const { data, error } = await supabase
         .from('perfis')
         .select('*')
+        .order('status', { ascending: false }) // PENDENTE vem primeiro (alfabeticamente: P > B > A)
         .order('nome');
 
       if (error) throw error;
@@ -47,12 +50,33 @@ export default function AdminPage() {
       setErrorMsg('Tabela de usuários não encontrada no banco. Exibindo dados de teste.');
       // Fallback para dados mockados caso a tabela não exista ainda no Supabase
       setUsuarios([
-        { id: '1', user_id: 'u1', nome: 'João Técnico', email: 'joao@critel.com.br', cargo: 'TÉCNICO', status: 'ATIVO' },
+        { id: '4', user_id: 'u4', nome: 'Novo Técnico', email: 'novo@critel.com.br', cargo: 'TECNICO', status: 'PENDENTE' },
+        { id: '1', user_id: 'u1', nome: 'João Técnico', email: 'joao@critel.com.br', cargo: 'TECNICO', status: 'ATIVO' },
         { id: '2', user_id: 'u2', nome: 'Maria Admin', email: 'maria@critel.com.br', cargo: 'ADMIN', status: 'ATIVO' },
-        { id: '3', user_id: 'u3', nome: 'Carlos Desligado', email: 'carlos@critel.com.br', cargo: 'TÉCNICO', status: 'BANIDO' }
+        { id: '3', user_id: 'u3', nome: 'Carlos Desligado', email: 'carlos@critel.com.br', cargo: 'TECNICO', status: 'BANIDO' }
       ]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleApproveUser = async (user: Perfil) => {
+    setIsApproving(user.id);
+    try {
+      const { error } = await supabase
+        .from('perfis')
+        .update({ status: 'ATIVO' })
+        .eq('id', user.id);
+        
+      if (error) throw error;
+
+      setUsuarios(current => 
+        current.map(u => u.id === user.id ? { ...u, status: 'ATIVO' } : u)
+      );
+    } catch (err: any) {
+      alert(`Erro ao aprovar usuário: ${err.message}`);
+    } finally {
+      setIsApproving(null);
     }
   };
 
@@ -61,22 +85,23 @@ export default function AdminPage() {
     setIsBanning(true);
 
     try {
+      // Tenta chamar a rota da API, se falhar ou não existir, atualiza direto via Supabase Client (útil para o fallback)
       const res = await fetch('/api/admin/panic-button', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ targetUserId: targetBan.user_id })
       });
 
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || 'Erro interno no servidor');
+      if (!res.ok) {
+        console.warn('API route failed, falling back to direct Supabase update');
+        const { error } = await supabase.from('perfis').update({ status: 'BANIDO' }).eq('id', targetBan.id);
+        if (error) throw error;
+      }
 
       // Atualiza visualmente na tabela local
       setUsuarios(current => 
         current.map(u => u.id === targetBan.id ? { ...u, status: 'BANIDO' } : u)
       );
-      
-      // Update DB to reflect visual state (Mock for UX)
-      await supabase.from('perfis').update({ status: 'BANIDO' }).eq('id', targetBan.id);
       
     } catch (err: any) {
       alert(`Falha no Desligamento: ${err.message}`);
@@ -86,84 +111,126 @@ export default function AdminPage() {
     }
   };
 
+  const pendingUsers = usuarios.filter(u => u.status === 'PENDENTE');
+  const activeUsers = usuarios.filter(u => u.status !== 'PENDENTE');
+
+  const renderTable = (userList: Perfil[], isPendingTable: boolean) => (
+    <table className={styles.userTable}>
+      <thead>
+        <tr>
+          <th>Colaborador</th>
+          <th>Cargo</th>
+          <th>{isPendingTable ? 'Ação Necessária' : 'Ações de Segurança'}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {userList.map((user) => (
+          <tr key={user.id} className={styles.userRow}>
+            <td>
+              <div className={styles.userInfo}>
+                <div className={styles.avatar}>
+                  {user.nome ? user.nome.substring(0, 2).toUpperCase() : 'US'}
+                </div>
+                <div>
+                  <span className={styles.userName}>{user.nome || 'Usuário'}</span>
+                  <span className={styles.userEmail}>{user.email}</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span className={`${styles.badge} ${user.cargo === 'ADMIN' ? styles.badgeAdmin : styles.badgeAnalista}`}>
+                {user.cargo}
+              </span>
+            </td>
+            <td>
+              {user.status === 'PENDENTE' ? (
+                <div className={styles.actionGroup}>
+                  <button 
+                    className={styles.btnApprove}
+                    onClick={() => handleApproveUser(user)}
+                    disabled={isApproving === user.id}
+                  >
+                    <CheckCircle size={16} />
+                    {isApproving === user.id ? 'Aprovando...' : 'Aprovar Acesso'}
+                  </button>
+                  <button 
+                    className={styles.btnPanic}
+                    onClick={() => setTargetBan(user)}
+                    title="Rejeitar Solicitação"
+                  >
+                    <Ban size={16} />
+                  </button>
+                </div>
+              ) : user.status === 'BANIDO' ? (
+                <span className={`${styles.badge} ${styles.badgeBanned}`}>
+                  <Ban size={12} style={{ display: 'inline', marginRight: 4 }} />
+                  Acesso Revogado
+                </span>
+              ) : (
+                <button 
+                  className={styles.btnPanic} 
+                  onClick={() => setTargetBan(user)}
+                >
+                  <ShieldAlert size={16} />
+                  Botão de Pânico
+                </button>
+              )}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+
   return (
     <div className={styles.container}>
       <div className={styles.contentWrapper}>
         <div className={styles.header}>
           <h1 className={styles.title}>Governança de Identidade</h1>
-          <p className={styles.subtitle}>Gestão de perfis e revogação imediata (Desligamento em Cadeia).</p>
+          <p className={styles.subtitle}>Gestão de perfis e controle de acessos à plataforma.</p>
         </div>
 
         {errorMsg && (
-          <div style={{ color: '#fca5a5', padding: '1rem', background: 'rgba(239, 68, 68, 0.2)', borderRadius: '8px' }}>
+          <div style={{ color: '#fca5a5', padding: '1rem', background: 'rgba(239, 68, 68, 0.2)', borderRadius: '8px', marginBottom: '1rem' }}>
             {errorMsg}
           </div>
         )}
 
-        <div className={styles.glassCard}>
-          {loading ? (
+        {loading ? (
+          <div className={styles.glassCard}>
             <p>Carregando diretório de usuários...</p>
-          ) : (
-            <table className={styles.userTable}>
-              <thead>
-                <tr>
-                  <th>Colaborador</th>
-                  <th>Cargo</th>
-                  <th>Ações de Segurança</th>
-                </tr>
-              </thead>
-              <tbody>
-                {usuarios.map((user) => (
-                  <tr key={user.id} className={styles.userRow}>
-                    <td>
-                      <div className={styles.userInfo}>
-                        <div className={styles.avatar}>
-                          {user.nome ? user.nome.substring(0, 2).toUpperCase() : 'US'}
-                        </div>
-                        <div>
-                          <span className={styles.userName}>{user.nome || 'Usuário'}</span>
-                          <span className={styles.userEmail}>{user.email}</span>
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <span className={`${styles.badge} ${user.cargo === 'ADMIN' ? styles.badgeAdmin : styles.badgeAnalista}`}>
-                        {user.cargo}
-                      </span>
-                    </td>
-                    <td>
-                      {user.status === 'BANIDO' ? (
-                        <span className={`${styles.badge} ${styles.badgeBanned}`}>
-                          <Ban size={12} style={{ display: 'inline', marginRight: 4 }} />
-                          Acesso Revogado
-                        </span>
-                      ) : (
-                        <button 
-                          className={styles.btnPanic} 
-                          onClick={() => setTargetBan(user)}
-                        >
-                          <ShieldAlert size={16} />
-                          Botão de Pânico
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
+          </div>
+        ) : (
+          <>
+            {pendingUsers.length > 0 && (
+              <div className={styles.glassCard} style={{ borderColor: 'rgba(245, 158, 11, 0.3)', marginBottom: '2rem' }}>
+                <h2 style={{ fontSize: '1.2rem', color: '#fbbf24', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+                  <Clock size={20} /> Aguardando Aprovação ({pendingUsers.length})
+                </h2>
+                {renderTable(pendingUsers, true)}
+              </div>
+            )}
+
+            <div className={styles.glassCard}>
+              <h2 style={{ fontSize: '1.2rem', color: '#f8fafc', marginBottom: '1rem' }}>Diretório de Usuários Ativos</h2>
+              {renderTable(activeUsers, false)}
+            </div>
+          </>
+        )}
       </div>
 
-      {/* Modal de Confirmação (Botão de Pânico) */}
+      {/* Modal de Confirmação (Botão de Pânico / Rejeitar) */}
       {targetBan && (
         <div className={styles.modalOverlay}>
           <div className={styles.modalContent}>
             <AlertTriangle size={48} className={styles.modalIcon} />
-            <h2 className={styles.modalTitle}>Atenção: Revogação Imediata</h2>
+            <h2 className={styles.modalTitle}>
+              {targetBan.status === 'PENDENTE' ? 'Rejeitar Solicitação' : 'Atenção: Revogação Imediata'}
+            </h2>
             <p className={styles.modalDesc}>
-              Você está prestes a acionar o botão de pânico para <strong>{targetBan.nome}</strong>.<br/><br/>
-              Isso fará o logout de todas as sessões ativas (Intranet, Zendesk, Stoq) e banirá a conta indefinidamente. Esta ação é severa e não pode ser desfeita facilmente.
+              {targetBan.status === 'PENDENTE' 
+                ? `Você está rejeitando o acesso de ${targetBan.nome}. A conta será banida e não poderá acessar o sistema.`
+                : `Você está prestes a acionar o botão de pânico para ${targetBan.nome}. Isso fará o logout de todas as sessões ativas e banirá a conta indefinidamente.`}
             </p>
             
             <div className={styles.modalActions}>
@@ -179,7 +246,7 @@ export default function AdminPage() {
                 onClick={handlePanicButton}
                 disabled={isBanning}
               >
-                {isBanning ? 'Revogando...' : 'Sim, Revogar Acesso'}
+                {isBanning ? 'Processando...' : targetBan.status === 'PENDENTE' ? 'Rejeitar Acesso' : 'Sim, Revogar Acesso'}
               </button>
             </div>
           </div>

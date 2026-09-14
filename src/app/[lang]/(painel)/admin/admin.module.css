@@ -147,6 +147,45 @@
   text-decoration: line-through;
 }
 
+.badgePendente {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+/* Botões de Ação para Pendentes */
+.btnApprove {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+}
+
+.btnApprove:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+  background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+}
+
+.btnApprove:active {
+  transform: scale(0.95);
+}
+
+.actionGroup {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
 /* Botão de Pânico */
 .btnPanic {
   background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
