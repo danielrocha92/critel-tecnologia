@@ -48,6 +48,11 @@ export default function LoginPage() {
         throw new Error('Acesso bloqueado. Contate o administrador.');
       }
 
+      if (perfilData.status === 'PENDENTE') {
+        await supabase.auth.signOut();
+        throw new Error('Sua conta está em análise. Aguarde a liberação do Administrador.');
+      }
+
       // Redirecionamento baseado em cargo
       if (perfilData.cargo === 'TECNICO') {
         router.push(`/${lang}/tecnico`);

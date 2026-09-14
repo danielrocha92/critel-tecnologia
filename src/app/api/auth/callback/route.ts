@@ -40,6 +40,10 @@ export async function GET(request: Request) {
         .eq('user_id', authData.user.id)
         .single()
         
+      if (perfilData?.status === 'PENDENTE') {
+        return NextResponse.redirect(`${origin}/pt/pendente`)
+      }
+        
       if (perfilData?.cargo === 'TECNICO') {
         return NextResponse.redirect(`${origin}/pt/tecnico`)
       } else {
