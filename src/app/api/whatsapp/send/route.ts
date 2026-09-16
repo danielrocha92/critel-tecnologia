@@ -14,10 +14,31 @@ const getSupabaseAdmin = () => {
 export async function POST(request: Request) {
   try {
     const supabase = getSupabaseAdmin();
-    const { to, message, conversaId } = await request.json();
+    const { to, message, conversaId, nomePerfil } = await request.json();
 
     if (!to || !message || !conversaId) {
       return new NextResponse('Faltam parâmetros: to, message, conversaId', { status: 400 });
+    }
+
+    let finalConversaId = conversaId;
+
+    // Se for uma nova conversa, cria no banco primeiro
+    if (finalConversaId === 'nova') {
+      const { data: novaConv, error: convError } = await supabase
+        .from('whatsapp_conversas')
+        .insert({
+          telefone: to,
+          nome_perfil: nomePerfil || to,
+          ultimo_status: 'ABERTA'
+        })
+        .select()
+        .single();
+        
+      if (convError) {
+        console.error('❌ Erro ao criar nova conversa:', convError);
+        return new NextResponse('Erro ao criar conversa', { status: 500 });
+      }
+      finalConversaId = novaConv.id;
     }
 
     const token = process.env.META_WHATSAPP_TOKEN;
@@ -60,7 +81,7 @@ export async function POST(request: Request) {
 
     // 2. Gravar no Supabase (OUTBOUND)
     await supabase.from('whatsapp_mensagens').insert({
-      conversa_id: conversaId,
+      conversa_id: finalConversaId,
       wa_message_id: wamid,
       direcao: 'OUTBOUND',
       tipo_mensagem: 'text',
@@ -72,10 +93,10 @@ export async function POST(request: Request) {
     await supabase
       .from('whatsapp_conversas')
       .update({ ultima_mensagem_data: new Date().toISOString() })
-      .eq('id', conversaId);
+      .eq('id', finalConversaId);
 
     console.log(`✅ Mensagem enviada para ${to} com sucesso! (ID: ${wamid})`);
-    return NextResponse.json({ success: true, data }, { status: 200 });
+    return NextResponse.json({ success: true, data, conversaId: finalConversaId }, { status: 200 });
 
   } catch (error) {
     console.error('❌ Erro interno no Next.js (send message):', error);

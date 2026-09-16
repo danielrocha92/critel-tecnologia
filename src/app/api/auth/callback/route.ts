@@ -36,7 +36,7 @@ export async function GET(request: Request) {
       // Verificar qual é o cargo do usuário para redirecionar corretamente
       const { data: perfilData } = await supabase
         .from('perfis')
-        .select('cargo')
+        .select('cargo, status')
         .eq('user_id', authData.user.id)
         .single()
         

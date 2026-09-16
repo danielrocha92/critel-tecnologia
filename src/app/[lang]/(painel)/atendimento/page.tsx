@@ -207,7 +207,7 @@ export default function CentralAtendimento() {
     const texto = inputMensagem;
     setInputMensagem(''); 
 
-    let body = { to: conversaAtiva.telefone, message: texto, conversaId: conversaAtiva.id };
+    let body: any = { to: conversaAtiva.telefone, message: texto, conversaId: conversaAtiva.id, nomePerfil: conversaAtiva.nome_perfil };
     
     if (texto.trim() === '/video') {
       const salaJitsi = `https://meet.jit.si/Critel-${Math.random().toString(36).substring(7)}`;
@@ -215,11 +215,21 @@ export default function CentralAtendimento() {
     }
 
     try {
-      await fetch('/api/whatsapp/send', {
+      const response = await fetch('/api/whatsapp/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       });
+      
+      if (response.ok) {
+        const result = await response.json();
+        // Se a conversa era 'nova', a API criou no banco e devolveu o UUID real
+        if (conversaAtiva.id === 'nova' && result.conversaId) {
+          setConversaAtiva({ ...conversaAtiva, id: result.conversaId });
+          // Atualiza a lista de conversas no menu lateral/fundo
+          setConversas((prev) => [{ ...conversaAtiva, id: result.conversaId }, ...prev]);
+        }
+      }
     } catch (error) {
       console.error('Erro ao enviar', error);
     }
