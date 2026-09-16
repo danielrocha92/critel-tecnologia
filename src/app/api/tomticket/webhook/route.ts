@@ -19,13 +19,22 @@ export async function POST(request: Request) {
     const secret = process.env.TOMTICKET_SECRET;
 
     // 1. Parse do payload seguro
-    const payload = JSON.parse(rawBody);
+    let payload: any = {};
+    try {
+      if (rawBody) {
+        payload = JSON.parse(rawBody);
+      }
+    } catch (err) {
+      console.log('Não foi possível fazer o parse do JSON do TomTicket', rawBody);
+    }
 
     // 2. Validação Inicial da URL pelo TomTicket (Pula checagem de assinatura)
-    if (payload.action === 'validation' && payload.type === 'account') {
+    if (payload.action === 'validation') {
       console.log('✅ TomTicket enviou um código de validação!');
       console.log(`\n========================================\nCOPIE E COLE ESTE CÓDIGO NO TOMTICKET:\n\n${payload.id}\n\n========================================\n`);
-      return NextResponse.json({ success: true, message: 'Validacao registrada no console.' }, { status: 200 });
+      
+      // Retorna 200 OK com o exato ID de volta, caso o TomTicket exija isso no corpo da resposta
+      return NextResponse.json({ id: payload.id, success: true }, { status: 200 });
     }
 
     if (!secret) {
