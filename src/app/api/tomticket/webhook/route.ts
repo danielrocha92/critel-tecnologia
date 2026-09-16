@@ -18,8 +18,18 @@ export async function POST(request: Request) {
     const signature = request.headers.get('x-hub-signature');
     const secret = process.env.TOMTICKET_SECRET;
 
+    // 1. Parse do payload seguro
+    const payload = JSON.parse(rawBody);
+
+    // 2. Validação Inicial da URL pelo TomTicket (Pula checagem de assinatura)
+    if (payload.action === 'validation' && payload.type === 'account') {
+      console.log('✅ TomTicket enviou um código de validação!');
+      console.log(`\n========================================\nCOPIE E COLE ESTE CÓDIGO NO TOMTICKET:\n\n${payload.id}\n\n========================================\n`);
+      return NextResponse.json({ success: true, message: 'Validacao registrada no console.' }, { status: 200 });
+    }
+
     if (!secret) {
-      console.error('❌ Segredo TOMTICKET_SECRET não configurado no .env.local');
+      console.error('❌ Segredo TOMTICKET_SECRET não configurado.');
       return new NextResponse('Internal Server Error', { status: 500 });
     }
 
@@ -27,21 +37,11 @@ export async function POST(request: Request) {
       return new NextResponse('Forbidden: No signature', { status: 403 });
     }
 
-    // 1. Verificação de Autenticidade (HMAC-SHA1)
+    // 3. Verificação de Autenticidade (HMAC-SHA1)
     const hmac = crypto.createHmac('sha1', secret).update(rawBody).digest('hex');
     if (hmac !== signature) {
       console.error('❌ Assinatura inválida do TomTicket', { recebida: signature, esperada: hmac });
       return new NextResponse('Forbidden: Invalid signature', { status: 403 });
-    }
-
-    // 2. Parse do payload seguro
-    const payload = JSON.parse(rawBody);
-
-    // 3. Validação Inicial da URL pelo TomTicket
-    if (payload.action === 'validation' && payload.type === 'account') {
-      console.log('✅ TomTicket enviou um código de validação!');
-      console.log(`\n========================================\nCOPIE E COLE ESTE CÓDIGO NO TOMTICKET:\n\n${payload.id}\n\n========================================\n`);
-      return NextResponse.json({ success: true, message: 'Validacao registrada no console.' }, { status: 200 });
     }
 
     // 4. Processar criação/atualização de chamados (Tickets)
