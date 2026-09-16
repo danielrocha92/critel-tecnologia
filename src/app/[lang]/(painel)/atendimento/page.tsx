@@ -186,8 +186,39 @@ export default function CentralAtendimento() {
     // Ouvinte em tempo real para quando o Cron Job / Worker do Milvus atualizar o banco
     const subPdvs = supabase
       .channel('lista-pdvs')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'status_pdv' }, (payload) => {
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'status_pdv' }, async (payload) => {
         carregarPdvs(); // Recarrega a lista se houver alguma alteração (Mock ou Real)
+        
+        // Automação: Criação automática de ticket se PDV cair
+        if (payload.new && payload.new.status_conexao) {
+          const loja = payload.new.loja;
+          let isOffline = false;
+          try {
+            const pdvsList = JSON.parse(payload.new.status_conexao);
+            isOffline = pdvsList.some((p: any) => p.status === 'OFFLINE');
+          } catch {
+            isOffline = payload.new.status_conexao === 'OFFLINE';
+          }
+
+          if (isOffline && loja.toLowerCase() !== 'bacio di latte') {
+            // Verifica se já tem ticket aberto pra loja
+            const temTicket = tickets.some(t => t.cliente === loja && t.status !== 'RESOLVIDO');
+            if (!temTicket) {
+              console.log(`Automação: Criando ticket para ${loja} (PDV Offline)`);
+              await fetch('/api/tomticket/webhook', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  type: 'ticket',
+                  protocolo: `AUTO-${Date.now()}`,
+                  subject: `[ALERTA AUTOMÁTICO] PDV Offline - ${loja}`,
+                  description: `O monitoramento detectou que um ou mais caixas da loja ${loja} estão offline. Verifique imediatamente.`,
+                  client: { name: loja }
+                })
+              });
+            }
+          }
+        }
       })
       .subscribe();
 
@@ -237,55 +268,101 @@ export default function CentralAtendimento() {
 
   return (
     <div className={styles.container}>
-      {/* Coluna 2: Fila de Chamados */}
+      {/* Coluna 1 (Anterior Coluna 2): Fila de Chamados Kanban */}
       <section className={styles.filaArea}>
         <div className={styles.filaHeader}>
-          <h3>Central de Tickets ({tickets.length})</h3>
+          <h3>Kanban de Tickets ({tickets.length})</h3>
         </div>
-        <div className={styles.ticketList}>
-          {tickets.length === 0 ? (
-            <div className={styles.emptyState}>
-              <Inbox size={48} style={{ opacity: 0.2, margin: '0 auto 1rem' }} />
-              <p>Nenhum chamado pendente no momento.</p>
-            </div>
-          ) : (
-            tickets.map((ticket) => (
-              <div 
-                key={ticket.id} 
-                className={`${styles.ticketCard} ${ticketAtivo?.id === ticket.id ? styles.ticketCardActive : ''}`}
-                onClick={() => setTicketAtivo(ticket)}
-              >
-                <div className={styles.ticketTitleRow}>
-                  <strong className={styles.ticketClient}>{ticket.cliente}</strong>
-                  <span className={styles.ticketTime}>
-                    {new Date(ticket.criado_em).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </span>
+        <div className={styles.kanbanBoard}>
+          {['NOVO', 'EM ANDAMENTO', 'RADAR_OBRAS', 'RESOLVIDO'].map(coluna => {
+            const ticketsColuna = tickets.filter(t => (t.status || 'NOVO').toUpperCase() === coluna);
+            return (
+              <div key={coluna} className={styles.kanbanColumn}>
+                <div className={styles.kanbanColumnHeader}>
+                  {coluna === 'RADAR_OBRAS' ? 'AGUARDANDO' : coluna}
+                  <span>{ticketsColuna.length}</span>
                 </div>
-                <div className={styles.ticketSubject}>
-                  {ticket.titulo}
-                </div>
-                <div className={styles.ticketProtocol}>
-                  #{ticket.protocolo_origem}
-                </div>
-                <div className={styles.ticketBadges}>
-                  <span className={`${styles.badge} ${ticket.status === 'NOVO' ? styles.badgeNovo : ticket.status === 'RADAR_OBRAS' ? styles.badgeRadar : styles.badgeNormal}`}>
-                    {ticket.status}
-                  </span>
+                <div className={styles.ticketList}>
+                  {ticketsColuna.length === 0 ? (
+                    <div style={{ textAlign: 'center', opacity: 0.5, padding: '1rem', fontSize: '0.8rem' }}>Vazio</div>
+                  ) : (
+                    ticketsColuna.map((ticket) => {
+                      // Verifica se o PDV desta loja está offline
+                      const pdvDaLoja = pdvs.find(p => p.loja === ticket.cliente);
+                      let isOffline = false;
+                      if (pdvDaLoja) {
+                        try {
+                          const pdvsList = JSON.parse(pdvDaLoja.status_conexao);
+                          isOffline = pdvsList.some((p: any) => p.status === 'OFFLINE');
+                        } catch {
+                          isOffline = pdvDaLoja.status_conexao === 'OFFLINE';
+                        }
+                      }
+
+                      return (
+                        <div 
+                          key={ticket.id} 
+                          className={`${styles.ticketCard} ${ticketAtivo?.id === ticket.id ? styles.ticketCardActive : ''} ${isOffline ? styles.ticketCardOffline : ''}`}
+                          onClick={() => setTicketAtivo(ticket)}
+                        >
+                          <div className={styles.ticketTitleRow}>
+                            <strong className={styles.ticketClient}>{ticket.cliente}</strong>
+                            <span className={styles.ticketTime}>
+                              {new Date(ticket.criado_em).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                          </div>
+                          <div className={styles.ticketSubject}>
+                            {ticket.titulo}
+                          </div>
+                          <div className={styles.ticketProtocol}>
+                            #{ticket.protocolo_origem}
+                          </div>
+                          <div className={styles.ticketBadges}>
+                            <span className={`${styles.badge} ${ticket.status === 'NOVO' ? styles.badgeNovo : ticket.status === 'RADAR_OBRAS' ? styles.badgeRadar : styles.badgeNormal}`}>
+                              {ticket.status}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
                 </div>
               </div>
-            ))
-          )}
+            );
+          })}
         </div>
       </section>
-
       {/* Coluna 3: Chat e Detalhes */}
       <main className={styles.chatArea}>
         {ticketAtivo ? (
           <>
             {/* Ticket Header (Contexto) */}
             <div className={styles.chatHeader}>
-              <h2 className={styles.chatHeaderTitle}>{ticketAtivo.titulo}</h2>
-              <p className={styles.chatHeaderDesc}>{ticketAtivo.descricao}</p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <h2 className={styles.chatHeaderTitle}>{ticketAtivo.titulo}</h2>
+                  <p className={styles.chatHeaderDesc}>{ticketAtivo.descricao}</p>
+                </div>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <select 
+                    value={ticketAtivo.status || 'NOVO'}
+                    onChange={async (e) => {
+                      const novoStatus = e.target.value;
+                      const { error } = await supabase.from('tickets').update({ status: novoStatus }).eq('id', ticketAtivo.id);
+                      if (!error) {
+                        setTicketAtivo({ ...ticketAtivo, status: novoStatus });
+                        setTickets(tickets.map(t => t.id === ticketAtivo.id ? { ...t, status: novoStatus } : t));
+                      }
+                    }}
+                    style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', padding: '6px 12px', borderRadius: '8px', cursor: 'pointer', outline: 'none' }}
+                  >
+                    <option value="NOVO" style={{ color: '#000' }}>Novo</option>
+                    <option value="EM ANDAMENTO" style={{ color: '#000' }}>Em Andamento</option>
+                    <option value="RADAR_OBRAS" style={{ color: '#000' }}>Aguardando / Radar</option>
+                    <option value="RESOLVIDO" style={{ color: '#000' }}>Resolvido</option>
+                  </select>
+                </div>
+              </div>
               {/* Módulo CRM Lojas (Contatos Dinâmicos) */}
               <div className={styles.crmContainer}>
                 {isLoadingContact ? (

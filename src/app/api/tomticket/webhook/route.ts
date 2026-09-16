@@ -69,6 +69,17 @@ export async function POST(request: Request) {
       });
       if (error) console.error('❌ Erro no Supabase:', error);
       else console.log(`✅ Chamado ${protocolo} salvo!`);
+    } else {
+      console.log('Evento não mapeado do TomTicket recebido:', payload.type, payload.action);
+      // DEBUG: Salvar o payload inteiro no banco para entendermos o formato que o TomTicket envia!
+      const supabase = getSupabaseAdmin();
+      await supabase.from('tickets').insert({
+        protocolo_origem: `DEBUG-${Date.now()}`,
+        cliente: 'DEBUG TOMTICKET',
+        titulo: `Tipo: ${payload.type} | Ação: ${payload.action}`,
+        descricao: rawBody,
+        status: 'NOVO'
+      });
     }
 
     return new NextResponse('OK', { status: 200 });
