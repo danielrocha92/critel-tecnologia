@@ -1,5 +1,7 @@
 import Sidebar from '@/components/Navigation/Sidebar';
 import Topbar from '@/components/Navigation/Topbar';
+import { TelephonyProvider } from '@/contexts/TelephonyContext';
+import TelephonyWidget from '@/components/Telephony/TelephonyWidget';
 
 export default async function PainelLayout(
   props: { children: React.ReactNode; params: Promise<{ lang: string }> }
@@ -22,6 +24,11 @@ export default async function PainelLayout(
           display: flex;
           flex-direction: column;
           width: calc(100% - 250px);
+          transition: margin-left 0.3s ease, width 0.3s ease;
+        }
+        .layout-root.sidebar-collapsed .main-content {
+          margin-left: 70px;
+          width: calc(100% - 70px);
         }
         @media (max-width: 768px) {
           .main-content {
@@ -37,13 +44,16 @@ export default async function PainelLayout(
           }
         }
       `}} />
-      <Sidebar lang={lang} />
-      <div className="main-content">
-        <Topbar />
-        <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-          {props.children}
-        </main>
-      </div>
+      <TelephonyProvider>
+        <Sidebar lang={lang} />
+        <div className="main-content">
+          <Topbar />
+          <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+            {props.children}
+          </main>
+        </div>
+        <TelephonyWidget />
+      </TelephonyProvider>
     </div>
   );
 }

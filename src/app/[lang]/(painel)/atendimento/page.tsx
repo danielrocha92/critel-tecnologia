@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import styles from './atendimento.module.css';
-import { Send, User, Phone, Clock, Search, Bot, Server, Key, Video, Activity, Inbox, Settings } from 'lucide-react';
+import { Send, User, Phone, Clock, Search, Bot, Server, Key, Video, Activity, Inbox, Settings, Trash2, Printer, Pencil, History } from 'lucide-react';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
@@ -28,6 +28,15 @@ export default function CentralAtendimento() {
   const [isEditingContact, setIsEditingContact] = useState(false);
   const [newPhoneValue, setNewPhoneValue] = useState('');
   const [isLoadingContact, setIsLoadingContact] = useState(false);
+
+  // Milvus Proxy Modal
+  const [isMilvusIframeOpen, setIsMilvusIframeOpen] = useState(false);
+
+  // Wpp Modal
+  const [isWppModalOpen, setIsWppModalOpen] = useState(false);
+
+  // Dropdown Mais
+  const [isMaisDropdownOpen, setIsMaisDropdownOpen] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -190,14 +199,15 @@ export default function CentralAtendimento() {
         carregarPdvs(); // Recarrega a lista se houver alguma alteração (Mock ou Real)
         
         // Automação: Criação automática de ticket se PDV cair
-        if (payload.new && payload.new.status_conexao) {
-          const loja = payload.new.loja;
+        const record = payload.new as any;
+        if (record && record.status_conexao) {
+          const loja = record.loja;
           let isOffline = false;
           try {
-            const pdvsList = JSON.parse(payload.new.status_conexao);
+            const pdvsList = JSON.parse(record.status_conexao);
             isOffline = pdvsList.some((p: any) => p.status === 'OFFLINE');
           } catch {
-            isOffline = payload.new.status_conexao === 'OFFLINE';
+            isOffline = record.status_conexao === 'OFFLINE';
           }
 
           if (isOffline && loja.toLowerCase() !== 'bacio di latte') {
@@ -268,291 +278,369 @@ export default function CentralAtendimento() {
 
   return (
     <div className={styles.container}>
-      {/* Coluna 1 (Anterior Coluna 2): Fila de Chamados Kanban */}
-      <section className={styles.filaArea}>
-        <div className={styles.filaHeader}>
-          <h3>Kanban de Tickets ({tickets.length})</h3>
-        </div>
-        <div className={styles.kanbanBoard}>
-          {['NOVO', 'EM ANDAMENTO', 'RADAR_OBRAS', 'RESOLVIDO'].map(coluna => {
-            const ticketsColuna = tickets.filter(t => (t.status || 'NOVO').toUpperCase() === coluna);
-            return (
-              <div key={coluna} className={styles.kanbanColumn}>
-                <div className={styles.kanbanColumnHeader}>
-                  {coluna === 'RADAR_OBRAS' ? 'AGUARDANDO' : coluna}
-                  <span>{ticketsColuna.length}</span>
-                </div>
-                <div className={styles.ticketList}>
-                  {ticketsColuna.length === 0 ? (
-                    <div style={{ textAlign: 'center', opacity: 0.5, padding: '1rem', fontSize: '0.8rem' }}>Vazio</div>
-                  ) : (
-                    ticketsColuna.map((ticket) => {
-                      // Verifica se o PDV desta loja está offline
-                      const pdvDaLoja = pdvs.find(p => p.loja === ticket.cliente);
-                      let isOffline = false;
-                      if (pdvDaLoja) {
-                        try {
-                          const pdvsList = JSON.parse(pdvDaLoja.status_conexao);
-                          isOffline = pdvsList.some((p: any) => p.status === 'OFFLINE');
-                        } catch {
-                          isOffline = pdvDaLoja.status_conexao === 'OFFLINE';
-                        }
-                      }
-
-                      return (
-                        <div 
-                          key={ticket.id} 
-                          className={`${styles.ticketCard} ${ticketAtivo?.id === ticket.id ? styles.ticketCardActive : ''} ${isOffline ? styles.ticketCardOffline : ''}`}
-                          onClick={() => setTicketAtivo(ticket)}
-                        >
-                          <div className={styles.ticketTitleRow}>
-                            <strong className={styles.ticketClient}>{ticket.cliente}</strong>
-                            <span className={styles.ticketTime}>
-                              {new Date(ticket.criado_em).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </span>
-                          </div>
-                          <div className={styles.ticketSubject}>
-                            {ticket.titulo}
-                          </div>
-                          <div className={styles.ticketProtocol}>
-                            #{ticket.protocolo_origem}
-                          </div>
-                          <div className={styles.ticketBadges}>
-                            <span className={`${styles.badge} ${ticket.status === 'NOVO' ? styles.badgeNovo : ticket.status === 'RADAR_OBRAS' ? styles.badgeRadar : styles.badgeNormal}`}>
-                              {ticket.status}
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-      {/* Coluna 3: Chat e Detalhes */}
-      <main className={styles.chatArea}>
-        {ticketAtivo ? (
-          <>
-            {/* Ticket Header (Contexto) */}
-            <div className={styles.chatHeader}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div>
-                  <h2 className={styles.chatHeaderTitle}>{ticketAtivo.titulo}</h2>
-                  <p className={styles.chatHeaderDesc}>{ticketAtivo.descricao}</p>
-                </div>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <select 
-                    value={ticketAtivo.status || 'NOVO'}
-                    onChange={async (e) => {
-                      const novoStatus = e.target.value;
-                      const { error } = await supabase.from('tickets').update({ status: novoStatus }).eq('id', ticketAtivo.id);
-                      if (!error) {
-                        setTicketAtivo({ ...ticketAtivo, status: novoStatus });
-                        setTickets(tickets.map(t => t.id === ticketAtivo.id ? { ...t, status: novoStatus } : t));
-                      }
-                    }}
-                    style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', padding: '6px 12px', borderRadius: '8px', cursor: 'pointer', outline: 'none' }}
-                  >
-                    <option value="NOVO" style={{ color: '#000' }}>Novo</option>
-                    <option value="EM ANDAMENTO" style={{ color: '#000' }}>Em Andamento</option>
-                    <option value="RADAR_OBRAS" style={{ color: '#000' }}>Aguardando / Radar</option>
-                    <option value="RESOLVIDO" style={{ color: '#000' }}>Resolvido</option>
-                  </select>
-                </div>
-              </div>
-              {/* Módulo CRM Lojas (Contatos Dinâmicos) */}
-              <div className={styles.crmContainer}>
-                {isLoadingContact ? (
-                  <p style={{ fontSize: '0.85rem', color: '#8b9bb4' }}>Buscando contato da loja...</p>
+      {!ticketAtivo ? (
+        <div className={styles.tableContainer}>
+          <div className={styles.tableHeader}>
+            <div className={`${styles.tabItem} ${styles.tabItemActive}`}>
+              Novos Chamados <span className={styles.tabBadge}>1338</span>
+            </div>
+            <div className={styles.tabItem}>Chamados Respondidos</div>
+            <div className={styles.tabItem}>Novos Chamados Vinculados</div>
+            <div className={styles.tabItem}>
+              Abertos <span className={styles.tabBadge}>5</span>
+            </div>
+            <div className={styles.tabItem}>
+              Abertos da Equipe <span className={styles.tabBadge}>3588</span>
+            </div>
+            <div className={styles.tabItem}>
+              Aguardando Ação da Equipe <span className={styles.tabBadge}>509</span>
+            </div>
+          </div>
+          
+          <div className={styles.tableWrapper}>
+            <table className={styles.ticketTable}>
+              <thead>
+                <tr>
+                  <th>Protocolo</th>
+                  <th>Assunto</th>
+                  <th>Departamento</th>
+                  <th>Cliente</th>
+                  <th>Categoria</th>
+                  <th>Data/Hora</th>
+                  <th>Última Situação</th>
+                  <th>Status</th>
+                  <th>Situação</th>
+                  <th>Aberto Por</th>
+                  <th>Prioridade</th>
+                  <th>Atendente</th>
+                  <th>SLA</th>
+                </tr>
+              </thead>
+              <tbody>
+                {tickets.length === 0 ? (
+                  <tr>
+                    <td colSpan={13} style={{ textAlign: 'center', padding: '3rem', opacity: 0.7 }}>
+                      Nenhum chamado pendente no momento.
+                    </td>
+                  </tr>
                 ) : (
-                  (!lojaContato || isEditingContact) ? (
-                    <div className={styles.crmForm}>
-                      <span style={{ fontSize: '0.85rem', color: '#e2e8f0', marginBottom: '4px', display: 'block' }}>
-                        {!lojaContato ? 'Loja sem contato cadastrado. Adicione um número (com DDD):' : 'Editar contato da loja:'}
-                      </span>
-                      <div style={{ display: 'flex', gap: '8px' }}>
-                        <input 
-                          type="text" 
-                          value={newPhoneValue}
-                          onChange={(e) => setNewPhoneValue(e.target.value)}
-                          placeholder="Ex: 5511999999999"
-                          className={styles.crmInput}
-                        />
-                        <button className={styles.btnAction} onClick={handleSaveContact} disabled={!newPhoneValue}>
-                          Salvar
-                        </button>
-                        {isEditingContact && lojaContato && (
-                          <button className={styles.btnCancel} onClick={() => { setIsEditingContact(false); setNewPhoneValue(lojaContato.telefone_whatsapp); }}>
-                            Cancelar
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className={styles.crmActive}>
-                      <button 
-                        className={styles.btnAction}
-                        onClick={() => {
-                          const conversa = conversas.find(c => c.telefone === lojaContato.telefone_whatsapp); 
-                          if (conversa) {
-                            setConversaAtiva(conversa);
-                          } else {
-                            // Se não tiver conversa prévia, simulamos a abertura criando uma localmente pro atendente chamar (na v2 isso faria o envio ativo via API da Meta)
-                            setConversaAtiva({
-                              id: 'nova',
-                              telefone: lojaContato.telefone_whatsapp,
-                              nome_perfil: ticketAtivo.cliente
-                            });
-                            setMensagens([]);
-                          }
-                        }}
+                  tickets.map((ticket, index) => {
+                    const pdvDaLoja = pdvs.find(p => p.loja === ticket.cliente);
+                    let isOffline = false;
+                    if (pdvDaLoja) {
+                      try {
+                        const pdvsList = JSON.parse(pdvDaLoja.status_conexao);
+                        isOffline = pdvsList.some((p: any) => p.status === 'OFFLINE');
+                      } catch {
+                        isOffline = pdvDaLoja.status_conexao === 'OFFLINE';
+                      }
+                    }
+
+                    // Mocks para colunas que não existem no banco ainda
+                    const mockDepto = index % 2 === 0 ? 'TI - Protheus' : 'FIN - Fiscal';
+                    const mockCategoria = index % 2 === 0 ? 'Software - Protheus | Totvs' : 'Solicitação de Estorno/Reembolso';
+                    const mockPrioridade = index % 2 === 0 ? 'BAIXA' : 'ALTA';
+                    
+                    return (
+                      <tr 
+                        key={ticket.id} 
+                        className={`${styles.ticketRow} ${isOffline ? styles.ticketRowOffline : ''}`}
+                        onClick={() => setTicketAtivo(ticket)}
                       >
-                        <Phone size={18} /> Acionar WhatsApp (+{lojaContato.telefone_whatsapp})
-                      </button>
-                      <button className={styles.btnEdit} onClick={() => setIsEditingContact(true)} title="Alterar contato">
-                        ✏️
-                      </button>
-                    </div>
-                  )
+                        <td className={styles.colProtocolo}>#{ticket.protocolo_origem}</td>
+                        <td className={styles.colAssunto}>
+                          {ticket.titulo}
+                          <span className={styles.badgeAguardando}>AGUARDANDO</span>
+                        </td>
+                        <td className={styles.colDepto}>{mockDepto}</td>
+                        <td className={styles.colCliente}>
+                          <span className={styles.clienteNome}>{ticket.cliente}</span>
+                          <span className={styles.clienteDetalhe}>(Operações)</span>
+                        </td>
+                        <td className={styles.colDepto}>{mockCategoria}</td>
+                        <td className={styles.colData}>
+                          {new Date(ticket.criado_em).toLocaleDateString()}<br/>
+                          {new Date(ticket.criado_em).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </td>
+                        <td className={styles.colData}>
+                          {new Date(ticket.criado_em).toLocaleDateString()}<br/>
+                          {new Date(ticket.criado_em).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </td>
+                        <td className={styles.colStatus}>Sem atendente vinculado</td>
+                        <td className={styles.colStatus}>Sem atendente vinculado</td>
+                        <td className={styles.colStatus}>Cliente</td>
+                        <td>
+                          <span className={mockPrioridade === 'BAIXA' ? styles.badgePrioridadeBaixa : styles.badgePrioridadeAlta}>
+                            {mockPrioridade}
+                          </span>
+                        </td>
+                        <td className={styles.colStatus}>Não definido</td>
+                        <td><div style={{ width: '40px', height: '6px', background: '#e2e8f0', borderRadius: '3px' }}></div></td>
+                      </tr>
+                    );
+                  })
                 )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ) : (
+        <div className={styles.innerViewContainer}>
+          <div className={styles.innerHeader}>
+            <div className={styles.innerHeaderTitle}>
+              <button className={styles.btnBack} onClick={() => setTicketAtivo(null)} title="Voltar">
+                ⬅
+              </button>
+              Detalhes do Chamado: #{ticketAtivo.id} - {ticketAtivo.titulo}
+            </div>
+            <div className={styles.headerActionsGroup}>
+              <div style={{ position: 'relative' }}>
+                <button 
+                  className={styles.btnMais} 
+                  onClick={() => setIsMaisDropdownOpen(!isMaisDropdownOpen)}
+                >
+                  Mais v
+                </button>
+                {isMaisDropdownOpen && (
+                  <div style={{ 
+                    position: 'absolute', top: '100%', left: 0, marginTop: '8px',
+                    background: '#1a1d26', border: '1px solid #32394c', borderRadius: '8px',
+                    minWidth: '200px', padding: '8px 0', zIndex: 50,
+                    boxShadow: '0 4px 15px rgba(0,0,0,0.5)'
+                  }}>
+                    <button className={styles.dropdownItem}><Trash2 size={16} /> Excluir</button>
+                    <button className={styles.dropdownItem}><Printer size={16} /> Imprimir</button>
+                    <button className={styles.dropdownItem}><Pencil size={16} /> Editar</button>
+                    <button className={styles.dropdownItem}><History size={16} /> Log de Alterações</button>
+                  </div>
+                )}
+              </div>
+              <button className={styles.btnFinalizar}>Finalizar</button>
+              <button className={styles.btnCancelar}>Cancelar</button>
+            </div>
+          </div>
+
+          <div className={styles.innerBody}>
+            {/* Coluna Esquerda: Timeline e Resposta */}
+            <div className={styles.innerTimeline}>
+              <div className={styles.timelineCard}>
+                <div className={styles.timelineHeader}>
+                  <div className={styles.timelineUser}>
+                    <div className={styles.timelineAvatar}>
+                      <User size={20} color="#64748b" />
+                    </div>
+                    <div>
+                      <span className={styles.timelineName}>{ticketAtivo.cliente}</span>
+                      <span className={styles.timelineRole}>Cliente</span>
+                    </div>
+                  </div>
+                  <div className={styles.timelineDate}>
+                    {new Date(ticketAtivo.criado_em).toLocaleDateString()} {new Date(ticketAtivo.criado_em).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </div>
+                </div>
+                <div className={styles.timelineContent}>
+                  {ticketAtivo.descricao}
+                </div>
+                
+                <div className={styles.replyEditor}>
+                  <div className={styles.replyToolbar}>
+                    <button><b>B</b></button>
+                    <button><i>I</i></button>
+                    <button><u>U</u></button>
+                    <button>T</button>
+                    <div style={{ width: '1px', background: '#32394c', margin: '0 8px' }}></div>
+                    <button>≡</button>
+                    <button>List</button>
+                    <div style={{ width: '1px', background: '#32394c', margin: '0 8px' }}></div>
+                    <button>🔗</button>
+                    <button>🖼️</button>
+                  </div>
+                  <textarea className={styles.replyTextarea} placeholder="Escreva sua resposta aqui..."></textarea>
+                  <div className={styles.replyActions}>
+                    <button className={styles.btnSendReply}>
+                      Enviar Resposta v
+                    </button>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button style={{ background: 'transparent', border: '1px solid #32394c', padding: '8px 12px', borderRadius: '4px', color: '#cbd5e1', cursor: 'pointer' }}>📎</button>
+                      <button style={{ background: 'transparent', border: '1px solid #32394c', padding: '8px 12px', borderRadius: '4px', color: '#cbd5e1', cursor: 'pointer' }}>🕒</button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Interface WhatsApp */}
-            {conversaAtiva ? (
-              <>
-                 <div className={styles.chatSubHeader}>
-                  <div className={styles.chatProfile}>
-                    <div className={styles.chatAvatar}>
-                      {conversaAtiva.nome_perfil.substring(0, 2).toUpperCase()}
-                    </div>
-                    <div>
-                      <span className={styles.chatName}>{conversaAtiva.nome_perfil}</span>
-                      <span className={styles.chatPhone}>+{conversaAtiva.telefone}</span>
-                    </div>
-                  </div>
-                  <div className={styles.chatHint} title="Digite /video para gerar uma sala Jitsi segura">
-                     Dica de Ação rápida: /video
-                  </div>
+            {/* Coluna Direita: Informações */}
+            <div className={styles.innerSidebar}>
+              <div className={styles.panelCard}>
+                <h4 className={styles.panelTitle}>Cliente</h4>
+                <div className={styles.panelRow}>
+                  <span className={styles.panelLabel}>Cliente:</span>
+                  <span className={styles.panelValue}>{ticketAtivo.cliente}</span>
                 </div>
+                <div className={styles.panelRow}>
+                  <span className={styles.panelLabel}>Organização:</span>
+                  <span className={styles.panelValue}>Operações</span>
+                </div>
+                <div className={styles.panelRow}>
+                  <span className={styles.panelLabel}>Email:</span>
+                  <span className={styles.panelValue}>contato@{ticketAtivo.cliente.toLowerCase().replace(/ /g, '')}.com.br</span>
+                </div>
+                <button className={styles.btnShowDetails}>Mostrar Detalhes</button>
                 
-                <div ref={scrollRef} className={styles.chatMessages}>
-                  {mensagens.length === 0 ? (
-                    <div className={styles.chatEmpty}>Inicie o atendimento. Suas mensagens aparecerão aqui.</div>
-                  ) : (
-                    mensagens.map((msg) => {
-                      const isInbound = msg.direcao === 'INBOUND';
-                      return (
-                        <div key={msg.id} className={`${styles.messageWrapper} ${isInbound ? styles.msgInbound : styles.msgOutbound}`}>
-                          <div className={styles.messageBubble}>
-                            {msg.conteudo}
-                            <div className={styles.messageMeta}>
-                              <span className={styles.messageTime}>
-                                {new Date(msg.criado_em).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
-
-                <div className={styles.chatInputArea}>
-                  <form onSubmit={handleEnviarMensagem} className={styles.chatForm}>
-                    <input 
-                      type="text" 
-                      value={inputMensagem}
-                      onChange={(e) => setInputMensagem(e.target.value)}
-                      placeholder="Digite uma mensagem ou comando /video..." 
-                      className={styles.chatInput}
-                    />
-                    <button type="submit" className={styles.btnSend}>
-                      <Send size={18} />
-                    </button>
-                  </form>
-                </div>
-              </>
-            ) : (
-              <div className={styles.chatEmpty}>
-                <Phone size={48} className={styles.chatEmptyIcon} />
-                <h3>Nenhum chat ativo</h3>
-                <p>Acione o WhatsApp do cliente para iniciar a conversa.</p>
+                <button 
+                  className={styles.btnWppAction}
+                  onClick={() => {
+                    if (lojaContato) {
+                      const conversa = conversas.find(c => c.telefone === lojaContato.telefone_whatsapp);
+                      setConversaAtiva(conversa || { id: 'nova', telefone: lojaContato.telefone_whatsapp, nome_perfil: ticketAtivo.cliente });
+                      if (!conversa) setMensagens([]);
+                    }
+                    setIsWppModalOpen(true);
+                  }}
+                >
+                  <Phone size={16} /> Acionar WhatsApp {lojaContato ? `(+${lojaContato.telefone_whatsapp})` : ''}
+                </button>
               </div>
-            )}
-          </>
-        ) : (
-          <div className={styles.chatEmpty}>
-            <Search size={48} className={styles.chatEmptyIcon} />
-            <h2>Selecione um Chamado</h2>
-            <p>O contexto e o canal de contato aparecerão aqui para você focar no atendimento.</p>
-          </div>
-        )}
-      </main>
 
-      {/* Coluna 4: Status e Acessos */}
-      <section className={styles.statusArea}>
-        <div className={styles.statusSection}>
-          <h3 className={styles.statusTitle}>
-            <Key size={18} /> Cofre de Senhas (SSO)
-          </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <a href="/api/cofre/stoq" target="_blank" rel="noreferrer" className={styles.btnCofre}>
-              Abrir Stoq ERP
-            </a>
-            <a href="/api/cofre/milvus" target="_blank" rel="noreferrer" className={styles.btnCofre}>
-              Abrir Milvus Suite
-            </a>
-          </div>
-          <p className={styles.cofreDesc}>
-            O login corporativo é injetado via proxy. Você não verá a senha.
-          </p>
-        </div>
+              <div className={styles.panelCard}>
+                <h4 className={styles.panelTitle}>Rótulos</h4>
+                <select style={{ width: '100%', background: '#1a1d26', color: '#94a3b8', border: '1px solid #32394c', padding: '10px', borderRadius: '4px', outline: 'none' }}>
+                  <option>Adicionar rótulos</option>
+                </select>
+              </div>
 
-        <div className={styles.statusSection}>
-          <h3 className={styles.statusTitle}>
-            <Server size={18} /> Radar de PDVs
-          </h3>
-          <div className={styles.pdvList}>
-            {!ticketAtivo ? (
-              <span className={styles.cofreDesc}>Selecione um chamado para ver o status do PDV.</span>
-            ) : (
-              (() => {
-                const pdvAtual = pdvs.find(p => p.loja === ticketAtivo.cliente);
-                if (!pdvAtual) {
-                  return <span className={styles.cofreDesc}>Buscando disponibilidade da loja no Milvus...</span>;
-                }
+              <div className={styles.panelCard}>
+                <h4 className={styles.panelTitle}>Informações do Chamado</h4>
+                <div className={styles.panelRow}>
+                  <span className={styles.panelLabel}>Responsável:</span>
+                  <span className={styles.panelValue}>Henrique Cunha - Critel Tecnologia</span>
+                </div>
+                <div className={styles.panelRow}>
+                  <span className={styles.panelLabel}>Departamento:</span>
+                  <span className={styles.panelValue}>TI - Software</span>
+                </div>
+                <div className={styles.panelRow}>
+                  <span className={styles.panelLabel}>Categoria:</span>
+                  <span className={styles.panelValue}>Software - Gestor de Lojas</span>
+                </div>
+                <div className={styles.panelRow}>
+                  <span className={styles.panelLabel}>Criado em:</span>
+                  <span className={styles.panelValue}>{new Date(ticketAtivo.criado_em).toLocaleString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                </div>
+                <div className={styles.panelRow}>
+                  <span className={styles.panelLabel}>Prioridade:</span>
+                  <span className={styles.panelValue}>Baixa</span>
+                </div>
+                <div className={styles.panelRow}>
+                  <span className={styles.panelLabel}>Deadline:</span>
+                  <span className={styles.panelValue}>-</span>
+                </div>
+              </div>
 
-                let pdvsList = [];
-                try {
-                  // O novo mock guarda o array de PDVs dentro da string
-                  pdvsList = JSON.parse(pdvAtual.status_conexao);
-                } catch {
-                  // Fallback para os dados antigos antes dessa modificação
-                  pdvsList = [{ nome: 'Caixa Principal', status: pdvAtual.status_conexao }];
-                }
-
-                return (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
-                    {pdvsList.map((p: any, idx: number) => (
-                      <div key={idx} className={styles.pdvItem}>
-                        <span className={p.status === 'ONLINE' ? styles.dotGreen : styles.dotRed}></span>
-                        <span className={styles.pdvName}>{p.nome}</span>
-                        <span className={styles.pdvStatusText} style={{ color: p.status === 'ONLINE' ? '#10b981' : '#ef4444' }}>
-                          {p.status}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                );
-              })()
-            )}
+              <div className={styles.panelCard}>
+                <h4 className={styles.panelTitle}>Ferramentas Integradas</h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <a href="/api/cofre/stoq" target="_blank" rel="noreferrer" style={{ display: 'block', textAlign: 'center', background: '#3b82f6', color: '#fff', textDecoration: 'none', padding: '10px', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600 }}>
+                    Abrir Stoq ERP (Cofre)
+                  </a>
+                  <button 
+                    onClick={() => setIsMilvusIframeOpen(true)}
+                    style={{ background: '#6366f1', color: '#fff', border: 'none', padding: '10px', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }}
+                  >
+                    Abrir Milvus Proxy
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </section>
+      )}
+
+      {/* Modal WhatsApp Flutuante */}
+      {isWppModalOpen && (
+        <div className={styles.floatingWppOverlay}>
+          <div className={styles.floatingWppContainer}>
+            <div className={styles.floatingWppHeader}>
+              <h3 className={styles.floatingWppTitle}>
+                <Phone size={18} color="#10b981" /> WhatsApp - {conversaAtiva?.nome_perfil || ticketAtivo?.cliente}
+              </h3>
+              <button onClick={() => setIsWppModalOpen(false)} style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '1.2rem' }}>×</button>
+            </div>
+            
+            <div ref={scrollRef} className={styles.chatMessages}>
+              {(!mensagens || mensagens.length === 0) ? (
+                <div style={{ textAlign: 'center', opacity: 0.5, marginTop: '2rem', color: '#fff' }}>
+                  {!lojaContato ? (
+                    <div>
+                      <p>Loja sem contato cadastrado.</p>
+                      <button onClick={() => {setIsEditingContact(true); setIsWppModalOpen(false);}} style={{ background: '#3b82f6', color: '#fff', padding: '8px 16px', border: 'none', borderRadius: '4px', cursor: 'pointer', marginTop: '8px' }}>Cadastrar Contato</button>
+                    </div>
+                  ) : 'Inicie o atendimento. Suas mensagens aparecerão aqui.'}
+                </div>
+              ) : (
+                mensagens.map((msg) => {
+                  const isInbound = msg.direcao === 'INBOUND';
+                  return (
+                    <div key={msg.id} className={`${styles.messageWrapper} ${isInbound ? styles.msgIn : styles.msgOut}`}>
+                      <p className={styles.msgText}>{msg.conteudo}</p>
+                      <span className={styles.msgTime}>
+                        {new Date(msg.criado_em).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            <div className={styles.chatInputArea}>
+              <input 
+                type="text" 
+                value={inputMensagem}
+                onChange={(e) => setInputMensagem(e.target.value)}
+                onKeyDown={(e) => { if(e.key === 'Enter') handleEnviarMensagem(e as any); }}
+                placeholder="Digite a mensagem..." 
+                className={styles.chatInput}
+                disabled={!lojaContato}
+              />
+              <button onClick={handleEnviarMensagem} className={styles.btnSend} disabled={!lojaContato}>
+                <Send size={18} />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Full-Screen do Milvus Proxy */}
+      {isMilvusIframeOpen && (
+        <div style={{
+          position: 'absolute',
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(11, 17, 32, 0.95)',
+          backdropFilter: 'blur(10px)',
+          zIndex: 9999,
+          display: 'flex',
+          flexDirection: 'column',
+          padding: '2rem'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <div>
+              <h2 style={{ margin: 0, color: '#fff', fontFamily: 'var(--font-montserrat)' }}>Milvus IT Management</h2>
+              <p style={{ margin: '4px 0 0 0', color: '#94a3b8', fontSize: '0.9rem' }}>Sessão Única Compartilhada via WebRTC Proxy</p>
+            </div>
+            <button 
+              onClick={() => setIsMilvusIframeOpen(false)}
+              style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}
+            >
+              Fechar Milvus
+            </button>
+          </div>
+          <iframe 
+            src="http://localhost:3001" 
+            style={{ flex: 1, border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', background: '#fff', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }}
+            allow="camera; microphone; display-capture; fullscreen; clipboard-read; clipboard-write"
+          />
+        </div>
+      )}
     </div>
   );
 }

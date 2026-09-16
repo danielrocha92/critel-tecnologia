@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
 import { useRouter, useParams } from 'next/navigation';
-import { LogIn, KeyRound } from 'lucide-react';
+import { LogIn } from 'lucide-react';
 import styles from './login.module.css';
 
 export default function LoginPage() {
@@ -88,11 +88,11 @@ export default function LoginPage() {
     <div className={styles.container}>
       <div className={styles.loginBox}>
         <div className={styles.logoArea}>
-          <div className={styles.logoIcon}>
-            <KeyRound size={28} />
+          <div className={styles.logoWrapper}>
+            <img src="/critel-logo-light.svg" alt="Critel Tecnologia" className={styles.logoImage} />
           </div>
-          <h1 className={styles.title}>Acesso Critel</h1>
-          <p className={styles.subtitle}>Plataforma de Operações Integradas</p>
+          <h1 className={styles.title}>Plataforma de Operações</h1>
+          <p className={styles.subtitle}>Acesso Centralizado Critel</p>
         </div>
 
         {error && (

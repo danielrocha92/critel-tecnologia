@@ -3,21 +3,25 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #0b1120 0%, #162032 50%, #0f172a 100%);
+  background-color: #0b1120;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(2, 132, 199, 0.3) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(139, 44, 255, 0.2) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(16, 185, 129, 0.1) 0px, transparent 50%);
   padding: 1rem;
   font-family: var(--font-inter), sans-serif;
 }
 
 .loginBox {
-  background: rgba(15, 23, 42, 0.7);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 2.5rem 2rem;
-  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 3rem 2.5rem;
+  border-radius: 20px;
   width: 100%;
-  max-width: 420px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  max-width: 440px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -30,17 +34,13 @@
   align-items: center;
 }
 
-.logoIcon {
-  width: 56px;
-  height: 56px;
-  background: linear-gradient(135deg, #00d2ff 0%, #0284c7 100%);
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  margin-bottom: 1rem;
-  box-shadow: 0 4px 15px rgba(0, 210, 255, 0.3);
+.logoWrapper {
+  margin-bottom: 1.5rem;
+}
+
+.logoImage {
+  height: 40px;
+  width: auto;
 }
 
 .title {
