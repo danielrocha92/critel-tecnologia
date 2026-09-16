@@ -35,13 +35,22 @@ export async function POST(request: Request) {
     // Se for validação (independente de como vier)
     if (payload.action === 'validation' || rawBody.includes('validation')) {
       console.log('✅ TomTicket enviou um código de validação!');
-      // Tenta extrair o ID mesmo se for string
       const match = rawBody.match(/"id"\s*:\s*"([^"]+)"/);
       const valId = payload.id || (match ? match[1] : 'ID_NAO_ENCONTRADO');
       console.log(`\n========================================\nCOPIE E COLE ESTE CÓDIGO NO TOMTICKET:\n\n${valId}\n\n========================================\n`);
-      
-      // Retorna 200 OK vazio para não confundir o parser do TomTicket
       return new NextResponse(valId, { status: 200 });
+    }
+
+    // --- PROTEÇÃO DE SEGURANÇA PARA CRIAÇÃO DE TICKETS ---
+    if (!secret || !signature) {
+      console.error('❌ Falha de segurança: Sem segredo ou assinatura.');
+      return new NextResponse('Forbidden', { status: 403 });
+    }
+
+    const hmac = crypto.createHmac('sha1', secret).update(rawBody).digest('hex');
+    if (hmac !== signature) {
+      console.error('❌ Assinatura inválida! Possível ataque.', { recebida: signature, esperada: hmac });
+      return new NextResponse('Forbidden', { status: 403 });
     }
 
     if (payload.type === 'ticket') {
