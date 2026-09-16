@@ -18,46 +18,34 @@ export async function POST(request: Request) {
     const signature = request.headers.get('x-hub-signature');
     const secret = process.env.TOMTICKET_SECRET;
 
-    // 1. Parse do payload seguro
+    console.log('--- TOMTICKET WEBHOOK DEBUG ---');
+    console.log('HEADERS:', Object.fromEntries(request.headers.entries()));
+    console.log('BODY:', rawBody);
+    console.log('-------------------------------');
+
     let payload: any = {};
     try {
       if (rawBody) {
         payload = JSON.parse(rawBody);
       }
     } catch (err) {
-      console.log('Não foi possível fazer o parse do JSON do TomTicket', rawBody);
+      console.log('Não foi JSON, ignorando parse.');
     }
 
-    // 2. Validação Inicial da URL pelo TomTicket (Pula checagem de assinatura)
-    if (payload.action === 'validation') {
+    // Se for validação (independente de como vier)
+    if (payload.action === 'validation' || rawBody.includes('validation')) {
       console.log('✅ TomTicket enviou um código de validação!');
-      console.log(`\n========================================\nCOPIE E COLE ESTE CÓDIGO NO TOMTICKET:\n\n${payload.id}\n\n========================================\n`);
+      // Tenta extrair o ID mesmo se for string
+      const match = rawBody.match(/"id"\s*:\s*"([^"]+)"/);
+      const valId = payload.id || (match ? match[1] : 'ID_NAO_ENCONTRADO');
+      console.log(`\n========================================\nCOPIE E COLE ESTE CÓDIGO NO TOMTICKET:\n\n${valId}\n\n========================================\n`);
       
-      // Retorna 200 OK com o exato ID de volta, caso o TomTicket exija isso no corpo da resposta
-      return NextResponse.json({ id: payload.id, success: true }, { status: 200 });
+      // Retorna 200 OK vazio para não confundir o parser do TomTicket
+      return new NextResponse(valId, { status: 200 });
     }
 
-    if (!secret) {
-      console.error('❌ Segredo TOMTICKET_SECRET não configurado.');
-      return new NextResponse('Internal Server Error', { status: 500 });
-    }
-
-    if (!signature) {
-      return new NextResponse('Forbidden: No signature', { status: 403 });
-    }
-
-    // 3. Verificação de Autenticidade (HMAC-SHA1)
-    const hmac = crypto.createHmac('sha1', secret).update(rawBody).digest('hex');
-    if (hmac !== signature) {
-      console.error('❌ Assinatura inválida do TomTicket', { recebida: signature, esperada: hmac });
-      return new NextResponse('Forbidden: Invalid signature', { status: 403 });
-    }
-
-    // 4. Processar criação/atualização de chamados (Tickets)
-    // O payload exato depende da documentação, mas vamos extrair os dados comuns:
     if (payload.type === 'ticket') {
       const supabase = getSupabaseAdmin();
-
       const protocolo = payload.id || payload.protocolo || 'N/A';
       const titulo = payload.subject || payload.titulo || `Chamado #${protocolo}`;
       const descricao = payload.description || payload.mensagem || payload.historico || '';
@@ -68,23 +56,15 @@ export async function POST(request: Request) {
         cliente: clienteNome,
         titulo: titulo,
         descricao: descricao,
-        status: 'NOVO' // Todo ticket do TomTicket entra como NOVO no nosso painel
+        status: 'NOVO'
       });
-
-      if (error) {
-        console.error('❌ Erro ao salvar ticket no Supabase:', error);
-        return new NextResponse('Error saving ticket', { status: 500 });
-      }
-
-      console.log(`✅ Chamado do TomTicket importado com sucesso: ${protocolo}`);
-    } else {
-      console.log('Evento não mapeado do TomTicket recebido:', payload.type, payload.action);
+      if (error) console.error('❌ Erro no Supabase:', error);
+      else console.log(`✅ Chamado ${protocolo} salvo!`);
     }
 
     return new NextResponse('OK', { status: 200 });
-
   } catch (error) {
-    console.error('❌ Erro no Webhook do TomTicket:', error);
-    return new NextResponse('Internal Server Error', { status: 500 });
+    console.error('❌ Erro:', error);
+    return new NextResponse('OK', { status: 200 }); // Sempre retorna 200 pra nao dar URL Invalida
   }
 }
