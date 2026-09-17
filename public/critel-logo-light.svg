@@ -1,37 +1,36 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 54" fill="none">
-  <!-- Critel Emblem / Symbol -->
-  <g transform="translate(4, 2)">
-    <!-- Top Orbit Arc -->
-    <path d="M 25 4 C 36 4 45.5 12 48 23 L 42 23 C 39.8 15 33 9.5 25 9.5 C 17 9.5 10.2 15 8 23 L 2 23 C 4.5 12 14 4 25 4 Z" fill="url(#arcGradientLight)" />
-    <!-- Bottom Orbit Arc -->
-    <path d="M 25 46 C 14 46 4.5 38 2 27 L 8 27 C 10.2 35 17 40.5 25 40.5 C 33 40.5 39.8 35 42 27 L 48 27 C 45.5 38 36 46 25 46 Z" fill="url(#arcGradientLight)" />
-    <!-- Center Core Glow & Sphere -->
-    <circle cx="25" cy="25" r="14" fill="url(#coreGradientLight)" />
-    <circle cx="25" cy="25" r="13" stroke="#dc2626" stroke-width="1.5" stroke-opacity="0.3" fill="none" />
-    <!-- Modern Tech Intersection Dot -->
-    <circle cx="25" cy="25" r="5" fill="#dc2626" />
-    <circle cx="25" cy="25" r="2.5" fill="#ffffff" />
-  </g>
-
-  <!-- Brand Typography -->
-  <!-- "Critel" -->
-  <text x="64" y="31" font-family="Montserrat, Inter, system-ui, sans-serif" font-size="24" font-weight="900" letter-spacing="-0.5" fill="#dc2626">Critel</text>
-  <!-- "Tecnologia" -->
-  <text x="138" y="31" font-family="Montserrat, Inter, system-ui, sans-serif" font-size="24" font-weight="700" letter-spacing="-0.2" fill="#0f172a">Tecnologia</text>
-  
-  <!-- Subtitle Tagline -->
-  <text x="65" y="45" font-family="Inter, system-ui, sans-serif" font-size="8" font-weight="700" letter-spacing="3" fill="#64748b">INFRAESTRUTURA &amp; TI</text>
-
-  <!-- Gradients -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 56" fill="none">
   <defs>
-    <linearGradient id="arcGradientLight" x1="0" y1="0" x2="50" y2="50" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#0284c7" />
-      <stop offset="50%" stop-color="#0369a1" />
-      <stop offset="100%" stop-color="#b91c1c" />
+    <linearGradient id="ovalTop" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2d4a6b"/>
+      <stop offset="100%" stop-color="#1a3a5c"/>
     </linearGradient>
-    <linearGradient id="coreGradientLight" x1="11" y1="11" x2="39" y2="39" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#f1f5f9" />
-      <stop offset="100%" stop-color="#e2e8f0" />
+    <linearGradient id="ovalBot" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#3a566e"/>
+      <stop offset="100%" stop-color="#243f58"/>
     </linearGradient>
   </defs>
+
+  <!-- Ícone oval Critel — fiel ao logo oficial adaptado para fundo escuro -->
+  <g transform="translate(2, 4)">
+    <!-- Arco externo superior -->
+    <path d="M24 2 C38 2 49 11 51 24 L44 24 C42.5 15 34.5 9 24 9 C13.5 9 5.5 15 4 24 L-3 24 C-1 11 10 2 24 2 Z"
+          fill="#c0c9d4" opacity="0.85"/>
+    <!-- Arco externo inferior -->
+    <path d="M24 50 C10 50 -1 41 -3 28 L4 28 C5.5 37 13.5 43 24 43 C34.5 43 42.5 37 44 28 L51 28 C49 41 38 50 24 50 Z"
+          fill="#c0c9d4" opacity="0.85"/>
+    <!-- Meia-lua interna superior -->
+    <ellipse cx="24" cy="18" rx="14" ry="9" fill="url(#ovalTop)" opacity="0.9"/>
+    <!-- Meia-lua interna inferior -->
+    <ellipse cx="24" cy="34" rx="14" ry="9" fill="url(#ovalBot)" opacity="0.9"/>
+    <!-- Borda oval externa -->
+    <ellipse cx="24" cy="26" rx="20" ry="24" stroke="#2d4a6b" stroke-width="2.5" fill="none"/>
+  </g>
+
+  <!-- Tipografia: "Critel" em vermelho carmim -->
+  <text x="62" y="30" font-family="Georgia, 'Times New Roman', serif" font-size="22" font-weight="700" letter-spacing="-0.3" fill="#c9253a">Critel</text>
+  <!-- Tipografia: " Tecnologia" em branco/cinza claro -->
+  <text x="114" y="30" font-family="Georgia, 'Times New Roman', serif" font-size="22" font-weight="400" letter-spacing="-0.2" fill="#e2e8f0">Tecnologia</text>
+
+  <!-- Tagline -->
+  <text x="63" y="44" font-family="Inter, system-ui, sans-serif" font-size="7.5" font-weight="600" letter-spacing="2.5" fill="#64748b">INFRAESTRUTURA &amp; TI</text>
 </svg>

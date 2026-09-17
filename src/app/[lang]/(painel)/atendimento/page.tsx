@@ -13,6 +13,20 @@ const supabase = createClient(
 export default function CentralAtendimento() {
   const [tickets, setTickets] = useState<any[]>([]);
   const [ticketAtivo, setTicketAtivo] = useState<any | null>(null);
+  const [viewMode, setViewMode] = useState<'details' | 'timeline'>('details');
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [perfis, setPerfis] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState('novos');
+  const [operadorAtual, setOperadorAtual] = useState<any>(null);
+  
+  // Edit Form States
+  const [editForm, setEditForm] = useState({
+    titulo: '',
+    descricao: '',
+    departamento: '',
+    categoria: '',
+    prioridade: ''
+  });
   
   // WhatsApp States
   const [conversas, setConversas] = useState<any[]>([]);
@@ -40,7 +54,7 @@ export default function CentralAtendimento() {
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // 1. Carregar fila de Tickets (TomTicket Webhooks)
+  // 1. Carregar fila de Tickets e Perfis
   useEffect(() => {
     const carregarTickets = async () => {
       const { data } = await supabase
@@ -49,7 +63,20 @@ export default function CentralAtendimento() {
         .order('criado_em', { ascending: false });
       if (data) setTickets(data);
     };
+    
+    const carregarPerfis = async () => {
+      const { data } = await supabase
+        .from('perfis')
+        .select('id, nome, cargo')
+        .order('nome');
+      if (data) {
+        setPerfis(data);
+        if (data.length > 0) setOperadorAtual(data[0]); // Operador default
+      }
+    };
+
     carregarTickets();
+    carregarPerfis();
 
     const subTickets = supabase
       .channel('lista-tickets')
@@ -280,20 +307,53 @@ export default function CentralAtendimento() {
     <div className={styles.container}>
       {!ticketAtivo ? (
         <div className={styles.tableContainer}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px', paddingRight: '24px', alignItems: 'center', gap: '8px' }}>
+            <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>Simular Operador Logado:</span>
+            <select 
+              value={operadorAtual?.id || ''} 
+              onChange={(e) => setOperadorAtual(perfis.find(p => p.id === e.target.value))}
+              style={{ background: '#1f2937', color: '#fff', border: '1px solid #374151', padding: '4px 8px', borderRadius: '4px', outline: 'none', fontSize: '0.85rem' }}
+            >
+              <option value="">Nenhum</option>
+              {perfis.map(p => <option key={p.id} value={p.id}>{p.nome}</option>)}
+            </select>
+          </div>
           <div className={styles.tableHeader}>
-            <div className={`${styles.tabItem} ${styles.tabItemActive}`}>
-              Novos Chamados <span className={styles.tabBadge}>1338</span>
+            <div 
+              className={`${styles.tabItem} ${activeTab === 'novos' ? styles.tabItemActive : ''}`}
+              onClick={() => setActiveTab('novos')}
+            >
+              Novos Chamados <span className={styles.tabBadge}>{tickets.filter(t => !t.analista_id).length}</span>
             </div>
-            <div className={styles.tabItem}>Chamados Respondidos</div>
-            <div className={styles.tabItem}>Novos Chamados Vinculados</div>
-            <div className={styles.tabItem}>
-              Abertos <span className={styles.tabBadge}>5</span>
+            <div 
+              className={`${styles.tabItem} ${activeTab === 'respondidos' ? styles.tabItemActive : ''}`}
+              onClick={() => setActiveTab('respondidos')}
+            >
+              Chamados Respondidos
             </div>
-            <div className={styles.tabItem}>
-              Abertos da Equipe <span className={styles.tabBadge}>3588</span>
+            <div 
+              className={`${styles.tabItem} ${activeTab === 'novos_vinculados' ? styles.tabItemActive : ''}`}
+              onClick={() => setActiveTab('novos_vinculados')}
+            >
+              Novos Chamados Vinculados
             </div>
-            <div className={styles.tabItem}>
-              Aguardando Ação da Equipe <span className={styles.tabBadge}>509</span>
+            <div 
+              className={`${styles.tabItem} ${activeTab === 'abertos' ? styles.tabItemActive : ''}`}
+              onClick={() => setActiveTab('abertos')}
+            >
+              Abertos <span className={styles.tabBadge}>{tickets.filter(t => t.analista_id === operadorAtual?.id && t.status !== 'FECHADO').length}</span>
+            </div>
+            <div 
+              className={`${styles.tabItem} ${activeTab === 'abertos_equipe' ? styles.tabItemActive : ''}`}
+              onClick={() => setActiveTab('abertos_equipe')}
+            >
+              Abertos da Equipe <span className={styles.tabBadge}>{tickets.filter(t => t.analista_id && t.status !== 'FECHADO').length}</span>
+            </div>
+            <div 
+              className={`${styles.tabItem} ${activeTab === 'aguardando' ? styles.tabItemActive : ''}`}
+              onClick={() => setActiveTab('aguardando')}
+            >
+              Aguardando Ação da Equipe
             </div>
           </div>
           
@@ -317,14 +377,22 @@ export default function CentralAtendimento() {
                 </tr>
               </thead>
               <tbody>
-                {tickets.length === 0 ? (
-                  <tr>
-                    <td colSpan={13} style={{ textAlign: 'center', padding: '3rem', opacity: 0.7 }}>
-                      Nenhum chamado pendente no momento.
-                    </td>
-                  </tr>
-                ) : (
-                  tickets.map((ticket, index) => {
+                {(() => {
+                  const filteredTickets = tickets.filter(t => {
+                    if (activeTab === 'novos') return !t.analista_id;
+                    if (activeTab === 'abertos') return t.analista_id === operadorAtual?.id && t.status !== 'FECHADO';
+                    if (activeTab === 'abertos_equipe') return t.analista_id && t.status !== 'FECHADO';
+                    return true;
+                  });
+
+                  return filteredTickets.length === 0 ? (
+                    <tr>
+                      <td colSpan={13} style={{ textAlign: 'center', padding: '3rem', opacity: 0.7 }}>
+                        Nenhum chamado para este filtro.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredTickets.map((ticket, index) => {
                     const pdvDaLoja = pdvs.find(p => p.loja === ticket.cliente);
                     let isOffline = false;
                     if (pdvDaLoja) {
@@ -345,12 +413,14 @@ export default function CentralAtendimento() {
                       <tr 
                         key={ticket.id} 
                         className={`${styles.ticketRow} ${isOffline ? styles.ticketRowOffline : ''}`}
-                        onClick={() => setTicketAtivo(ticket)}
+                        onClick={() => {
+                          setTicketAtivo(ticket);
+                          setViewMode('details');
+                        }}
                       >
                         <td className={styles.colProtocolo}>#{ticket.protocolo_origem}</td>
                         <td className={styles.colAssunto}>
                           {ticket.titulo}
-                          <span className={styles.badgeAguardando}>AGUARDANDO</span>
                         </td>
                         <td className={styles.colDepto}>{departamento}</td>
                         <td className={styles.colCliente}>
@@ -378,11 +448,128 @@ export default function CentralAtendimento() {
                       </tr>
                     );
                   })
-                )}
+                );
+              })()}
               </tbody>
             </table>
           </div>
         </div>
+      ) : viewMode === 'details' ? (
+         <div className={styles.innerViewContainer} style={{ background: '#0b1120', color: '#fff', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '16px 24px', borderBottom: '1px solid #1f2937' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                 <button onClick={() => setTicketAtivo(null)} style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '1.2rem' }}>⬅</button>
+                 <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 600 }}>Vincular Chamado: #{ticketAtivo.protocolo_origem} - {ticketAtivo.titulo}</h2>
+              </div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                 <button 
+                   onClick={() => {
+                     setEditForm({
+                       titulo: ticketAtivo.titulo || '',
+                       descricao: ticketAtivo.descricao || '',
+                       departamento: ticketAtivo.departamento || '',
+                       categoria: ticketAtivo.categoria || '',
+                       prioridade: ticketAtivo.prioridade || 'Baixa'
+                     });
+                     setIsEditModalOpen(true);
+                   }} 
+                   style={{ background: '#1f2937', color: '#fff', padding: '8px 12px', border: '1px solid #374151', borderRadius: '4px', cursor: 'pointer' }}
+                 >
+                   <Pencil size={16} />
+                 </button>
+                 <button style={{ background: '#1f2937', color: '#fff', padding: '8px 12px', border: '1px solid #374151', borderRadius: '4px', cursor: 'pointer' }}><Inbox size={16} /></button>
+                 <button style={{ background: '#ef4444', color: '#fff', padding: '8px 16px', border: 'none', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}><Trash2 size={16}/> Excluir v</button>
+                 <button onClick={() => setTicketAtivo(null)} style={{ background: '#1f2937', color: '#fff', padding: '8px 16px', border: '1px solid #374151', borderRadius: '4px', cursor: 'pointer' }}>Cancelar</button>
+              </div>
+            </div>
+
+            <div style={{ padding: '24px', flex: 1, overflowY: 'auto' }}>
+               <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr', gap: '16px', marginBottom: '24px' }}>
+                  <div style={{ color: '#9ca3af', textAlign: 'right', fontWeight: 500, fontSize: '0.9rem' }}>Mensagem:</div>
+                  <div style={{ color: '#f3f4f6', fontSize: '0.9rem', whiteSpace: 'pre-wrap' }}>{ticketAtivo.descricao || '-'}</div>
+
+                  <div style={{ color: '#9ca3af', textAlign: 'right', fontWeight: 500, fontSize: '0.9rem' }}>Departamento:</div>
+                  <div style={{ color: '#f3f4f6', fontSize: '0.9rem' }}>{ticketAtivo.departamento || '-'}</div>
+
+                  <div style={{ color: '#9ca3af', textAlign: 'right', fontWeight: 500, fontSize: '0.9rem' }}>Categoria:</div>
+                  <div style={{ color: '#f3f4f6', fontSize: '0.9rem' }}>{ticketAtivo.categoria || '-'}</div>
+
+                  <div style={{ color: '#9ca3af', textAlign: 'right', fontWeight: 500, fontSize: '0.9rem' }}>Prioridade:</div>
+                  <div style={{ color: '#f3f4f6', fontSize: '0.9rem' }}>{ticketAtivo.prioridade || '-'}</div>
+
+                  <div style={{ color: '#9ca3af', textAlign: 'right', fontWeight: 500, fontSize: '0.9rem' }}>Data/Hora:</div>
+                  <div style={{ color: '#f3f4f6', fontSize: '0.9rem' }}>{new Date(ticketAtivo.criado_em).toLocaleString()}</div>
+
+                  <div style={{ color: '#9ca3af', textAlign: 'right', fontWeight: 500, fontSize: '0.9rem' }}>Agendamento:</div>
+                  <div style={{ color: '#f3f4f6', fontSize: '0.9rem' }}>-</div>
+
+                  <div style={{ color: '#9ca3af', textAlign: 'right', fontWeight: 500, fontSize: '0.9rem' }}>Deadline:</div>
+                  <div style={{ color: '#f3f4f6', fontSize: '0.9rem' }}>-</div>
+               </div>
+
+               <hr style={{ borderColor: '#1f2937', margin: '24px 0' }} />
+
+               <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr', gap: '16px', marginBottom: '24px' }}>
+                  <div style={{ color: '#9ca3af', textAlign: 'right', fontWeight: 500, fontSize: '0.9rem' }}>Cliente:</div>
+                  <div style={{ color: '#f3f4f6', fontSize: '0.9rem' }}>{ticketAtivo.cliente || '-'}</div>
+
+                  <div style={{ color: '#9ca3af', textAlign: 'right', fontWeight: 500, fontSize: '0.9rem' }}>Organização:</div>
+                  <div style={{ color: '#f3f4f6', fontSize: '0.9rem' }}>-</div>
+
+                  <div style={{ color: '#9ca3af', textAlign: 'right', fontWeight: 500, fontSize: '0.9rem' }}>Email:</div>
+                  <div style={{ color: '#f3f4f6', fontSize: '0.9rem' }}>{ticketAtivo.email_cliente || '-'}</div>
+               </div>
+
+               <div style={{ textAlign: 'center', margin: '24px 0' }}>
+                  <button onClick={() => setViewMode('timeline')} style={{ background: 'transparent', color: '#fff', border: '1px solid #374151', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem' }}>Mostrar Detalhes</button>
+               </div>
+
+               <hr style={{ borderColor: '#1f2937', margin: '24px 0' }} />
+
+               <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr', gap: '16px', alignItems: 'center' }}>
+                  <div style={{ color: '#9ca3af', textAlign: 'right', fontWeight: 500, fontSize: '0.9rem' }}>Atendente:</div>
+                  <div>
+                    <select 
+                      style={{ background: '#1f2937', color: '#fff', border: '1px solid #374151', padding: '10px 12px', borderRadius: '4px', width: '100%', maxWidth: '400px', outline: 'none', fontSize: '0.9rem' }}
+                      value={ticketAtivo.analista_id || ''}
+                      onChange={async (e) => {
+                        const novoAtendente = e.target.value;
+                        setTicketAtivo({...ticketAtivo, analista_id: novoAtendente});
+                        await supabase.from('tickets').update({ analista_id: novoAtendente }).eq('id', ticketAtivo.id);
+                      }}
+                    >
+                      <option value="">Sem atendente</option>
+                      {perfis.map(p => (
+                        <option key={p.id} value={p.id}>{p.nome} {p.cargo ? `(${p.cargo})` : ''}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div></div>
+                  <div>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#f3f4f6', fontSize: '0.85rem' }}>
+                      <input type="checkbox" defaultChecked />
+                      Receber respostas do cliente por email
+                    </label>
+                  </div>
+               </div>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '16px 24px', borderTop: '1px solid #1f2937' }}>
+              <button 
+                style={{ background: '#059669', color: '#fff', border: 'none', padding: '8px 24px', borderRadius: '4px', cursor: 'pointer', fontWeight: 500 }}
+                onClick={async () => {
+                   alert('Atendente vinculado!');
+                   setViewMode('timeline');
+                }}
+              >
+                Vincular
+              </button>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button style={{ background: '#dc2626', color: '#fff', padding: '8px 16px', border: 'none', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>Excluir v</button>
+                <button onClick={() => setTicketAtivo(null)} style={{ background: 'transparent', color: '#fff', padding: '8px 16px', border: '1px solid #374151', borderRadius: '4px', cursor: 'pointer' }}>Cancelar</button>
+              </div>
+            </div>
+         </div>
       ) : (
         <div className={styles.innerViewContainer}>
           <div className={styles.innerHeader}>
@@ -640,6 +827,124 @@ export default function CentralAtendimento() {
           />
         </div>
       )}
+
+      {/* Modal Editar Chamado */}
+      {isEditModalOpen && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(11, 17, 32, 0.85)', backdropFilter: 'blur(4px)',
+          zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }}>
+          <div style={{
+            background: '#1a1d26', width: '100%', maxWidth: '800px',
+            borderRadius: '8px', border: '1px solid #32394c',
+            display: 'flex', flexDirection: 'column'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '16px', borderBottom: '1px solid #32394c' }}>
+              <h3 style={{ margin: 0, color: '#fff' }}>Editar Chamado</h3>
+              <button onClick={() => setIsEditModalOpen(false)} style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '1.2rem' }}>×</button>
+            </div>
+            
+            <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', alignItems: 'center', gap: '16px' }}>
+                <label style={{ textAlign: 'right', color: '#9ca3af', fontSize: '0.9rem' }}>Assunto:</label>
+                <input 
+                  type="text" 
+                  value={editForm.titulo}
+                  onChange={(e) => setEditForm({...editForm, titulo: e.target.value})}
+                  style={{ background: '#0b1120', color: '#fff', border: '1px solid #3b82f6', padding: '10px', borderRadius: '4px', width: '100%', outline: 'none' }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', alignItems: 'flex-start', gap: '16px' }}>
+                <label style={{ textAlign: 'right', color: '#9ca3af', fontSize: '0.9rem', marginTop: '10px' }}>Mensagem:</label>
+                <textarea 
+                  value={editForm.descricao}
+                  onChange={(e) => setEditForm({...editForm, descricao: e.target.value})}
+                  style={{ background: '#0b1120', color: '#fff', border: '1px solid #32394c', padding: '10px', borderRadius: '4px', width: '100%', minHeight: '120px', outline: 'none', resize: 'vertical' }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', alignItems: 'center', gap: '16px' }}>
+                <label style={{ textAlign: 'right', color: '#9ca3af', fontSize: '0.9rem' }}>Departamento:</label>
+                <select 
+                  value={editForm.departamento}
+                  onChange={(e) => setEditForm({...editForm, departamento: e.target.value})}
+                  style={{ background: '#0b1120', color: '#fff', border: '1px solid #32394c', padding: '10px', borderRadius: '4px', width: '100%', outline: 'none' }}
+                >
+                  <option value="">Selecione...</option>
+                  <option value="FIN - Contas a Pagar">FIN - Contas a Pagar</option>
+                  <option value="FIN - Contas a Receber">FIN - Contas a Receber</option>
+                  <option value="TI - Lojas">TI - Lojas</option>
+                  <option value="RH - Pessoal">RH - Pessoal</option>
+                  <option value="Operações">Operações</option>
+                </select>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', alignItems: 'center', gap: '16px' }}>
+                <label style={{ textAlign: 'right', color: '#9ca3af', fontSize: '0.9rem' }}>Categoria:</label>
+                <select 
+                  value={editForm.categoria}
+                  onChange={(e) => setEditForm({...editForm, categoria: e.target.value})}
+                  style={{ background: '#0b1120', color: '#fff', border: '1px solid #32394c', padding: '10px', borderRadius: '4px', width: '100%', outline: 'none' }}
+                >
+                  <option value="">Selecione...</option>
+                  <option value="Solicitação Cartão Vexpenses (Lojas)">Solicitação Cartão Vexpenses (Lojas)</option>
+                  <option value="Hardware - PDV">Hardware - PDV</option>
+                  <option value="Dúvida de Sistema">Dúvida de Sistema</option>
+                </select>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', alignItems: 'center', gap: '16px' }}>
+                <label style={{ textAlign: 'right', color: '#9ca3af', fontSize: '0.9rem' }}>Prioridade:</label>
+                <select 
+                  value={editForm.prioridade}
+                  onChange={(e) => setEditForm({...editForm, prioridade: e.target.value})}
+                  style={{ background: '#0b1120', color: '#fff', border: '1px solid #3b82f6', padding: '10px', borderRadius: '4px', width: '100%', outline: 'none' }}
+                >
+                  <option value="Baixa">Baixa</option>
+                  <option value="Normal">Normal</option>
+                  <option value="Alta">Alta</option>
+                  <option value="Urgente">Urgente</option>
+                </select>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', padding: '16px', borderTop: '1px solid #32394c', background: '#111520', borderBottomLeftRadius: '8px', borderBottomRightRadius: '8px' }}>
+              <button 
+                style={{ background: '#10b981', color: '#fff', padding: '8px 24px', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 500 }}
+                onClick={async () => {
+                  const { error } = await supabase.from('tickets').update({
+                    titulo: editForm.titulo,
+                    descricao: editForm.descricao,
+                    departamento: editForm.departamento,
+                    categoria: editForm.categoria,
+                    prioridade: editForm.prioridade
+                  }).eq('id', ticketAtivo.id);
+                  
+                  if (!error) {
+                    setTicketAtivo({
+                      ...ticketAtivo,
+                      titulo: editForm.titulo,
+                      descricao: editForm.descricao,
+                      departamento: editForm.departamento,
+                      categoria: editForm.categoria,
+                      prioridade: editForm.prioridade
+                    });
+                    setIsEditModalOpen(false);
+                  } else {
+                    alert('Erro ao salvar: ' + error.message);
+                  }
+                }}
+              >
+                Salvar
+              </button>
+              <button onClick={() => setIsEditModalOpen(false)} style={{ background: 'transparent', color: '#fff', padding: '8px 16px', border: '1px solid #32394c', borderRadius: '4px', cursor: 'pointer' }}>Fechar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

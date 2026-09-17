@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Bell, User, MessageSquare, ChevronUp, ChevronDown, Pencil, Menu } from 'lucide-react';
+import { User, MessageSquare, ChevronUp, ChevronDown, Pencil, Menu } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { createBrowserClient } from '@supabase/ssr';
+import NotificacoesBell from './NotificacoesBell';
 
 export default function Topbar() {
   const params = useParams();
@@ -54,12 +55,7 @@ export default function Topbar() {
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-        <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#cbd5e1', position: 'relative' }}>
-          <Bell size={20} />
-          <span style={{ position: 'absolute', top: '-5px', right: '-8px', background: '#ef4444', color: '#fff', fontSize: '0.65rem', padding: '2px 6px', borderRadius: '10px', fontWeight: 'bold' }}>
-            111
-          </span>
-        </button>
+        <NotificacoesBell />
         <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#cbd5e1' }}>
           <MessageSquare size={20} />
         </button>

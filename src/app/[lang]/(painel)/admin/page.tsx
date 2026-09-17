@@ -18,6 +18,8 @@ export default function AdminPage() {
   const [usuarios, setUsuarios] = useState<Perfil[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
+  const [perfilLogado, setPerfilLogado] = useState<Perfil | null>(null);
+  const [loadingPerfil, setLoadingPerfil] = useState(true);
   
   // Modal State
   const [targetBan, setTargetBan] = useState<Perfil | null>(null);
@@ -26,6 +28,7 @@ export default function AdminPage() {
   const [isApproving, setIsApproving] = useState<string | null>(null);
 
   useEffect(() => {
+    carregarPerfilLogado();
     carregarUsuarios();
   }, []);
 
@@ -33,6 +36,23 @@ export default function AdminPage() {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
+
+  const carregarPerfilLogado = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { setLoadingPerfil(false); return; }
+      const { data } = await supabase
+        .from('perfis')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+      setPerfilLogado(data || null);
+    } catch {
+      // ignora
+    } finally {
+      setLoadingPerfil(false);
+    }
+  };
 
   const carregarUsuarios = async () => {
     try {
@@ -182,39 +202,57 @@ export default function AdminPage() {
     </table>
   );
 
+  const isSuperAdmin = perfilLogado?.cargo === 'SUPER_ADMIN';
+
   return (
     <div className={styles.container}>
       <div className={styles.contentWrapper}>
-        <div className={styles.header}>
-          <h1 className={styles.title}>Governança de Identidade</h1>
-          <p className={styles.subtitle}>Gestão de perfis e controle de acessos à plataforma.</p>
-        </div>
 
-        {errorMsg && (
-          <div style={{ color: '#fca5a5', padding: '1rem', background: 'rgba(239, 68, 68, 0.2)', borderRadius: '8px', marginBottom: '1rem' }}>
-            {errorMsg}
-          </div>
-        )}
-
-        {loading ? (
+        {/* Bloco protegido: apenas SUPER_ADMIN */}
+        {loadingPerfil ? (
           <div className={styles.glassCard}>
-            <p>Carregando diretório de usuários...</p>
+            <p>Verificando permissões...</p>
+          </div>
+        ) : !isSuperAdmin ? (
+          <div className={styles.glassCard} style={{ textAlign: 'center', padding: '3rem' }}>
+            <ShieldAlert size={48} style={{ color: '#ef4444', marginBottom: '1rem' }} />
+            <h2 style={{ color: '#f8fafc', marginBottom: '0.5rem' }}>Acesso Restrito</h2>
+            <p style={{ color: '#94a3b8' }}>A seção de Governança de Identidade é exclusiva para o Super Administrador.</p>
           </div>
         ) : (
           <>
-            {pendingUsers.length > 0 && (
-              <div className={styles.glassCard} style={{ borderColor: 'rgba(245, 158, 11, 0.3)', marginBottom: '2rem' }}>
-                <h2 style={{ fontSize: '1.2rem', color: '#fbbf24', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-                  <Clock size={20} /> Aguardando Aprovação ({pendingUsers.length})
-                </h2>
-                {renderTable(pendingUsers, true)}
+            <div className={styles.header}>
+              <h1 className={styles.title}>Governança de Identidade</h1>
+              <p className={styles.subtitle}>Gestão de perfis e controle de acessos à plataforma.</p>
+            </div>
+
+            {errorMsg && (
+              <div style={{ color: '#fca5a5', padding: '1rem', background: 'rgba(239, 68, 68, 0.2)', borderRadius: '8px', marginBottom: '1rem' }}>
+                {errorMsg}
               </div>
             )}
 
-            <div className={styles.glassCard}>
-              <h2 style={{ fontSize: '1.2rem', color: '#f8fafc', marginBottom: '1rem' }}>Diretório de Usuários Ativos</h2>
-              {renderTable(activeUsers, false)}
-            </div>
+            {loading ? (
+              <div className={styles.glassCard}>
+                <p>Carregando diretório de usuários...</p>
+              </div>
+            ) : (
+              <>
+                {pendingUsers.length > 0 && (
+                  <div className={styles.glassCard} style={{ borderColor: 'rgba(245, 158, 11, 0.3)', marginBottom: '2rem' }}>
+                    <h2 style={{ fontSize: '1.2rem', color: '#fbbf24', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+                      <Clock size={20} /> Aguardando Aprovação ({pendingUsers.length})
+                    </h2>
+                    {renderTable(pendingUsers, true)}
+                  </div>
+                )}
+
+                <div className={styles.glassCard}>
+                  <h2 style={{ fontSize: '1.2rem', color: '#f8fafc', marginBottom: '1rem' }}>Diretório de Usuários Ativos</h2>
+                  {renderTable(activeUsers, false)}
+                </div>
+              </>
+            )}
           </>
         )}
       </div>
