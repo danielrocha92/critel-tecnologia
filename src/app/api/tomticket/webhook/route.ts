@@ -43,47 +43,45 @@ export async function POST(request: Request) {
 
     // --- PROTEÇÃO DE SEGURANÇA PARA CRIAÇÃO DE TICKETS ---
     /*
-    if (!secret || !signature) {
-      console.error('❌ Falha de segurança: Sem segredo ou assinatura.');
-      return new NextResponse('Forbidden', { status: 403 });
-    }
-
-    const hmac = crypto.createHmac('sha1', secret).update(rawBody).digest('hex');
-    if (hmac !== signature) {
-      console.error('❌ Assinatura inválida! Possível ataque.', { recebida: signature, esperada: hmac });
-      return new NextResponse('Forbidden', { status: 403 });
-    }
+    // Removemos a trava HMAC estrita porque o TomTicket não envia o x-hub-signature no padrão GitHub.
+    // Vamos logar os headers para ver como o TomTicket realmente manda a chave:
+    console.log('Headers recebidos do TomTicket:', Object.fromEntries(request.headers.entries()));
     */
     console.log('⚠️ Verificação de assinatura (HMAC) desativada para debug.');
 
     if (payload.type === 'ticket') {
       const supabase = getSupabaseAdmin();
-      const protocolo = payload.id || payload.protocolo || 'N/A';
-      const titulo = payload.subject || payload.titulo || `Chamado #${protocolo}`;
-      const descricao = payload.description || payload.mensagem || payload.historico || '';
-      const clienteNome = payload.client?.name || payload.nome_cliente || payload.cliente || 'Desconhecido';
       
-      const departamento = payload.department || payload.departamento || '';
-      const categoria = payload.category || payload.categoria || '';
-      const prioridade = payload.priority || payload.prioridade || '';
-      const emailCliente = payload.client?.email || payload.email_cliente || payload.email || '';
+      const ticket = payload.data || payload;
+      const protocolo = ticket.id || ticket.protocolo || `N-A-${Date.now()}`;
+      const clienteNome = ticket.client?.name || ticket.cliente?.nome || 'Desconhecido';
+      const titulo = ticket.subject || ticket.titulo || `Chamado #${protocolo}`;
+      const descricao = ticket.description || ticket.descricao || '';
+      const departamento = ticket.department?.name || ticket.departamento?.nome || null;
+      const categoria = ticket.category?.name || ticket.categoria?.nome || null;
+      const prioridade = ticket.priority?.name || ticket.prioridade?.nome || null;
+      const emailCliente = ticket.client?.email || ticket.cliente?.email || null;
 
-      const { error } = await supabase.from('tickets').insert({
-        protocolo_origem: protocolo.toString(),
-        cliente: clienteNome,
-        titulo: titulo,
-        descricao: descricao,
-        departamento: departamento,
-        categoria: categoria,
-        prioridade: prioridade,
-        email_cliente: emailCliente,
-        status: 'NOVO'
-      });
-      if (error) {
-        console.error('❌ Erro no Supabase:', error);
-        return new NextResponse(JSON.stringify({ error }), { status: 500, headers: {'content-type': 'application/json'} });
+      try {
+        const { error } = await supabase.from('tickets').insert({
+          protocolo_origem: protocolo.toString(),
+          cliente: clienteNome,
+          titulo: titulo,
+          descricao: descricao,
+          departamento: departamento,
+          categoria: categoria,
+          prioridade: prioridade,
+          email_cliente: emailCliente,
+          status: 'NOVO'
+        });
+        if (error) {
+          console.error('❌ Erro no Supabase:', error);
+          return new NextResponse(JSON.stringify({ error }), { status: 500, headers: {'content-type': 'application/json'} });
+        }
+        else console.log(`✅ Chamado ${protocolo} salvo!`);
+      } catch (err) {
+        console.error('Crash ao inserir:', err);
       }
-      else console.log(`✅ Chamado ${protocolo} salvo!`);
     } else {
       console.log('Evento não mapeado do TomTicket recebido:', payload.type, payload.action);
       // DEBUG: Salvar o payload inteiro no banco para entendermos o formato que o TomTicket envia!
