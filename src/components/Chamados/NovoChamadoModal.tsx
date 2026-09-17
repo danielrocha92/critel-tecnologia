@@ -1,13 +1,62 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { X, Paperclip, Bold, Italic, Underline, Type, AlignLeft, List, ListOrdered, Quote, Link2, Image as ImageIcon, Plus, BookTemplate } from 'lucide-react';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder'
+);
 
 interface NovoChamadoModalProps {
   onClose: () => void;
 }
 
 export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    cliente: '',
+    departamento: '',
+    assunto: '',
+    mensagem: '',
+    prioridade: '',
+    atendente: ''
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleCreateTicket = async () => {
+    if (!formData.cliente || !formData.assunto) {
+      alert('Por favor, preencha o Cliente e o Assunto.');
+      return;
+    }
+
+    setLoading(true);
+    const protocolo = `OS-${Date.now()}`;
+    
+    const { error } = await supabase.from('tickets').insert({
+      protocolo_origem: protocolo,
+      cliente: formData.cliente,
+      titulo: formData.assunto,
+      descricao: formData.mensagem,
+      departamento: formData.departamento,
+      prioridade: formData.prioridade,
+      status: 'NOVO' // Todo chamado novo começa como NOVO
+    });
+
+    setLoading(false);
+
+    if (error) {
+      console.error('Erro ao criar OS:', error);
+      alert('Erro ao criar Ordem de Serviço.');
+    } else {
+      // Recarrega a página para puxar os dados atualizados
+      window.location.reload();
+    }
+  };
   return (
     <div style={{
       position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
@@ -86,6 +135,9 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
             <label className="form-label">Cliente:</label>
             <input 
               type="text" 
+              name="cliente"
+              value={formData.cliente}
+              onChange={handleChange}
               placeholder="Pesquisar cliente..." 
               style={{
                 background: '#1e2230', border: '1px solid #32394c', color: '#f8fafc',
@@ -104,10 +156,15 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
           <div className="form-row">
             <label className="form-label">Departamento:</label>
             <div style={{ gridColumn: '2 / 3' }}>
-              <select style={{
-                background: '#1e2230', border: '1px solid #32394c', color: '#94a3b8',
-                padding: '10px 14px', borderRadius: '4px', fontSize: '0.9rem', width: '100%', outline: 'none', appearance: 'none'
-              }}>
+              <select 
+                name="departamento"
+                value={formData.departamento}
+                onChange={handleChange}
+                style={{
+                  background: '#1e2230', border: '1px solid #32394c', color: '#94a3b8',
+                  padding: '10px 14px', borderRadius: '4px', fontSize: '0.9rem', width: '100%', outline: 'none', appearance: 'none'
+                }}
+              >
                 <option value="">Escolher departamento...</option>
                 <option value="suporte">Suporte Técnico</option>
                 <option value="financeiro">Financeiro</option>
@@ -121,6 +178,9 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
             <div style={{ gridColumn: '2 / 3' }}>
               <input 
                 type="text" 
+                name="assunto"
+                value={formData.assunto}
+                onChange={handleChange}
                 style={{
                   background: '#1e2230', border: '1px solid #32394c', color: '#f8fafc',
                   padding: '10px 14px', borderRadius: '4px', fontSize: '0.9rem', width: '100%', outline: 'none'
@@ -135,6 +195,9 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
             <div style={{ gridColumn: '2 / 3', background: '#1e2230', border: '1px solid #32394c', borderRadius: '4px', display: 'flex', flexDirection: 'column' }}>
               <textarea 
                 rows={10}
+                name="mensagem"
+                value={formData.mensagem}
+                onChange={handleChange}
                 style={{
                   background: 'transparent', border: 'none', color: '#f8fafc',
                   padding: '16px', fontSize: '0.95rem', width: '100%', outline: 'none', resize: 'vertical',
@@ -165,10 +228,15 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
           <div className="form-row">
             <label className="form-label">Prioridade:</label>
             <div style={{ gridColumn: '2 / 3' }}>
-              <select style={{
-                background: '#1e2230', border: '1px solid #32394c', color: '#94a3b8',
-                padding: '10px 14px', borderRadius: '4px', fontSize: '0.9rem', width: '100%', outline: 'none', appearance: 'none'
-              }}>
+              <select 
+                name="prioridade"
+                value={formData.prioridade}
+                onChange={handleChange}
+                style={{
+                  background: '#1e2230', border: '1px solid #32394c', color: '#94a3b8',
+                  padding: '10px 14px', borderRadius: '4px', fontSize: '0.9rem', width: '100%', outline: 'none', appearance: 'none'
+                }}
+              >
                 <option value="">Definir Prioridade...</option>
                 <option value="baixa">Baixa</option>
                 <option value="normal">Normal</option>
@@ -182,10 +250,15 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
           <div className="form-row">
             <label className="form-label">Atendente:</label>
             <div style={{ gridColumn: '2 / 3' }}>
-              <select style={{
-                background: '#1e2230', border: '1px solid #32394c', color: '#94a3b8',
-                padding: '10px 14px', borderRadius: '4px', fontSize: '0.9rem', width: '100%', outline: 'none', appearance: 'none'
-              }}>
+              <select 
+                name="atendente"
+                value={formData.atendente}
+                onChange={handleChange}
+                style={{
+                  background: '#1e2230', border: '1px solid #32394c', color: '#94a3b8',
+                  padding: '10px 14px', borderRadius: '4px', fontSize: '0.9rem', width: '100%', outline: 'none', appearance: 'none'
+                }}
+              >
                 <option value="">Escolher atendente...</option>
                 <option value="daniel">Daniel (Técnico)</option>
                 <option value="luiz">Luiz (Técnico)</option>
@@ -225,11 +298,16 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
         {/* FOOTER */}
         <div style={{ padding: '16px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #252a38', background: '#1a1d26' }}>
           <div style={{ display: 'flex', gap: '12px' }}>
-            <button style={{ 
-              background: '#10b981', color: '#fff', border: 'none', 
-              padding: '10px 24px', borderRadius: '4px', fontWeight: 600, cursor: 'pointer' 
-            }}>
-              Criar Chamado
+            <button 
+              onClick={handleCreateTicket}
+              disabled={loading}
+              style={{ 
+                background: '#10b981', color: '#fff', border: 'none', 
+                padding: '10px 24px', borderRadius: '4px', fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer',
+                opacity: loading ? 0.7 : 1
+              }}
+            >
+              {loading ? 'Criando...' : 'Criar Chamado'}
             </button>
             <button style={{ 
               background: '#252a38', color: '#f8fafc', border: '1px solid #32394c', 

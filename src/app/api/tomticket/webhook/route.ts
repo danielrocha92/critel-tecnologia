@@ -49,18 +49,50 @@ export async function POST(request: Request) {
     */
     console.log('⚠️ Verificação de assinatura (HMAC) desativada para debug.');
 
-    if (payload.type === 'ticket') {
+    if (payload.type === 'ticket' && payload.id) {
       const supabase = getSupabaseAdmin();
+      let ticketData = null;
+
+      try {
+        // O webhook do TomTicket só manda o ID. Precisamos buscar os dados na API!
+        const apiToken = process.env.TOMTICKET_API_TOKEN;
+        if (apiToken) {
+          console.log(`Buscando detalhes do ticket ${payload.id} na API do TomTicket...`);
+          const res = await fetch(`https://api.tomticket.com/v2.0/ticket/detail?ticket_id=${payload.id}`, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${apiToken}`,
+              'Accept': 'application/json'
+            }
+          });
+          
+          if (res.ok) {
+            const apiResp = await res.json();
+            // A API geralmente retorna os dados dentro de um objeto, vamos tentar pegar o raiz ou o 'data'
+            ticketData = apiResp.data || apiResp.ticket || apiResp;
+            console.log('✅ Dados do TomTicket recebidos com sucesso!');
+          } else {
+            console.error('❌ Falha ao buscar na API do TomTicket:', res.status, await res.text());
+          }
+        } else {
+          console.error('❌ TOMTICKET_API_TOKEN não está configurado!');
+        }
+      } catch (err) {
+        console.error('Crash ao buscar na API do TomTicket:', err);
+      }
+
+      // Se não achou na API, tenta usar o que veio no payload (fallback)
+      const ticket = ticketData || payload.data || payload;
       
-      const ticket = payload.data || payload;
-      const protocolo = ticket.id || ticket.protocolo || `N-A-${Date.now()}`;
-      const clienteNome = ticket.client?.name || ticket.cliente?.nome || 'Desconhecido';
-      const titulo = ticket.subject || ticket.titulo || `Chamado #${protocolo}`;
-      const descricao = ticket.description || ticket.descricao || '';
-      const departamento = ticket.department?.name || ticket.departamento?.nome || null;
-      const categoria = ticket.category?.name || ticket.categoria?.nome || null;
-      const prioridade = ticket.priority?.name || ticket.prioridade?.nome || null;
-      const emailCliente = ticket.client?.email || ticket.cliente?.email || null;
+      const protocolo = ticket.protocol || ticket.id || ticket.protocolo || `N-A-${Date.now()}`;
+      // Tratamento robusto para os nomes de campos que a API do TomTicket pode retornar
+      const clienteNome = ticket.client?.name || ticket.cliente?.nome || ticket.client_name || ticket.organization?.name || 'Desconhecido';
+      const titulo = ticket.subject || ticket.titulo || ticket.title || `Chamado #${protocolo}`;
+      const descricao = ticket.description || ticket.descricao || ticket.message || '';
+      const departamento = ticket.department?.name || ticket.departamento?.nome || ticket.department_name || null;
+      const categoria = ticket.category?.name || ticket.categoria?.nome || ticket.category_name || null;
+      const prioridade = ticket.priority?.name || ticket.prioridade?.nome || ticket.priority_name || null;
+      const emailCliente = ticket.client?.email || ticket.cliente?.email || ticket.client_email || null;
 
       try {
         const { error } = await supabase.from('tickets').insert({
