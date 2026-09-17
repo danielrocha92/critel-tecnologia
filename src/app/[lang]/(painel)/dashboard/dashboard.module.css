@@ -113,3 +113,18 @@
   color: #fff;
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
 }
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+  .title {
+    font-size: 1.5rem;
+  }
+  .systemGrid {
+    grid-template-columns: 1fr;
+  }
+  .systemCard {
+    padding: 1.5rem;
+  }
+}

@@ -16,9 +16,57 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
       zIndex: 9999,
       fontFamily: 'Inter, sans-serif'
     }}>
-      <div style={{
-        background: '#161922', width: '95%', maxWidth: '1000px', height: '90vh',
-        borderRadius: '8px', border: '1px solid #252a38', boxShadow: '0 25px 60px rgba(0,0,0,0.6)',
+      <style dangerouslySetInnerHTML={{__html: `
+        .modal-container {
+          width: 95%;
+          max-width: 1000px;
+          height: 90vh;
+          border-radius: 8px;
+        }
+        .form-row {
+          display: grid;
+          grid-template-columns: 150px 1fr auto;
+          align-items: center;
+          gap: 16px;
+        }
+        .form-row-start {
+          display: grid;
+          grid-template-columns: 150px 1fr auto;
+          align-items: flex-start;
+          gap: 16px;
+        }
+        .form-label {
+          color: #e2e8f0;
+          font-size: 0.9rem;
+          font-weight: 500;
+          text-align: right;
+        }
+        .form-spacer {
+          display: block;
+        }
+        @media (max-width: 768px) {
+          .modal-container {
+            width: 100%;
+            height: 100%;
+            border-radius: 0;
+            border: none !important;
+          }
+          .form-row, .form-row-start {
+            grid-template-columns: 1fr;
+            gap: 8px;
+          }
+          .form-label {
+            text-align: left;
+            margin-top: 8px;
+          }
+          .form-spacer {
+            display: none;
+          }
+        }
+      `}} />
+      <div className="modal-container" style={{
+        background: '#161922', 
+        border: '1px solid #252a38', boxShadow: '0 25px 60px rgba(0,0,0,0.6)',
         display: 'flex', flexDirection: 'column', overflow: 'hidden'
       }}>
         
@@ -34,8 +82,8 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
         <div style={{ flex: 1, overflowY: 'auto', padding: '32px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
           
           {/* Cliente */}
-          <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr auto', alignItems: 'center', gap: '16px' }}>
-            <label style={{ color: '#e2e8f0', fontSize: '0.9rem', fontWeight: 500, textAlign: 'right' }}>Cliente:</label>
+          <div className="form-row">
+            <label className="form-label">Cliente:</label>
             <input 
               type="text" 
               placeholder="Pesquisar cliente..." 
@@ -53,8 +101,8 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
           </div>
 
           {/* Departamento */}
-          <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr auto', alignItems: 'center', gap: '16px' }}>
-            <label style={{ color: '#e2e8f0', fontSize: '0.9rem', fontWeight: 500, textAlign: 'right' }}>Departamento:</label>
+          <div className="form-row">
+            <label className="form-label">Departamento:</label>
             <div style={{ gridColumn: '2 / 3' }}>
               <select style={{
                 background: '#1e2230', border: '1px solid #32394c', color: '#94a3b8',
@@ -68,8 +116,8 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
           </div>
 
           {/* Assunto */}
-          <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr auto', alignItems: 'center', gap: '16px' }}>
-            <label style={{ color: '#e2e8f0', fontSize: '0.9rem', fontWeight: 500, textAlign: 'right' }}>Assunto:</label>
+          <div className="form-row">
+            <label className="form-label">Assunto:</label>
             <div style={{ gridColumn: '2 / 3' }}>
               <input 
                 type="text" 
@@ -82,8 +130,8 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
           </div>
 
           {/* Mensagem (Textarea com Toolbar Fake) */}
-          <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr auto', alignItems: 'flex-start', gap: '16px' }}>
-            <label style={{ color: '#e2e8f0', fontSize: '0.9rem', fontWeight: 500, textAlign: 'right', marginTop: '12px' }}>Mensagem:</label>
+          <div className="form-row-start">
+            <label className="form-label" style={{ marginTop: '12px' }}>Mensagem:</label>
             <div style={{ gridColumn: '2 / 3', background: '#1e2230', border: '1px solid #32394c', borderRadius: '4px', display: 'flex', flexDirection: 'column' }}>
               <textarea 
                 rows={10}
@@ -93,7 +141,7 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
                   minHeight: '200px'
                 }}
               />
-              <div style={{ padding: '12px 16px', borderTop: '1px solid #32394c', display: 'flex', gap: '16px', color: '#94a3b8', alignItems: 'center' }}>
+              <div style={{ padding: '12px 16px', borderTop: '1px solid #32394c', display: 'flex', gap: '16px', color: '#94a3b8', alignItems: 'center', flexWrap: 'wrap' }}>
                 <Bold size={16} style={{cursor: 'pointer'}} />
                 <Italic size={16} style={{cursor: 'pointer'}} />
                 <Underline size={16} style={{cursor: 'pointer'}} />
@@ -114,8 +162,8 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
           </div>
 
           {/* Prioridade */}
-          <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr auto', alignItems: 'center', gap: '16px' }}>
-            <label style={{ color: '#e2e8f0', fontSize: '0.9rem', fontWeight: 500, textAlign: 'right' }}>Prioridade:</label>
+          <div className="form-row">
+            <label className="form-label">Prioridade:</label>
             <div style={{ gridColumn: '2 / 3' }}>
               <select style={{
                 background: '#1e2230', border: '1px solid #32394c', color: '#94a3b8',
@@ -131,8 +179,8 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
           </div>
 
           {/* Atendente (Técnicos Cadastrados) */}
-          <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr auto', alignItems: 'center', gap: '16px' }}>
-            <label style={{ color: '#e2e8f0', fontSize: '0.9rem', fontWeight: 500, textAlign: 'right' }}>Atendente:</label>
+          <div className="form-row">
+            <label className="form-label">Atendente:</label>
             <div style={{ gridColumn: '2 / 3' }}>
               <select style={{
                 background: '#1e2230', border: '1px solid #32394c', color: '#94a3b8',
@@ -148,8 +196,8 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
           </div>
 
           {/* Checkboxes e Opções */}
-          <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr auto', gap: '16px', marginTop: '8px' }}>
-            <div /> {/* Spacer */}
+          <div className="form-row-start" style={{ marginTop: '8px' }}>
+            <div className="form-spacer" /> {/* Spacer */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#e2e8f0', fontSize: '0.9rem', cursor: 'pointer' }}>
                 <input type="checkbox" defaultChecked style={{ accentColor: '#3b82f6', width: '16px', height: '16px' }} />

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Bell, User, MessageSquare, ChevronUp, ChevronDown, Pencil } from 'lucide-react';
+import { Bell, User, MessageSquare, ChevronUp, ChevronDown, Pencil, Menu } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { createBrowserClient } from '@supabase/ssr';
@@ -42,7 +42,14 @@ export default function Topbar() {
       top: 0,
       zIndex: 10
     }}>
-      <div style={{ flex: 1 }}>
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <button 
+          className="mobile-menu-btn" 
+          onClick={() => window.dispatchEvent(new CustomEvent('toggle-mobile-menu'))}
+          aria-label="Abrir menu"
+        >
+          <Menu size={24} />
+        </button>
         {/* Espaço para Search bar futuramente se necessário */}
       </div>
 
@@ -170,6 +177,22 @@ export default function Topbar() {
           .topbar-dropdown-item:hover {
             background: rgba(255,255,255,0.05);
             color: #fff;
+          }
+          .mobile-menu-btn {
+            display: none;
+            background: transparent;
+            border: none;
+            color: #cbd5e1;
+            cursor: pointer;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          @media (min-width: 769px) {
+            .mobile-menu-btn {
+              display: none !important;
+            }
           }
         `}} />
       </div>

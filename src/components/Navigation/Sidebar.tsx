@@ -18,6 +18,17 @@ export default function Sidebar({ lang }: { lang: string }) {
   const [expandedMenu, setExpandedMenu] = useState<string | null>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isNovoChamadoModalOpen, setIsNovoChamadoModalOpen] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+
+  useEffect(() => {
+    const toggleMenu = () => setIsMobileOpen(prev => !prev);
+    window.addEventListener('toggle-mobile-menu', toggleMenu);
+    return () => window.removeEventListener('toggle-mobile-menu', toggleMenu);
+  }, []);
+
+  useEffect(() => {
+    setIsMobileOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     const root = document.querySelector('.layout-root');
@@ -306,15 +317,47 @@ export default function Sidebar({ lang }: { lang: string }) {
 
         @media (max-width: 768px) {
           .sidebar-aside {
-            width: 100%;
-            height: auto;
-            position: relative;
-            border-right: none;
-            overflow: visible;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 260px;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+          }
+          .sidebar-aside.mobile-open {
+            transform: translateX(0);
+          }
+          .btn-collapse {
+            display: none;
+          }
+        }
+        .sidebar-overlay {
+          display: none;
+        }
+        @media (max-width: 768px) {
+          .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            display: block;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+          }
+          .sidebar-overlay.mobile-open {
+            opacity: 1;
+            pointer-events: auto;
           }
         }
       `}} />
-      <aside className={`sidebar-aside ${isCollapsed ? 'collapsed' : ''}`}>
+      <div className={`sidebar-overlay ${isMobileOpen ? 'mobile-open' : ''}`} onClick={() => setIsMobileOpen(false)} />
+      <aside className={`sidebar-aside ${isCollapsed ? 'collapsed' : ''} ${isMobileOpen ? 'mobile-open' : ''}`}>
         <div className="sidebar-header">
           <div className="logo-critel" style={{ minHeight: '40px' }}>
             {!isCollapsed && <img src="/critel-logo-light.svg" alt="Critel Tecnologia" />}

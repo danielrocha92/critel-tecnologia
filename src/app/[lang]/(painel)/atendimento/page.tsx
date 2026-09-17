@@ -336,10 +336,10 @@ export default function CentralAtendimento() {
                       }
                     }
 
-                    // Mocks para colunas que não existem no banco ainda
-                    const mockDepto = index % 2 === 0 ? 'TI - Protheus' : 'FIN - Fiscal';
-                    const mockCategoria = index % 2 === 0 ? 'Software - Protheus | Totvs' : 'Solicitação de Estorno/Reembolso';
-                    const mockPrioridade = index % 2 === 0 ? 'BAIXA' : 'ALTA';
+                    // Usando campos dinâmicos vindos do banco
+                    const prioridade = ticket.prioridade || '-';
+                    const departamento = ticket.departamento || '-';
+                    const categoria = ticket.categoria || '-';
                     
                     return (
                       <tr 
@@ -352,26 +352,25 @@ export default function CentralAtendimento() {
                           {ticket.titulo}
                           <span className={styles.badgeAguardando}>AGUARDANDO</span>
                         </td>
-                        <td className={styles.colDepto}>{mockDepto}</td>
+                        <td className={styles.colDepto}>{departamento}</td>
                         <td className={styles.colCliente}>
                           <span className={styles.clienteNome}>{ticket.cliente}</span>
-                          <span className={styles.clienteDetalhe}>(Operações)</span>
                         </td>
-                        <td className={styles.colDepto}>{mockCategoria}</td>
+                        <td className={styles.colDepto}>{categoria}</td>
                         <td className={styles.colData}>
                           {new Date(ticket.criado_em).toLocaleDateString()}<br/>
                           {new Date(ticket.criado_em).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </td>
                         <td className={styles.colData}>
-                          {new Date(ticket.criado_em).toLocaleDateString()}<br/>
-                          {new Date(ticket.criado_em).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          {ticket.atualizado_em ? new Date(ticket.atualizado_em).toLocaleDateString() : '-'}<br/>
+                          {ticket.atualizado_em ? new Date(ticket.atualizado_em).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
                         </td>
                         <td className={styles.colStatus}>Sem atendente vinculado</td>
-                        <td className={styles.colStatus}>Sem atendente vinculado</td>
+                        <td className={styles.colStatus}>{ticket.status}</td>
                         <td className={styles.colStatus}>Cliente</td>
                         <td>
-                          <span className={mockPrioridade === 'BAIXA' ? styles.badgePrioridadeBaixa : styles.badgePrioridadeAlta}>
-                            {mockPrioridade}
+                          <span className={prioridade.toUpperCase() === 'ALTA' || prioridade.toUpperCase() === 'URGENTE' ? styles.badgePrioridadeAlta : styles.badgePrioridadeBaixa}>
+                            {prioridade.toUpperCase() === '-' ? 'N/A' : prioridade.toUpperCase()}
                           </span>
                         </td>
                         <td className={styles.colStatus}>Não definido</td>
@@ -479,11 +478,11 @@ export default function CentralAtendimento() {
                 </div>
                 <div className={styles.panelRow}>
                   <span className={styles.panelLabel}>Organização:</span>
-                  <span className={styles.panelValue}>Operações</span>
+                  <span className={styles.panelValue}>-</span>
                 </div>
                 <div className={styles.panelRow}>
                   <span className={styles.panelLabel}>Email:</span>
-                  <span className={styles.panelValue}>contato@{ticketAtivo.cliente.toLowerCase().replace(/ /g, '')}.com.br</span>
+                  <span className={styles.panelValue}>{ticketAtivo.email_cliente || 'Não Informado'}</span>
                 </div>
                 <button className={styles.btnShowDetails}>Mostrar Detalhes</button>
                 
@@ -513,15 +512,15 @@ export default function CentralAtendimento() {
                 <h4 className={styles.panelTitle}>Informações do Chamado</h4>
                 <div className={styles.panelRow}>
                   <span className={styles.panelLabel}>Responsável:</span>
-                  <span className={styles.panelValue}>Henrique Cunha - Critel Tecnologia</span>
+                  <span className={styles.panelValue}>Sem Atendente Vinculado</span>
                 </div>
                 <div className={styles.panelRow}>
                   <span className={styles.panelLabel}>Departamento:</span>
-                  <span className={styles.panelValue}>TI - Software</span>
+                  <span className={styles.panelValue}>{ticketAtivo.departamento || 'Não Informado'}</span>
                 </div>
                 <div className={styles.panelRow}>
                   <span className={styles.panelLabel}>Categoria:</span>
-                  <span className={styles.panelValue}>Software - Gestor de Lojas</span>
+                  <span className={styles.panelValue}>{ticketAtivo.categoria || 'Não Informada'}</span>
                 </div>
                 <div className={styles.panelRow}>
                   <span className={styles.panelLabel}>Criado em:</span>
@@ -529,7 +528,7 @@ export default function CentralAtendimento() {
                 </div>
                 <div className={styles.panelRow}>
                   <span className={styles.panelLabel}>Prioridade:</span>
-                  <span className={styles.panelValue}>Baixa</span>
+                  <span className={styles.panelValue}>{ticketAtivo.prioridade || 'Não Definida'}</span>
                 </div>
                 <div className={styles.panelRow}>
                   <span className={styles.panelLabel}>Deadline:</span>

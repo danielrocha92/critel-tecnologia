@@ -34,7 +34,6 @@ export default async function PainelLayout(
           .main-content {
             margin-left: 0 !important;
             width: 100%;
-            padding-bottom: 70px; /* Espaço para a bottom bar */
           }
           .topbar-header {
             padding: 0 1rem !important;

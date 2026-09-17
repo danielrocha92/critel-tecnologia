@@ -306,3 +306,19 @@
 @keyframes fadeIn {
   to { opacity: 1; }
 }
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1.5rem 1rem;
+  }
+  .title {
+    font-size: 1.5rem;
+  }
+  .glassCard {
+    padding: 1.25rem;
+  }
+  .actionGroup {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+}

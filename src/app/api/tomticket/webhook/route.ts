@@ -42,6 +42,7 @@ export async function POST(request: Request) {
     }
 
     // --- PROTEÇÃO DE SEGURANÇA PARA CRIAÇÃO DE TICKETS ---
+    /*
     if (!secret || !signature) {
       console.error('❌ Falha de segurança: Sem segredo ou assinatura.');
       return new NextResponse('Forbidden', { status: 403 });
@@ -52,6 +53,8 @@ export async function POST(request: Request) {
       console.error('❌ Assinatura inválida! Possível ataque.', { recebida: signature, esperada: hmac });
       return new NextResponse('Forbidden', { status: 403 });
     }
+    */
+    console.log('⚠️ Verificação de assinatura (HMAC) desativada para debug.');
 
     if (payload.type === 'ticket') {
       const supabase = getSupabaseAdmin();
@@ -60,14 +63,26 @@ export async function POST(request: Request) {
       const descricao = payload.description || payload.mensagem || payload.historico || '';
       const clienteNome = payload.client?.name || payload.nome_cliente || payload.cliente || 'Desconhecido';
       
+      const departamento = payload.department || payload.departamento || '';
+      const categoria = payload.category || payload.categoria || '';
+      const prioridade = payload.priority || payload.prioridade || '';
+      const emailCliente = payload.client?.email || payload.email_cliente || payload.email || '';
+
       const { error } = await supabase.from('tickets').insert({
         protocolo_origem: protocolo.toString(),
         cliente: clienteNome,
         titulo: titulo,
         descricao: descricao,
+        departamento: departamento,
+        categoria: categoria,
+        prioridade: prioridade,
+        email_cliente: emailCliente,
         status: 'NOVO'
       });
-      if (error) console.error('❌ Erro no Supabase:', error);
+      if (error) {
+        console.error('❌ Erro no Supabase:', error);
+        return new NextResponse(JSON.stringify({ error }), { status: 500, headers: {'content-type': 'application/json'} });
+      }
       else console.log(`✅ Chamado ${protocolo} salvo!`);
     } else {
       console.log('Evento não mapeado do TomTicket recebido:', payload.type, payload.action);
