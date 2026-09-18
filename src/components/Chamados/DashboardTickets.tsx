@@ -13,7 +13,6 @@ interface DashboardTicketsProps {
 }
 
 export function DashboardTickets({ tickets, perfis, operadorAtual, searchTerm, setSearchTerm, onSelectTicket, loading }: DashboardTicketsProps) {
-  // Accordion states
   const [openSections, setOpenSections] = useState({
     reminder: true,
     escalated: true,
@@ -21,8 +20,19 @@ export function DashboardTickets({ tickets, perfis, operadorAtual, searchTerm, s
     my: true
   });
 
+  // Limite de itens por seção
+  const [limits, setLimits] = useState<Record<string, number>>({
+    escalated: 50,
+    new: 50,
+    my: 50
+  });
+
   const toggleSection = (section: keyof typeof openSections) => {
     setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
+  };
+
+  const loadMore = (section: string) => {
+    setLimits(prev => ({ ...prev, [section]: (prev[section] || 50) + 50 }));
   };
 
   const renderBadge = (priority: string) => {
@@ -82,7 +92,7 @@ export function DashboardTickets({ tickets, perfis, operadorAtual, searchTerm, s
                   </tr>
                 </thead>
                 <tbody>
-                  {data.map(ticket => (
+                  {data.slice(0, limits[sectionKey] || 50).map(ticket => (
                     <tr key={ticket.id} onClick={() => onSelectTicket(ticket)}>
                       <td>#{ticket.protocolo_origem}</td>
                       <td style={{ fontWeight: 500 }}>{ticket.titulo}</td>
@@ -110,6 +120,29 @@ export function DashboardTickets({ tickets, perfis, operadorAtual, searchTerm, s
                   ))}
                 </tbody>
               </table>
+            )}
+            
+            {/* Load More Button */}
+            {data.length > (limits[sectionKey] || 50) && (
+              <div style={{ padding: '12px', textAlign: 'center', borderTop: '1px solid #334155' }}>
+                <button 
+                  onClick={() => loadMore(sectionKey)}
+                  style={{
+                    background: 'transparent',
+                    border: '1px solid #475569',
+                    color: '#e2e8f0',
+                    padding: '8px 16px',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontSize: '0.9rem',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseOver={e => e.currentTarget.style.background = '#334155'}
+                  onMouseOut={e => e.currentTarget.style.background = 'transparent'}
+                >
+                  Carregar Mais 50
+                </button>
+              </div>
             )}
           </div>
         )}

@@ -2,6 +2,7 @@ import Sidebar from '@/components/Navigation/Sidebar';
 import Topbar from '@/components/Navigation/Topbar';
 import { TelephonyProvider } from '@/contexts/TelephonyContext';
 import TelephonyWidget from '@/components/Telephony/TelephonyWidget';
+import BackToTop from '@/components/Navigation/BackToTop';
 
 export default async function PainelLayout(
   props: { children: React.ReactNode; params: Promise<{ lang: string }> }
@@ -52,6 +53,7 @@ export default async function PainelLayout(
           </main>
         </div>
         <TelephonyWidget />
+        <BackToTop />
       </TelephonyProvider>
     </div>
   );

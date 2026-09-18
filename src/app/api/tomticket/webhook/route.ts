@@ -99,6 +99,26 @@ export async function POST(request: Request) {
       // Captura de status e atendente, caso o TomTicket envie
       // No TomTicket, ticket.status ou ticket.situation costuma vir com os dados da situação atual
       const statusOrigem = ticket.status?.name || ticket.status || 'NOVO';
+      
+      let analistaId = null;
+      const atendenteObj = ticket.attendant || ticket.atendente || ticket.operator;
+      if (atendenteObj) {
+        const nomeToSearch = typeof atendenteObj === 'string' ? atendenteObj : (atendenteObj.name || atendenteObj.nome || atendenteObj.email);
+        if (nomeToSearch) {
+          // Tenta extrair a primeira parte se vier formatado como "Nome | Empresa"
+          const searchName = nomeToSearch.split('|')[0].trim();
+          
+          const { data: perfilData } = await supabase
+            .from('perfis')
+            .select('id')
+            .ilike('nome', `%${searchName}%`)
+            .limit(1);
+            
+          if (perfilData && perfilData.length > 0) {
+            analistaId = perfilData[0].id;
+          }
+        }
+      }
 
       try {
         // Verifica se o chamado já existe
@@ -121,6 +141,8 @@ export async function POST(request: Request) {
               categoria: categoria,
               prioridade: prioridade,
               email_cliente: emailCliente,
+              analista_id: analistaId,
+              tomticket_id: ticket.id,
               // Opcional: Atualizar status e atendente_id aqui se conseguirmos mapear com nosso banco
               atualizado_em: new Date().toISOString()
             })
@@ -143,6 +165,8 @@ export async function POST(request: Request) {
             categoria: categoria,
             prioridade: prioridade,
             email_cliente: emailCliente,
+            analista_id: analistaId,
+            tomticket_id: ticket.id,
             status: 'NOVO'
           });
           

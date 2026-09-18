@@ -58,6 +58,10 @@ function CentralAtendimentoContent() {
   const [newPhoneValue, setNewPhoneValue] = useState('');
   const [isLoadingContact, setIsLoadingContact] = useState(false);
 
+  // TomTicket History
+  const [ticketHistory, setTicketHistory] = useState<any[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+
   // Milvus Proxy Modal
   const [isMilvusIframeOpen, setIsMilvusIframeOpen] = useState(false);
 
@@ -68,6 +72,30 @@ function CentralAtendimentoContent() {
   const [isMaisDropdownOpen, setIsMaisDropdownOpen] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // 1. Carregar Historico do TomTicket
+  useEffect(() => {
+    if (!ticketAtivo || !ticketAtivo.tomticket_id) {
+      setTicketHistory([]);
+      return;
+    }
+    const fetchHistory = async () => {
+      setIsLoadingHistory(true);
+      try {
+        const res = await fetch(`/api/tomticket/history?tomticket_id=${ticketAtivo.tomticket_id}`);
+        const data = await res.json();
+        if (data.success) {
+          setTicketHistory(data.messages || []);
+        } else {
+          setTicketHistory([]);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+      setIsLoadingHistory(false);
+    };
+    fetchHistory();
+  }, [ticketAtivo]);
 
   // 1.5. Carregar Contato Dinâmico da Loja (Micro-CRM)
   useEffect(() => {
@@ -448,6 +476,28 @@ function CentralAtendimentoContent() {
                   </div>
                 </div>
               </div>
+
+              {isLoadingHistory && <div style={{ textAlign: 'center', padding: '20px', color: '#94a3b8' }}>Carregando histórico do TomTicket...</div>}
+
+              {ticketHistory.map((reply) => (
+                <div key={reply.id} className={styles.timelineCard} style={{ marginTop: '16px' }}>
+                  <div className={styles.timelineHeader}>
+                    <div className={styles.timelineUser}>
+                      <div className={styles.timelineAvatar} style={{ background: reply.sender_type === 'A' ? '#c9253a' : '#334155', color: '#fff' }}>
+                        <User size={20} />
+                      </div>
+                      <div>
+                        <span className={styles.timelineName}>{reply.sender}</span>
+                        <span className={styles.timelineRole}>{reply.sender_type === 'A' ? 'Atendente' : 'Cliente'}</span>
+                      </div>
+                    </div>
+                    <div className={styles.timelineDate}>
+                      {reply.date}
+                    </div>
+                  </div>
+                  <div className={styles.timelineContent} dangerouslySetInnerHTML={{ __html: reply.message }} />
+                </div>
+              ))}
             </div>
 
             {/* Coluna Direita: Informações */}
