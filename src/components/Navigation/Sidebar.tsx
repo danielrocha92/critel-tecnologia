@@ -188,20 +188,20 @@ export default function Sidebar({ lang }: { lang: string }) {
         .btn-novo-chamado {
           margin: 12px 14px;
           width: calc(100% - 28px);
-          background: linear-gradient(135deg, #8b2cff, #7020cc);
+          background: linear-gradient(135deg, #c9253a, #a01d2a);
           color: #fff; border: none;
           padding: 10px 14px; border-radius: 8px;
           font-weight: 600; font-size: 0.875rem;
           cursor: pointer;
           display: flex; align-items: center; justify-content: space-between;
           gap: 8px;
-          box-shadow: 0 4px 20px rgba(139,44,255,0.25);
+          box-shadow: 0 4px 20px rgba(183,28,28,0.25);
           transition: all 0.2s;
           font-family: inherit;
         }
         .btn-novo-chamado:hover {
-          background: linear-gradient(135deg, #9d3fff, #8b2cff);
-          box-shadow: 0 6px 24px rgba(139,44,255,0.4);
+          background: linear-gradient(135deg, #e8344a, #c9253a);
+          box-shadow: 0 6px 24px rgba(183,28,28,0.4);
           transform: translateY(-1px);
         }
         .btn-novo-chamado:active { transform: translateY(0); }
@@ -234,14 +234,14 @@ export default function Sidebar({ lang }: { lang: string }) {
         }
         .nav-item:hover { background: rgba(255,255,255,0.04); color: #c8d6e5; }
         .nav-item.active {
-          background: rgba(139,44,255,0.12);
-          color: #d8aaff;
+          background: rgba(183,28,28,0.12);
+          color: #ff5252;
         }
         .nav-item.active::before {
           content: '';
           position: absolute; left: 0; top: 20%; bottom: 20%;
           width: 3px; border-radius: 0 3px 3px 0;
-          background: #8b2cff;
+          background: #c9253a;
         }
         .nav-item-left { display: flex; align-items: center; gap: 12px; }
         .nav-icon { color: inherit; opacity: 0.75; flex-shrink: 0; }
@@ -266,9 +266,9 @@ export default function Sidebar({ lang }: { lang: string }) {
           transition: background 0.15s;
         }
         .submenu-link:hover { color: #c8d6e5; background: rgba(255,255,255,0.04); }
-        .submenu-link:hover::before { background: #8b2cff; }
-        .submenu-link.active { color: #c084fc; }
-        .submenu-link.active::before { background: #8b2cff; }
+        .submenu-link:hover::before { background: #c9253a; }
+        .submenu-link.active { color: #ff5252; }
+        .submenu-link.active::before { background: #c9253a; }
 
         /* ── FOOTER ── */
         .sidebar-footer {

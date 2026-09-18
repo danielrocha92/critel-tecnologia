@@ -95,26 +95,66 @@ export async function POST(request: Request) {
       const categoria = ticket.category?.name || ticket.categoria?.nome || null;
       const prioridade = ticket.priority ? String(ticket.priority) : null;
       const emailCliente = ticket.customer?.email || ticket.client?.email || null;
+      
+      // Captura de status e atendente, caso o TomTicket envie
+      // No TomTicket, ticket.status ou ticket.situation costuma vir com os dados da situação atual
+      const statusOrigem = ticket.status?.name || ticket.status || 'NOVO';
 
       try {
-        const { error } = await supabase.from('tickets').insert({
-          protocolo_origem: protocolo.toString(),
-          cliente: clienteNome,
-          titulo: titulo,
-          descricao: descricao,
-          departamento: departamento,
-          categoria: categoria,
-          prioridade: prioridade,
-          email_cliente: emailCliente,
-          status: 'NOVO'
-        });
-        if (error) {
-          console.error('❌ Erro no Supabase:', error);
-          return new NextResponse(JSON.stringify({ error }), { status: 500, headers: {'content-type': 'application/json'} });
+        // Verifica se o chamado já existe
+        const { data: chamadosExistentes } = await supabase
+          .from('tickets')
+          .select('id')
+          .eq('protocolo_origem', protocolo.toString())
+          .order('criado_em', { ascending: true });
+
+        if (chamadosExistentes && chamadosExistentes.length > 0) {
+          // Atualiza o chamado existente mais antigo (e ignoramos/podemos limpar os duplicados depois)
+          const ticketId = chamadosExistentes[0].id;
+          const { error } = await supabase
+            .from('tickets')
+            .update({
+              cliente: clienteNome,
+              titulo: titulo,
+              descricao: descricao,
+              departamento: departamento,
+              categoria: categoria,
+              prioridade: prioridade,
+              email_cliente: emailCliente,
+              // Opcional: Atualizar status e atendente_id aqui se conseguirmos mapear com nosso banco
+              atualizado_em: new Date().toISOString()
+            })
+            .eq('id', ticketId);
+
+          if (error) {
+            console.error('❌ Erro no Supabase Update:', error);
+            return new NextResponse(JSON.stringify({ error }), { status: 500, headers: {'content-type': 'application/json'} });
+          } else {
+            console.log(`✅ Chamado ${protocolo} ATUALIZADO com sucesso!`);
+          }
+        } else {
+          // Inserção nova
+          const { error } = await supabase.from('tickets').insert({
+            protocolo_origem: protocolo.toString(),
+            cliente: clienteNome,
+            titulo: titulo,
+            descricao: descricao,
+            departamento: departamento,
+            categoria: categoria,
+            prioridade: prioridade,
+            email_cliente: emailCliente,
+            status: 'NOVO'
+          });
+          
+          if (error) {
+            console.error('❌ Erro no Supabase Insert:', error);
+            return new NextResponse(JSON.stringify({ error }), { status: 500, headers: {'content-type': 'application/json'} });
+          } else {
+            console.log(`✅ Chamado ${protocolo} SALVO com sucesso!`);
+          }
         }
-        else console.log(`✅ Chamado ${protocolo} salvo!`);
       } catch (err) {
-        console.error('Crash ao inserir:', err);
+        console.error('Crash ao inserir/atualizar:', err);
       }
     } else {
       console.log('Evento não mapeado do TomTicket recebido:', payload.type, payload.action);

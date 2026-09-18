@@ -2,14 +2,13 @@
 
 import { useEffect, useState, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '../../../../utils/supabase/client';
+import { useCentralAtendimento } from '../../../../hooks/useCentralAtendimento';
 import styles from './atendimento.module.css';
 import { Send, User, Phone, Clock, Search, Bot, Server, Key, Video, Activity, Inbox, Settings, Trash2, Printer, Pencil, History } from 'lucide-react';
+import { DashboardTickets } from '../../../../components/Chamados/DashboardTickets';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder'
-);
+const supabase = createClient();
 
 export default function CentralAtendimentoPage() {
   return (
@@ -20,14 +19,13 @@ export default function CentralAtendimentoPage() {
 }
 
 function CentralAtendimentoContent() {
+  const { tickets, perfis, pdvs, operadorAtual, loading } = useCentralAtendimento();
+
   const searchParams = useSearchParams();
-  const [tickets, setTickets] = useState<any[]>([]);
   const [ticketAtivo, setTicketAtivo] = useState<any | null>(null);
   const [viewMode, setViewMode] = useState<'details' | 'timeline'>('details');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [perfis, setPerfis] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState('novos');
-  const [operadorAtual, setOperadorAtual] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
@@ -52,8 +50,7 @@ function CentralAtendimentoContent() {
   const [mensagens, setMensagens] = useState<any[]>([]);
   const [inputMensagem, setInputMensagem] = useState('');
   
-  // Status PDV
-  const [pdvs, setPdvs] = useState<any[]>([]);
+  // Status PDV e CRM movidos para o final para manter a estrutura, PDVs agora vêm do hook.
   
   // CRM Lojas (Contatos Dinâmicos)
   const [lojaContato, setLojaContato] = useState<any | null>(null);
@@ -71,40 +68,6 @@ function CentralAtendimentoContent() {
   const [isMaisDropdownOpen, setIsMaisDropdownOpen] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
-
-  // 1. Carregar fila de Tickets e Perfis
-  useEffect(() => {
-    const carregarTickets = async () => {
-      const { data } = await supabase
-        .from('tickets')
-        .select('*')
-        .order('criado_em', { ascending: false });
-      if (data) setTickets(data);
-    };
-    
-    const carregarPerfis = async () => {
-      const { data } = await supabase
-        .from('perfis')
-        .select('id, nome, cargo')
-        .order('nome');
-      if (data) {
-        setPerfis(data);
-        if (data.length > 0) setOperadorAtual(data[0]); // Operador default
-      }
-    };
-
-    carregarTickets();
-    carregarPerfis();
-
-    const subTickets = supabase
-      .channel('lista-tickets')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'tickets' }, (payload) => {
-        carregarTickets();
-      })
-      .subscribe();
-
-    return () => { supabase.removeChannel(subTickets); };
-  }, []);
 
   // 1.5. Carregar Contato Dinâmico da Loja (Micro-CRM)
   useEffect(() => {
@@ -164,7 +127,7 @@ function CentralAtendimentoContent() {
 
     const subMensagens = supabase
       .channel(`chat-${conversaAtiva.id}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'whatsapp_mensagens', filter: `conversa_id=eq.${conversaAtiva.id}` }, (payload) => {
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'whatsapp_mensagens', filter: `conversa_id=eq.${conversaAtiva.id}` }, (payload: any) => {
         setMensagens((current) => [...current, payload.new]);
         rolarParaBaixo();
       })
@@ -229,56 +192,7 @@ function CentralAtendimentoContent() {
     verificarMilvus();
   }, [ticketAtivo]);
 
-  // 6. Carregar Status de PDV (Com WebSockets Realtime do Milvus)
-  useEffect(() => {
-    const carregarPdvs = async () => {
-      const { data } = await supabase.from('status_pdv').select('*').order('loja', { ascending: true });
-      if (data) setPdvs(data);
-    };
-    carregarPdvs();
 
-    // Ouvinte em tempo real para quando o Cron Job / Worker do Milvus atualizar o banco
-    const subPdvs = supabase
-      .channel('lista-pdvs')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'status_pdv' }, async (payload) => {
-        carregarPdvs(); // Recarrega a lista se houver alguma alteração (Mock ou Real)
-        
-        // Automação: Criação automática de ticket se PDV cair
-        const record = payload.new as any;
-        if (record && record.status_conexao) {
-          const loja = record.loja;
-          let isOffline = false;
-          try {
-            const pdvsList = JSON.parse(record.status_conexao);
-            isOffline = pdvsList.some((p: any) => p.status === 'OFFLINE');
-          } catch {
-            isOffline = record.status_conexao === 'OFFLINE';
-          }
-
-          if (isOffline && loja.toLowerCase() !== 'bacio di latte') {
-            // Verifica se já tem ticket aberto pra loja
-            const temTicket = tickets.some(t => t.cliente === loja && t.status !== 'RESOLVIDO');
-            if (!temTicket) {
-              console.log(`Automação: Criando ticket para ${loja} (PDV Offline)`);
-              await fetch('/api/tomticket/webhook', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  type: 'ticket',
-                  protocolo: `AUTO-${Date.now()}`,
-                  subject: `[ALERTA AUTOMÁTICO] PDV Offline - ${loja}`,
-                  description: `O monitoramento detectou que um ou mais caixas da loja ${loja} estão offline. Verifique imediatamente.`,
-                  client: { name: loja }
-                })
-              });
-            }
-          }
-        }
-      })
-      .subscribe();
-
-    return () => { supabase.removeChannel(subPdvs); };
-  }, []);
 
   const rolarParaBaixo = () => {
     setTimeout(() => {
@@ -324,167 +238,20 @@ function CentralAtendimentoContent() {
   return (
     <div className={styles.container}>
       {!ticketAtivo ? (
-        <div className={styles.tableContainer}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', paddingLeft: '24px', paddingRight: '24px', alignItems: 'center', gap: '8px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', background: '#1f2937', border: '1px solid #374151', borderRadius: '4px', padding: '4px 8px' }}>
-              <Search size={16} color="#94a3b8" />
-              <input 
-                type="text" 
-                placeholder="Buscar chamado (protocolo, cliente, assunto)..." 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                style={{ background: 'transparent', border: 'none', color: '#fff', outline: 'none', marginLeft: '8px', fontSize: '0.85rem', width: '280px' }}
-              />
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>Simular Operador Logado:</span>
-              <select 
-                value={operadorAtual?.id || ''} 
-                onChange={(e) => setOperadorAtual(perfis.find(p => p.id === e.target.value))}
-                style={{ background: '#1f2937', color: '#fff', border: '1px solid #374151', padding: '4px 8px', borderRadius: '4px', outline: 'none', fontSize: '0.85rem' }}
-              >
-                <option value="">Nenhum</option>
-                {perfis.map(p => <option key={p.id} value={p.id}>{p.nome}</option>)}
-              </select>
-            </div>
-          </div>
-          <div className={styles.tableHeader}>
-            {[
-              { id: 'todos', label: 'Todos os Chamados' },
-              { id: 'meus', label: 'Meus Chamados', badge: tickets.filter(t => t.analista_id === operadorAtual?.id).length },
-              { id: 'novos', label: 'Novos', badge: tickets.filter(t => !t.analista_id && t.status !== 'FECHADO' && t.status !== 'CANCELADO' && t.status !== 'RESOLVIDO').length },
-              { id: 'abertos', label: 'Abertos', badge: tickets.filter(t => t.status !== 'FECHADO' && t.status !== 'CANCELADO' && t.status !== 'RESOLVIDO').length },
-              { id: 'aguardando', label: 'Aguardando' },
-              { id: 'finalizados', label: 'Finalizados' },
-              { id: 'cancelados', label: 'Cancelados' }
-            ].map(tab => (
-              <div 
-                key={tab.id}
-                className={`${styles.tabItem} ${activeTab === tab.id ? styles.tabItemActive : ''}`}
-                onClick={() => setActiveTab(tab.id)}
-              >
-                {tab.label} {tab.badge !== undefined && tab.badge > 0 && <span className={styles.tabBadge}>{tab.badge}</span>}
-              </div>
-            ))}
-          </div>
-          
-          <div className={styles.tableWrapper}>
-            <table className={styles.ticketTable}>
-              <thead>
-                <tr>
-                  <th>Protocolo</th>
-                  <th>Assunto</th>
-                  <th>Departamento</th>
-                  <th>Cliente</th>
-                  <th>Categoria</th>
-                  <th>Data/Hora</th>
-                  <th>Última Situação</th>
-                  <th>Status</th>
-                  <th>Situação</th>
-                  <th>Aberto Por</th>
-                  <th>Prioridade</th>
-                  <th>Atendente</th>
-                  <th>SLA</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(() => {
-                  const filteredTickets = tickets.filter(t => {
-                    if (searchTerm) return true; // Ignora o filtro de abas se estiver pesquisando
-                    switch (activeTab) {
-                      case 'todos': return true;
-                      case 'meus': return t.analista_id === operadorAtual?.id;
-                      case 'novos': return !t.analista_id && t.status !== 'FECHADO' && t.status !== 'CANCELADO' && t.status !== 'RESOLVIDO';
-                      case 'abertos': return t.status !== 'FECHADO' && t.status !== 'CANCELADO' && t.status !== 'RESOLVIDO';
-                      case 'aguardando': return t.status === 'AGUARDANDO';
-                      case 'finalizados': return t.status === 'FECHADO' || t.status === 'RESOLVIDO';
-                      case 'cancelados': return t.status === 'CANCELADO';
-                      default: return true;
-                    }
-                  }).filter(t => {
-                    if (!searchTerm) return true;
-                    const termo = searchTerm.toLowerCase();
-                    return (
-                      String(t.titulo || '').toLowerCase().includes(termo) ||
-                      String(t.cliente || '').toLowerCase().includes(termo) ||
-                      String(t.protocolo_origem || '').toLowerCase().includes(termo) ||
-                      String(t.id || '').toLowerCase().includes(termo) ||
-                      String(t.descricao || '').toLowerCase().includes(termo)
-                    );
-                  });
-
-                  return filteredTickets.length === 0 ? (
-                    <tr>
-                      <td colSpan={13} style={{ textAlign: 'center', padding: '3rem', opacity: 0.7 }}>
-                        Nenhum chamado para este filtro.
-                      </td>
-                    </tr>
-                  ) : (
-                    filteredTickets.map((ticket, index) => {
-                    const pdvDaLoja = pdvs.find(p => p.loja === ticket.cliente);
-                    let isOffline = false;
-                    if (pdvDaLoja) {
-                      try {
-                        const pdvsList = JSON.parse(pdvDaLoja.status_conexao);
-                        isOffline = pdvsList.some((p: any) => p.status === 'OFFLINE');
-                      } catch {
-                        isOffline = pdvDaLoja.status_conexao === 'OFFLINE';
-                      }
-                    }
-
-                    // Usando campos dinâmicos vindos do banco
-                    const prioridade = ticket.prioridade || '-';
-                    const departamento = ticket.departamento || '-';
-                    const categoria = ticket.categoria || '-';
-                    
-                    return (
-                      <tr 
-                        key={ticket.id} 
-                        className={`${styles.ticketRow} ${isOffline ? styles.ticketRowOffline : ''}`}
-                        onClick={() => {
-                          setTicketAtivo(ticket);
-                          setViewMode('details');
-                        }}
-                      >
-                        <td className={styles.colProtocolo}>#{ticket.protocolo_origem}</td>
-                        <td className={styles.colAssunto}>
-                          {ticket.titulo}
-                        </td>
-                        <td className={styles.colDepto}>{departamento}</td>
-                        <td className={styles.colCliente}>
-                          <span className={styles.clienteNome}>{ticket.cliente}</span>
-                        </td>
-                        <td className={styles.colDepto}>{categoria}</td>
-                        <td className={styles.colData}>
-                          {new Date(ticket.criado_em).toLocaleDateString()}<br/>
-                          {new Date(ticket.criado_em).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </td>
-                        <td className={styles.colData}>
-                          {ticket.atualizado_em ? new Date(ticket.atualizado_em).toLocaleDateString() : '-'}<br/>
-                          {ticket.atualizado_em ? new Date(ticket.atualizado_em).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
-                        </td>
-                        <td className={styles.colStatus}>Sem atendente vinculado</td>
-                        <td className={styles.colStatus}>{ticket.status}</td>
-                        <td className={styles.colStatus}>Cliente</td>
-                        <td>
-                          <span className={prioridade.toUpperCase() === 'ALTA' || prioridade.toUpperCase() === 'URGENTE' ? styles.badgePrioridadeAlta : styles.badgePrioridadeBaixa}>
-                            {prioridade.toUpperCase() === '-' ? 'N/A' : prioridade.toUpperCase()}
-                          </span>
-                        </td>
-                        <td className={styles.colStatus}>Não definido</td>
-                        <td><div style={{ width: '40px', height: '6px', background: '#e2e8f0', borderRadius: '3px' }}></div></td>
-                      </tr>
-                    );
-                  })
-                );
-              })()}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <DashboardTickets 
+          tickets={tickets}
+          perfis={perfis}
+          operadorAtual={operadorAtual}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          onSelectTicket={(ticket) => {
+            setTicketAtivo(ticket);
+            setViewMode('details');
+          }}
+        />
       ) : viewMode === 'details' ? (
          <div className={styles.innerViewContainer} style={{ background: '#0b1120', color: '#fff', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '16px 24px', borderBottom: '1px solid #1f2937' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '16px 24px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                  <button onClick={() => setTicketAtivo(null)} style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '1.2rem' }}>⬅</button>
                  <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 600 }}>Vincular Chamado: #{ticketAtivo.protocolo_origem} - {ticketAtivo.titulo}</h2>
@@ -501,13 +268,13 @@ function CentralAtendimentoContent() {
                      });
                      setIsEditModalOpen(true);
                    }} 
-                   style={{ background: '#1f2937', color: '#fff', padding: '8px 12px', border: '1px solid #374151', borderRadius: '4px', cursor: 'pointer' }}
+                   style={{ background: '#162032', color: '#fff', padding: '8px 12px', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', cursor: 'pointer' }}
                  >
                    <Pencil size={16} />
                  </button>
-                 <button style={{ background: '#1f2937', color: '#fff', padding: '8px 12px', border: '1px solid #374151', borderRadius: '4px', cursor: 'pointer' }}><Inbox size={16} /></button>
-                 <button style={{ background: '#ef4444', color: '#fff', padding: '8px 16px', border: 'none', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}><Trash2 size={16}/> Excluir v</button>
-                 <button onClick={() => setTicketAtivo(null)} style={{ background: '#1f2937', color: '#fff', padding: '8px 16px', border: '1px solid #374151', borderRadius: '4px', cursor: 'pointer' }}>Cancelar</button>
+                 <button style={{ background: '#162032', color: '#fff', padding: '8px 12px', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', cursor: 'pointer' }}><Inbox size={16} /></button>
+                 <button style={{ background: '#b71c1c', color: '#fff', padding: '8px 16px', border: 'none', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}><Trash2 size={16}/> Excluir v</button>
+                 <button onClick={() => setTicketAtivo(null)} style={{ background: '#162032', color: '#fff', padding: '8px 16px', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', cursor: 'pointer' }}>Cancelar</button>
               </div>
             </div>
 
@@ -535,7 +302,7 @@ function CentralAtendimentoContent() {
                   <div style={{ color: '#f3f4f6', fontSize: '0.9rem' }}>-</div>
                </div>
 
-               <hr style={{ borderColor: '#1f2937', margin: '24px 0' }} />
+               <hr style={{ borderColor: 'rgba(255,255,255,0.08)', margin: '24px 0' }} />
 
                <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr', gap: '16px', marginBottom: '24px' }}>
                   <div style={{ color: '#9ca3af', textAlign: 'right', fontWeight: 500, fontSize: '0.9rem' }}>Cliente:</div>
@@ -549,16 +316,16 @@ function CentralAtendimentoContent() {
                </div>
 
                <div style={{ textAlign: 'center', margin: '24px 0' }}>
-                  <button onClick={() => setViewMode('timeline')} style={{ background: 'transparent', color: '#fff', border: '1px solid #374151', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem' }}>Mostrar Detalhes</button>
+                  <button onClick={() => setViewMode('timeline')} style={{ background: 'transparent', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem' }}>Mostrar Detalhes</button>
                </div>
 
-               <hr style={{ borderColor: '#1f2937', margin: '24px 0' }} />
+               <hr style={{ borderColor: 'rgba(255,255,255,0.08)', margin: '24px 0' }} />
 
                <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr', gap: '16px', alignItems: 'center' }}>
                   <div style={{ color: '#9ca3af', textAlign: 'right', fontWeight: 500, fontSize: '0.9rem' }}>Atendente:</div>
                   <div>
                     <select 
-                      style={{ background: '#1f2937', color: '#fff', border: '1px solid #374151', padding: '10px 12px', borderRadius: '4px', width: '100%', maxWidth: '400px', outline: 'none', fontSize: '0.9rem' }}
+                      style={{ background: '#162032', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', padding: '10px 12px', borderRadius: '4px', width: '100%', maxWidth: '400px', outline: 'none', fontSize: '0.9rem' }}
                       value={ticketAtivo.analista_id || ''}
                       onChange={async (e) => {
                         const novoAtendente = e.target.value;
@@ -582,9 +349,9 @@ function CentralAtendimentoContent() {
                </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '16px 24px', borderTop: '1px solid #1f2937' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '16px 24px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
               <button 
-                style={{ background: '#059669', color: '#fff', border: 'none', padding: '8px 24px', borderRadius: '4px', cursor: 'pointer', fontWeight: 500 }}
+                style={{ background: '#c9253a', color: '#fff', border: 'none', padding: '8px 24px', borderRadius: '4px', cursor: 'pointer', fontWeight: 500 }}
                 onClick={async () => {
                    alert('Atendente vinculado!');
                    setViewMode('timeline');
@@ -593,8 +360,8 @@ function CentralAtendimentoContent() {
                 Vincular
               </button>
               <div style={{ display: 'flex', gap: '8px' }}>
-                <button style={{ background: '#dc2626', color: '#fff', padding: '8px 16px', border: 'none', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>Excluir v</button>
-                <button onClick={() => setTicketAtivo(null)} style={{ background: 'transparent', color: '#fff', padding: '8px 16px', border: '1px solid #374151', borderRadius: '4px', cursor: 'pointer' }}>Cancelar</button>
+                <button style={{ background: '#b71c1c', color: '#fff', padding: '8px 16px', border: 'none', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>Excluir v</button>
+                <button onClick={() => setTicketAtivo(null)} style={{ background: 'transparent', color: '#fff', padding: '8px 16px', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', cursor: 'pointer' }}>Cancelar</button>
               </div>
             </div>
          </div>
@@ -754,12 +521,12 @@ function CentralAtendimentoContent() {
               <div className={styles.panelCard}>
                 <h4 className={styles.panelTitle}>Ferramentas Integradas</h4>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <a href="/api/cofre/stoq" target="_blank" rel="noreferrer" style={{ display: 'block', textAlign: 'center', background: '#3b82f6', color: '#fff', textDecoration: 'none', padding: '10px', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600 }}>
+                  <a href="/api/cofre/stoq" target="_blank" rel="noreferrer" style={{ display: 'block', textAlign: 'center', background: '#00d2ff', color: '#0b1120', textDecoration: 'none', padding: '10px', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600 }}>
                     Abrir Stoq ERP (Cofre)
                   </a>
                   <button 
                     onClick={() => setIsMilvusIframeOpen(true)}
-                    style={{ background: '#6366f1', color: '#fff', border: 'none', padding: '10px', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }}
+                    style={{ background: '#c9253a', color: '#fff', border: 'none', padding: '10px', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }}
                   >
                     Abrir Milvus Proxy
                   </button>
@@ -880,7 +647,7 @@ function CentralAtendimentoContent() {
                   type="text" 
                   value={editForm.titulo}
                   onChange={(e) => setEditForm({...editForm, titulo: e.target.value})}
-                  style={{ background: '#0b1120', color: '#fff', border: '1px solid #3b82f6', padding: '10px', borderRadius: '4px', width: '100%', outline: 'none' }}
+                  style={{ background: '#0b1120', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', padding: '10px', borderRadius: '4px', width: '100%', outline: 'none' }}
                 />
               </div>
 
@@ -928,7 +695,7 @@ function CentralAtendimentoContent() {
                 <select 
                   value={editForm.prioridade}
                   onChange={(e) => setEditForm({...editForm, prioridade: e.target.value})}
-                  style={{ background: '#0b1120', color: '#fff', border: '1px solid #3b82f6', padding: '10px', borderRadius: '4px', width: '100%', outline: 'none' }}
+                  style={{ background: '#0b1120', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', padding: '10px', borderRadius: '4px', width: '100%', outline: 'none' }}
                 >
                   <option value="Baixa">Baixa</option>
                   <option value="Normal">Normal</option>

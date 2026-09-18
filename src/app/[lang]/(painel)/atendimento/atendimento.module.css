@@ -7,7 +7,7 @@
   height: 100vh;
   width: 100%;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  background: #232736;
+  background: #0b1120;
   color: #c9d1d9;
   overflow: hidden;
 }
@@ -30,8 +30,8 @@
   display: flex;
   align-items: center;
   padding: 16px 24px;
-  background: #1e2230;
-  border-bottom: 1px solid #333848;
+  background: #162032;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
   gap: 24px;
 }
 
@@ -52,7 +52,7 @@
 }
 .tabItemActive {
   color: #fff;
-  border-bottom: 2px solid #8b5cf6;
+  border-bottom: 2px solid #c9253a;
 }
 
 .tabBadge {
@@ -87,7 +87,7 @@
 .ticketTable th {
   text-align: left;
   padding: 12px 16px;
-  background: #292d3e;
+  background: #162032;
   font-weight: 600;
   color: #a0aec0;
   font-size: 0.7rem;
@@ -98,7 +98,7 @@
 
 .ticketTable td {
   padding: 12px 16px;
-  border-bottom: 1px solid #333848;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
   font-size: 0.75rem;
   color: #e2e8f0;
   vertical-align: middle;
@@ -201,7 +201,7 @@
   flex-direction: column;
   height: 100%;
   width: 100%;
-  background: #1a1d26;
+  background: #0b1120;
   overflow: hidden;
 }
 
@@ -210,8 +210,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px 24px;
-  background: #202431;
-  border-bottom: 1px solid #2e3344;
+  background: #162032;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 .innerHeaderTitle { font-size: 1.1rem; margin: 0; color: #fff; font-weight: 600; display: flex; align-items: center; gap: 12px; }
 .headerActionsGroup { display: flex; gap: 8px; align-items: center; }
@@ -234,13 +234,13 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
-  background: #1a1d26;
+  background: #0b1120;
 }
 
 .timelineCard {
-  background: #252a38;
+  background: #162032;
   border-radius: 8px;
-  border: 1px solid #32394c;
+  border: 1px solid rgba(255,255,255,0.08);
   padding: 20px;
 }
 .timelineHeader {
@@ -267,14 +267,14 @@
 }
 
 .replyEditor {
-  border: 1px solid #32394c;
+  border: 1px solid rgba(255,255,255,0.08);
   border-radius: 8px;
   margin-top: 16px;
-  background: #1a1d26;
+  background: #0b1120;
 }
 .replyToolbar {
   padding: 12px;
-  border-bottom: 1px solid #32394c;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
   display: flex;
   gap: 16px;
   color: #fff;
@@ -298,7 +298,7 @@
   justify-content: space-between;
 }
 .btnSendReply {
-  background: #10b981;
+  background: #c9253a;
   color: #fff;
   border: none;
   padding: 8px 16px;
@@ -312,8 +312,8 @@
 
 .innerSidebar {
   width: 380px;
-  background: #1a1d26;
-  border-left: 1px solid #2e3344;
+  background: #0b1120;
+  border-left: 1px solid rgba(255,255,255,0.08);
   overflow-y: auto;
   padding: 24px;
   display: flex;
@@ -322,8 +322,8 @@
 }
 
 .panelCard {
-  background: #252a38;
-  border: 1px solid #32394c;
+  background: #162032;
+  border: 1px solid rgba(255,255,255,0.08);
   border-radius: 8px;
   padding: 16px;
 }
@@ -333,7 +333,7 @@
   margin-top: 0;
   margin-bottom: 16px;
   font-weight: 600;
-  border-bottom: 1px solid #32394c;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
   padding-bottom: 8px;
 }
 .panelRow {
@@ -387,8 +387,8 @@
   justify-content: center;
 }
 .floatingWppContainer {
-  background: #1e2230;
-  border: 1px solid #333848;
+  background: #162032;
+  border: 1px solid rgba(255,255,255,0.08);
   border-radius: 12px;
   width: 90%;
   max-width: 450px;
@@ -403,8 +403,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px;
-  background: #252a38;
-  border-bottom: 1px solid #333848;
+  background: #1f2d42;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 .floatingWppTitle {
   color: #fff;
@@ -421,25 +421,25 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  background: #161922;
+  background: #0b1120;
 }
 .messageWrapper { display: flex; flex-direction: column; max-width: 80%; }
-.msgIn { align-self: flex-start; background: #252a38; border: 1px solid #333848; padding: 12px; border-radius: 8px 8px 8px 0; color: #fff;}
+.msgIn { align-self: flex-start; background: #1f2d42; border: 1px solid rgba(255,255,255,0.08); padding: 12px; border-radius: 8px 8px 8px 0; color: #fff;}
 .msgOut { align-self: flex-end; background: #10b981; padding: 12px; border-radius: 8px 8px 0 8px; color: #fff; }
 .msgText { margin: 0 0 4px 0; font-size: 0.85rem; }
 .msgTime { font-size: 0.7rem; opacity: 0.7; text-align: right; display: block; }
 
 .chatInputArea {
   padding: 16px;
-  background: #252a38;
-  border-top: 1px solid #333848;
+  background: #1f2d42;
+  border-top: 1px solid rgba(255,255,255,0.08);
   display: flex;
   gap: 12px;
 }
 .chatInput {
   flex: 1;
-  background: #161922;
-  border: 1px solid #333848;
+  background: #0b1120;
+  border: 1px solid rgba(255,255,255,0.08);
   padding: 12px;
   color: #fff;
   border-radius: 6px;
@@ -524,4 +524,154 @@
     max-width: 100%;
     border-radius: 0;
   }
+}
+
+/* OTRS Dashboard Layout */
+.dashboardWrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background-color: var(--bg-primary, #0b1120);
+  color: var(--text-primary, #f8fafc);
+  overflow-y: auto;
+}
+
+.dashboardToolbar {
+  display: flex;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background-color: var(--bg-secondary, #162032);
+  border-bottom: 1px solid var(--border-color, rgba(255,255,255,0.1));
+}
+
+.searchBox {
+  display: flex;
+  align-items: center;
+  background: var(--bg-tertiary, #1e293b);
+  border: 1px solid var(--border-color, rgba(255,255,255,0.1));
+  border-radius: 4px;
+  padding: 6px 12px;
+  width: 300px;
+}
+
+.searchBox input {
+  background: transparent;
+  border: none;
+  color: var(--text-primary, #fff);
+  outline: none;
+  margin-left: 8px;
+  width: 100%;
+}
+
+.dashboardSections {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.accordionContainer {
+  background-color: var(--bg-secondary, #162032);
+  border: 1px solid var(--border-color, rgba(255,255,255,0.1));
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.accordionHeader {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  background-color: var(--bg-tertiary, #1e293b);
+  cursor: pointer;
+  user-select: none;
+  border-bottom: 1px solid var(--border-color, rgba(255,255,255,0.05));
+}
+
+.accordionHeader h3 {
+  margin: 0 0 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+  flex: 1;
+}
+
+.accordionActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #94a3b8;
+}
+
+.accordionContent {
+  background-color: var(--bg-secondary, #162032);
+}
+
+.otrsTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.otrsTable th {
+  text-align: left;
+  padding: 12px 16px;
+  color: #94a3b8;
+  font-weight: 500;
+  border-bottom: 1px solid var(--border-color, rgba(255,255,255,0.05));
+}
+
+.otrsTable td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color, rgba(255,255,255,0.05));
+  cursor: pointer;
+}
+
+.otrsTable tr:hover td {
+  background-color: rgba(255,255,255,0.03);
+}
+
+.badgePrioHigh {
+  background-color: var(--critel-red, #c9253a);
+  color: #fff;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.badgePrioMedium {
+  background-color: #f59e0b;
+  color: #fff;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.badgePrioLow {
+  background-color: #3b82f6;
+  color: #fff;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.iconBtn {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 4px;
+}
+.iconBtn:hover {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
 }
