@@ -39,10 +39,10 @@ export default function Sidebar({ lang }: { lang: string }) {
 
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    supabase.auth.getUser().then(({ data: { user } }: any) => {
       if (!user) return;
       supabase.from('perfis').select('cargo').eq('user_id', user.id).eq('status', 'ATIVO').single()
-        .then(({ data }) => { if (data?.cargo) setCargo(data.cargo); });
+        .then(({ data }: any) => { if (data?.cargo) setCargo(data.cargo); });
     });
   }, []);
 
