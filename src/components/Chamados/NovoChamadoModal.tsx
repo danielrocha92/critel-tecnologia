@@ -2,12 +2,9 @@
 
 import React, { useState } from 'react';
 import { X, Paperclip, Bold, Italic, Underline, Type, AlignLeft, List, ListOrdered, Quote, Link2, Image as ImageIcon, Plus, BookTemplate } from 'lucide-react';
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '../../utils/supabase/client';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder'
-);
+const supabase = createClient();
 
 interface NovoChamadoModalProps {
   onClose: () => void;

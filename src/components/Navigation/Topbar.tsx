@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { User, MessageSquare, ChevronUp, ChevronDown, Pencil, Menu } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { createBrowserClient } from '@supabase/ssr';
+import { createClient } from '../../utils/supabase/client';
 import NotificacoesBell from './NotificacoesBell';
 
 export default function Topbar() {
@@ -23,10 +23,7 @@ export default function Topbar() {
   }, []);
 
   const handleLogout = async () => {
-    const supabase = createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
+    const supabase = createClient();
     await supabase.auth.signOut();
     window.location.href = `/${params.lang}/login`;
   };

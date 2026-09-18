@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import styles from './atendimento.module.css';
 import { Send, User, Phone, Clock, Search, Bot, Server, Key, Video, Activity, Inbox, Settings, Trash2, Printer, Pencil, History } from 'lucide-react';
@@ -10,7 +11,16 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder'
 );
 
-export default function CentralAtendimento() {
+export default function CentralAtendimentoPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: '2rem', color: '#fff' }}>Carregando chamados...</div>}>
+      <CentralAtendimentoContent />
+    </Suspense>
+  );
+}
+
+function CentralAtendimentoContent() {
+  const searchParams = useSearchParams();
   const [tickets, setTickets] = useState<any[]>([]);
   const [ticketAtivo, setTicketAtivo] = useState<any | null>(null);
   const [viewMode, setViewMode] = useState<'details' | 'timeline'>('details');
@@ -18,6 +28,14 @@ export default function CentralAtendimento() {
   const [perfis, setPerfis] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState('novos');
   const [operadorAtual, setOperadorAtual] = useState<any>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  useEffect(() => {
+    const f = searchParams.get('filter');
+    const m = searchParams.get('meus');
+    if (m === 'true') setActiveTab('meus');
+    else if (f) setActiveTab(f);
+  }, [searchParams]);
   
   // Edit Form States
   const [editForm, setEditForm] = useState({
@@ -307,54 +325,47 @@ export default function CentralAtendimento() {
     <div className={styles.container}>
       {!ticketAtivo ? (
         <div className={styles.tableContainer}>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px', paddingRight: '24px', alignItems: 'center', gap: '8px' }}>
-            <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>Simular Operador Logado:</span>
-            <select 
-              value={operadorAtual?.id || ''} 
-              onChange={(e) => setOperadorAtual(perfis.find(p => p.id === e.target.value))}
-              style={{ background: '#1f2937', color: '#fff', border: '1px solid #374151', padding: '4px 8px', borderRadius: '4px', outline: 'none', fontSize: '0.85rem' }}
-            >
-              <option value="">Nenhum</option>
-              {perfis.map(p => <option key={p.id} value={p.id}>{p.nome}</option>)}
-            </select>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', paddingLeft: '24px', paddingRight: '24px', alignItems: 'center', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', background: '#1f2937', border: '1px solid #374151', borderRadius: '4px', padding: '4px 8px' }}>
+              <Search size={16} color="#94a3b8" />
+              <input 
+                type="text" 
+                placeholder="Buscar chamado (protocolo, cliente, assunto)..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{ background: 'transparent', border: 'none', color: '#fff', outline: 'none', marginLeft: '8px', fontSize: '0.85rem', width: '280px' }}
+              />
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>Simular Operador Logado:</span>
+              <select 
+                value={operadorAtual?.id || ''} 
+                onChange={(e) => setOperadorAtual(perfis.find(p => p.id === e.target.value))}
+                style={{ background: '#1f2937', color: '#fff', border: '1px solid #374151', padding: '4px 8px', borderRadius: '4px', outline: 'none', fontSize: '0.85rem' }}
+              >
+                <option value="">Nenhum</option>
+                {perfis.map(p => <option key={p.id} value={p.id}>{p.nome}</option>)}
+              </select>
+            </div>
           </div>
           <div className={styles.tableHeader}>
-            <div 
-              className={`${styles.tabItem} ${activeTab === 'novos' ? styles.tabItemActive : ''}`}
-              onClick={() => setActiveTab('novos')}
-            >
-              Novos Chamados <span className={styles.tabBadge}>{tickets.filter(t => !t.analista_id).length}</span>
-            </div>
-            <div 
-              className={`${styles.tabItem} ${activeTab === 'respondidos' ? styles.tabItemActive : ''}`}
-              onClick={() => setActiveTab('respondidos')}
-            >
-              Chamados Respondidos
-            </div>
-            <div 
-              className={`${styles.tabItem} ${activeTab === 'novos_vinculados' ? styles.tabItemActive : ''}`}
-              onClick={() => setActiveTab('novos_vinculados')}
-            >
-              Novos Chamados Vinculados
-            </div>
-            <div 
-              className={`${styles.tabItem} ${activeTab === 'abertos' ? styles.tabItemActive : ''}`}
-              onClick={() => setActiveTab('abertos')}
-            >
-              Abertos <span className={styles.tabBadge}>{tickets.filter(t => t.analista_id === operadorAtual?.id && t.status !== 'FECHADO').length}</span>
-            </div>
-            <div 
-              className={`${styles.tabItem} ${activeTab === 'abertos_equipe' ? styles.tabItemActive : ''}`}
-              onClick={() => setActiveTab('abertos_equipe')}
-            >
-              Abertos da Equipe <span className={styles.tabBadge}>{tickets.filter(t => t.analista_id && t.status !== 'FECHADO').length}</span>
-            </div>
-            <div 
-              className={`${styles.tabItem} ${activeTab === 'aguardando' ? styles.tabItemActive : ''}`}
-              onClick={() => setActiveTab('aguardando')}
-            >
-              Aguardando Ação da Equipe
-            </div>
+            {[
+              { id: 'todos', label: 'Todos os Chamados' },
+              { id: 'meus', label: 'Meus Chamados', badge: tickets.filter(t => t.analista_id === operadorAtual?.id).length },
+              { id: 'novos', label: 'Novos', badge: tickets.filter(t => !t.analista_id && t.status !== 'FECHADO' && t.status !== 'CANCELADO' && t.status !== 'RESOLVIDO').length },
+              { id: 'abertos', label: 'Abertos', badge: tickets.filter(t => t.status !== 'FECHADO' && t.status !== 'CANCELADO' && t.status !== 'RESOLVIDO').length },
+              { id: 'aguardando', label: 'Aguardando' },
+              { id: 'finalizados', label: 'Finalizados' },
+              { id: 'cancelados', label: 'Cancelados' }
+            ].map(tab => (
+              <div 
+                key={tab.id}
+                className={`${styles.tabItem} ${activeTab === tab.id ? styles.tabItemActive : ''}`}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                {tab.label} {tab.badge !== undefined && tab.badge > 0 && <span className={styles.tabBadge}>{tab.badge}</span>}
+              </div>
+            ))}
           </div>
           
           <div className={styles.tableWrapper}>
@@ -379,10 +390,27 @@ export default function CentralAtendimento() {
               <tbody>
                 {(() => {
                   const filteredTickets = tickets.filter(t => {
-                    if (activeTab === 'novos') return !t.analista_id;
-                    if (activeTab === 'abertos') return t.analista_id === operadorAtual?.id && t.status !== 'FECHADO';
-                    if (activeTab === 'abertos_equipe') return t.analista_id && t.status !== 'FECHADO';
-                    return true;
+                    if (searchTerm) return true; // Ignora o filtro de abas se estiver pesquisando
+                    switch (activeTab) {
+                      case 'todos': return true;
+                      case 'meus': return t.analista_id === operadorAtual?.id;
+                      case 'novos': return !t.analista_id && t.status !== 'FECHADO' && t.status !== 'CANCELADO' && t.status !== 'RESOLVIDO';
+                      case 'abertos': return t.status !== 'FECHADO' && t.status !== 'CANCELADO' && t.status !== 'RESOLVIDO';
+                      case 'aguardando': return t.status === 'AGUARDANDO';
+                      case 'finalizados': return t.status === 'FECHADO' || t.status === 'RESOLVIDO';
+                      case 'cancelados': return t.status === 'CANCELADO';
+                      default: return true;
+                    }
+                  }).filter(t => {
+                    if (!searchTerm) return true;
+                    const termo = searchTerm.toLowerCase();
+                    return (
+                      String(t.titulo || '').toLowerCase().includes(termo) ||
+                      String(t.cliente || '').toLowerCase().includes(termo) ||
+                      String(t.protocolo_origem || '').toLowerCase().includes(termo) ||
+                      String(t.id || '').toLowerCase().includes(termo) ||
+                      String(t.descricao || '').toLowerCase().includes(termo)
+                    );
                   });
 
                   return filteredTickets.length === 0 ? (

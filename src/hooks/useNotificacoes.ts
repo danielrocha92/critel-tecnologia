@@ -140,7 +140,7 @@ export function useNotificacoes() {
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'tickets' },
-        (payload) => {
+        (payload: any) => {
           if (!prefsAtual.novoChamado) return;
           const ticket = payload.new as any;
           if (!isEscopoTI(ticket)) return;
@@ -156,7 +156,7 @@ export function useNotificacoes() {
       .on(
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'tickets' },
-        (payload) => {
+        (payload: any) => {
           const ticket = payload.new as any;
           const old    = payload.old as any;
           if (!isEscopoTI(ticket)) return;

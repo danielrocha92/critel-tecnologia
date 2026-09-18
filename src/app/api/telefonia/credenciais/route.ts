@@ -16,15 +16,15 @@ export async function GET() {
     }
   );
 
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { user } } = await supabase.auth.getUser();
 
-  if (!session) {
+  if (!user) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
   }
 
   // Na infraestrutura real, essas informações virão de uma tabela de colaboradores/ramais.
   // Para testes na intranet da Critel, vamos gerar dados estáticos simulando o Issabel:
-  const ramalSimulado = session.user.email?.includes('daniel') ? '1001' : '1002';
+  const ramalSimulado = user.email?.includes('daniel') ? '1001' : '1002';
 
   return NextResponse.json({
     ramal: ramalSimulado,

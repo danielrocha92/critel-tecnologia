@@ -9,7 +9,7 @@ import {
   GraduationCap, Settings, LifeBuoy,
   ChevronDown, ChevronLeft, ChevronRight, Plus, LogOut
 } from 'lucide-react';
-import { createBrowserClient } from '@supabase/ssr';
+import { createClient } from '../../utils/supabase/client';
 
 type Cargo = 'SUPER_ADMIN' | 'ADMIN' | 'TÉCNICO' | 'TECNICO' | string;
 
@@ -38,10 +38,7 @@ export default function Sidebar({ lang }: { lang: string }) {
   }, [isCollapsed]);
 
   useEffect(() => {
-    const supabase = createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
+    const supabase = createClient();
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) return;
       supabase.from('perfis').select('cargo').eq('user_id', user.id).eq('status', 'ATIVO').single()
@@ -50,10 +47,7 @@ export default function Sidebar({ lang }: { lang: string }) {
   }, []);
 
   const handleLogout = async () => {
-    const supabase = createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
+    const supabase = createClient();
     await supabase.auth.signOut();
     window.location.href = `/${lang}/login`;
   };
@@ -63,6 +57,7 @@ export default function Sidebar({ lang }: { lang: string }) {
     {
       name: 'Chamados', icon: Inbox, hasSubmenu: true, section: 'main',
       subItems: [
+        { label: 'Todos os Chamados', href: `/${lang}/atendimento?filter=todos` },
         { label: 'Meus Chamados', href: `/${lang}/atendimento?meus=true` },
         { label: 'Abertos',       href: `/${lang}/atendimento?filter=abertos` },
         { label: 'Finalizados',   href: `/${lang}/atendimento?filter=finalizados` },
