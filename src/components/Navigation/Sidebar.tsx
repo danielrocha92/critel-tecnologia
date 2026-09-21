@@ -58,7 +58,7 @@ export default function Sidebar({ lang }: { lang: string }) {
       name: 'Chamados', icon: Inbox, hasSubmenu: true, section: 'main',
       subItems: [
         { label: 'Todos os Chamados', href: `/${lang}/all-tickets` },
-        { label: 'Meus Chamados', href: `/${lang}/my-tickets` },
+        { label: 'Meus Chamados', href: `/${lang}/my-tickets/all` },
         { label: 'Meus Chamados Abertos', href: `/${lang}/my-tickets/opened` },
         { label: 'Meus Chamados Finalizados', href: `/${lang}/my-tickets/closed` },
       ],
@@ -84,7 +84,7 @@ export default function Sidebar({ lang }: { lang: string }) {
       subItems: [
         { label: 'Configurações de Sistema', href: `/${lang}/admin/configuracoes`, roles: ['SUPER_ADMIN', 'ADMIN', 'TÉCNICO', 'TECNICO'] },
         { label: 'Gerenciar Usuários',       href: `/${lang}/admin/usuarios`, roles: ['SUPER_ADMIN', 'ADMIN', 'TÉCNICO', 'TECNICO'] },
-        { label: 'Governança de Identidade', href: `/${lang}/admin`, roles: ['SUPER_ADMIN'] },
+        { label: 'Governança de Identidade', href: `/${lang}/admin`, roles: ['SUPER_ADMIN', 'ADMIN'] },
       ].filter(item => item.roles.includes(cargo)),
     },
     { name: 'Ajuda e Suporte', icon: LifeBuoy, href: `/${lang}/ajuda`, section: 'admin' },

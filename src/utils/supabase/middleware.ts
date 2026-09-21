@@ -31,10 +31,13 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Proteger rotas para apenas usuários logados
-  const isPrivatePath = request.nextUrl.pathname.includes('/atendimento') || 
-                        request.nextUrl.pathname.includes('/tecnico') || 
-                        request.nextUrl.pathname.includes('/pendente');
+  const isPublicPath = 
+    request.nextUrl.pathname.includes('/login') || 
+    request.nextUrl.pathname.includes('/api/auth') || 
+    request.nextUrl.pathname.includes('/api/webhooks') ||
+    request.nextUrl.pathname.match(/\.(.*)$/); // Allow static files like .png, .js, .css
+
+  const isPrivatePath = !isPublicPath;
   
   if (!user && isPrivatePath) {
     // Redireciona para o login

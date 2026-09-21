@@ -72,16 +72,26 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
       payload.tecnico_id = formData.atendente;
     }
 
-    const { error } = await supabase.from('tickets').insert(payload);
+    try {
+      const response = await fetch('/api/tickets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      
+      const result = await response.json();
+      setLoading(false);
 
-    setLoading(false);
-
-    if (error) {
-      console.error('Erro ao criar OS:', error);
-      alert('Erro ao criar Ordem de Serviço.');
-    } else {
-      // Recarrega a página para puxar os dados atualizados
-      window.location.reload();
+      if (!response.ok) {
+        console.error('Erro ao criar OS:', result.error);
+        alert('Erro ao criar Ordem de Serviço.');
+      } else {
+        window.location.reload();
+      }
+    } catch (err) {
+      setLoading(false);
+      console.error('Erro ao chamar a API:', err);
+      alert('Erro de conexão ao criar a Ordem de Serviço.');
     }
   };
   return (

@@ -9,8 +9,25 @@ import NotificacoesBell from './NotificacoesBell';
 
 export default function Topbar() {
   const params = useParams();
+  const lang = params.lang as string;
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [userData, setUserData] = useState<{ nome: string; email: string } | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: perfil } = await supabase.from('perfis').select('nome').eq('user_id', user.id).single();
+        setUserData({
+          nome: perfil?.nome || user.email?.split('@')[0] || 'Usuário',
+          email: user.email || ''
+        });
+      }
+    };
+    fetchUser();
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -106,16 +123,16 @@ export default function Topbar() {
                 </div>
                 <div style={{ flex: 1, overflow: 'hidden' }}>
                   <div style={{ fontWeight: '600', fontSize: '0.9rem', color: '#fff', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
-                    Daniel Rocha - Critel Te...
+                    {userData ? userData.nome : 'Carregando...'}
                   </div>
                   <div style={{ fontSize: '0.75rem', color: '#94a3b8', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
-                    daniel.rocha@criteltecnologia.com.br
+                    {userData ? userData.email : ''}
                   </div>
                 </div>
               </div>
 
               <div style={{ padding: '8px 0', borderBottom: '1px solid #32394c' }}>
-                <button className="topbar-dropdown-item">Meus Dados</button>
+                <Link href={`/${lang}/tecnico/perfil`} className="topbar-dropdown-item" style={{ display: 'block', textDecoration: 'none' }} onClick={() => setIsProfileOpen(false)}>Meus Dados</Link>
                 <button className="topbar-dropdown-item">Alterar Senha</button>
                 <button className="topbar-dropdown-item">Alterar Foto...</button>
                 <div className="topbar-dropdown-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

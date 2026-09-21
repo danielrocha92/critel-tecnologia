@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Users, Shield, Crown, Wrench } from 'lucide-react';
-import { createBrowserClient } from '@supabase/ssr';
+import { createClient } from '@/utils/supabase/client';
 
 type PerfilRow = { id: string; nome: string; email: string; cargo: string; status: string };
 
@@ -10,16 +10,13 @@ export default function UsuariosPage() {
   const [usuarios, setUsuarios] = useState<PerfilRow[]>([]);
   const [atualizando, setAtualizando] = useState<string | null>(null);
 
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const supabase = createClient();
 
   useEffect(() => {
-    supabase.from('perfis').select('id,nome,email,cargo,status').order('nome').then(({ data }) => {
+    supabase.from('perfis').select('id,nome,email,cargo,status').order('nome').then(({ data }: any) => {
       if (data) setUsuarios(data);
     });
-  }, [supabase]);
+  }, []);
 
   return (
     <div style={{ padding: '2rem', flex: 1, maxWidth: '1000px' }}>
@@ -35,7 +32,6 @@ export default function UsuariosPage() {
               <th style={{ padding: '14px 20px', textAlign: 'left', color: '#64748b', fontSize: '0.8rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Colaborador</th>
               <th style={{ padding: '14px 20px', textAlign: 'left', color: '#64748b', fontSize: '0.8rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Cargo Atual</th>
               <th style={{ padding: '14px 20px', textAlign: 'left', color: '#64748b', fontSize: '0.8rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Status</th>
-              <th style={{ padding: '14px 20px', textAlign: 'right', color: '#64748b', fontSize: '0.8rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Alterar Cargo</th>
             </tr>
           </thead>
           <tbody>
@@ -58,9 +54,45 @@ export default function UsuariosPage() {
                     </div>
                   </td>
                   <td style={{ padding: '14px 20px' }}>
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: cargoCor.bg, color: cargoCor.text, padding: '4px 12px', borderRadius: '999px', fontSize: '0.8rem', fontWeight: 600 }}>
-                      {cargoIcon} {u.cargo === 'TECNICO' ? 'TÉCNICO' : u.cargo}
-                    </span>
+                    <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: '6px', background: cargoCor.bg, color: cargoCor.text, padding: '4px 12px', borderRadius: '999px', fontSize: '0.8rem', fontWeight: 600 }}>
+                      {cargoIcon}
+                      <select
+                        value={u.cargo}
+                        disabled={atualizando === u.id || u.cargo === 'SUPER_ADMIN'}
+                        onChange={async (e) => {
+                          const novoCargo = e.target.value;
+                          setAtualizando(u.id);
+                          try {
+                            const res = await fetch('/api/admin/update-perfil', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ id: u.id, cargo: novoCargo })
+                            });
+                            if (!res.ok) throw new Error(await res.text());
+                            setUsuarios(prev => prev.map(p => p.id === u.id ? { ...p, cargo: novoCargo } : p));
+                          } catch (err: any) {
+                            console.error('Erro ao atualizar cargo:', err);
+                            alert('Erro ao atualizar cargo: ' + err.message);
+                          }
+                          setAtualizando(null);
+                        }}
+                        style={{ 
+                          background: 'transparent', 
+                          border: 'none', 
+                          color: 'inherit', 
+                          fontWeight: 'inherit',
+                          fontSize: 'inherit',
+                          cursor: u.cargo === 'SUPER_ADMIN' ? 'not-allowed' : 'pointer',
+                          outline: 'none',
+                          appearance: 'none',
+                          paddingRight: '12px'
+                        }}
+                      >
+                        <option value="TECNICO" style={{color: '#94a3b8', background: '#0f172a'}}>TÉCNICO</option>
+                        <option value="ADMIN" style={{color: '#60a5fa', background: '#0f172a'}}>ADMIN</option>
+                        <option value="SUPER_ADMIN" style={{color: '#fbbf24', background: '#0f172a'}}>SUPER_ADMIN</option>
+                      </select>
+                    </div>
                   </td>
                   <td style={{ padding: '14px 20px' }}>
                     <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(0,0,0,0.2)', padding: '4px 8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)' }}>
@@ -102,39 +134,6 @@ export default function UsuariosPage() {
                         <option value="BANIDO" style={{color: '#ef4444', background: '#0f172a'}}>BANIDO</option>
                       </select>
                     </div>
-                  </td>
-                  <td style={{ padding: '14px 20px', textAlign: 'right' }}>
-                    {u.cargo !== 'SUPER_ADMIN' && (
-                      <select
-                        value={u.cargo}
-                        disabled={atualizando === u.id}
-                        onChange={async (e) => {
-                          const novoCargo = e.target.value;
-                          setAtualizando(u.id);
-                          try {
-                            const res = await fetch('/api/admin/update-perfil', {
-                              method: 'POST',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ id: u.id, cargo: novoCargo })
-                            });
-                            if (!res.ok) throw new Error(await res.text());
-                            setUsuarios(prev => prev.map(p => p.id === u.id ? { ...p, cargo: novoCargo } : p));
-                          } catch (err: any) {
-                            console.error('Erro ao atualizar cargo:', err);
-                            alert('Erro ao atualizar cargo: ' + err.message);
-                          }
-                          setAtualizando(null);
-                        }}
-                        style={{ background: '#0f172a', border: '1px solid #334155', color: '#e2e8f0', padding: '6px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem' }}
-                      >
-                        <option value="TECNICO">TÉCNICO</option>
-                        <option value="ADMIN">ADMIN</option>
-                        <option value="SUPER_ADMIN">SUPER_ADMIN</option>
-                      </select>
-                    )}
-                    {u.cargo === 'SUPER_ADMIN' && (
-                      <span style={{ color: '#475569', fontSize: '0.82rem', fontStyle: 'italic' }}>Protegido</span>
-                    )}
                   </td>
                 </tr>
               );
