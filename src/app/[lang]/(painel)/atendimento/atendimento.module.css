@@ -238,32 +238,41 @@
 }
 
 .timelineCard {
-  background: #162032;
-  border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.08);
-  padding: 20px;
+  background: #1c2436;
+  border-radius: 12px;
+  border: none;
+  padding: 24px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 .timelineHeader {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 16px;
+  align-items: center;
+  margin-bottom: 20px;
 }
 .timelineUser {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
 }
 .timelineAvatar {
-  width: 40px; height: 40px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center;
+  width: 44px; height: 44px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
-.timelineName { color: #fff; font-weight: 600; font-size: 0.9rem; }
-.timelineRole { color: #64748b; font-size: 0.8rem; margin-left: 6px; }
-.timelineDate { color: #64748b; font-size: 0.8rem; }
+.timelineName { color: #f8fafc; font-weight: 600; font-size: 1rem; }
+.timelineRole { color: #64748b; font-size: 0.85rem; margin-left: 8px; font-weight: 500; }
+.timelineDate { color: #64748b; font-size: 0.85rem; }
 .timelineContent {
-  color: #cbd5e1;
-  font-size: 0.9rem;
-  line-height: 1.5;
-  margin-bottom: 16px;
+  color: #e2e8f0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+.timelineContent img {
+  max-width: 100%;
+  border-radius: 8px;
+  margin-top: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
 }
 
 .replyEditor {

@@ -13,7 +13,27 @@ const withPWA = withPWAInit({
 });
 
 const nextConfig: NextConfig = {
-  turbopack: {}
+  turbopack: {},
+  async rewrites() {
+    return [
+      {
+        source: '/:lang/all-tickets',
+        destination: '/:lang/atendimento?filter=todos',
+      },
+      {
+        source: '/:lang/my-tickets',
+        destination: '/:lang/atendimento?meus=true&filter=todos',
+      },
+      {
+        source: '/:lang/my-tickets/opened',
+        destination: '/:lang/atendimento?meus=true&filter=abertos',
+      },
+      {
+        source: '/:lang/my-tickets/closed',
+        destination: '/:lang/atendimento?meus=true&filter=finalizados',
+      },
+    ];
+  },
 };
 
 export default withPWA(nextConfig);

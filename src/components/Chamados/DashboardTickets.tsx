@@ -1,18 +1,22 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronRight, Search, Eye, Filter } from 'lucide-react';
+import { SkeletonRow } from './SkeletonTicket';
 import styles from '../../app/[lang]/(painel)/atendimento/atendimento.module.css';
+import { ITicket, IPerfil } from '../../types/ticket';
 
 interface DashboardTicketsProps {
-  tickets: any[];
-  perfis: any[];
-  operadorAtual: any;
+  tickets: ITicket[];
+  perfis: IPerfil[];
+  operadorAtual: IPerfil | null;
   searchTerm: string;
   setSearchTerm: (term: string) => void;
-  onSelectTicket: (ticket: any) => void;
+  activeFilter?: string;
+  isMeus?: boolean;
+  onSelectTicket: (ticket: ITicket) => void;
   loading?: boolean;
 }
 
-export function DashboardTickets({ tickets, perfis, operadorAtual, searchTerm, setSearchTerm, onSelectTicket, loading }: DashboardTicketsProps) {
+export function DashboardTickets({ tickets, perfis, operadorAtual, searchTerm, setSearchTerm, activeFilter = 'todos', isMeus = false, onSelectTicket, loading }: DashboardTicketsProps) {
   const [openSections, setOpenSections] = useState({
     reminder: true,
     escalated: true,
@@ -43,7 +47,7 @@ export function DashboardTickets({ tickets, perfis, operadorAtual, searchTerm, s
     return <span className={styles.badgePrioLow}>Normal</span>;
   };
 
-  const filteredTickets = tickets.filter(t => {
+  const searchedTickets = tickets.filter(t => {
     const termo = searchTerm.toLowerCase();
     if (!termo) return true;
     return (
@@ -53,19 +57,43 @@ export function DashboardTickets({ tickets, perfis, operadorAtual, searchTerm, s
     );
   });
 
-  // Agrupamentos OTRS-style
-  const myTickets = filteredTickets.filter(t => t.analista_id === operadorAtual?.id && t.status !== 'FECHADO' && t.status !== 'RESOLVIDO' && t.status !== 'CANCELADO');
-  const newTickets = filteredTickets.filter(t => t.status !== 'FECHADO' && t.status !== 'RESOLVIDO' && t.status !== 'CANCELADO' && t.status !== 'ESCALADO' && t.status !== 'AGUARDANDO');
-  const escalatedTickets = filteredTickets.filter(t => t.status === 'ESCALADO' || t.status === 'AGUARDANDO');
+  let filteredTickets = searchedTickets;
 
-  const renderTable = (data: any[], title: string, sectionKey: keyof typeof openSections) => {
+  if (isMeus && operadorAtual) {
+    filteredTickets = filteredTickets.filter(t => String(t.analista_id) === String(operadorAtual.id));
+  } else if (isMeus && !operadorAtual) {
+    // Prevent showing all tickets before operator is loaded
+    filteredTickets = [];
+  }
+
+  if (activeFilter === 'abertos') {
+    filteredTickets = filteredTickets.filter(t => t.status !== 'FECHADO' && t.status !== 'RESOLVIDO' && t.status !== 'CANCELADO');
+  } else if (activeFilter === 'finalizados') {
+    filteredTickets = filteredTickets.filter(t => t.status === 'FECHADO' || t.status === 'RESOLVIDO');
+  } else if (activeFilter === 'cancelados') {
+    filteredTickets = filteredTickets.filter(t => t.status === 'CANCELADO');
+  }
+
+  let title = 'Chamados';
+  if (isMeus) {
+    if (activeFilter === 'todos') title = 'Meus Chamados (Todos)';
+    else if (activeFilter === 'abertos') title = 'Meus Chamados (Abertos)';
+    else if (activeFilter === 'finalizados') title = 'Meus Chamados (Finalizados)';
+  } else {
+    if (activeFilter === 'todos') title = 'Todos os Chamados';
+    else if (activeFilter === 'abertos') title = 'Todos os Chamados Abertos';
+    else if (activeFilter === 'finalizados') title = 'Todos os Chamados Finalizados';
+    else if (activeFilter === 'cancelados') title = 'Todos os Chamados Cancelados';
+  }
+
+  const renderTable = (data: ITicket[], sectionTitle: string, sectionKey: keyof typeof openSections) => {
     const isOpen = openSections[sectionKey];
     
     return (
       <div className={styles.accordionContainer}>
         <div className={styles.accordionHeader} onClick={() => toggleSection(sectionKey)}>
           {isOpen ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
-          <h3>{title} ({data.length} Objects)</h3>
+          <h3>{sectionTitle} ({data.length} Registros)</h3>
           <div className={styles.accordionActions}>
              <Filter size={16} />
           </div>
@@ -81,43 +109,47 @@ export function DashboardTickets({ tickets, perfis, operadorAtual, searchTerm, s
                   <tr>
                     <th>Protocolo</th>
                     <th>Título</th>
+                    <th>Departamento</th>
                     <th>Prioridade</th>
                     <th>Status</th>
                     <th>Cliente</th>
                     <th>Data/Hora</th>
                     <th>Última Situação</th>
                     <th>Atendente</th>
-                    <th>Departamento</th>
                     <th>Ações</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {data.slice(0, limits[sectionKey] || 50).map(ticket => (
-                    <tr key={ticket.id} onClick={() => onSelectTicket(ticket)}>
-                      <td>#{ticket.protocolo_origem}</td>
-                      <td style={{ fontWeight: 500 }}>{ticket.titulo}</td>
-                      <td>{renderBadge(ticket.prioridade)}</td>
-                      <td>{ticket.status}</td>
-                      <td>{ticket.cliente}</td>
-                      <td style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
-                        {new Date(ticket.criado_em).toLocaleDateString()}<br/>
-                        {new Date(ticket.criado_em).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </td>
-                      <td style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
-                        {ticket.atualizado_em ? new Date(ticket.atualizado_em).toLocaleDateString() : '-'}<br/>
-                        {ticket.atualizado_em ? new Date(ticket.atualizado_em).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
-                      </td>
-                      <td style={{ color: '#94a3b8' }}>
-                        {ticket.analista_id 
-                          ? (perfis?.find(p => String(p.id) === String(ticket.analista_id))?.nome || 'Alocado') 
-                          : 'Sem Atendente'}
-                      </td>
-                      <td>{ticket.departamento || '-'}</td>
-                      <td>
-                        <button className={styles.iconBtn}><Eye size={16} /></button>
-                      </td>
-                    </tr>
-                  ))}
+                  {loading ? (
+                    Array.from({ length: 10 }).map((_, i) => <SkeletonRow key={i} />)
+                  ) : (
+                    data.slice(0, limits[sectionKey] || 50).map(ticket => (
+                      <tr key={ticket.id} onClick={() => onSelectTicket(ticket)}>
+                        <td>#{ticket.protocolo_origem}</td>
+                        <td style={{ fontWeight: 500 }}>{ticket.titulo}</td>
+                        <td>{ticket.departamento || '-'}</td>
+                        <td>{renderBadge(ticket.prioridade)}</td>
+                        <td>{ticket.status}</td>
+                        <td>{ticket.cliente}</td>
+                        <td style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+                          {new Date(ticket.criado_em).toLocaleDateString()}<br/>
+                          {new Date(ticket.criado_em).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </td>
+                        <td style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+                          {ticket.atualizado_em ? new Date(ticket.atualizado_em).toLocaleDateString() : '-'}<br/>
+                          {ticket.atualizado_em ? new Date(ticket.atualizado_em).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
+                        </td>
+                        <td style={{ color: '#94a3b8' }}>
+                          {ticket.analista_id 
+                            ? (perfis?.find(p => String(p.id) === String(ticket.analista_id))?.nome || 'Alocado') 
+                            : 'Sem Atendente'}
+                        </td>
+                        <td>
+                          <button className={styles.iconBtn}><Eye size={16} /></button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             )}
@@ -150,7 +182,7 @@ export function DashboardTickets({ tickets, perfis, operadorAtual, searchTerm, s
     );
   };
 
-  if (loading) return <div style={{ padding: '2rem', color: '#fff' }}>Carregando chamados...</div>;
+
 
   return (
     <div className={styles.dashboardWrapper}>
@@ -167,9 +199,7 @@ export function DashboardTickets({ tickets, perfis, operadorAtual, searchTerm, s
       </div>
 
       <div className={styles.dashboardSections}>
-        {renderTable(myTickets, 'Meus Chamados Abertos', 'my')}
-        {renderTable(escalatedTickets, 'Chamados Aguardando / Escalados', 'escalated')}
-        {renderTable(newTickets, 'Novos Chamados / Todos Abertos', 'new')}
+        {renderTable(filteredTickets, title, 'my')}
       </div>
     </div>
   );

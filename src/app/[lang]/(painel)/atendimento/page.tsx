@@ -1,12 +1,17 @@
 'use client';
 
 import { useEffect, useState, useRef, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, usePathname } from 'next/navigation';
+import { toast } from 'sonner';
 import { createClient } from '../../../../utils/supabase/client';
 import { useCentralAtendimento } from '../../../../hooks/useCentralAtendimento';
 import styles from './atendimento.module.css';
 import { Send, User, Phone, Clock, Search, Bot, Server, Key, Video, Activity, Inbox, Settings, Trash2, Printer, Pencil, History } from 'lucide-react';
 import { DashboardTickets } from '../../../../components/Chamados/DashboardTickets';
+import { TicketEditor } from '../../../../components/Chamados/TicketEditor';
+import { WhatsAppModal } from '../../../../components/Chamados/WhatsAppModal';
+import { SkeletonHistory } from '../../../../components/Chamados/SkeletonHistory';
+import { ITicket, ITomTicketReply, IWhatsAppConversation, IWhatsAppMessage, ILojaContato } from '../../../../types/ticket';
 
 const supabase = createClient();
 
@@ -22,19 +27,34 @@ function CentralAtendimentoContent() {
   const { tickets, perfis, pdvs, operadorAtual, loading } = useCentralAtendimento();
 
   const searchParams = useSearchParams();
-  const [ticketAtivo, setTicketAtivo] = useState<any | null>(null);
+  const [ticketAtivo, setTicketAtivo] = useState<ITicket | null>(null);
   const [viewMode, setViewMode] = useState<'details' | 'timeline'>('details');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('novos');
   const [searchTerm, setSearchTerm] = useState('');
 
+  const [activeFilter, setActiveFilter] = useState('todos');
+  const [isMeus, setIsMeus] = useState(false);
+  const pathname = usePathname();
+
   useEffect(() => {
-    const f = searchParams.get('filter');
-    const m = searchParams.get('meus');
-    if (m === 'true') setActiveTab('meus');
-    else if (f) setActiveTab(f);
-  }, [searchParams]);
-  
+    // Check path for new clean URLs
+    if (pathname.includes('/my-tickets')) {
+      setIsMeus(true);
+      if (pathname.includes('/opened')) setActiveFilter('abertos');
+      else if (pathname.includes('/closed')) setActiveFilter('finalizados');
+      else setActiveFilter('todos');
+    } else if (pathname.includes('/all-tickets')) {
+      setIsMeus(false);
+      setActiveFilter('todos');
+    } else {
+      // Fallback to query params for /atendimento
+      const f = searchParams.get('filter');
+      const m = searchParams.get('meus');
+      setIsMeus(m === 'true');
+      setActiveFilter(f || 'todos');
+    }
+  }, [pathname, searchParams]);
   // Edit Form States
   const [editForm, setEditForm] = useState({
     titulo: '',
@@ -44,23 +64,59 @@ function CentralAtendimentoContent() {
     prioridade: ''
   });
   
+  // Reply Editor States
+  const [replyText, setReplyText] = useState('');
+  const [isSendingReply, setIsSendingReply] = useState(false);
+
+  const handleSendReply = async () => {
+    if (!replyText.trim()) return;
+    setIsSendingReply(true);
+    
+    try {
+      // Stub for actual API call
+      // await fetch('/api/tomticket/reply', { method: 'POST', body: JSON.stringify({ ticketId: ticketAtivo?.id, message: replyText }) });
+      
+      // Simulate network request
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      // Optimistically add to history
+      const newReply: ITomTicketReply = {
+        id: Date.now(),
+        sender_type: 'agent',
+        sender: operadorAtual?.nome || 'Você',
+        message: replyText,
+        date: new Date().toISOString()
+      };
+      
+      setTicketHistory(prev => [newReply, ...prev]);
+      setReplyText('');
+      toast.success('Resposta enviada com sucesso!');
+    } catch (error) {
+      console.error(error);
+      toast.error('Erro ao enviar a resposta.');
+    } finally {
+      setIsSendingReply(false);
+    }
+  };
+
   // WhatsApp States
-  const [conversas, setConversas] = useState<any[]>([]);
-  const [conversaAtiva, setConversaAtiva] = useState<any | null>(null);
-  const [mensagens, setMensagens] = useState<any[]>([]);
+  const [conversas, setConversas] = useState<IWhatsAppConversation[]>([]);
+  const [conversaAtiva, setConversaAtiva] = useState<IWhatsAppConversation | null>(null);
+  const [mensagens, setMensagens] = useState<IWhatsAppMessage[]>([]);
   const [inputMensagem, setInputMensagem] = useState('');
   
   // Status PDV e CRM movidos para o final para manter a estrutura, PDVs agora vêm do hook.
   
   // CRM Lojas (Contatos Dinâmicos)
-  const [lojaContato, setLojaContato] = useState<any | null>(null);
+  const [lojaContato, setLojaContato] = useState<ILojaContato | null>(null);
   const [isEditingContact, setIsEditingContact] = useState(false);
   const [newPhoneValue, setNewPhoneValue] = useState('');
   const [isLoadingContact, setIsLoadingContact] = useState(false);
 
   // TomTicket History
-  const [ticketHistory, setTicketHistory] = useState<any[]>([]);
+  const [ticketHistory, setTicketHistory] = useState<ITomTicketReply[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [errorHistory, setErrorHistory] = useState<string | null>(null);
 
   // Milvus Proxy Modal
   const [isMilvusIframeOpen, setIsMilvusIframeOpen] = useState(false);
@@ -81,6 +137,7 @@ function CentralAtendimentoContent() {
     }
     const fetchHistory = async () => {
       setIsLoadingHistory(true);
+      setErrorHistory(null);
       try {
         const res = await fetch(`/api/tomticket/history?tomticket_id=${ticketAtivo.tomticket_id}`);
         const data = await res.json();
@@ -88,9 +145,11 @@ function CentralAtendimentoContent() {
           setTicketHistory(data.messages || []);
         } else {
           setTicketHistory([]);
+          setErrorHistory('Não foi possível carregar o histórico deste chamado.');
         }
       } catch (err) {
         console.error(err);
+        setErrorHistory('Erro de conexão ao buscar histórico do TomTicket.');
       }
       setIsLoadingHistory(false);
     };
@@ -165,8 +224,8 @@ function CentralAtendimentoContent() {
   }, [conversaAtiva?.id]);
 
   // 4. Salvar/Atualizar Contato da Loja (Micro-CRM)
-  const handleSaveContact = async () => {
-    if (!newPhoneValue) return;
+  const handleVincularContato = async () => {
+    if (!ticketAtivo || !ticketAtivo.cliente || !newPhoneValue) return;
     setIsLoadingContact(true);
     
     try {
@@ -176,14 +235,14 @@ function CentralAtendimentoContent() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          nome_loja: ticketAtivo.cliente,
+          nome_loja: ticketAtivo?.cliente,
           telefone_whatsapp: newPhoneValue.replace(/\D/g, '') // Only numbers
         })
       });
 
       if (response.ok) {
         setLojaContato({
-          nome_loja: ticketAtivo.cliente,
+          nome_loja: ticketAtivo?.cliente || '',
           telefone_whatsapp: newPhoneValue.replace(/\D/g, '')
         });
         setIsEditingContact(false);
@@ -228,8 +287,8 @@ function CentralAtendimentoContent() {
     }, 100);
   };
 
-  const handleEnviarMensagem = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleEnviarMensagem = async (e?: React.FormEvent | React.KeyboardEvent) => {
+    if (e) e.preventDefault();
     if (!inputMensagem.trim() || !conversaAtiva) return;
 
     const texto = inputMensagem;
@@ -253,9 +312,10 @@ function CentralAtendimentoContent() {
         const result = await response.json();
         // Se a conversa era 'nova', a API criou no banco e devolveu o UUID real
         if (conversaAtiva.id === 'nova' && result.conversaId) {
-          setConversaAtiva({ ...conversaAtiva, id: result.conversaId });
+          const updatedConversa: IWhatsAppConversation = { ...conversaAtiva, id: result.conversaId };
+          setConversaAtiva(updatedConversa);
           // Atualiza a lista de conversas no menu lateral/fundo
-          setConversas((prev) => [{ ...conversaAtiva, id: result.conversaId }, ...prev]);
+          setConversas((prev) => [updatedConversa, ...prev]);
         }
       }
     } catch (error) {
@@ -272,6 +332,8 @@ function CentralAtendimentoContent() {
           operadorAtual={operadorAtual}
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
+          activeFilter={activeFilter}
+          isMeus={isMeus}
           onSelectTicket={(ticket) => {
             setTicketAtivo(ticket);
             setViewMode('details');
@@ -288,11 +350,11 @@ function CentralAtendimentoContent() {
                  <button 
                    onClick={() => {
                      setEditForm({
-                       titulo: ticketAtivo.titulo || '',
-                       descricao: ticketAtivo.descricao || '',
-                       departamento: ticketAtivo.departamento || '',
-                       categoria: ticketAtivo.categoria || '',
-                       prioridade: ticketAtivo.prioridade || 'Baixa'
+                       titulo: ticketAtivo?.titulo || '',
+                       descricao: ticketAtivo?.descricao || '',
+                       departamento: ticketAtivo?.departamento || '',
+                       categoria: ticketAtivo?.categoria || '',
+                       prioridade: ticketAtivo?.prioridade || 'Baixa'
                      });
                      setIsEditModalOpen(true);
                    }} 
@@ -400,7 +462,7 @@ function CentralAtendimentoContent() {
               <button className={styles.btnBack} onClick={() => setTicketAtivo(null)} title="Voltar">
                 ⬅
               </button>
-              Detalhes do Chamado: #{ticketAtivo.id} - {ticketAtivo.titulo}
+              Detalhes do Chamado: #{ticketAtivo.protocolo_origem || ticketAtivo.id.substring(0,8)} - {ticketAtivo.titulo}
             </div>
             <div className={styles.headerActionsGroup}>
               <div style={{ position: 'relative' }}>
@@ -451,33 +513,31 @@ function CentralAtendimentoContent() {
                   {ticketAtivo.descricao}
                 </div>
                 
-                <div className={styles.replyEditor}>
-                  <div className={styles.replyToolbar}>
-                    <button><b>B</b></button>
-                    <button><i>I</i></button>
-                    <button><u>U</u></button>
-                    <button>T</button>
-                    <div style={{ width: '1px', background: '#32394c', margin: '0 8px' }}></div>
-                    <button>≡</button>
-                    <button>List</button>
-                    <div style={{ width: '1px', background: '#32394c', margin: '0 8px' }}></div>
-                    <button>🔗</button>
-                    <button>🖼️</button>
-                  </div>
-                  <textarea className={styles.replyTextarea} placeholder="Escreva sua resposta aqui..."></textarea>
-                  <div className={styles.replyActions}>
-                    <button className={styles.btnSendReply}>
-                      Enviar Resposta v
-                    </button>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <button style={{ background: 'transparent', border: '1px solid #32394c', padding: '8px 12px', borderRadius: '4px', color: '#cbd5e1', cursor: 'pointer' }}>📎</button>
-                      <button style={{ background: 'transparent', border: '1px solid #32394c', padding: '8px 12px', borderRadius: '4px', color: '#cbd5e1', cursor: 'pointer' }}>🕒</button>
-                    </div>
-                  </div>
-                </div>
+                <TicketEditor 
+                  replyText={replyText}
+                  setReplyText={setReplyText}
+                  isSendingReply={isSendingReply}
+                  handleSendReply={handleSendReply}
+                />
               </div>
 
-              {isLoadingHistory && <div style={{ textAlign: 'center', padding: '20px', color: '#94a3b8' }}>Carregando histórico do TomTicket...</div>}
+              {isLoadingHistory && <SkeletonHistory />}
+              
+              {errorHistory && (
+                <div style={{ textAlign: 'center', padding: '20px', color: '#ef4444', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '8px', margin: '16px 0', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+                  <p style={{ margin: '0 0 8px 0', fontWeight: 500 }}>{errorHistory}</p>
+                  <button 
+                    onClick={() => setTicketAtivo({ ...ticketAtivo })} 
+                    style={{ background: 'transparent', border: '1px solid #ef4444', color: '#ef4444', padding: '4px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}
+                  >
+                    Tentar Novamente
+                  </button>
+                </div>
+              )}
+
+              {!isLoadingHistory && !errorHistory && ticketHistory.length === 0 && (
+                <div style={{ textAlign: 'center', padding: '20px', color: '#94a3b8' }}>Nenhuma interação registrada neste chamado ainda.</div>
+              )}
 
               {ticketHistory.map((reply) => (
                 <div key={reply.id} className={styles.timelineCard} style={{ marginTop: '16px' }}>
@@ -588,58 +648,19 @@ function CentralAtendimentoContent() {
       )}
 
       {/* Modal WhatsApp Flutuante */}
-      {isWppModalOpen && (
-        <div className={styles.floatingWppOverlay}>
-          <div className={styles.floatingWppContainer}>
-            <div className={styles.floatingWppHeader}>
-              <h3 className={styles.floatingWppTitle}>
-                <Phone size={18} color="#10b981" /> WhatsApp - {conversaAtiva?.nome_perfil || ticketAtivo?.cliente}
-              </h3>
-              <button onClick={() => setIsWppModalOpen(false)} style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '1.2rem' }}>×</button>
-            </div>
-            
-            <div ref={scrollRef} className={styles.chatMessages}>
-              {(!mensagens || mensagens.length === 0) ? (
-                <div style={{ textAlign: 'center', opacity: 0.5, marginTop: '2rem', color: '#fff' }}>
-                  {!lojaContato ? (
-                    <div>
-                      <p>Loja sem contato cadastrado.</p>
-                      <button onClick={() => {setIsEditingContact(true); setIsWppModalOpen(false);}} style={{ background: '#3b82f6', color: '#fff', padding: '8px 16px', border: 'none', borderRadius: '4px', cursor: 'pointer', marginTop: '8px' }}>Cadastrar Contato</button>
-                    </div>
-                  ) : 'Inicie o atendimento. Suas mensagens aparecerão aqui.'}
-                </div>
-              ) : (
-                mensagens.map((msg) => {
-                  const isInbound = msg.direcao === 'INBOUND';
-                  return (
-                    <div key={msg.id} className={`${styles.messageWrapper} ${isInbound ? styles.msgIn : styles.msgOut}`}>
-                      <p className={styles.msgText}>{msg.conteudo}</p>
-                      <span className={styles.msgTime}>
-                        {new Date(msg.criado_em).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </span>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-
-            <div className={styles.chatInputArea}>
-              <input 
-                type="text" 
-                value={inputMensagem}
-                onChange={(e) => setInputMensagem(e.target.value)}
-                onKeyDown={(e) => { if(e.key === 'Enter') handleEnviarMensagem(e as any); }}
-                placeholder="Digite a mensagem..." 
-                className={styles.chatInput}
-                disabled={!lojaContato}
-              />
-              <button onClick={handleEnviarMensagem} className={styles.btnSend} disabled={!lojaContato}>
-                <Send size={18} />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <WhatsAppModal 
+        isWppModalOpen={isWppModalOpen}
+        setIsWppModalOpen={setIsWppModalOpen}
+        conversaAtiva={conversaAtiva}
+        ticketAtivo={ticketAtivo}
+        mensagens={mensagens}
+        lojaContato={lojaContato}
+        setIsEditingContact={setIsEditingContact}
+        inputMensagem={inputMensagem}
+        setInputMensagem={setInputMensagem}
+        handleEnviarMensagem={handleEnviarMensagem}
+        scrollRef={scrollRef}
+      />
 
       {/* Modal Full-Screen do Milvus Proxy */}
       {isMilvusIframeOpen && (
@@ -759,6 +780,7 @@ function CentralAtendimentoContent() {
               <button 
                 style={{ background: '#10b981', color: '#fff', padding: '8px 24px', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 500 }}
                 onClick={async () => {
+                  if (!ticketAtivo) return;
                   const { error } = await supabase.from('tickets').update({
                     titulo: editForm.titulo,
                     descricao: editForm.descricao,
@@ -769,7 +791,7 @@ function CentralAtendimentoContent() {
                   
                   if (!error) {
                     setTicketAtivo({
-                      ...ticketAtivo,
+                      ...(ticketAtivo as ITicket),
                       titulo: editForm.titulo,
                       descricao: editForm.descricao,
                       departamento: editForm.departamento,

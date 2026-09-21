@@ -104,6 +104,8 @@ export async function generateMetadata({
   };
 }
 
+import { Toaster } from 'sonner';
+
 export default async function RootLayout({
   children,
   params,
@@ -139,6 +141,7 @@ export default async function RootLayout({
         />
       </head>
       <body>
+        <Toaster theme="dark" position="top-right" richColors />
         {children}
       </body>
     </html>

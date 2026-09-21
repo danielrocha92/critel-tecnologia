@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '../utils/supabase/client';
+import { ITicket, IPerfil } from '../types/ticket';
 
 export function useCentralAtendimento() {
-  const [tickets, setTickets] = useState<any[]>([]);
-  const [perfis, setPerfis] = useState<any[]>([]);
+  const [tickets, setTickets] = useState<ITicket[]>([]);
+  const [perfis, setPerfis] = useState<IPerfil[]>([]);
   const [pdvs, setPdvs] = useState<any[]>([]);
-  const [operadorAtual, setOperadorAtual] = useState<any | null>(null);
+  const [operadorAtual, setOperadorAtual] = useState<IPerfil | null>(null);
   const [loading, setLoading] = useState(true);
 
   // O cliente deve ser inicializado dentro do hook ou importado do singleton para evitar multiplas instancias

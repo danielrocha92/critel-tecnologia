@@ -57,11 +57,10 @@ export default function Sidebar({ lang }: { lang: string }) {
     {
       name: 'Chamados', icon: Inbox, hasSubmenu: true, section: 'main',
       subItems: [
-        { label: 'Todos os Chamados', href: `/${lang}/atendimento?filter=todos` },
-        { label: 'Meus Chamados', href: `/${lang}/atendimento?meus=true` },
-        { label: 'Abertos',       href: `/${lang}/atendimento?filter=abertos` },
-        { label: 'Finalizados',   href: `/${lang}/atendimento?filter=finalizados` },
-        { label: 'Cancelados',    href: `/${lang}/atendimento?filter=cancelados` },
+        { label: 'Todos os Chamados', href: `/${lang}/all-tickets` },
+        { label: 'Meus Chamados', href: `/${lang}/my-tickets` },
+        { label: 'Meus Chamados Abertos', href: `/${lang}/my-tickets/opened` },
+        { label: 'Meus Chamados Finalizados', href: `/${lang}/my-tickets/closed` },
       ],
     },
     { name: 'Ordens de Serviço', icon: MessageSquare, href: `/${lang}/atendimentos`, section: 'main' },

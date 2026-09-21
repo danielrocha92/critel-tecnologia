@@ -20,7 +20,8 @@
     "ngrok": "^5.0.0-beta.2",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "sip.js": "^0.21.2"
+    "sip.js": "^0.21.2",
+    "sonner": "^2.0.8"
   },
   "devDependencies": {
     "@types/node": "^20",

@@ -224,11 +224,14 @@ export default function ConfiguracoesPage() {
                     </td>
                     <td style={{ padding: '14px 20px' }}>
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: cargoCor.bg, color: cargoCor.text, padding: '4px 12px', borderRadius: '999px', fontSize: '0.8rem', fontWeight: 600 }}>
-                        {cargoIcon} {u.cargo}
+                        {cargoIcon} {u.cargo === 'TECNICO' ? 'TÉCNICO' : u.cargo}
                       </span>
                     </td>
                     <td style={{ padding: '14px 20px' }}>
-                      <span style={{ color: statusCor, fontSize: '0.85rem', fontWeight: 500 }}>● {u.status}</span>
+                      <span style={{ color: statusCor, fontSize: '0.85rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
+                        <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: statusCor }}></div>
+                        {u.status}
+                      </span>
                     </td>
                     <td style={{ padding: '14px 20px', textAlign: 'right' }}>
                       {u.cargo !== 'SUPER_ADMIN' && (
