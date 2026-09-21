@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Bell, Volume2, VolumeX, Monitor, Ticket, MessageSquare, CheckCircle2, Shield, Users, UserCheck, UserX, Crown, Wrench } from 'lucide-react';
+import { Bell, Volume2, VolumeX, Monitor, Ticket, MessageSquare, CheckCircle2 } from 'lucide-react';
 import { useNotificacoes, NotifPrefs } from '@/hooks/useNotificacoes';
 import { createBrowserClient } from '@supabase/ssr';
 
@@ -31,20 +31,10 @@ export default function ConfiguracoesPage() {
   const [permStatus, setPermStatus] = useState<PermStatus>('unsupported');
   const [salvo, setSalvo] = useState(false);
 
-  type PerfilRow = { id: string; nome: string; email: string; cargo: string; status: string };
-  const [usuarios, setUsuarios] = useState<PerfilRow[]>([]);
-  const [atualizando, setAtualizando] = useState<string | null>(null);
-
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
-
-  useEffect(() => {
-    supabase.from('perfis').select('id,nome,email,cargo,status').order('nome').then(({ data }) => {
-      if (data) setUsuarios(data);
-    });
-  }, []);
 
   useEffect(() => {
     setLocal(prefs);
@@ -186,83 +176,6 @@ export default function ConfiguracoesPage() {
         </button>
       </div>
 
-      {/* SEÇÃO: Gerenciar Usuários */}
-      <div id="usuarios" style={{ marginTop: '3rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-          <Users size={22} color="#3b82f6" />
-          <h2 style={{ margin: 0, color: '#f8fafc', fontSize: '1.3rem', fontWeight: 700 }}>Gerenciar Usuários</h2>
-        </div>
-
-        <div style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: '12px', overflow: 'hidden' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ background: '#0f172a' }}>
-                <th style={{ padding: '14px 20px', textAlign: 'left', color: '#64748b', fontSize: '0.8rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Colaborador</th>
-                <th style={{ padding: '14px 20px', textAlign: 'left', color: '#64748b', fontSize: '0.8rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Cargo Atual</th>
-                <th style={{ padding: '14px 20px', textAlign: 'left', color: '#64748b', fontSize: '0.8rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Status</th>
-                <th style={{ padding: '14px 20px', textAlign: 'right', color: '#64748b', fontSize: '0.8rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Alterar Cargo</th>
-              </tr>
-            </thead>
-            <tbody>
-              {usuarios.map((u, i) => {
-                const cargoIcon = u.cargo === 'SUPER_ADMIN' ? <Crown size={14} color="#f59e0b" /> : u.cargo === 'ADMIN' ? <Shield size={14} color="#3b82f6" /> : <Wrench size={14} color="#94a3b8" />;
-                const cargoCor = u.cargo === 'SUPER_ADMIN' ? { bg: 'rgba(245,158,11,0.15)', text: '#fbbf24' } : u.cargo === 'ADMIN' ? { bg: 'rgba(59,130,246,0.15)', text: '#60a5fa' } : { bg: 'rgba(100,116,139,0.15)', text: '#94a3b8' };
-                const statusCor = u.status === 'ATIVO' ? '#10b981' : u.status === 'BANIDO' ? '#ef4444' : '#f59e0b';
-
-                return (
-                  <tr key={u.id} style={{ borderTop: i > 0 ? '1px solid rgba(51,65,85,0.5)' : 'none' }}>
-                    <td style={{ padding: '14px 20px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#334155', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, color: '#e2e8f0', fontSize: '0.85rem', flexShrink: 0 }}>
-                          {(u.nome || '?').substring(0, 2).toUpperCase()}
-                        </div>
-                        <div>
-                          <div style={{ color: '#f1f5f9', fontWeight: 600, fontSize: '0.9rem' }}>{u.nome}</div>
-                          <div style={{ color: '#64748b', fontSize: '0.78rem' }}>{u.email}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td style={{ padding: '14px 20px' }}>
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: cargoCor.bg, color: cargoCor.text, padding: '4px 12px', borderRadius: '999px', fontSize: '0.8rem', fontWeight: 600 }}>
-                        {cargoIcon} {u.cargo === 'TECNICO' ? 'TÉCNICO' : u.cargo}
-                      </span>
-                    </td>
-                    <td style={{ padding: '14px 20px' }}>
-                      <span style={{ color: statusCor, fontSize: '0.85rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
-                        <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: statusCor }}></div>
-                        {u.status}
-                      </span>
-                    </td>
-                    <td style={{ padding: '14px 20px', textAlign: 'right' }}>
-                      {u.cargo !== 'SUPER_ADMIN' && (
-                        <select
-                          value={u.cargo}
-                          disabled={atualizando === u.id}
-                          onChange={async (e) => {
-                            const novoCargo = e.target.value;
-                            setAtualizando(u.id);
-                            await supabase.from('perfis').update({ cargo: novoCargo }).eq('id', u.id);
-                            setUsuarios(prev => prev.map(p => p.id === u.id ? { ...p, cargo: novoCargo } : p));
-                            setAtualizando(null);
-                          }}
-                          style={{ background: '#0f172a', border: '1px solid #334155', color: '#e2e8f0', padding: '6px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem' }}
-                        >
-                          <option value="TECNICO">TÉCNICO</option>
-                          <option value="ADMIN">ADMIN</option>
-                          <option value="SUPER_ADMIN">SUPER_ADMIN</option>
-                        </select>
-                      )}
-                      {u.cargo === 'SUPER_ADMIN' && (
-                        <span style={{ color: '#475569', fontSize: '0.82rem', fontStyle: 'italic' }}>Protegido</span>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
     </div>
   );
 }

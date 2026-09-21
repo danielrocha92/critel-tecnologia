@@ -83,7 +83,7 @@ export default function Sidebar({ lang }: { lang: string }) {
       name: 'Administração', icon: Settings, hasSubmenu: true, section: 'admin',
       subItems: [
         { label: 'Configurações de Sistema', href: `/${lang}/admin/configuracoes`, roles: ['SUPER_ADMIN', 'ADMIN', 'TÉCNICO', 'TECNICO'] },
-        { label: 'Gerenciar Usuários',       href: `/${lang}/admin/configuracoes#usuarios`, roles: ['SUPER_ADMIN', 'ADMIN'] },
+        { label: 'Gerenciar Usuários',       href: `/${lang}/admin/usuarios`, roles: ['SUPER_ADMIN', 'ADMIN', 'TÉCNICO', 'TECNICO'] },
         { label: 'Governança de Identidade', href: `/${lang}/admin`, roles: ['SUPER_ADMIN'] },
       ].filter(item => item.roles.includes(cargo)),
     },

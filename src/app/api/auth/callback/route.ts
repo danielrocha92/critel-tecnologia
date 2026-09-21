@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server'
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
+export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
+
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
@@ -34,11 +37,16 @@ export async function GET(request: Request) {
     
     if (!error && authData.user) {
       // Verificar qual é o cargo do usuário para redirecionar corretamente
-      const { data: perfilData } = await supabase
+      const { data: perfilData, error: perfilError } = await supabase
         .from('perfis')
         .select('cargo, status')
         .eq('user_id', authData.user.id)
         .single()
+        
+      console.log('--- CALLBACK DEBUG ---');
+      console.log('User ID from auth:', authData.user.id);
+      console.log('Perfil Data:', perfilData);
+      console.log('Perfil Error:', perfilError);
         
       if (perfilData?.status === 'PENDENTE') {
         return NextResponse.redirect(`${origin}/pt/pendente`)

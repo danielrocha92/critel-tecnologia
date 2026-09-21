@@ -3,9 +3,13 @@
 import { useEffect, useState } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { MapPin, Clock, FileText, CheckCircle, Car } from 'lucide-react';
 
+import ResumoFinanceiro from '@/components/Tecnico/ResumoFinanceiro';
+
 export default function TecnicoDashboard() {
+  const [userId, setUserId] = useState<string | null>(null);
   const [tickets, setTickets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -22,16 +26,39 @@ export default function TecnicoDashboard() {
         router.push('/pt/login');
         return;
       }
+      setUserId(userData.user.id);
 
-      // Buscar os chamados atribuídos a esse técnico (Status EM_ANDAMENTO ou ABERTO)
-      const { data } = await supabase
+      const { data: perfilData } = await supabase
+        .from('perfis')
+        .select('cargo, status')
+        .eq('user_id', userData.user.id)
+        .single();
+
+      if (!perfilData || perfilData.cargo !== 'TECNICO' || perfilData.status !== 'ATIVO') {
+        router.push('/pt/login');
+        return;
+      }
+
+      // Buscar os chamados atribuídos a esse técnico (Status ABERTO, EM_ANDAMENTO)
+      const { data, error } = await supabase
         .from('tickets')
         .select('*')
+        .eq('tecnico_id', userData.user.id)
+        .neq('status', 'FINALIZADO')
         .order('criado_em', { ascending: false });
         
-      // Na versão final, filtre por `tecnico_id = userData.user.id` caso exista na sua tabela tickets.
-      
-      setTickets(data || []);
+      if (error) {
+        console.warn('Erro ao buscar tickets por tecnico_id (talvez a coluna ainda não exista):', error);
+        // Fallback temporário caso a migration ainda não tenha rodado
+        const fallback = await supabase
+          .from('tickets')
+          .select('*')
+          .neq('status', 'FINALIZADO')
+          .order('criado_em', { ascending: false });
+        setTickets(fallback.data || []);
+      } else {
+        setTickets(data || []);
+      }
       setLoading(false);
     };
 
@@ -44,7 +71,9 @@ export default function TecnicoDashboard() {
 
   return (
     <div style={{ padding: '1rem', paddingBottom: '5rem' }}>
-      <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', color: '#f8fafc' }}>Meus Serviços</h2>
+      {userId && <ResumoFinanceiro userId={userId} />}
+      
+      <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', color: '#f8fafc' }}>Meus Serviços pendentes</h2>
       
       {tickets.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '3rem 1rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px' }}>
@@ -83,8 +112,8 @@ export default function TecnicoDashboard() {
                 </div>
               </div>
 
-              <button 
-                onClick={() => router.push(`/pt/tecnico/os/${ticket.id}`)}
+              <Link 
+                href={`/pt/tecnico/os/${ticket.id}`}
                 style={{
                   width: '100%',
                   padding: '12px',
@@ -98,10 +127,11 @@ export default function TecnicoDashboard() {
                   justifyContent: 'center',
                   gap: '8px',
                   boxShadow: '0 4px 12px rgba(2, 132, 199, 0.3)',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  textDecoration: 'none'
               }}>
                 <FileText size={18} /> Preencher OS e Finalizar
-              </button>
+              </Link>
             </div>
           ))}
         </div>

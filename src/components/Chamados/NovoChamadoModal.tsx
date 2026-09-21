@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X, Paperclip, Bold, Italic, Underline, Type, AlignLeft, List, ListOrdered, Quote, Link2, Image as ImageIcon, Plus, BookTemplate } from 'lucide-react';
 import { createClient } from '../../utils/supabase/client';
 
@@ -12,37 +12,67 @@ interface NovoChamadoModalProps {
 
 export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
   const [loading, setLoading] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+  const messageRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState({
     cliente: '',
     departamento: '',
     assunto: '',
-    mensagem: '',
     prioridade: '',
     atendente: ''
   });
+
+  const [tecnicos, setTecnicos] = useState<{user_id: string, nome: string, cargo: string}[]>([]);
+
+  useEffect(() => {
+    const fetchTecnicos = async () => {
+      const { data, error } = await supabase
+        .from('perfis')
+        .select('user_id, nome, cargo')
+        .eq('status', 'ATIVO')
+        .eq('cargo', 'TECNICO'); // Filtrar apenas técnicos
+      
+      if (!error && data) {
+        // Filtrar opcionalmente apenas técnicos ou deixar todos os ativos
+        setTecnicos(data);
+      }
+    };
+    fetchTecnicos();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
+  const handleFormat = (command: string, value?: string) => {
+    document.execCommand(command, false, value);
+  };
+
   const handleCreateTicket = async () => {
-    if (!formData.cliente || !formData.assunto) {
-      alert('Por favor, preencha o Cliente e o Assunto.');
+    const descricaoFinal = messageRef.current?.innerHTML || '';
+    if (!formData.cliente || !formData.assunto || !descricaoFinal) {
+      alert('Por favor, preencha o Cliente, Assunto e Mensagem.');
       return;
     }
 
     setLoading(true);
     const protocolo = `OS-${Date.now()}`;
     
-    const { error } = await supabase.from('tickets').insert({
+    const payload: any = {
       protocolo_origem: protocolo,
       cliente: formData.cliente,
       titulo: formData.assunto,
-      descricao: formData.mensagem,
+      descricao: descricaoFinal,
       departamento: formData.departamento,
       prioridade: formData.prioridade,
-      status: 'NOVO' // Todo chamado novo começa como NOVO
-    });
+      status: formData.atendente ? 'ABERTO' : 'NOVO' // Se já tem técnico, pode ser ABERTO
+    };
+
+    if (formData.atendente) {
+      payload.tecnico_id = formData.atendente;
+    }
+
+    const { error } = await supabase.from('tickets').insert(payload);
 
     setLoading(false);
 
@@ -130,23 +160,24 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
           {/* Cliente */}
           <div className="form-row">
             <label className="form-label">Cliente:</label>
-            <input 
-              type="text" 
-              name="cliente"
-              value={formData.cliente}
-              onChange={handleChange}
-              placeholder="Pesquisar cliente..." 
-              style={{
-                background: '#1e2230', border: '1px solid #32394c', color: '#f8fafc',
-                padding: '10px 14px', borderRadius: '4px', fontSize: '0.9rem', width: '100%', outline: 'none'
-              }}
-            />
-            <button style={{ 
-              background: 'transparent', border: '1px solid #f8fafc', color: '#f8fafc', fontWeight: 500, 
-              fontSize: '0.85rem', cursor: 'pointer', padding: '8px 16px', borderRadius: '20px'
-            }}>
-              Criar Cliente...
-            </button>
+            <div style={{ gridColumn: '2 / 3' }}>
+              <select 
+                name="cliente"
+                value={formData.cliente}
+                onChange={handleChange}
+                style={{
+                  background: '#1e2230', border: '1px solid #32394c', color: '#94a3b8',
+                  padding: '10px 14px', borderRadius: '4px', fontSize: '0.9rem', width: '100%', outline: 'none', appearance: 'none'
+                }}
+              >
+                <option value="">Escolher cliente...</option>
+                <option value="Bacio di Latte">Bacio di Latte</option>
+                <option value="Ofner">Ofner</option>
+                <option value="KFC Brasil">KFC Brasil</option>
+                <option value="Burger King">Burger King</option>
+                <option value="Pizza Hut">Pizza Hut</option>
+              </select>
+            </div>
           </div>
 
           {/* Departamento */}
@@ -186,35 +217,40 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
             </div>
           </div>
 
-          {/* Mensagem (Textarea com Toolbar Fake) */}
+          {/* Mensagem (Rich Text) */}
           <div className="form-row-start">
             <label className="form-label" style={{ marginTop: '12px' }}>Mensagem:</label>
             <div style={{ gridColumn: '2 / 3', background: '#1e2230', border: '1px solid #32394c', borderRadius: '4px', display: 'flex', flexDirection: 'column' }}>
-              <textarea 
-                rows={10}
-                name="mensagem"
-                value={formData.mensagem}
-                onChange={handleChange}
+              <div 
+                ref={messageRef}
+                contentEditable
                 style={{
                   background: 'transparent', border: 'none', color: '#f8fafc',
-                  padding: '16px', fontSize: '0.95rem', width: '100%', outline: 'none', resize: 'vertical',
-                  minHeight: '200px'
+                  padding: '16px', fontSize: '0.95rem', width: '100%', outline: 'none', 
+                  minHeight: '200px', overflowY: 'auto'
                 }}
               />
               <div style={{ padding: '12px 16px', borderTop: '1px solid #32394c', display: 'flex', gap: '16px', color: '#94a3b8', alignItems: 'center', flexWrap: 'wrap' }}>
-                <Bold size={16} style={{cursor: 'pointer'}} />
-                <Italic size={16} style={{cursor: 'pointer'}} />
-                <Underline size={16} style={{cursor: 'pointer'}} />
-                <Type size={16} style={{cursor: 'pointer'}} />
+                <Bold size={16} style={{cursor: 'pointer'}} onMouseDown={(e)=>{e.preventDefault(); handleFormat('bold')}} />
+                <Italic size={16} style={{cursor: 'pointer'}} onMouseDown={(e)=>{e.preventDefault(); handleFormat('italic')}} />
+                <Underline size={16} style={{cursor: 'pointer'}} onMouseDown={(e)=>{e.preventDefault(); handleFormat('underline')}} />
+                <Type size={16} style={{cursor: 'pointer'}} onMouseDown={(e)=>{e.preventDefault(); handleFormat('fontSize', '4')}} />
                 <div style={{ width: '1px', height: '16px', background: '#32394c', margin: '0 4px' }} />
-                <AlignLeft size={16} style={{cursor: 'pointer'}} />
-                <List size={16} style={{cursor: 'pointer'}} />
-                <ListOrdered size={16} style={{cursor: 'pointer'}} />
-                <Quote size={16} style={{cursor: 'pointer'}} />
+                <AlignLeft size={16} style={{cursor: 'pointer'}} onMouseDown={(e)=>{e.preventDefault(); handleFormat('justifyLeft')}} />
+                <List size={16} style={{cursor: 'pointer'}} onMouseDown={(e)=>{e.preventDefault(); handleFormat('insertUnorderedList')}} />
+                <ListOrdered size={16} style={{cursor: 'pointer'}} onMouseDown={(e)=>{e.preventDefault(); handleFormat('insertOrderedList')}} />
+                <Quote size={16} style={{cursor: 'pointer'}} onMouseDown={(e)=>{e.preventDefault(); handleFormat('formatBlock', 'BLOCKQUOTE')}} />
                 <div style={{ width: '1px', height: '16px', background: '#32394c', margin: '0 4px' }} />
-                <Link2 size={16} style={{cursor: 'pointer'}} />
-                <ImageIcon size={16} style={{cursor: 'pointer'}} />
-                <Plus size={16} style={{cursor: 'pointer'}} />
+                <Link2 size={16} style={{cursor: 'pointer'}} onMouseDown={(e)=>{
+                  e.preventDefault();
+                  const url = prompt('Digite a URL:');
+                  if(url) handleFormat('createLink', url);
+                }} />
+                <ImageIcon size={16} style={{cursor: 'pointer'}} onMouseDown={(e)=>{
+                  e.preventDefault();
+                  const url = prompt('URL da Imagem:');
+                  if(url) handleFormat('insertImage', url);
+                }} />
                 <div style={{ flex: 1 }} />
                 <BookTemplate size={16} style={{cursor: 'pointer'}} />
               </div>
@@ -257,38 +293,16 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
                 }}
               >
                 <option value="">Escolher atendente...</option>
-                <option value="daniel">Daniel (Técnico)</option>
-                <option value="luiz">Luiz (Técnico)</option>
-                <option value="joao">João (Técnico N2)</option>
-                <option value="maria">Maria (Especialista Redes)</option>
+                {tecnicos.map(tec => (
+                  <option key={tec.user_id} value={tec.user_id}>
+                    {tec.nome} ({tec.cargo === 'TECNICO' ? 'Técnico' : tec.cargo})
+                  </option>
+                ))}
               </select>
             </div>
           </div>
 
-          {/* Checkboxes e Opções */}
-          <div className="form-row-start" style={{ marginTop: '8px' }}>
-            <div className="form-spacer" /> {/* Spacer */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#e2e8f0', fontSize: '0.9rem', cursor: 'pointer' }}>
-                <input type="checkbox" defaultChecked style={{ accentColor: '#3b82f6', width: '16px', height: '16px' }} />
-                Receber respostas do cliente por email
-              </label>
-              
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#e2e8f0', fontSize: '0.9rem', cursor: 'pointer' }}>
-                <input type="checkbox" defaultChecked style={{ accentColor: '#3b82f6', width: '16px', height: '16px' }} />
-                Enviar notificações por email para o cliente
-              </label>
 
-              <div>
-                <button style={{ 
-                  background: 'transparent', border: '1px solid #32394c', color: '#e2e8f0', 
-                  padding: '6px 12px', borderRadius: '4px', fontSize: '0.8rem', cursor: 'pointer'
-                }}>
-                  Mais Opções
-                </button>
-              </div>
-            </div>
-          </div>
 
         </div>
 
@@ -306,13 +320,14 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
             >
               {loading ? 'Criando...' : 'Criar Chamado'}
             </button>
-            <button style={{ 
+            <label style={{ 
               background: '#252a38', color: '#f8fafc', border: '1px solid #32394c', 
               padding: '10px 16px', borderRadius: '4px', fontWeight: 500, cursor: 'pointer',
               display: 'flex', alignItems: 'center', gap: '8px'
             }}>
-              <Paperclip size={16} /> Anexar
-            </button>
+              <input type="file" hidden onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)} />
+              <Paperclip size={16} /> {file ? file.name : 'Anexar'}
+            </label>
           </div>
           
           <button 

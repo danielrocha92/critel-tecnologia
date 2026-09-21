@@ -12,6 +12,7 @@ import { TicketEditor } from '../../../../components/Chamados/TicketEditor';
 import { WhatsAppModal } from '../../../../components/Chamados/WhatsAppModal';
 import { SkeletonHistory } from '../../../../components/Chamados/SkeletonHistory';
 import { ITicket, ITomTicketReply, IWhatsAppConversation, IWhatsAppMessage, ILojaContato } from '../../../../types/ticket';
+import { File, Download } from 'lucide-react';
 
 const supabase = createClient();
 
@@ -28,6 +29,7 @@ function CentralAtendimentoContent() {
 
   const searchParams = useSearchParams();
   const [ticketAtivo, setTicketAtivo] = useState<ITicket | null>(null);
+  const [anexos, setAnexos] = useState<any[]>([]);
   const [viewMode, setViewMode] = useState<'details' | 'timeline'>('details');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('novos');
@@ -73,13 +75,8 @@ function CentralAtendimentoContent() {
     setIsSendingReply(true);
     
     try {
-      // Stub for actual API call
-      // await fetch('/api/tomticket/reply', { method: 'POST', body: JSON.stringify({ ticketId: ticketAtivo?.id, message: replyText }) });
-      
-      // Simulate network request
       await new Promise(resolve => setTimeout(resolve, 800));
       
-      // Optimistically add to history
       const newReply: ITomTicketReply = {
         id: Date.now(),
         sender_type: 'agent',
@@ -98,6 +95,25 @@ function CentralAtendimentoContent() {
       setIsSendingReply(false);
     }
   };
+
+  // Fetch anexos when ticketAtivo changes
+  useEffect(() => {
+    const fetchAnexos = async () => {
+      if (!ticketAtivo) {
+        setAnexos([]);
+        return;
+      }
+      const { data, error } = await supabase
+        .from('ticket_anexos')
+        .select('*')
+        .eq('ticket_id', ticketAtivo.id);
+      
+      if (data && !error) {
+        setAnexos(data);
+      }
+    };
+    fetchAnexos();
+  }, [ticketAtivo]);
 
   // WhatsApp States
   const [conversas, setConversas] = useState<IWhatsAppConversation[]>([]);
@@ -371,7 +387,7 @@ function CentralAtendimentoContent() {
             <div style={{ padding: '24px', flex: 1, overflowY: 'auto' }}>
                <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr', gap: '16px', marginBottom: '24px' }}>
                   <div style={{ color: '#9ca3af', textAlign: 'right', fontWeight: 500, fontSize: '0.9rem' }}>Mensagem:</div>
-                  <div style={{ color: '#f3f4f6', fontSize: '0.9rem', whiteSpace: 'pre-wrap' }}>{ticketAtivo.descricao || '-'}</div>
+                  <div style={{ color: '#f3f4f6', fontSize: '0.9rem', overflowX: 'auto' }} dangerouslySetInnerHTML={{ __html: ticketAtivo.descricao || '-' }} />
 
                   <div style={{ color: '#9ca3af', textAlign: 'right', fontWeight: 500, fontSize: '0.9rem' }}>Departamento:</div>
                   <div style={{ color: '#f3f4f6', fontSize: '0.9rem' }}>{ticketAtivo.departamento || '-'}</div>
@@ -509,9 +525,7 @@ function CentralAtendimentoContent() {
                     {new Date(ticketAtivo.criado_em).toLocaleDateString()} {new Date(ticketAtivo.criado_em).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </div>
                 </div>
-                <div className={styles.timelineContent}>
-                  {ticketAtivo.descricao}
-                </div>
+                <div className={styles.timelineContent} style={{ overflowX: 'auto' }} dangerouslySetInnerHTML={{ __html: ticketAtivo.descricao || '' }} />
                 
                 <TicketEditor 
                   replyText={replyText}
@@ -562,6 +576,48 @@ function CentralAtendimentoContent() {
 
             {/* Coluna Direita: Informações */}
             <div className={styles.innerSidebar}>
+              {/* Card de Anexos */}
+              <div className={styles.panelCard}>
+                <h4 className={styles.panelTitle}>Anexos</h4>
+                {anexos.length === 0 ? (
+                  <div style={{ color: '#94a3b8', fontSize: '0.85rem', padding: '10px 0' }}>Nenhum anexo encontrado.</div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '10px' }}>
+                    {anexos.map((anexo, i) => (
+                      <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+                        <File size={16} color="#00d2ff" style={{ marginTop: '2px' }} />
+                        <div style={{ flex: 1, overflow: 'hidden' }}>
+                          <a 
+                            href={anexo.url} 
+                            target="_blank" 
+                            rel="noreferrer"
+                            style={{ 
+                              color: '#e2e8f0', 
+                              fontSize: '0.85rem', 
+                              textDecoration: 'none',
+                              display: 'block',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis'
+                            }}
+                          >
+                            {anexo.nome_arquivo}
+                          </a>
+                          {anexo.tamanho_bytes && (
+                            <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                              {(anexo.tamanho_bytes / 1024).toFixed(1)} KB
+                            </span>
+                          )}
+                        </div>
+                        <a href={anexo.url} download target="_blank" rel="noreferrer" style={{ color: '#94a3b8', cursor: 'pointer' }}>
+                          <Download size={16} />
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <div className={styles.panelCard}>
                 <h4 className={styles.panelTitle}>Cliente</h4>
                 <div className={styles.panelRow}>

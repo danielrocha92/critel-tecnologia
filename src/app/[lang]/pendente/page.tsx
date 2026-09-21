@@ -1,4 +1,5 @@
 'use client';
+import { useEffect } from 'react';
 
 import { LogOut, Clock } from 'lucide-react';
 import { createBrowserClient } from '@supabase/ssr';
@@ -19,6 +20,28 @@ export default function PendentePage() {
     await supabase.auth.signOut();
     router.push(`/${lang}/login`);
   };
+
+  useEffect(() => {
+    const checkStatus = async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      if (userData?.user) {
+        const { data: perfilData } = await supabase
+          .from('perfis')
+          .select('cargo, status')
+          .eq('user_id', userData.user.id)
+          .single();
+          
+        if (perfilData?.status === 'ATIVO') {
+          if (perfilData.cargo === 'TECNICO') {
+            router.push(`/${lang}/tecnico`);
+          } else {
+            router.push(`/${lang}/dashboard`);
+          }
+        }
+      }
+    };
+    checkStatus();
+  }, [router, lang, supabase]);
 
   return (
     <div className={styles.container}>
