@@ -31,14 +31,27 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
+  const publicRoutes = [
+    '/', 
+    '/certificacoes', 
+    '/clientes', 
+    '/contato', 
+    '/privacidade', 
+    '/sobre', 
+    '/solucoes', 
+    '/termos',
+    '/login'
+  ];
+  
+  const pathname = request.nextUrl.pathname;
+  // Remove o prefixo de idioma (/pt ou /en) para verificar a rota real
+  const pathWithoutLang = pathname.replace(/^\/(pt|en)/, '') || '/';
+
   const isPublicPath = 
-    request.nextUrl.pathname === '/' ||
-    request.nextUrl.pathname === '/pt' ||
-    request.nextUrl.pathname === '/en' ||
-    request.nextUrl.pathname.includes('/login') || 
-    request.nextUrl.pathname.includes('/api/auth') || 
-    request.nextUrl.pathname.includes('/api/webhooks') ||
-    request.nextUrl.pathname.match(/\.(.*)$/); // Allow static files like .png, .js, .css
+    publicRoutes.includes(pathWithoutLang) ||
+    pathname.includes('/api/auth') || 
+    pathname.includes('/api/webhooks') ||
+    pathname.match(/\.(.*)$/); // Allow static files like .png, .js, .css
 
   const isPrivatePath = !isPublicPath;
   
