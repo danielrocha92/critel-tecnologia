@@ -48,7 +48,7 @@ export async function updateSession(request: NextRequest) {
   const pathWithoutLang = pathname.replace(/^\/(pt|en)/, '') || '/';
 
   const isPublicPath = 
-    publicRoutes.includes(pathWithoutLang) ||
+    publicRoutes.some(route => pathWithoutLang === route || pathWithoutLang.startsWith(`${route}/`)) ||
     pathname.includes('/api/auth') || 
     pathname.includes('/api/webhooks') ||
     pathname.match(/\.(.*)$/); // Allow static files like .png, .js, .css
