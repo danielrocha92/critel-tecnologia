@@ -3,51 +3,37 @@
 import React, { useState, useEffect } from 'react';
 import { Search, MapPin, Clock, AlertCircle, Bookmark, Tag, User, Activity } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 export type TicketFilter = 'all' | 'my-all' | 'my-opened' | 'my-closed';
 
 export default function TicketList({ filterTitle, filterType, excludeTomTicket }: { filterTitle: string, filterType: TicketFilter, excludeTomTicket?: boolean }) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [dateFilter, setDateFilter] = useState('');
   const [clientFilter, setClientFilter] = useState('');
   const [tickets, setTickets] = useState<any[]>([]);
   const [perfis, setPerfis] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const pathname = usePathname();
+  const lang = pathname.split('/')[1] || 'pt';
+
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
   useEffect(() => {
     const fetchTickets = async () => {
       setLoading(true);
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
+      setCurrentUser(user);
 
       let query = supabase.from('tickets').select('*').order('criado_em', { ascending: false });
-
-      if (clientFilter) {
-        query = query.eq('cliente', clientFilter);
-      }
 
       if (excludeTomTicket) {
         query = query.like('protocolo_origem', 'OS-%');
       }
 
-      if (dateFilter) {
-        const nextDay = new Date(dateFilter);
-        nextDay.setDate(nextDay.getDate() + 1);
-        query = query.gte('criado_em', `${dateFilter}T00:00:00.000Z`)
-          .lt('criado_em', nextDay.toISOString());
-      }
-
       if (user && filterType !== 'all') {
-        query = query.eq('analista_id', user.id);
-      }
-
-      // Filtros por status
-      if (filterType === 'my-opened') {
-        query = query.neq('status', 'FINALIZADO').neq('status', 'CONCLUIDO');
-      } else if (filterType === 'my-closed') {
-        query = query.in('status', ['FINALIZADO', 'CONCLUIDO']);
+        query = query.or(`tecnico_id.eq.${user.id},analista_id.eq.${user.id}`);
       }
 
       const [resTickets, resPerfis] = await Promise.all([
@@ -69,16 +55,31 @@ export default function TicketList({ filterTitle, filterType, excludeTomTicket }
     };
 
     fetchTickets();
-  }, [filterType, dateFilter, clientFilter, excludeTomTicket]);
-
+  }, [excludeTomTicket, filterType]);
 
   const filteredTickets = tickets.filter(t => {
-    const term = searchTerm.toLowerCase();
-    return (
-      (t.titulo && t.titulo.toLowerCase().includes(term)) ||
-      (t.cliente && t.cliente.toLowerCase().includes(term)) ||
-      (t.protocolo_origem && t.protocolo_origem.toLowerCase().includes(term))
-    );
+    // 1. Filtro de Cliente
+    if (clientFilter && t.cliente !== clientFilter) return false;
+
+    // 2. Filtros por Status (Abertos / Finalizados)
+    if (filterType === 'my-opened') {
+      if (t.status === 'FINALIZADO' || t.status === 'CONCLUIDO') return false;
+    } else if (filterType === 'my-closed') {
+      if (t.status !== 'FINALIZADO' && t.status !== 'CONCLUIDO') return false;
+    }
+
+    // 4. Termo de Pesquisa
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      const matchTerm = (
+        (t.titulo && t.titulo.toLowerCase().includes(term)) ||
+        (t.cliente && t.cliente.toLowerCase().includes(term)) ||
+        (t.protocolo_origem && t.protocolo_origem.toLowerCase().includes(term))
+      );
+      if (!matchTerm) return false;
+    }
+
+    return true;
   });
 
   const getAtendenteNome = (analista_id: string) => {
@@ -136,17 +137,6 @@ export default function TicketList({ filterTitle, filterType, excludeTomTicket }
             <option value="Pizza Hut">Pizza Hut</option>
           </select>
         </div>
-        <div style={{ position: 'relative', width: '200px' }}>
-          <input
-            type="date"
-            value={dateFilter}
-            onChange={e => setDateFilter(e.target.value)}
-            style={{
-              width: '100%', background: '#0f172a', border: '1px solid #334155', color: '#94a3b8',
-              padding: '10px', borderRadius: '8px', outline: 'none'
-            }}
-          />
-        </div>
       </div>
 
       {loading ? (
@@ -160,7 +150,7 @@ export default function TicketList({ filterTitle, filterType, excludeTomTicket }
           {filteredTickets.map(ticket => (
             <div 
               key={ticket.id} 
-              onClick={() => router.push(`/pt/atendimento?ticket_id=${ticket.id}`)}
+              onClick={() => router.push(`/${lang}/atendimento?ticket_id=${ticket.id}`)}
               style={{
                 background: '#1e293b', border: '1px solid #334155', borderRadius: '12px', padding: '20px',
                 display: 'flex', flexDirection: 'column', gap: '14px', position: 'relative', overflow: 'hidden',

@@ -61,21 +61,29 @@ function CentralAtendimentoContent() {
   useEffect(() => {
     const tid = searchParams.get('ticket_id');
     if (tid && !ticketAtivo) {
+      toast.info(`Tentando abrir chamado: ${tid.substring(0,6)}...`);
       const found = tickets.find((t: ITicket) => t.id === tid);
       if (found) {
+        toast.success(`Chamado encontrado na memória!`);
         setTicketAtivo(found);
         setViewMode('details');
       } else if (!loading) {
+        toast.info(`Buscando chamado no banco de dados...`);
         // If not found in loaded tickets, fetch it directly
         const fetchTicket = async () => {
           const supabase = createClient();
-          const { data } = await supabase.from('tickets').select('*').eq('id', tid).single();
+          const { data, error } = await supabase.from('tickets').select('*').eq('id', tid).single();
           if (data) {
+            toast.success(`Chamado carregado do banco!`);
             setTicketAtivo(data);
             setViewMode('details');
+          } else {
+            toast.error(`Falha ao buscar chamado: ${error?.message}`);
           }
         };
         fetchTicket();
+      } else {
+        toast.info(`Aguardando carregamento da lista...`);
       }
     }
   }, [searchParams, tickets, ticketAtivo, loading]);
