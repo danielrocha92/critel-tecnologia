@@ -1,17 +1,20 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Search, MapPin, Clock, AlertCircle } from 'lucide-react';
+import { Search, MapPin, Clock, AlertCircle, Bookmark, Tag, User, Activity } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
+import { useRouter } from 'next/navigation';
 
 export type TicketFilter = 'all' | 'my-all' | 'my-opened' | 'my-closed';
 
-export default function TicketList({ filterTitle, filterType }: { filterTitle: string, filterType: TicketFilter }) {
+export default function TicketList({ filterTitle, filterType, excludeTomTicket }: { filterTitle: string, filterType: TicketFilter, excludeTomTicket?: boolean }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState('');
   const [clientFilter, setClientFilter] = useState('');
   const [tickets, setTickets] = useState<any[]>([]);
+  const [perfis, setPerfis] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchTickets = async () => {
@@ -25,69 +28,49 @@ export default function TicketList({ filterTitle, filterType }: { filterTitle: s
         query = query.eq('cliente', clientFilter);
       }
 
+      if (excludeTomTicket) {
+        query = query.like('protocolo_origem', 'OS-%');
+      }
+
       if (dateFilter) {
-        // Assume dateFilter is YYYY-MM-DD
         const nextDay = new Date(dateFilter);
         nextDay.setDate(nextDay.getDate() + 1);
-
         query = query.gte('criado_em', `${dateFilter}T00:00:00.000Z`)
           .lt('criado_em', nextDay.toISOString());
       }
 
       if (user && filterType !== 'all') {
-        // Assume column 'tecnico_id' ou 'analista_id'. If not present, might need to adapt.
-        query = query.eq('tecnico_id', user.id);
-
-        if (filterType === 'my-opened') {
-          query = query.neq('status', 'FINALIZADO').neq('status', 'CONCLUIDO');
-        } else if (filterType === 'my-closed') {
-          query = query.in('status', ['FINALIZADO', 'CONCLUIDO']);
-        }
+        query = query.eq('analista_id', user.id);
       }
 
-      const res = await query;
-      let data = res.data;
-      let error = res.error;
-
-      if (error) {
-        console.error('Erro ao buscar chamados com tecnico_id:', error);
-        // Fallback temporário caso a coluna tecnico_id não exista
-        let fallbackQuery = supabase.from('tickets').select('*').order('criado_em', { ascending: false });
-        
-        if (clientFilter) {
-          fallbackQuery = fallbackQuery.eq('cliente', clientFilter);
-        }
-
-        if (dateFilter) {
-          const nextDay = new Date(dateFilter);
-          nextDay.setDate(nextDay.getDate() + 1);
-          fallbackQuery = fallbackQuery.gte('criado_em', `${dateFilter}T00:00:00.000Z`)
-                                       .lt('criado_em', nextDay.toISOString());
-        }
-
-        if (user && filterType !== 'all') {
-          if (filterType === 'my-opened') {
-            fallbackQuery = fallbackQuery.neq('status', 'FINALIZADO').neq('status', 'CONCLUIDO');
-          } else if (filterType === 'my-closed') {
-            fallbackQuery = fallbackQuery.in('status', ['FINALIZADO', 'CONCLUIDO']);
-          }
-        }
-
-        const fallbackRes = await fallbackQuery;
-        data = fallbackRes.data;
-        error = fallbackRes.error;
+      // Filtros por status
+      if (filterType === 'my-opened') {
+        query = query.neq('status', 'FINALIZADO').neq('status', 'CONCLUIDO');
+      } else if (filterType === 'my-closed') {
+        query = query.in('status', ['FINALIZADO', 'CONCLUIDO']);
       }
 
-      if (error) {
-        console.error('Erro ao buscar chamados (fallback):', error);
+      const [resTickets, resPerfis] = await Promise.all([
+        query,
+        supabase.from('perfis').select('id, nome')
+      ]);
+
+      if (resTickets.error) {
+        console.error('Erro ao buscar chamados:', resTickets.error);
       } else {
-        setTickets(data || []);
+        setTickets(resTickets.data || []);
       }
+      
+      if (!resPerfis.error && resPerfis.data) {
+        setPerfis(resPerfis.data);
+      }
+      
       setLoading(false);
     };
 
     fetchTickets();
-  }, [filterType, dateFilter, clientFilter]);
+  }, [filterType, dateFilter, clientFilter, excludeTomTicket]);
+
 
   const filteredTickets = tickets.filter(t => {
     const term = searchTerm.toLowerCase();
@@ -97,6 +80,20 @@ export default function TicketList({ filterTitle, filterType }: { filterTitle: s
       (t.protocolo_origem && t.protocolo_origem.toLowerCase().includes(term))
     );
   });
+
+  const getAtendenteNome = (analista_id: string) => {
+    if (!analista_id) return 'Sem Atendente';
+    const p = perfis.find(p => String(p.id) === String(analista_id));
+    return p ? p.nome : 'Alocado';
+  };
+
+  const renderBadge = (priority: string) => {
+    const p = String(priority).toLowerCase();
+    if (p === 'alta' || p === '1' || p === 'urgente') return <span style={{ color: '#ef4444', fontWeight: 600 }}>Alta</span>;
+    if (p === 'media' || p === '2' || p === 'normal') return <span style={{ color: '#f59e0b', fontWeight: 600 }}>Média</span>;
+    if (p === 'baixa' || p === '3' || p === 'low') return <span style={{ color: '#10b981', fontWeight: 600 }}>Baixa</span>;
+    return <span style={{ color: '#64748b', fontWeight: 600 }}>Normal</span>;
+  };
 
   return (
     <div style={{ padding: '2rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
@@ -159,42 +156,86 @@ export default function TicketList({ filterTitle, filterType }: { filterTitle: s
           Nenhum chamado encontrado para este filtro.
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: '16px' }}>
           {filteredTickets.map(ticket => (
-            <div key={ticket.id} style={{
-              background: '#1e293b', border: '1px solid #334155', borderRadius: '12px', padding: '20px',
-              display: 'flex', flexDirection: 'column', gap: '12px', position: 'relative', overflow: 'hidden'
-            }}>
+            <div 
+              key={ticket.id} 
+              onClick={() => router.push(`/pt/atendimento?ticket_id=${ticket.id}`)}
+              style={{
+                background: '#1e293b', border: '1px solid #334155', borderRadius: '12px', padding: '20px',
+                display: 'flex', flexDirection: 'column', gap: '14px', position: 'relative', overflow: 'hidden',
+                cursor: 'pointer', transition: 'transform 0.2s, border-color 0.2s'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.borderColor = '#475569';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.transform = 'none';
+                e.currentTarget.style.borderColor = '#334155';
+              }}
+            >
               <div style={{
                 position: 'absolute', top: 0, left: 0, width: '4px', height: '100%',
                 background: ticket.status === 'NOVO' ? '#f59e0b' : ticket.status === 'FINALIZADO' ? '#10b981' : '#3b82f6'
               }} />
 
+              {/* Header: ID, Titulo, Status */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <span style={{ fontWeight: 'bold', color: '#e2e8f0', fontSize: '1.1rem' }}>{ticket.protocolo_origem || ticket.id.split('-')[0]}</span>
+                <div style={{ flex: 1, paddingRight: '12px' }}>
+                  <div style={{ fontSize: '0.85rem', color: '#94a3b8', fontWeight: 600, marginBottom: '4px' }}>
+                    #{ticket.protocolo_origem || ticket.id.split('-')[0]}
+                  </div>
+                  <div style={{ fontWeight: 'bold', color: '#e2e8f0', fontSize: '1.1rem', lineHeight: '1.4' }}>
+                    {ticket.titulo}
+                  </div>
+                </div>
                 <span style={{
                   background: 'rgba(59, 130, 246, 0.2)',
                   color: '#60a5fa',
-                  padding: '4px 12px', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 600
+                  padding: '4px 12px', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 600, flexShrink: 0
                 }}>
                   {ticket.status}
                 </span>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#cbd5e1', fontWeight: 600 }}>
-                <MapPin size={16} color="#94a3b8" /> {ticket.cliente}
+              {/* Client & Info Badges */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', color: '#94a3b8', fontSize: '0.85rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <MapPin size={14} color="#60a5fa" />
+                  <span style={{ color: '#cbd5e1' }}>{ticket.cliente}</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Bookmark size={14} color="#818cf8" />
+                  <span>{ticket.departamento || '-'}</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Tag size={14} color="#f472b6" />
+                  <span>{ticket.categoria || '-'}</span>
+                </div>
+              </div>
+              
+              {/* Prioridade e Atendente */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', background: '#0f172a', padding: '10px 12px', borderRadius: '8px', fontSize: '0.85rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ color: '#64748b' }}>Prioridade:</span>
+                  {renderBadge(ticket.prioridade)}
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#cbd5e1' }}>
+                  <User size={14} color="#94a3b8" />
+                  {getAtendenteNome(ticket.analista_id)}
+                </div>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', color: '#94a3b8', fontSize: '0.9rem' }}>
-                <AlertCircle size={16} color="#94a3b8" style={{ marginTop: '2px', flexShrink: 0 }} />
-                <span style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                  {ticket.titulo}
-                </span>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginTop: '8px', paddingTop: '16px', borderTop: '1px solid #334155' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem', color: '#64748b' }}>
-                  <Clock size={14} /> {new Date(ticket.criado_em).toLocaleString()}
+              {/* Footer: Datas */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #334155', paddingTop: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: '#64748b' }}>
+                  <Clock size={14} /> 
+                  <span>{new Date(ticket.criado_em).toLocaleString()}</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: '#64748b' }}>
+                  <Activity size={14} />
+                  <span>Atualizado: {ticket.atualizado_em ? new Date(ticket.atualizado_em).toLocaleDateString() : '-'}</span>
                 </div>
               </div>
             </div>

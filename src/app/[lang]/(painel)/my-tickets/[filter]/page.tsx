@@ -16,5 +16,5 @@ export default async function MyTicketsPage({ params }: { params: Promise<{ filt
     title = 'Meus Chamados Finalizados';
   }
 
-  return <TicketList filterTitle={title} filterType={filterType} />;
+  return <TicketList key={filter} filterTitle={title} filterType={filterType} />;
 }

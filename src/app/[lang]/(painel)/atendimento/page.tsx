@@ -57,6 +57,28 @@ function CentralAtendimentoContent() {
       setActiveFilter(f || 'todos');
     }
   }, [pathname, searchParams]);
+
+  useEffect(() => {
+    const tid = searchParams.get('ticket_id');
+    if (tid && !ticketAtivo) {
+      const found = tickets.find((t: ITicket) => t.id === tid);
+      if (found) {
+        setTicketAtivo(found);
+        setViewMode('details');
+      } else if (!loading) {
+        // If not found in loaded tickets, fetch it directly
+        const fetchTicket = async () => {
+          const supabase = createClient();
+          const { data } = await supabase.from('tickets').select('*').eq('id', tid).single();
+          if (data) {
+            setTicketAtivo(data);
+            setViewMode('details');
+          }
+        };
+        fetchTicket();
+      }
+    }
+  }, [searchParams, tickets, ticketAtivo, loading]);
   // Edit Form States
   const [editForm, setEditForm] = useState({
     titulo: '',

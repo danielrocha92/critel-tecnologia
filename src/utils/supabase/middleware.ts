@@ -32,6 +32,9 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   const isPublicPath = 
+    request.nextUrl.pathname === '/' ||
+    request.nextUrl.pathname === '/pt' ||
+    request.nextUrl.pathname === '/en' ||
     request.nextUrl.pathname.includes('/login') || 
     request.nextUrl.pathname.includes('/api/auth') || 
     request.nextUrl.pathname.includes('/api/webhooks') ||
