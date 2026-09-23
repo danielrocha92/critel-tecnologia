@@ -31,6 +31,12 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
+  let cargo: string | null = null;
+  if (user) {
+    const { data: perfil } = await supabase.from('perfis').select('cargo').eq('user_id', user.id).single();
+    cargo = perfil?.cargo || null;
+  }
+
   const publicRoutes = [
     '/', 
     '/certificacoes', 
@@ -64,13 +70,57 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // Se o usuário está logado e tenta acessar a página de login, redireciona para o painel
-  if (user && request.nextUrl.pathname.includes('/login')) {
-    const url = request.nextUrl.clone()
-    const segments = url.pathname.split('/').filter(Boolean);
-    const lang = segments[0] || 'pt';
-    url.pathname = `/${lang}/atendimento` // Default path
-    return NextResponse.redirect(url)
+  // Se o usuário está logado, verificamos as permissões de rota
+  if (user) {
+    const cargoNormalizado = cargo === 'TÉCNICO' ? 'TECNICO' : (cargo || 'VISITANTE');
+    
+    const roleBasePaths: Record<string, string> = {
+      'TECNICO': '/tecnico',
+      'FINANCEIRO': '/financeiro',
+      'COMERCIAL': '/comercial',
+      'ANALISTA': '/analista',
+      'ADMIN': '/dashboard',
+      'SUPER_ADMIN': '/dashboard'
+    };
+    const basePath = roleBasePaths[cargoNormalizado] || '/dashboard';
+
+    const decodedPath = decodeURIComponent(pathWithoutLang);
+
+    // Se o usuário digitou /técnico com acento, redireciona para /tecnico sem acento
+    if (decodedPath === '/técnico' || decodedPath.startsWith('/técnico/')) {
+      const url = request.nextUrl.clone();
+      url.pathname = url.pathname.replace(/t%C3%A9cnico/i, 'tecnico').replace(/técnico/i, 'tecnico');
+      return NextResponse.redirect(url);
+    }
+
+    const isLoginPath = pathname.includes('/login');
+
+    if (isLoginPath) {
+      // Redireciona da página de login para o painel correspondente
+      const url = request.nextUrl.clone()
+      const segments = url.pathname.split('/').filter(Boolean);
+      const lang = segments[0] || 'pt';
+      // Se for técnico, usa barra no final por precaução
+      url.pathname = cargoNormalizado === 'TECNICO' ? `/${lang}/tecnico/` : `/${lang}${basePath}`;
+      return NextResponse.redirect(url)
+    }
+
+    if (isPrivatePath) {
+      // Admins têm acesso livre
+      if (cargoNormalizado !== 'ADMIN' && cargoNormalizado !== 'SUPER_ADMIN') {
+        const isAllowedPath = pathWithoutLang === basePath || 
+                              pathWithoutLang.startsWith(`${basePath}/`) || 
+                              pathWithoutLang === '/conta'; // rotas compartilhadas estritas
+                              
+        if (!isAllowedPath) {
+          const url = request.nextUrl.clone();
+          const segments = url.pathname.split('/').filter(Boolean);
+          const lang = segments[0] || 'pt';
+          url.pathname = cargoNormalizado === 'TECNICO' ? `/${lang}/tecnico/` : `/${lang}${basePath}`;
+          return NextResponse.redirect(url);
+        }
+      }
+    }
   }
 
   return supabaseResponse

@@ -45,7 +45,10 @@ export default async function TecnicoLayout({
     .eq('user_id', userData.user.id)
     .single();
 
-  if (!perfilData || perfilData.cargo !== 'TECNICO' || perfilData.status !== 'ATIVO') {
+  const isAdmin = perfilData.cargo === 'ADMIN' || perfilData.cargo === 'SUPER_ADMIN';
+  const isTecnico = perfilData.cargo === 'TECNICO' || perfilData.cargo === 'TÉCNICO';
+
+  if (!perfilData || (!isTecnico && !isAdmin) || perfilData.status !== 'ATIVO') {
     if (perfilData?.status === 'PENDENTE') {
       redirect(`/${lang || 'pt'}/pendente`);
     } else {
@@ -57,15 +60,21 @@ export default async function TecnicoLayout({
   const primeiroNome = perfilData.nome ? perfilData.nome.split(' ')[0] : 'Técnico';
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      background: '#0b1120', 
-      color: '#f8fafc',
-      fontFamily: 'Inter, system-ui, sans-serif',
-      display: 'flex',
-      flexDirection: 'column'
-    }}>
-      {/* Topbar minimalista para mobile */}
+    <div style={{ minHeight: '100vh', background: '#020617', width: '100%' }}>
+      <div style={{ 
+        minHeight: '100vh', 
+        background: '#0b1120', 
+        color: '#f8fafc',
+        fontFamily: 'Inter, system-ui, sans-serif',
+        display: 'flex',
+        flexDirection: 'column',
+        maxWidth: '600px',
+        margin: '0 auto',
+        width: '100%',
+        position: 'relative',
+        boxShadow: '0 0 20px rgba(0,0,0,0.5)'
+      }}>
+        {/* Topbar minimalista para mobile */}
       <header style={{
         background: 'rgba(15, 23, 42, 0.9)',
         backdropFilter: 'blur(10px)',
@@ -90,6 +99,7 @@ export default async function TecnicoLayout({
       </main>
 
       <BottomNav />
+      </div>
     </div>
   );
 }

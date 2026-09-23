@@ -52,11 +52,20 @@ export async function GET(request: Request) {
         return NextResponse.redirect(`${origin}/pt/pendente`)
       }
         
-      if (perfilData?.cargo === 'TECNICO') {
-        return NextResponse.redirect(`${origin}/pt/tecnico`)
-      } else {
-        return NextResponse.redirect(`${origin}/pt/dashboard`)
-      }
+      const cargo = perfilData?.cargo;
+      const cargoNormalizado = cargo === 'TÉCNICO' ? 'TECNICO' : (cargo || 'VISITANTE');
+      
+      const roleBasePaths: Record<string, string> = {
+        'TECNICO': '/tecnico/',
+        'FINANCEIRO': '/financeiro',
+        'COMERCIAL': '/comercial',
+        'ANALISTA': '/analista',
+        'ADMIN': '/dashboard',
+        'SUPER_ADMIN': '/dashboard'
+      };
+      const basePath = roleBasePaths[cargoNormalizado] || '/dashboard';
+
+      return NextResponse.redirect(`${origin}/pt${basePath}`);
     }
   }
 

@@ -34,7 +34,7 @@ export function useCentralAtendimento() {
 
         // 3. Carregar PDVs (Loja)
         const { data: pdvsData } = await supabase
-          .from('pdv')
+          .from('status_pdv')
           .select('loja, status_conexao');
         if (pdvsData && isMounted) setPdvs(pdvsData);
 
@@ -70,7 +70,7 @@ export function useCentralAtendimento() {
     const channelPdvs = supabase.channel('realtime_pdvs_atendimento')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'status_pdv' }, async (payload: any) => {
         // Recarrega lista
-        supabase.from('pdv').select('loja, status_conexao')
+        supabase.from('status_pdv').select('loja, status_conexao')
           .then(({ data }: { data: any }) => { if (data && isMounted) setPdvs(data); });
         
         // Automação: Criação automática de ticket se PDV cair
