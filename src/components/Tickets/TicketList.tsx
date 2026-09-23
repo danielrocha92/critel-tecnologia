@@ -60,7 +60,7 @@ export default function TicketList({ filterTitle, filterType, excludeTomTicket }
         .on(
           'postgres_changes',
           { event: '*', schema: 'public', table: 'tickets' },
-          (payload) => {
+          (payload: any) => {
             console.log('Alteração recebida via WebSocket:', payload);
             setTickets((currentTickets) => {
               if (payload.eventType === 'INSERT') {

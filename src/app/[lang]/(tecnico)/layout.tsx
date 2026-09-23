@@ -45,8 +45,8 @@ export default async function TecnicoLayout({
     .eq('user_id', userData.user.id)
     .single();
 
-  const isAdmin = perfilData.cargo === 'ADMIN' || perfilData.cargo === 'SUPER_ADMIN';
-  const isTecnico = perfilData.cargo === 'TECNICO' || perfilData.cargo === 'TÉCNICO';
+  const isAdmin = perfilData?.cargo === 'ADMIN' || perfilData?.cargo === 'SUPER_ADMIN';
+  const isTecnico = perfilData?.cargo === 'TECNICO' || perfilData?.cargo === 'TÉCNICO';
 
   if (!perfilData || (!isTecnico && !isAdmin) || perfilData.status !== 'ATIVO') {
     if (perfilData?.status === 'PENDENTE') {
