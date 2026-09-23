@@ -11,6 +11,9 @@ export default function TicketList({ filterTitle, filterType, excludeTomTicket }
   const [searchTerm, setSearchTerm] = useState('');
   const [clientFilter, setClientFilter] = useState('');
   const [departmentFilter, setDepartmentFilter] = useState('');
+  const [serverStatusFilter, setServerStatusFilter] = useState<'open' | 'closed' | 'all'>(
+    filterType === 'my-closed' ? 'closed' : 'open'
+  );
   const [tickets, setTickets] = useState<any[]>([]);
   const [perfis, setPerfis] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,6 +39,17 @@ export default function TicketList({ filterTitle, filterType, excludeTomTicket }
 
       if (user && filterType !== 'all') {
         query = query.or(`tecnico_id.eq.${user.id},analista_id.eq.${user.id}`);
+      }
+
+      // Filtro de Status no Servidor (Contorna limite de 1000 linhas)
+      if (serverStatusFilter === 'open') {
+        query = query.neq('status', 'FECHADO')
+                     .neq('status', 'RESOLVIDO')
+                     .neq('status', 'CANCELADO')
+                     .neq('status', 'CONCLUIDO')
+                     .neq('status', 'FINALIZADO');
+      } else if (serverStatusFilter === 'closed') {
+        query = query.in('status', ['FECHADO', 'RESOLVIDO', 'CANCELADO', 'CONCLUIDO', 'FINALIZADO']);
       }
 
       const [resTickets, resPerfis] = await Promise.all([
@@ -92,7 +106,7 @@ export default function TicketList({ filterTitle, filterType, excludeTomTicket }
         if (cleanFn) cleanFn();
       });
     };
-  }, [excludeTomTicket, filterType]);
+  }, [excludeTomTicket, filterType, serverStatusFilter]);
 
   const filteredTickets = tickets.filter(t => {
     // 1. Filtro de Cliente
@@ -228,9 +242,9 @@ export default function TicketList({ filterTitle, filterType, excludeTomTicket }
 
       <div style={{
         background: '#1e293b', padding: '16px', borderRadius: '12px', border: '1px solid #334155',
-        display: 'flex', gap: '16px', marginBottom: '2rem'
+        display: 'flex', gap: '16px', marginBottom: '2rem', flexWrap: 'wrap'
       }}>
-        <div style={{ flex: 1, position: 'relative' }}>
+        <div style={{ flex: 1, minWidth: '250px', position: 'relative' }}>
           <Search size={18} color="#94a3b8" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
           <input
             type="text"
@@ -243,13 +257,32 @@ export default function TicketList({ filterTitle, filterType, excludeTomTicket }
             }}
           />
         </div>
+
+        {/* Filtro de Status (Servidor) - Somente mostrar se não estivermos nas abas travadas */}
+        {(filterType === 'all' || filterType === 'my-all') && (
+          <div style={{ position: 'relative', width: '180px' }}>
+            <select
+              value={serverStatusFilter}
+              onChange={e => setServerStatusFilter(e.target.value as 'open' | 'closed' | 'all')}
+              style={{
+                width: '100%', background: '#0f172a', border: '1px solid #334155', color: '#94a3b8',
+                padding: '10px', borderRadius: '8px', outline: 'none'
+              }}
+            >
+              <option value="open">Somente Abertos</option>
+              <option value="closed">Somente Fechados</option>
+              <option value="all">Todos os Status</option>
+            </select>
+          </div>
+        )}
+
         <div style={{ position: 'relative', width: '200px' }}>
           <select
             value={clientFilter}
             onChange={e => setClientFilter(e.target.value)}
             style={{
               width: '100%', background: '#0f172a', border: '1px solid #334155', color: '#94a3b8',
-              padding: '10px', borderRadius: '8px', outline: 'none', appearance: 'none'
+              padding: '10px', borderRadius: '8px', outline: 'none'
             }}
           >
             <option value="">Todos os Clientes</option>
