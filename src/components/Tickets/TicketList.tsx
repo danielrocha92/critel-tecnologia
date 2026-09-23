@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Search, MapPin, Clock, AlertCircle, Bookmark, Tag, User, Activity } from 'lucide-react';
+import { Search, MapPin, Clock, AlertCircle, Bookmark, Tag, User, Activity, ChevronDown, ChevronRight } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
 import { useRouter, usePathname } from 'next/navigation';
 
@@ -13,6 +13,7 @@ export default function TicketList({ filterTitle, filterType, excludeTomTicket }
   const [tickets, setTickets] = useState<any[]>([]);
   const [perfis, setPerfis] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isDepartmentsOpen, setIsDepartmentsOpen] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
   const lang = pathname.split('/')[1] || 'pt';
@@ -52,9 +53,44 @@ export default function TicketList({ filterTitle, filterType, excludeTomTicket }
       }
       
       setLoading(false);
+
+      // Assinar as mudanças em tempo real (Supabase Realtime)
+      const channel = supabase
+        .channel('tickets-realtime')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'tickets' },
+          (payload) => {
+            console.log('Alteração recebida via WebSocket:', payload);
+            setTickets((currentTickets) => {
+              if (payload.eventType === 'INSERT') {
+                return [payload.new, ...currentTickets];
+              }
+              if (payload.eventType === 'UPDATE') {
+                return currentTickets.map((t) => t.id === payload.new.id ? payload.new : t);
+              }
+              if (payload.eventType === 'DELETE') {
+                return currentTickets.filter((t) => t.id !== payload.old.id);
+              }
+              return currentTickets;
+            });
+          }
+        )
+        .subscribe();
+
+      // Cleanup
+      return () => {
+        supabase.removeChannel(channel);
+      };
     };
 
-    fetchTickets();
+    const cleanup = fetchTickets();
+    
+    return () => {
+      cleanup.then(cleanFn => {
+        if (cleanFn) cleanFn();
+      });
+    };
   }, [excludeTomTicket, filterType]);
 
   const filteredTickets = tickets.filter(t => {
@@ -94,6 +130,83 @@ export default function TicketList({ filterTitle, filterType, excludeTomTicket }
     if (p === 'media' || p === '2' || p === 'normal') return <span style={{ color: '#f59e0b', fontWeight: 600 }}>Média</span>;
     if (p === 'baixa' || p === '3' || p === 'low') return <span style={{ color: '#10b981', fontWeight: 600 }}>Baixa</span>;
     return <span style={{ color: '#64748b', fontWeight: 600 }}>Normal</span>;
+  };
+
+  const renderDepartmentTotals = () => {
+    if (filterType !== 'all') return null; // Apenas visível em todos os chamados
+
+    // Conta os chamados abertos agrupados por departamento
+    const openTickets = tickets.filter(t => t.status !== 'FECHADO' && t.status !== 'RESOLVIDO' && t.status !== 'CANCELADO');
+    
+    const deptoCounts: Record<string, number> = {};
+    openTickets.forEach(t => {
+      const depto = t.departamento || 'Sem Departamento';
+      deptoCounts[depto] = (deptoCounts[depto] || 0) + 1;
+    });
+
+    const sortedDeptos = Object.entries(deptoCounts).sort((a, b) => a[0].localeCompare(b[0]));
+
+    return (
+      <div style={{
+        background: '#162032',
+        border: '1px solid rgba(255,255,255,0.1)',
+        borderRadius: '6px',
+        overflow: 'hidden',
+        marginBottom: '2rem'
+      }}>
+        <div 
+          onClick={() => setIsDepartmentsOpen(!isDepartmentsOpen)} 
+          style={{ 
+            display: 'flex', alignItems: 'flex-start', padding: '16px',
+            background: '#1e293b', cursor: 'pointer', userSelect: 'none',
+            borderBottom: '1px solid rgba(255,255,255,0.05)'
+          }}
+        >
+          <div style={{ marginTop: '2px', color: '#94a3b8' }}>
+            {isDepartmentsOpen ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', marginLeft: '8px', flex: 1 }}>
+            <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 600, color: '#f8fafc' }}>Total de Chamados Abertos por Departamento</h3>
+            <span style={{ fontSize: '12px', color: '#94a3b8', marginTop: '4px', fontWeight: 'normal' }}>Lista com o total de chamados abertos por departamentos.</span>
+          </div>
+        </div>
+        
+        {isDepartmentsOpen && (
+          <div style={{ padding: '0', maxHeight: '400px', overflowY: 'auto', background: '#162032' }}>
+            {sortedDeptos.length === 0 ? (
+               <div style={{ padding: '16px', color: '#94a3b8', fontSize: '13px' }}>Nenhum chamado aberto.</div>
+            ) : (
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                {sortedDeptos.map(([depto, count], i) => (
+                  <li key={depto} style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center',
+                    padding: '12px 16px',
+                    borderBottom: '1px solid rgba(255,255,255,0.05)',
+                    background: i % 2 === 0 ? 'rgba(255,255,255,0.03)' : 'transparent',
+                    fontSize: '13px',
+                    color: '#e2e8f0'
+                  }}>
+                    <span>{depto}</span>
+                    <span style={{ 
+                      background: 'rgba(255,255,255,0.1)', 
+                      color: '#fff',
+                      padding: '2px 8px', 
+                      borderRadius: '4px',
+                      fontSize: '11px',
+                      fontWeight: 'bold',
+                      minWidth: '24px',
+                      textAlign: 'center'
+                    }}>{count}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -138,6 +251,8 @@ export default function TicketList({ filterTitle, filterType, excludeTomTicket }
           </select>
         </div>
       </div>
+
+      {renderDepartmentTotals()}
 
       {loading ? (
         <div style={{ color: '#94a3b8', padding: '2rem', textAlign: 'center' }}>Carregando chamados...</div>

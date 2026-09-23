@@ -185,68 +185,6 @@ export function DashboardTickets({ tickets, perfis, operadorAtual, searchTerm, s
 
 
 
-  const renderDepartmentTotals = () => {
-    // Conta os chamados abertos agrupados por departamento
-    const openTickets = tickets.filter(t => t.status !== 'FECHADO' && t.status !== 'RESOLVIDO' && t.status !== 'CANCELADO');
-    
-    const deptoCounts: Record<string, number> = {};
-    openTickets.forEach(t => {
-      const depto = t.departamento || 'Sem Departamento';
-      deptoCounts[depto] = (deptoCounts[depto] || 0) + 1;
-    });
-
-    const sortedDeptos = Object.entries(deptoCounts).sort((a, b) => a[0].localeCompare(b[0]));
-    const isOpen = openSections.departments;
-
-    return (
-      <div className={styles.accordionContainer}>
-        <div className={styles.accordionHeader} onClick={() => toggleSection('departments')} style={{ alignItems: 'flex-start', padding: '16px' }}>
-          <div style={{ marginTop: '2px' }}>
-            {isOpen ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', marginLeft: '8px', flex: 1 }}>
-            <h3 style={{ margin: 0, fontSize: '15px' }}>Total de Chamados Abertos por Departamento</h3>
-            <span style={{ fontSize: '12px', color: '#94a3b8', marginTop: '4px', fontWeight: 'normal' }}>Lista com o total de chamados abertos por departamentos.</span>
-          </div>
-        </div>
-        
-        {isOpen && (
-          <div className={styles.accordionContent} style={{ padding: '0', maxHeight: '400px', overflowY: 'auto' }}>
-            {sortedDeptos.length === 0 ? (
-               <div style={{ padding: '16px', color: '#94a3b8', fontSize: '13px' }}>Nenhum chamado aberto.</div>
-            ) : (
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                {sortedDeptos.map(([depto, count], i) => (
-                  <li key={depto} style={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between', 
-                    alignItems: 'center',
-                    padding: '12px 16px',
-                    borderBottom: '1px solid rgba(255,255,255,0.05)',
-                    background: i % 2 === 0 ? 'rgba(255,255,255,0.03)' : 'transparent',
-                    fontSize: '13px',
-                    color: '#e2e8f0'
-                  }}>
-                    <span>{depto}</span>
-                    <span style={{ 
-                      background: 'rgba(255,255,255,0.1)', 
-                      color: '#fff',
-                      padding: '2px 8px', 
-                      borderRadius: '4px',
-                      fontSize: '11px',
-                      fontWeight: 'bold',
-                      minWidth: '24px',
-                      textAlign: 'center'
-                    }}>{count}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        )}
-      </div>
-    );
-  };
 
   return (
     <div className={styles.dashboardWrapper}>
@@ -263,7 +201,6 @@ export function DashboardTickets({ tickets, perfis, operadorAtual, searchTerm, s
       </div>
 
       <div className={styles.dashboardSections}>
-        {!isMeus && renderDepartmentTotals()}
         {renderTable(filteredTickets, title, 'my')}
       </div>
     </div>

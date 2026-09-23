@@ -21,12 +21,19 @@ async function syncMilvusStatus() {
   console.log(`[${new Date().toISOString()}] Iniciando sync com Milvus...`);
   try {
     // 1. Fazer o Request para o Milvus
-    // const response = await axios.get(`${milvusApiUrl}/status-pdvs`, {
-    //   headers: { Authorization: `Bearer ${milvusToken}` }
-    // });
-    // const pdvs = response.data;
+    // Descomente e ajuste os campos conforme a documentação oficial da API do Milvus
+    /*
+    const response = await axios.get(`${milvusApiUrl}/api/status-pdvs`, {
+      headers: { Authorization: `Bearer ${milvusToken}` }
+    });
+    // Formatar a resposta do Milvus para a estrutura que esperamos no banco
+    const pdvs = response.data.map(device => ({
+      loja: device.cliente_nome || 'Desconhecida',
+      status: device.is_online ? 'ONLINE' : 'OFFLINE'
+    }));
+    */
     
-    // Mock temporário para simular a resposta do Milvus
+    // Mock temporário para simular a resposta do Milvus enquanto a URL oficial não é inserida
     const pdvs = [
       { loja: 'Bacio di Latte - Morumbi', status: 'ONLINE' },
       { loja: 'Bacio di Latte - JK Iguatemi', status: 'OFFLINE' }
