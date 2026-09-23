@@ -2,9 +2,9 @@
 // Este script deve ser executado no servidor via PM2 ou Systemd.
 // Exemplo: pm2 start milvus-worker.js --name "milvus-proxy"
 
-const axios = require('axios');
+// O Axios foi removido e substituído por fetch nativo do Node.js
 const { createClient } = require('@supabase/supabase-js');
-require('dotenv').config();
+require('dotenv').config({ path: '.env.local' }); // Garante leitura do .env.local
 
 // Configurações do Supabase (lerá do .env ou do ambiente do servidor)
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -12,8 +12,7 @@ const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY; // Usar service role 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Configurações da API Oculta do Milvus
-const milvusApiUrl = process.env.MILVUS_API_URL;
-const milvusToken = process.env.MILVUS_API_KEY;
+const milvusApiUrl = process.env.MILVUS_API_URL || 'https://app.milvus.com.br';
 
 const POLLING_INTERVAL_MS = 60000; // 60 segundos
 
@@ -25,24 +24,42 @@ async function syncMilvusStatus() {
     const milvusPassword = process.env.MILVUS_PASSWORD;
 
     if (!milvusEmail || !milvusPassword) {
-      throw new Error('Credenciais do Milvus (MILVUS_EMAIL e MILVUS_PASSWORD) não configuradas no .env');
+      throw new Error('Credenciais do Milvus (MILVUS_EMAIL e MILVUS_PASSWORD) não configuradas no .env.local');
     }
 
-    // Fazemos o login para obter o token/cookie
-    const loginResponse = await axios.post(`${milvusApiUrl}/api/auth/login`, {
-      email: milvusEmail,
-      password: milvusPassword
+    // Fazemos o login para obter o token/cookie usando fetch
+    const loginResponse = await fetch(`${milvusApiUrl}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: milvusEmail,
+        password: milvusPassword
+      })
     });
-
-    const token = loginResponse.data.token || loginResponse.data.access_token;
+    
+    if (!loginResponse.ok) {
+      throw new Error(`Falha no login do Milvus: ${loginResponse.statusText}`);
+    }
+    
+    const loginData = await loginResponse.json();
+    const token = loginData.token || loginData.access_token;
     
     // 2. Buscar os PDVs com o Token Obtido
-    const response = await axios.get(`${milvusApiUrl}/api/status-pdvs`, {
+    const response = await fetch(`${milvusApiUrl}/api/status-pdvs`, {
       headers: { Authorization: `Bearer ${token}` }
     });
+    
+    if (!response.ok) {
+      throw new Error(`Falha ao buscar PDVs: ${response.statusText}`);
+    }
+    
+    const data = await response.json();
 
     // Formatar a resposta do Milvus para a estrutura que esperamos no banco
-    const pdvs = response.data.map(device => ({
+    // ATENÇÃO: Dependendo da API do Milvus, a lista pode estar em data.data ou apenas data.
+    const listaDispositivos = Array.isArray(data) ? data : data.data || [];
+    
+    const pdvs = listaDispositivos.map(device => ({
       loja: device.cliente_nome || 'Desconhecida',
       status: device.is_online ? 'ONLINE' : 'OFFLINE'
     }));
