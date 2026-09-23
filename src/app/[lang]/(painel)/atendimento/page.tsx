@@ -215,7 +215,7 @@ function CentralAtendimentoContent() {
         .from('lojas_contatos')
         .select('*')
         .eq('nome_loja', ticketAtivo.cliente)
-        .single();
+        .maybeSingle();
       
       if (data) {
         setLojaContato(data);

@@ -20,26 +20,42 @@ const POLLING_INTERVAL_MS = 60000; // 60 segundos
 async function syncMilvusStatus() {
   console.log(`[${new Date().toISOString()}] Iniciando sync com Milvus...`);
   try {
-    // 1. Fazer o Request para o Milvus
-    // Descomente e ajuste os campos conforme a documentação oficial da API do Milvus
-    /*
-    const response = await axios.get(`${milvusApiUrl}/api/status-pdvs`, {
-      headers: { Authorization: `Bearer ${milvusToken}` }
+    // 1. Autenticação no Milvus
+    const milvusEmail = process.env.MILVUS_EMAIL;
+    const milvusPassword = process.env.MILVUS_PASSWORD;
+
+    if (!milvusEmail || !milvusPassword) {
+      throw new Error('Credenciais do Milvus (MILVUS_EMAIL e MILVUS_PASSWORD) não configuradas no .env');
+    }
+
+    // Fazemos o login para obter o token/cookie
+    const loginResponse = await axios.post(`${milvusApiUrl}/api/auth/login`, {
+      email: milvusEmail,
+      password: milvusPassword
     });
+
+    const token = loginResponse.data.token || loginResponse.data.access_token;
+    
+    // 2. Buscar os PDVs com o Token Obtido
+    const response = await axios.get(`${milvusApiUrl}/api/status-pdvs`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
     // Formatar a resposta do Milvus para a estrutura que esperamos no banco
     const pdvs = response.data.map(device => ({
       loja: device.cliente_nome || 'Desconhecida',
       status: device.is_online ? 'ONLINE' : 'OFFLINE'
     }));
-    */
-    
-    // Mock temporário para simular a resposta do Milvus enquanto a URL oficial não é inserida
+
+    // Mock temporário caso os endpoints acima precisem de ajuste na URL exata
+    /*
     const pdvs = [
       { loja: 'Bacio di Latte - Morumbi', status: 'ONLINE' },
       { loja: 'Bacio di Latte - JK Iguatemi', status: 'OFFLINE' }
     ];
+    */
 
-    // 2. Atualizar o Supabase (Upsert)
+    // 3. Atualizar o Supabase (Upsert)
     for (const pdv of pdvs) {
       const { error } = await supabase
         .from('status_pdv')
