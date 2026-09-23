@@ -10,6 +10,7 @@ export type TicketFilter = 'all' | 'my-all' | 'my-opened' | 'my-closed';
 export default function TicketList({ filterTitle, filterType, excludeTomTicket }: { filterTitle: string, filterType: TicketFilter, excludeTomTicket?: boolean }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [clientFilter, setClientFilter] = useState('');
+  const [departmentFilter, setDepartmentFilter] = useState('');
   const [tickets, setTickets] = useState<any[]>([]);
   const [perfis, setPerfis] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -97,6 +98,9 @@ export default function TicketList({ filterTitle, filterType, excludeTomTicket }
     // 1. Filtro de Cliente
     if (clientFilter && t.cliente !== clientFilter) return false;
 
+    // 1.5 Filtro de Departamento
+    if (departmentFilter && (t.departamento || 'Sem Departamento') !== departmentFilter) return false;
+
     // 2. Filtros por Status (Abertos / Finalizados)
     if (filterType === 'my-opened') {
       if (t.status === 'FINALIZADO' || t.status === 'CONCLUIDO') return false;
@@ -178,19 +182,25 @@ export default function TicketList({ filterTitle, filterType, excludeTomTicket }
             ) : (
               <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                 {sortedDeptos.map(([depto, count], i) => (
-                  <li key={depto} style={{ 
+                  <li key={depto} 
+                    onClick={() => setDepartmentFilter(departmentFilter === depto ? '' : depto)}
+                    style={{ 
                     display: 'flex', 
                     justifyContent: 'space-between', 
                     alignItems: 'center',
                     padding: '12px 16px',
                     borderBottom: '1px solid rgba(255,255,255,0.05)',
-                    background: i % 2 === 0 ? 'rgba(255,255,255,0.03)' : 'transparent',
+                    background: departmentFilter === depto ? 'rgba(96, 165, 250, 0.15)' : (i % 2 === 0 ? 'rgba(255,255,255,0.03)' : 'transparent'),
+                    borderLeft: departmentFilter === depto ? '4px solid #3b82f6' : '4px solid transparent',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
                     fontSize: '13px',
-                    color: '#e2e8f0'
+                    color: departmentFilter === depto ? '#60a5fa' : '#e2e8f0',
+                    fontWeight: departmentFilter === depto ? 'bold' : 'normal'
                   }}>
                     <span>{depto}</span>
                     <span style={{ 
-                      background: 'rgba(255,255,255,0.1)', 
+                      background: departmentFilter === depto ? '#3b82f6' : 'rgba(255,255,255,0.1)', 
                       color: '#fff',
                       padding: '2px 8px', 
                       borderRadius: '4px',
