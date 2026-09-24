@@ -471,7 +471,7 @@ function CentralAtendimentoContent() {
                     >
                       <option value="">Sem atendente</option>
                       {perfis.map(p => (
-                        <option key={p.id} value={p.id}>{p.nome} {p.cargo ? `(${p.cargo})` : ''}</option>
+                        <option key={p.id} value={p.user_id}>{p.nome} {p.cargo ? `(${p.cargo})` : ''}</option>
                       ))}
                     </select>
                   </div>

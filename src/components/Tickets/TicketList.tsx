@@ -138,7 +138,7 @@ export default function TicketList({ filterTitle, filterType, excludeTomTicket }
 
   const getAtendenteNome = (analista_id: string) => {
     if (!analista_id) return 'Sem Atendente';
-    const p = perfis.find(p => String(p.id) === String(analista_id));
+    const p = perfis.find(p => String(p.user_id) === String(analista_id));
     return p ? p.nome : 'Alocado';
   };
 
@@ -371,7 +371,7 @@ export default function TicketList({ filterTitle, filterType, excludeTomTicket }
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#cbd5e1' }}>
                   <User size={14} color="#94a3b8" />
-                  {getAtendenteNome(ticket.analista_id)}
+                  {getAtendenteNome(ticket.analista_id || ticket.tecnico_id)}
                 </div>
               </div>
 

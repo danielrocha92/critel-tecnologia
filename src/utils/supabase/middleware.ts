@@ -72,7 +72,8 @@ export async function updateSession(request: NextRequest) {
 
   // Se o usuário está logado, verificamos as permissões de rota
   if (user) {
-    const cargoNormalizado = cargo === 'TÉCNICO' ? 'TECNICO' : (cargo || 'VISITANTE');
+    const cargoStr = cargo || 'VISITANTE';
+    const cargoNormalizado = cargoStr.toUpperCase().replace('É', 'E');
     
     const roleBasePaths: Record<string, string> = {
       'TECNICO': '/tecnico',

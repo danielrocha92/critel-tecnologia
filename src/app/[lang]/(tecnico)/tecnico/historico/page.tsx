@@ -26,7 +26,7 @@ export default function HistoricoPage() {
       const { data } = await supabase
         .from('tickets')
         .select('*')
-        .eq('tecnico_id', userData.user.id)
+        .or(`tecnico_id.eq.${userData.user.id},analista_id.eq.${userData.user.id}`)
         .eq('status', 'FINALIZADO')
         .order('atualizado_em', { ascending: false })
         .limit(20);

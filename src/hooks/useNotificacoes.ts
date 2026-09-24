@@ -14,7 +14,7 @@ export type Notificacao = {
 };
 
 const STORAGE_KEY = 'critel_notificacoes';
-const PREFS_KEY   = 'critel_notif_prefs';
+const PREFS_KEY = 'critel_notif_prefs';
 
 export type NotifPrefs = {
   novoChamado: boolean;
@@ -80,7 +80,7 @@ function tocarSom() {
 
 export function useNotificacoes() {
   const [notificacoes, setNotificacoes] = useState<Notificacao[]>([]);
-  const [prefs, setPrefs]               = useState<NotifPrefs>(defaultPrefs);
+  const [prefs, setPrefs] = useState<NotifPrefs>(defaultPrefs);
   const naoLidas = notificacoes.filter(n => !n.lida).length;
 
   // ✅ FIX 2: Nome de canal único por instância do hook.
@@ -90,9 +90,9 @@ export function useNotificacoes() {
 
   // Carrega notificações e preferências do localStorage
   useEffect(() => {
-    const saved     = localStorage.getItem(STORAGE_KEY);
+    const saved = localStorage.getItem(STORAGE_KEY);
     const savedPrefs = localStorage.getItem(PREFS_KEY);
-    if (saved)      setNotificacoes(JSON.parse(saved));
+    if (saved) setNotificacoes(JSON.parse(saved));
     if (savedPrefs) setPrefs(JSON.parse(savedPrefs));
   }, []);
 
@@ -117,7 +117,7 @@ export function useNotificacoes() {
     if (prefsAtual.desktop && 'Notification' in window && Notification.permission === 'granted') {
       new Notification(nova.titulo, {
         body: nova.mensagem,
-        icon: '/critel-logo-light.svg',
+        icon: '/400PngdpiLogoCropped.png',
       });
     }
 
@@ -130,7 +130,7 @@ export function useNotificacoes() {
 
   // Subscrição Supabase Realtime — executa apenas 1x por instância
   useEffect(() => {
-    const supabase   = getSupabase();
+    const supabase = getSupabase();
     const prefsAtual = JSON.parse(
       localStorage.getItem(PREFS_KEY) || JSON.stringify(defaultPrefs)
     ) as NotifPrefs;
@@ -158,7 +158,7 @@ export function useNotificacoes() {
         { event: 'UPDATE', schema: 'public', table: 'tickets' },
         (payload: any) => {
           const ticket = payload.new as any;
-          const old    = payload.old as any;
+          const old = payload.old as any;
           if (!isEscopoTI(ticket)) return;
 
           if (prefsAtual.chamadoRespondido && ticket.status === 'RESPONDIDO' && old.status !== 'RESPONDIDO') {
@@ -187,7 +187,7 @@ export function useNotificacoes() {
     };
   }, []); // sem dependências — roda exatamente 1x no mount
 
-  const marcarLida       = useCallback((id: string) => {
+  const marcarLida = useCallback((id: string) => {
     setNotificacoes(prev => prev.map(n => n.id === id ? { ...n, lida: true } : n));
   }, []);
 

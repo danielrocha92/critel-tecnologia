@@ -53,7 +53,9 @@ export default function TecnicoDashboard() {
         .eq('user_id', userData.user.id)
         .single();
 
-      const isTecnico = perfilData?.cargo === 'TECNICO' || perfilData?.cargo === 'TÉCNICO';
+      const normalizedCargo = perfilData?.cargo?.toUpperCase().replace('É', 'E');
+      const isTecnico = normalizedCargo === 'TECNICO';
+      
       if (!perfilData || !isTecnico || perfilData.status !== 'ATIVO') {
         router.push('/pt/login');
         return;
@@ -63,7 +65,7 @@ export default function TecnicoDashboard() {
       let query = supabase
         .from('tickets')
         .select('*')
-        .eq('tecnico_id', userData.user.id)
+        .or(`tecnico_id.eq.${userData.user.id},analista_id.eq.${userData.user.id}`)
         .neq('status', 'FINALIZADO')
         .neq('status', 'CONCLUIDO')
         .order('criado_em', { ascending: false });

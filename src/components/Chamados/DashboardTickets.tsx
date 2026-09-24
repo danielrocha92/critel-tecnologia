@@ -61,7 +61,7 @@ export function DashboardTickets({ tickets, perfis, operadorAtual, searchTerm, s
   let filteredTickets = searchedTickets;
 
   if (isMeus && operadorAtual) {
-    filteredTickets = filteredTickets.filter(t => String(t.analista_id) === String(operadorAtual.id));
+    filteredTickets = filteredTickets.filter(t => String(t.analista_id) === String(operadorAtual.user_id) || String(t.tecnico_id) === String(operadorAtual.user_id));
   } else if (isMeus && !operadorAtual) {
     // Prevent showing all tickets before operator is loaded
     filteredTickets = [];
@@ -141,8 +141,8 @@ export function DashboardTickets({ tickets, perfis, operadorAtual, searchTerm, s
                           {ticket.atualizado_em ? new Date(ticket.atualizado_em).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
                         </td>
                         <td style={{ color: '#94a3b8' }}>
-                          {ticket.analista_id 
-                            ? (perfis?.find(p => String(p.id) === String(ticket.analista_id))?.nome || 'Alocado') 
+                          {(ticket.analista_id || ticket.tecnico_id) 
+                            ? (perfis?.find(p => String(p.user_id) === String(ticket.analista_id || ticket.tecnico_id))?.nome || 'Alocado') 
                             : 'Sem Atendente'}
                         </td>
                         <td>
