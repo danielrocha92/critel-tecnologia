@@ -65,7 +65,11 @@ export async function GET(request: Request) {
       };
       const basePath = roleBasePaths[cargoNormalizado] || '/dashboard';
 
-      return NextResponse.redirect(`${origin}/pt${basePath}`);
+      const response = NextResponse.redirect(`${origin}/pt${basePath}`);
+      if (cargo) {
+        response.cookies.set('user_cargo', cargo, { path: '/', maxAge: 60 * 60 * 8 });
+      }
+      return response;
     }
   }
 

@@ -31,10 +31,13 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  let cargo: string | null = null;
-  if (user) {
+  let cargo: string | null = request.cookies.get('user_cargo')?.value || null;
+  if (user && !cargo) {
     const { data: perfil } = await supabase.from('perfis').select('cargo').eq('user_id', user.id).single();
     cargo = perfil?.cargo || null;
+    if (cargo) {
+      supabaseResponse.cookies.set('user_cargo', cargo, { path: '/', maxAge: 60 * 60 * 8 }); // Cache for 8 hours
+    }
   }
 
   const publicRoutes = [
