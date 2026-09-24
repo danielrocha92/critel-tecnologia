@@ -12,7 +12,7 @@ export default function TicketList({ filterTitle, filterType, excludeTomTicket }
   const [clientFilter, setClientFilter] = useState('');
   const [departmentFilter, setDepartmentFilter] = useState('');
   const [serverStatusFilter, setServerStatusFilter] = useState<'open' | 'closed' | 'all'>(
-    filterType === 'my-closed' ? 'closed' : 'open'
+    filterType === 'my-closed' ? 'closed' : (filterType === 'all' || filterType === 'my-all') ? 'all' : 'open'
   );
   const [tickets, setTickets] = useState<any[]>([]);
   const [perfis, setPerfis] = useState<any[]>([]);
@@ -116,10 +116,11 @@ export default function TicketList({ filterTitle, filterType, excludeTomTicket }
     if (departmentFilter && (t.departamento || 'Sem Departamento') !== departmentFilter) return false;
 
     // 2. Filtros por Status (Abertos / Finalizados)
+    const closedStatuses = ['FECHADO', 'RESOLVIDO', 'CANCELADO', 'CONCLUIDO', 'FINALIZADO'];
     if (filterType === 'my-opened') {
-      if (t.status === 'FINALIZADO' || t.status === 'CONCLUIDO') return false;
+      if (closedStatuses.includes(t.status)) return false;
     } else if (filterType === 'my-closed') {
-      if (t.status !== 'FINALIZADO' && t.status !== 'CONCLUIDO') return false;
+      if (!closedStatuses.includes(t.status)) return false;
     }
 
     // 4. Termo de Pesquisa
