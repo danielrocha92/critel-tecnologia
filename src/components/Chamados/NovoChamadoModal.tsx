@@ -16,6 +16,7 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
   const messageRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState({
     cliente: '',
+    endereco_loja: '',
     departamento: '',
     assunto: '',
     prioridade: '',
@@ -58,11 +59,15 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
     setLoading(true);
     const protocolo = `OS-${Date.now()}`;
     
+    const finalHtml = formData.endereco_loja 
+      ? `<div><strong>Endereço da Loja:</strong> ${formData.endereco_loja}</div><br/>${descricaoFinal}`
+      : descricaoFinal;
+
     const payload: any = {
       protocolo_origem: protocolo,
       cliente: formData.cliente,
       titulo: formData.assunto,
-      descricao: descricaoFinal,
+      descricao: finalHtml,
       departamento: formData.departamento,
       prioridade: formData.prioridade,
       status: formData.atendente ? 'ABERTO' : 'NOVO' // Se já tem técnico, pode ser ABERTO
@@ -187,6 +192,24 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
                 <option value="Burger King">Burger King</option>
                 <option value="Pizza Hut">Pizza Hut</option>
               </select>
+            </div>
+          </div>
+
+          {/* Endereço da Loja */}
+          <div className="form-row">
+            <label className="form-label">Endereço da Loja:</label>
+            <div style={{ gridColumn: '2 / 3' }}>
+              <input 
+                type="text" 
+                name="endereco_loja"
+                value={formData.endereco_loja}
+                onChange={handleChange}
+                placeholder="Ex: Av. Paulista, 1000 - Bela Vista"
+                style={{
+                  background: '#1e2230', border: '1px solid #32394c', color: '#f8fafc',
+                  padding: '10px 14px', borderRadius: '4px', fontSize: '0.9rem', width: '100%', outline: 'none'
+                }}
+              />
             </div>
           </div>
 
@@ -330,14 +353,34 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
             >
               {loading ? 'Criando...' : 'Criar Chamado'}
             </button>
-            <label style={{ 
-              background: '#252a38', color: '#f8fafc', border: '1px solid #32394c', 
-              padding: '10px 16px', borderRadius: '4px', fontWeight: 500, cursor: 'pointer',
-              display: 'flex', alignItems: 'center', gap: '8px'
-            }}>
-              <input type="file" hidden onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)} />
-              <Paperclip size={16} /> {file ? file.name : 'Anexar'}
-            </label>
+            {file ? (
+              <div style={{
+                background: '#252a38', color: '#f8fafc', border: '1px solid #32394c', 
+                padding: '6px 16px', borderRadius: '4px', fontWeight: 500,
+                display: 'flex', alignItems: 'center', gap: '8px'
+              }}>
+                <Paperclip size={16} /> 
+                <span style={{ maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '0.9rem' }}>
+                  {file.name}
+                </span>
+                <button 
+                  onClick={() => setFile(null)} 
+                  style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '0 4px', marginLeft: '4px' }}
+                  title="Remover anexo"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            ) : (
+              <label style={{ 
+                background: '#252a38', color: '#f8fafc', border: '1px solid #32394c', 
+                padding: '10px 16px', borderRadius: '4px', fontWeight: 500, cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: '8px'
+              }}>
+                <input type="file" hidden onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)} />
+                <Paperclip size={16} /> Anexar
+              </label>
+            )}
           </div>
           
           <button 
