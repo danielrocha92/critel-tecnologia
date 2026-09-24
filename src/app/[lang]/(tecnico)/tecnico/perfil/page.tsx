@@ -47,6 +47,7 @@ export default function PerfilPage() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+    document.cookie = "user_cargo=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     router.push(`/${lang}/login`);
   };
 

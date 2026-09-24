@@ -54,7 +54,7 @@ export default function LoginPage() {
       }
 
       // Redirecionamento baseado em cargo
-      const normalizedCargo = perfilData?.cargo?.toUpperCase().replace('É', 'E');
+      const normalizedCargo = perfilData?.cargo?.trim().toUpperCase().replace('É', 'E');
       const isTecnico = normalizedCargo === 'TECNICO';
 
       if (isTecnico) {

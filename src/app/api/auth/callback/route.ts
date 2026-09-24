@@ -54,7 +54,7 @@ export async function GET(request: Request) {
         
       const cargo = perfilData?.cargo;
       const cargoStr = cargo || 'VISITANTE';
-      const cargoNormalizado = cargoStr.toUpperCase().replace('É', 'E');
+      const cargoNormalizado = cargoStr.trim().toUpperCase().replace('É', 'E');
       const roleBasePaths: Record<string, string> = {
         'TECNICO': '/tecnico/',
         'FINANCEIRO': '/financeiro',

@@ -45,7 +45,7 @@ export default async function TecnicoLayout({
     .eq('user_id', userData.user.id)
     .single();
 
-  const normalizedCargo = perfilData?.cargo?.toUpperCase().replace('É', 'E');
+  const normalizedCargo = perfilData?.cargo?.trim().toUpperCase().replace('É', 'E');
   const isAdmin = normalizedCargo === 'ADMIN' || normalizedCargo === 'SUPER_ADMIN';
   const isTecnico = normalizedCargo === 'TECNICO';
 

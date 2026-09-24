@@ -42,6 +42,7 @@ export default function Topbar() {
   const handleLogout = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
+    document.cookie = "user_cargo=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     window.location.href = `/${params.lang}/login`;
   };
   return (
