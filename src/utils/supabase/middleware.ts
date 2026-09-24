@@ -109,9 +109,12 @@ export async function updateSession(request: NextRequest) {
     if (isPrivatePath) {
       // Admins têm acesso livre
       if (cargoNormalizado !== 'ADMIN' && cargoNormalizado !== 'SUPER_ADMIN') {
+        const sharedRoutes = ['/conta', '/all-tickets', '/my-tickets', '/atendimentos', '/clientes', '/relatorios', '/base-conhecimento', '/ajuda'];
+        const isShared = sharedRoutes.some(route => pathWithoutLang === route || pathWithoutLang.startsWith(`${route}/`));
+        
         const isAllowedPath = pathWithoutLang === basePath || 
                               pathWithoutLang.startsWith(`${basePath}/`) || 
-                              pathWithoutLang === '/conta'; // rotas compartilhadas estritas
+                              isShared; // rotas compartilhadas estritas
                               
         if (!isAllowedPath) {
           const url = request.nextUrl.clone();
