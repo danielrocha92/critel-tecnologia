@@ -195,3 +195,22 @@ ON public.comunicados FOR ALL USING (
 );
 
 
+
+-- =========================================================================
+-- FASE 5: FLUXO DE EXECUCAO DO CHAMADO (OS) E CHECK-IN
+-- =========================================================================
+
+ALTER TABLE public.tickets
+ADD COLUMN IF NOT EXISTS tecnico_id UUID REFERENCES public.perfis(id),
+ADD COLUMN IF NOT EXISTS endereco VARCHAR(255),
+ADD COLUMN IF NOT EXISTS check_in_lat DOUBLE PRECISION,
+ADD COLUMN IF NOT EXISTS check_in_lng DOUBLE PRECISION,
+ADD COLUMN IF NOT EXISTS check_in_at TIMESTAMP WITH TIME ZONE,
+ADD COLUMN IF NOT EXISTS checkout_lat DOUBLE PRECISION,
+ADD COLUMN IF NOT EXISTS checkout_lng DOUBLE PRECISION,
+ADD COLUMN IF NOT EXISTS checkout_at TIMESTAMP WITH TIME ZONE,
+ADD COLUMN IF NOT EXISTS evidencia_antes_base64 TEXT,
+ADD COLUMN IF NOT EXISTS evidencia_depois_base64 TEXT,
+ADD COLUMN IF NOT EXISTS despesas_json JSONB DEFAULT '[]'::jsonb,
+ADD COLUMN IF NOT EXISTS assinatura_datahora TIMESTAMP WITH TIME ZONE;
+

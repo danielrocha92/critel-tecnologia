@@ -153,6 +153,9 @@ export default function Header({ dict, lang }: { dict: any, lang: string }) {
                 ))}
               </div>
             </div>
+            <Link href={`/${lang}/login`} className={styles.mobileBtnRestrito} onClick={closeMobileMenu}>
+              Acesso Restrito
+            </Link>
             <Link href={`/${lang}/#formulario`} className={styles.mobileBtnAction} onClick={closeMobileMenu}>
               {dict.talkToUs}
             </Link>
@@ -195,6 +198,9 @@ export default function Header({ dict, lang }: { dict: any, lang: string }) {
           </div>
 
           {/* CTA Principal */}
+          <Link href={`/${lang}/login`} className={styles.btnRestrito}>
+            Acesso Restrito
+          </Link>
           <Link href={`/${lang}/#formulario`} className={styles.btnAction}>
             {dict.talkToUs}
           </Link>

@@ -17,6 +17,22 @@ export default function TecnicoDashboard() {
   const [clientFilter, setClientFilter] = useState('');
   const router = useRouter();
 
+  const handleNavigate = (endereco: string) => {
+    if (!endereco || endereco === 'Endereço não informado') return;
+    let pref = localStorage.getItem('navAppPref');
+    if (!pref) {
+      const choice = window.confirm('Deseja usar o Waze? (Clique "OK" para Waze ou "Cancelar" para Google Maps)');
+      pref = choice ? 'waze' : 'maps';
+      localStorage.setItem('navAppPref', pref);
+    }
+    const query = encodeURIComponent(endereco);
+    if (pref === 'waze') {
+      window.open(`https://waze.com/ul?q=${query}`, '_blank');
+    } else {
+      window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
+    }
+  };
+
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -37,7 +53,8 @@ export default function TecnicoDashboard() {
         .eq('user_id', userData.user.id)
         .single();
 
-      if (!perfilData || perfilData.cargo !== 'TECNICO' || perfilData.status !== 'ATIVO') {
+      const isTecnico = perfilData?.cargo === 'TECNICO' || perfilData?.cargo === 'TÉCNICO';
+      if (!perfilData || !isTecnico || perfilData.status !== 'ATIVO') {
         router.push('/pt/login');
         return;
       }
@@ -189,12 +206,16 @@ export default function TecnicoDashboard() {
                 {ticket.titulo}
               </p>
               
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '1rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#94a3b8', fontSize: '0.85rem' }}>
-                  <MapPin size={14} /> Presencial
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '1rem' }}>
+                <div 
+                  onClick={() => handleNavigate(ticket.endereco)}
+                  style={{ display: 'flex', alignItems: 'flex-start', gap: '6px', color: '#38bdf8', fontSize: '0.85rem', cursor: 'pointer', textDecoration: 'underline' }}
+                >
+                  <MapPin size={16} style={{ flexShrink: 0, marginTop: '2px' }} /> 
+                  <span>{ticket.endereco || 'Endereço não informado'}</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#94a3b8', fontSize: '0.85rem' }}>
-                  <Clock size={14} /> Urgente
+                  <Clock size={14} /> {ticket.prioridade || 'Normal'}
                 </div>
               </div>
 
@@ -216,7 +237,7 @@ export default function TecnicoDashboard() {
                   cursor: 'pointer',
                   textDecoration: 'none'
               }}>
-                <FileText size={18} /> Preencher OS e Finalizar
+                <FileText size={18} /> iniciar/executar chamado
               </Link>
             </div>
           ))}

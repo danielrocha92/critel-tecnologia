@@ -5,12 +5,6 @@ import { cookies } from 'next/headers';
 export async function POST(request: Request) {
   try {
     const cookieStore = await cookies();
-    
-    // We must use the SERVICE_ROLE_KEY here if we want to bypass RLS, OR just use ANON_KEY and rely on the logged-in user's token.
-    // Given the user is authenticated, we should use their token to respect RLS (if configured securely) 
-    // or just use SERVICE_ROLE if we are missing explicit RLS INSERT policies for `servicos_concluidos`.
-    // Since the migration script creates RLS policies correctly, we can use the user's token,
-    // but just to be 100% safe and guarantee it writes to financeiro without blocking, we'll use SERVICE_ROLE for the backend execution.
     const supabaseAdmin = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!, 
@@ -21,7 +15,6 @@ export async function POST(request: Request) {
       }
     );
 
-    // Verify authentication
     const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
@@ -37,8 +30,10 @@ export async function POST(request: Request) {
       latitude, 
       longitude, 
       assinatura_base64,
-      valor_servico,
-      valor_despesas
+      evidencia_antes_base64,
+      evidencia_depois_base64,
+      despesas_json,
+      assinatura_datahora
     } = body;
 
     if (!ticket_id || !latitude || !longitude || !descricao_servicos) {
@@ -59,7 +54,17 @@ export async function POST(request: Request) {
     // 1. Update Ticket Status
     const { error: ticketError } = await supabaseAdmin
       .from('tickets')
-      .update({ status: 'FINALIZADO', atualizado_em: new Date().toISOString() })
+      .update({ 
+        status: 'FINALIZADO', 
+        atualizado_em: new Date().toISOString(),
+        checkout_lat: latitude,
+        checkout_lng: longitude,
+        checkout_at: new Date().toISOString(),
+        evidencia_antes_base64,
+        evidencia_depois_base64,
+        despesas_json,
+        assinatura_datahora
+      })
       .eq('id', ticket_id);
 
     if (ticketError) throw ticketError;
@@ -86,21 +91,26 @@ export async function POST(request: Request) {
       throw new Error('Falha ao registrar relatório do serviço.');
     }
 
-    // 3. Insert into financeiro
+    // Calcular total de despesas
+    let totalDespesas = 0;
+    if (despesas_json && Array.isArray(despesas_json)) {
+      totalDespesas = despesas_json.reduce((sum, d) => sum + (d.valor_numerico || 0), 0);
+    }
+
+    // 3. Insert into financeiro (valor_servico removido das inputs do técnico, assume-se 0)
     const { error: finError } = await supabaseAdmin
       .from('financeiro')
       .insert({
         ticket_id,
         tecnico_id: user.id,
-        servico_id: servico.id,
-        valor_servico: valor_servico || 0,
-        valor_despesas: valor_despesas || 0,
+        servico_id: servico?.id || null,
+        valor_servico: 0,
+        valor_despesas: totalDespesas,
         status_faturamento: 'PENDENTE'
       });
 
     if (finError) {
       console.error('Erro ao inserir financeiro:', finError);
-      // We won't rollback everything just for financeiro failure, but we log it.
     }
 
     return NextResponse.json({ success: true });

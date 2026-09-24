@@ -54,7 +54,8 @@ export default function LoginPage() {
       }
 
       // Redirecionamento baseado em cargo
-      if (perfilData.cargo === 'TECNICO') {
+      const isTecnico = perfilData?.cargo === 'TECNICO' || perfilData?.cargo === 'TÉCNICO';
+      if (isTecnico) {
         router.push(`/${lang}/tecnico`);
       } else {
         router.push(`/${lang}/dashboard`);

@@ -330,6 +330,38 @@
   background-color: rgba(183, 28, 28, 0.1);
 }
 
+/* Botão de Acesso Restrito */
+.btnRestrito {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  padding: 0.55rem 1.35rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+[data-theme='light'] .btnRestrito {
+  background: rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.btnRestrito:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+[data-theme='light'] .btnRestrito:hover {
+  background: rgba(0, 0, 0, 0.08);
+  color: #000;
+}
+
 /* CTA Principal */
 .btnAction {
   background: linear-gradient(135deg, var(--accent-brand), #991b1b);
@@ -533,6 +565,21 @@
     background: var(--accent-brand);
     color: #fff;
     border-color: var(--accent-brand-text);
+  }
+
+  .mobileBtnRestrito {
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    text-align: center;
+    padding: 0.9rem;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 1rem;
+    display: block;
+    width: 100%;
+    text-decoration: none;
+    margin-bottom: 0.5rem;
   }
 
   .mobileBtnAction {

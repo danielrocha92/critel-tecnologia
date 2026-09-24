@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { X, MapPin, MapPinOff, AlertTriangle, Send, Clock } from 'lucide-react';
+import { useState, useRef, useEffect, ChangeEvent } from 'react';
+import { X, MapPin, MapPinOff, AlertTriangle, Send, Clock, Plus, Trash } from 'lucide-react';
 import SignatureCanvas from 'react-signature-canvas';
+import styles from './FinalizarChamadoModal.module.css';
 
 interface FinalizarChamadoModalProps {
   ticket: any;
@@ -25,9 +26,12 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
   const [descricao, setDescricao] = useState('');
   const [materiais, setMateriais] = useState('');
   
-  // Optional Financial Fields (Técnico can fill, Admin can edit later)
-  const [valorServico, setValorServico] = useState('');
-  const [valorDespesas, setValorDespesas] = useState('');
+  // Evidências
+  const [evidenciaAntes, setEvidenciaAntes] = useState<string | null>(null);
+  const [evidenciaDepois, setEvidenciaDepois] = useState<string | null>(null);
+
+  // Despesas
+  const [despesas, setDespesas] = useState([{ natureza: '', valor: '', anexo: '' }]);
 
   // Signature
   const sigCanvas = useRef<any>(null);
@@ -35,14 +39,20 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
   useEffect(() => {
     // Get current time as default
     const now = new Date();
-    const tzOffset = (new Date()).getTimezoneOffset() * 60000; // offset in milliseconds
+    const tzOffset = (new Date()).getTimezoneOffset() * 60000;
     const localISOTime = (new Date(now.getTime() - tzOffset)).toISOString().slice(0, 16);
     
-    // Set End time to now, Start time to 1 hour ago (as a fallback default)
     setHoraTermino(localISOTime);
     
-    const oneHourAgo = new Date(now.getTime() - (60 * 60 * 1000));
-    const localISOTimeAgo = (new Date(oneHourAgo.getTime() - tzOffset)).toISOString().slice(0, 16);
+    // If ticket has check_in_at, use it as start time, otherwise use 1 hour ago
+    let localISOTimeAgo;
+    if (ticket.check_in_at) {
+      const checkInDate = new Date(ticket.check_in_at);
+      localISOTimeAgo = (new Date(checkInDate.getTime() - tzOffset)).toISOString().slice(0, 16);
+    } else {
+      const oneHourAgo = new Date(now.getTime() - (60 * 60 * 1000));
+      localISOTimeAgo = (new Date(oneHourAgo.getTime() - tzOffset)).toISOString().slice(0, 16);
+    }
     setHoraInicio(localISOTimeAgo);
 
     // Capture Geolocation immediately
@@ -65,12 +75,63 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
       setGeoError('Geolocalização não suportada pelo navegador.');
       setIsLocating(false);
     }
-  }, []);
+  }, [ticket.check_in_at]);
 
   const clearSignature = () => {
     if (sigCanvas.current) {
       sigCanvas.current.clear();
     }
+  };
+
+  const handleFileConvert = (e: ChangeEvent<HTMLInputElement>, setter: (val: string) => void) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setter(event.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const addDespesa = () => {
+    setDespesas([...despesas, { natureza: '', valor: '', anexo: '' }]);
+  };
+
+  const removeDespesa = (index: number) => {
+    setDespesas(despesas.filter((_, i) => i !== index));
+  };
+
+  const updateDespesa = (index: number, field: string, value: string) => {
+    const newDespesas = [...despesas];
+    (newDespesas[index] as any)[field] = value;
+    setDespesas(newDespesas);
+  };
+
+  const formatCurrency = (value: string) => {
+    // Remove tudo que não for número
+    let num = value.replace(/\D/g, "");
+    if (!num) return "";
+    
+    // Converte para decimal
+    const numValue = (parseInt(num) / 100).toFixed(2);
+    
+    // Adiciona máscara BRL
+    return numValue.replace(".", ",").replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
+  };
+
+  const handleCurrencyChange = (index: number, val: string) => {
+    const formatted = formatCurrency(val);
+    updateDespesa(index, 'valor', formatted);
+  };
+
+  const handleDespesaFile = (e: ChangeEvent<HTMLInputElement>, index: number) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      updateDespesa(index, 'anexo', event.target?.result as string);
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -89,12 +150,26 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
       setLoading(false);
       return;
     }
-
-    // Get signature as base64 if not empty
-    let assinaturaBase64 = null;
-    if (sigCanvas.current && !sigCanvas.current.isEmpty()) {
-      assinaturaBase64 = sigCanvas.current.getTrimmedCanvas().toDataURL('image/png');
+    
+    if (!evidenciaAntes || !evidenciaDepois) {
+      setError('Sessão Evidências: As fotos de antes e depois da fachada são obrigatórias.');
+      setLoading(false);
+      return;
     }
+
+    if (!sigCanvas.current || sigCanvas.current.isEmpty()) {
+      setError('A assinatura do responsável é obrigatória para fechar o chamado.');
+      setLoading(false);
+      return;
+    }
+
+    const assinaturaBase64 = sigCanvas.current.getTrimmedCanvas().toDataURL('image/png');
+    
+    // Parse expenses back to numbers
+    const parsedDespesas = despesas.map(d => ({
+      ...d,
+      valor_numerico: d.valor ? parseFloat(d.valor.replace(/\./g, '').replace(',', '.')) : 0
+    })).filter(d => d.natureza || d.valor_numerico > 0);
 
     try {
       const res = await fetch('/api/tecnico/finalizar-chamado', {
@@ -109,8 +184,10 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
           latitude: location.lat,
           longitude: location.lng,
           assinatura_base64: assinaturaBase64,
-          valor_servico: valorServico ? parseFloat(valorServico) : 0,
-          valor_despesas: valorDespesas ? parseFloat(valorDespesas) : 0
+          evidencia_antes_base64: evidenciaAntes,
+          evidencia_depois_base64: evidenciaDepois,
+          despesas_json: parsedDespesas,
+          assinatura_datahora: new Date().toISOString()
         })
       });
 
@@ -127,49 +204,18 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
   };
 
   return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      width: '100%',
-      height: '100%',
-      background: 'rgba(0, 0, 0, 0.8)',
-      backdropFilter: 'blur(5px)',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'flex-end',
-      zIndex: 100
-    }}>
-      <div style={{
-        background: '#0f172a',
-        width: '100%',
-        height: '90vh',
-        borderTopLeftRadius: '24px',
-        borderTopRightRadius: '24px',
-        display: 'flex',
-        flexDirection: 'column',
-        boxShadow: '0 -10px 40px rgba(0,0,0,0.5)',
-        animation: 'slideUp 0.3s ease-out'
-      }}>
-        <div style={{ padding: '1rem', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, background: '#0f172a', zIndex: 10, borderTopLeftRadius: '24px', borderTopRightRadius: '24px' }}>
-          <h2 style={{ margin: 0, fontSize: '1.2rem', color: '#f8fafc' }}>Baixa de OS</h2>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '0.5rem' }}>
+    <div className={styles.overlay}>
+      <div className={styles.modal}>
+        <div className={styles.header}>
+          <h2 className={styles.title}>Baixa de OS</h2>
+          <button onClick={onClose} className={styles.closeButton}>
             <X size={24} />
           </button>
         </div>
 
-        <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem 1rem' }}>
+        <div className={styles.content}>
           {/* GeoStatus */}
-          <div style={{ 
-            background: location ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', 
-            border: `1px solid ${location ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`,
-            borderRadius: '12px', 
-            padding: '1rem', 
-            marginBottom: '1.5rem',
-            display: 'flex',
-            alignItems: 'flex-start',
-            gap: '0.75rem'
-          }}>
+          <div className={`${styles.geoStatus} ${location ? styles.geoSuccess : styles.geoError}`}>
             {isLocating ? (
               <Clock size={24} color="#94a3b8" />
             ) : location ? (
@@ -192,87 +238,112 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
             </div>
           </div>
 
-          <form id="finalizarForm" onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <form id="finalizarForm" onSubmit={handleSubmit} className={styles.form}>
             
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div className={styles.grid}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#94a3b8', marginBottom: '0.5rem' }}>Início</label>
+                <label className={styles.label}>Início</label>
                 <input 
                   type="datetime-local" 
                   value={horaInicio}
                   onChange={e => setHoraInicio(e.target.value)}
                   required
-                  style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #334155', background: '#1e293b', color: 'white' }}
+                  className={styles.input}
                 />
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#94a3b8', marginBottom: '0.5rem' }}>Término</label>
+                <label className={styles.label}>Término</label>
                 <input 
                   type="datetime-local" 
                   value={horaTermino}
                   onChange={e => setHoraTermino(e.target.value)}
                   required
-                  style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #334155', background: '#1e293b', color: 'white' }}
+                  className={styles.input}
                 />
               </div>
             </div>
 
             <div>
-              <label style={{ display: 'block', fontSize: '0.85rem', color: '#94a3b8', marginBottom: '0.5rem' }}>Serviços Executados *</label>
+              <label className={styles.label}>Serviços Executados *</label>
               <textarea 
                 value={descricao}
                 onChange={e => setDescricao(e.target.value)}
                 placeholder="Descreva detalhadamente o que foi feito..."
                 rows={4}
                 required
-                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #334155', background: '#1e293b', color: 'white', resize: 'vertical' }}
+                className={styles.textarea}
               />
             </div>
 
+            <div className={styles.section}>
+              <h4 className={styles.sectionTitle}>Sessão Evidências (Obrigatório!)</h4>
+              <div className={styles.grid}>
+                <div>
+                  <label className={styles.label}>Fachada da Loja (Antes)</label>
+                  <input type="file" accept="image/*" capture="environment" onChange={e => handleFileConvert(e, setEvidenciaAntes)} className={styles.input} />
+                  {evidenciaAntes && <span style={{fontSize: '0.75rem', color: '#10b981', marginTop: '4px', display: 'block'}}>✓ Imagem capturada</span>}
+                </div>
+                <div>
+                  <label className={styles.label}>Fachada da Loja (Depois)</label>
+                  <input type="file" accept="image/*" capture="environment" onChange={e => handleFileConvert(e, setEvidenciaDepois)} className={styles.input} />
+                  {evidenciaDepois && <span style={{fontSize: '0.75rem', color: '#10b981', marginTop: '4px', display: 'block'}}>✓ Imagem capturada</span>}
+                </div>
+              </div>
+            </div>
+
             <div>
-              <label style={{ display: 'block', fontSize: '0.85rem', color: '#94a3b8', marginBottom: '0.5rem' }}>Materiais / Peças Utilizadas (Opcional)</label>
+              <label className={styles.label}>Materiais / Peças Utilizadas (Opcional)</label>
               <textarea 
                 value={materiais}
                 onChange={e => setMateriais(e.target.value)}
                 placeholder="Liste as peças trocadas ou materiais usados..."
                 rows={2}
-                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #334155', background: '#1e293b', color: 'white', resize: 'vertical' }}
+                className={styles.textarea}
               />
             </div>
 
-            <div style={{ background: 'rgba(56, 189, 248, 0.05)', border: '1px solid rgba(56, 189, 248, 0.2)', padding: '1rem', borderRadius: '12px' }}>
-              <h4 style={{ margin: '0 0 1rem 0', color: '#38bdf8', fontSize: '0.95rem' }}>Dados Financeiros</h4>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', color: '#94a3b8', marginBottom: '0.5rem' }}>Valor Serviço (R$)</label>
-                  <input 
-                    type="number" 
-                    step="0.01"
-                    min="0"
-                    value={valorServico}
-                    onChange={e => setValorServico(e.target.value)}
-                    placeholder="0.00"
-                    style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #334155', background: '#1e293b', color: 'white' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', color: '#94a3b8', marginBottom: '0.5rem' }}>Despesas Extras (R$)</label>
-                  <input 
-                    type="number" 
-                    step="0.01"
-                    min="0"
-                    value={valorDespesas}
-                    onChange={e => setValorDespesas(e.target.value)}
-                    placeholder="0.00"
-                    style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #334155', background: '#1e293b', color: 'white' }}
-                  />
-                </div>
+            <div className={styles.section}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <h4 className={styles.sectionTitle} style={{ margin: 0 }}>Despesas Extras (R$)</h4>
+                <button type="button" onClick={addDespesa} style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <Plus size={16} /> Adicionar
+                </button>
               </div>
+              
+              {despesas.map((despesa, index) => (
+                <div key={index} className={styles.despesaRow}>
+                  <input 
+                    type="text"
+                    placeholder="Natureza (ex: Pedágio)"
+                    value={despesa.natureza}
+                    onChange={e => updateDespesa(index, 'natureza', e.target.value)}
+                    className={styles.input}
+                  />
+                  <input 
+                    type="text"
+                    placeholder="0,00"
+                    value={despesa.valor}
+                    onChange={e => handleCurrencyChange(index, e.target.value)}
+                    className={styles.input}
+                  />
+                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <label style={{ background: '#334155', color: '#fff', padding: '0.65rem', borderRadius: '8px', cursor: 'pointer', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>
+                      {despesa.anexo ? '✓ Anexo' : 'Anexar'}
+                      <input type="file" accept="image/*" capture="environment" style={{ display: 'none' }} onChange={e => handleDespesaFile(e, index)} />
+                    </label>
+                    {despesas.length > 1 && (
+                      <button type="button" onClick={() => removeDespesa(index)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '0.5rem' }}>
+                        <Trash size={18} />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
 
             <div style={{ marginBottom: '1rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                <label style={{ fontSize: '0.85rem', color: '#94a3b8' }}>Assinatura do Responsável (Opcional)</label>
+                <label className={styles.label} style={{ margin: 0 }}>Assinatura do Responsável (Obrigatório!)</label>
                 <button type="button" onClick={clearSignature} style={{ background: 'none', border: 'none', color: '#38bdf8', fontSize: '0.8rem', cursor: 'pointer' }}>Limpar</button>
               </div>
               <div style={{ background: 'white', borderRadius: '12px', overflow: 'hidden', border: '2px solid #334155' }}>
@@ -296,38 +367,18 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
           </form>
         </div>
 
-        <div style={{ padding: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)', background: '#0f172a' }}>
+        <div className={styles.footer}>
           <button 
             type="submit"
             form="finalizarForm"
             disabled={loading || !location}
-            style={{
-              width: '100%',
-              padding: '16px',
-              background: (!location || loading) ? '#334155' : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-              color: (!location || loading) ? '#94a3b8' : 'white',
-              border: 'none',
-              borderRadius: '12px',
-              fontWeight: 'bold',
-              fontSize: '1.1rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              cursor: (!location || loading) ? 'not-allowed' : 'pointer'
-          }}>
+            className={`${styles.submitBtn} ${(!location || loading) ? styles.submitBtnDisabled : styles.submitBtnActive}`}
+          >
             <Send size={20} />
             {loading ? 'Sincronizando...' : 'Confirmar e Enviar Baixa'}
           </button>
         </div>
       </div>
-      
-      <style dangerouslySetInnerHTML={{__html: `
-        @keyframes slideUp {
-          from { transform: translateY(100%); }
-          to { transform: translateY(0); }
-        }
-      `}} />
     </div>
   );
 }
