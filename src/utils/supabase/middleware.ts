@@ -15,7 +15,7 @@ export async function updateSession(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
           supabaseResponse = NextResponse.next({
             request,
           })
@@ -27,56 +27,44 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { data: { user } } = await supabase.auth.getUser()
 
-  let cargo: string | null = request.cookies.get('user_cargo')?.value || null;
-  if (user && !cargo) {
-    const { data: perfil } = await supabase.from('perfis').select('cargo').eq('user_id', user.id).single();
-    cargo = perfil?.cargo || null;
-    if (cargo) {
-      supabaseResponse.cookies.set('user_cargo', cargo, { path: '/', maxAge: 60 * 60 * 8 }); // Cache for 8 hours
-    }
-  }
-
-  const publicRoutes = [
-    '/', 
-    '/certificacoes', 
-    '/clientes', 
-    '/contato', 
-    '/privacidade', 
-    '/sobre', 
-    '/solucoes', 
-    '/termos',
-    '/login'
-  ];
-  
   const pathname = request.nextUrl.pathname;
-  // Remove o prefixo de idioma (/pt ou /en) para verificar a rota real
   const pathWithoutLang = pathname.replace(/^\/(pt|en)/, '') || '/';
+  
+  const publicRoutes = [
+    '/', '/certificacoes', '/clientes', '/contato', 
+    '/privacidade', '/sobre', '/solucoes', '/termos', '/login'
+  ];
 
   const isPublicPath = 
     publicRoutes.some(route => pathWithoutLang === route || pathWithoutLang.startsWith(`${route}/`)) ||
-    pathname.includes('/api/auth') || 
-    pathname.includes('/api/webhooks') ||
-    pathname.match(/\.(.*)$/); // Allow static files like .png, .js, .css
+    pathname.includes('/api/') || 
+    pathname.match(/\.(.*)$/);
 
-  const isPrivatePath = !isPublicPath;
-  
-  if (!user && isPrivatePath) {
-    // Redireciona para o login
-    const url = request.nextUrl.clone()
-    const segments = url.pathname.split('/').filter(Boolean);
-    const lang = segments[0] || 'pt';
-    url.pathname = `/${lang}/login`
-    return NextResponse.redirect(url)
+  const isLoginPath = pathWithoutLang === '/login';
+
+  // 1. Redireciona usuários não logados que tentam acessar rotas privadas
+  if (!user && !isPublicPath) {
+    const url = request.nextUrl.clone();
+    const lang = url.pathname.split('/')[1] || 'pt';
+    url.pathname = `/${lang}/login`;
+    return NextResponse.redirect(url);
   }
 
-  // Se o usuário está logado, verificamos as permissões de rota
+  // 2. Lógica para usuários logados
   if (user) {
-    const cargoStr = cargo || 'VISITANTE';
-    const cargoNormalizado = cargoStr.trim().toUpperCase().replace('É', 'E');
+    let cargo = request.cookies.get('user_cargo')?.value || null;
+    
+    if (!cargo) {
+      const { data: perfil } = await supabase.from('perfis').select('cargo').eq('user_id', user.id).single();
+      cargo = perfil?.cargo || null;
+      if (cargo) {
+        supabaseResponse.cookies.set('user_cargo', cargo, { path: '/', maxAge: 60 * 60 * 8 });
+      }
+    }
+
+    const cargoNormalizado = (cargo || 'VISITANTE').trim().toUpperCase().replace('É', 'E');
     
     const roleBasePaths: Record<string, string> = {
       'TECNICO': '/tecnico',
@@ -88,47 +76,35 @@ export async function updateSession(request: NextRequest) {
     };
     const basePath = roleBasePaths[cargoNormalizado] || '/dashboard';
 
-    const decodedPath = decodeURIComponent(pathWithoutLang);
-
-    // Se o usuário digitou /técnico com acento, redireciona para /tecnico sem acento
-    if (decodedPath === '/técnico' || decodedPath.startsWith('/técnico/')) {
+    // 2.a Redireciona da página de login para o painel correto
+    if (isLoginPath) {
       const url = request.nextUrl.clone();
-      url.pathname = url.pathname.replace(/t%C3%A9cnico/i, 'tecnico').replace(/técnico/i, 'tecnico');
+      const lang = url.pathname.split('/')[1] || 'pt';
+      url.pathname = `/${lang}${basePath}`;
       return NextResponse.redirect(url);
     }
 
-    const isLoginPath = pathname.includes('/login');
-
-    if (isLoginPath) {
-      // Redireciona da página de login para o painel correspondente
-      const url = request.nextUrl.clone()
-      const segments = url.pathname.split('/').filter(Boolean);
-      const lang = segments[0] || 'pt';
-      // Se for técnico, usa barra no final por precaução
-      url.pathname = cargoNormalizado === 'TECNICO' ? `/${lang}/tecnico/` : `/${lang}${basePath}`;
-      return NextResponse.redirect(url)
-    }
-
-    if (isPrivatePath) {
-      // Admins têm acesso livre
+    // 2.b Restringe acesso a rotas privadas baseadas no cargo
+    if (!isPublicPath) {
       if (cargoNormalizado !== 'ADMIN' && cargoNormalizado !== 'SUPER_ADMIN') {
-        const sharedRoutes = ['/conta', '/all-tickets', '/my-tickets', '/atendimentos', '/clientes', '/relatorios', '/base-conhecimento', '/ajuda'];
-        const isShared = sharedRoutes.some(route => pathWithoutLang === route || pathWithoutLang.startsWith(`${route}/`));
+        const isOwnBasePath = pathWithoutLang === basePath || pathWithoutLang.startsWith(`${basePath}/`);
         
-        const isAllowedPath = pathWithoutLang === basePath || 
-                              pathWithoutLang.startsWith(`${basePath}/`) || 
-                              isShared; // rotas compartilhadas estritas
-                              
-        if (!isAllowedPath) {
+        let isShared = false;
+        // Técnicos ficam isolados apenas na sua rota mobile (/tecnico)
+        if (cargoNormalizado !== 'TECNICO') {
+          const sharedRoutes = ['/conta', '/all-tickets', '/my-tickets', '/atendimentos', '/clientes', '/relatorios', '/base-conhecimento', '/ajuda'];
+          isShared = sharedRoutes.some(route => pathWithoutLang === route || pathWithoutLang.startsWith(`${route}/`));
+        }
+        
+        if (!isOwnBasePath && !isShared) {
           const url = request.nextUrl.clone();
-          const segments = url.pathname.split('/').filter(Boolean);
-          const lang = segments[0] || 'pt';
-          url.pathname = cargoNormalizado === 'TECNICO' ? `/${lang}/tecnico/` : `/${lang}${basePath}`;
+          const lang = url.pathname.split('/')[1] || 'pt';
+          url.pathname = `/${lang}${basePath}`;
           return NextResponse.redirect(url);
         }
       }
     }
   }
 
-  return supabaseResponse
+  return supabaseResponse;
 }
