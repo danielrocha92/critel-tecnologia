@@ -1,0 +1,208 @@
+.wrapper {
+  position: relative;
+}
+
+.bellButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #cbd5e1;
+  position: relative;
+  padding: 4px;
+}
+
+.badge {
+  position: absolute;
+  top: -5px;
+  right: -8px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 0.65rem;
+  padding: 2px 5px;
+  border-radius: 10px;
+  font-weight: bold;
+  min-width: 18px;
+  text-align: center;
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: -10px;
+  width: 380px;
+  background: #1a1d26;
+  border: 1px solid #32394c;
+  border-radius: 12px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+  z-index: 200;
+  overflow: hidden;
+}
+
+.header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #32394c;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.title {
+  font-weight: 700;
+  color: #f8fafc;
+  font-size: 1rem;
+}
+
+.newBadge {
+  margin-left: 8px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.markAllBtn {
+  background: transparent;
+  border: 1px solid #334155;
+  color: #94a3b8;
+  border-radius: 6px;
+  padding: 4px 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.78rem;
+}
+
+.clearBtn {
+  background: transparent;
+  border: 1px solid #334155;
+  color: #94a3b8;
+  border-radius: 6px;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+.closeBtn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.list {
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.emptyState {
+  padding: 3rem;
+  text-align: center;
+  color: #64748b;
+}
+
+.emptyIcon {
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.emptyText {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.item {
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(50,57,76,0.5);
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.itemLida {
+  background: transparent;
+}
+
+.itemNaoLida {
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.item:hover {
+  background: rgba(255,255,255,0.04);
+}
+
+.icon {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+.itemHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.itemTitle {
+  font-size: 0.88rem;
+}
+
+.titleLida {
+  font-weight: 400;
+  color: #94a3b8;
+}
+
+.titleNaoLida {
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #3b82f6;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.message {
+  margin: 4px 0 0 0;
+  color: #64748b;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.time {
+  color: #475569;
+  font-size: 0.75rem;
+  margin-top: 4px;
+  display: block;
+}
+
+.footer {
+  padding: 12px 20px;
+  border-top: 1px solid #32394c;
+  text-align: center;
+}
+
+.configLink {
+  color: #3b82f6;
+  font-size: 0.85rem;
+  text-decoration: none;
+  font-weight: 500;
+}

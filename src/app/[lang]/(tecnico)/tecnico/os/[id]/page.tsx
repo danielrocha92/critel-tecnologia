@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { createBrowserClient } from '@supabase/ssr';
 import { ChevronLeft, MapPin, Clock, CheckCircle, Navigation, AlertTriangle } from 'lucide-react';
 import FinalizarChamadoModal from '@/components/Tecnico/FinalizarChamadoModal';
+import styles from './os.module.css';
 
 // Helper: Haversine distance em metros
 function getDistanceFromLatLonInMeters(lat1: number, lon1: number, lat2: number, lon2: number) {
@@ -142,120 +143,81 @@ export default function OrdemServicoMobilePage() {
     );
   };
 
-  if (loading) return <div style={{ padding: '2rem', textAlign: 'center' }}>Carregando dados da OS...</div>;
-  if (!ticket) return <div style={{ padding: '2rem', textAlign: 'center' }}>OS não encontrada.</div>;
+  if (loading) return <div className={styles.loadingContainer}>Carregando dados da OS...</div>;
+  if (!ticket) return <div className={styles.loadingContainer}>OS não encontrada.</div>;
 
   const isCheckedIn = !!ticket.check_in_at;
 
   return (
-    <div style={{ paddingBottom: '6rem' }}>
-      <header style={{ padding: '1rem', background: 'rgba(30, 41, 59, 0.5)', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        <button onClick={() => router.back()} style={{ background: 'none', border: 'none', color: '#00d2ff', padding: '0.5rem', cursor: 'pointer' }}>
+  return (
+    <div className={styles.pageContainer}>
+      <header className={styles.header}>
+        <button onClick={() => router.back()} className={styles.btnBack}>
           <ChevronLeft size={24} />
         </button>
-        <h2 style={{ fontSize: '1.2rem', margin: 0, color: '#f8fafc' }}>OS #{ticket.protocolo_origem}</h2>
+        <h2 className={styles.headerTitle}>OS #{ticket.protocolo_origem}</h2>
       </header>
 
-      <div style={{ padding: '1.5rem 1rem' }}>
-        <div style={{ marginBottom: '2rem' }}>
-          <h1 style={{ fontSize: '1.5rem', color: '#00d2ff', marginBottom: '0.5rem' }}>{ticket.cliente}</h1>
-          <p style={{ color: '#cbd5e1', fontSize: '1rem', lineHeight: '1.5' }}>
+      <div className={styles.contentWrapper}>
+        <div className={styles.titleSection}>
+          <h1 className={styles.clientTitle}>{ticket.cliente}</h1>
+          <p className={styles.ticketTitle}>
             {ticket.titulo}
           </p>
         </div>
 
-        <div style={{ background: 'rgba(15, 23, 42, 0.6)', borderRadius: '12px', padding: '1rem', marginBottom: '2rem', border: '1px solid rgba(255,255,255,0.05)' }}>
-          <h3 style={{ fontSize: '0.9rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '1rem' }}>Detalhes do Serviço</h3>
+        <div className={styles.cardSection}>
+          <h3 className={styles.sectionHeading}>Detalhes do Serviço</h3>
           
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <div style={{ display: 'flex', gap: '0.75rem' }}>
-              <Clock size={18} color="#00d2ff" style={{ marginTop: '2px' }} />
+          <div className={styles.detailsList}>
+            <div className={styles.detailItem}>
+              <Clock size={18} color="#00d2ff" className={styles.detailIcon} />
               <div>
-                <strong style={{ display: 'block', fontSize: '0.9rem', color: '#e2e8f0' }}>Abertura</strong>
-                <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>{new Date(ticket.criado_em).toLocaleString('pt-BR')}</span>
+                <strong className={styles.detailLabel}>Abertura</strong>
+                <span className={styles.detailValue}>{new Date(ticket.criado_em).toLocaleString('pt-BR')}</span>
               </div>
             </div>
             
-            <div style={{ display: 'flex', gap: '0.75rem' }}>
-              <MapPin size={18} color="#00d2ff" style={{ marginTop: '2px' }} />
+            <div className={styles.detailItem}>
+              <MapPin size={18} color="#00d2ff" className={styles.detailIcon} />
               <div>
-                <strong style={{ display: 'block', fontSize: '0.9rem', color: '#e2e8f0' }}>Departamento</strong>
-                <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>{ticket.departamento}</span>
+                <strong className={styles.detailLabel}>Departamento</strong>
+                <span className={styles.detailValue}>{ticket.departamento}</span>
               </div>
             </div>
           </div>
         </div>
 
-        <div style={{ background: 'rgba(15, 23, 42, 0.6)', borderRadius: '12px', padding: '1rem', marginBottom: '2rem', border: '1px solid rgba(255,255,255,0.05)' }}>
-          <h3 style={{ fontSize: '0.9rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>Descrição Reportada</h3>
-          <p style={{ color: '#cbd5e1', fontSize: '0.95rem', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
+        <div className={styles.cardSection}>
+          <h3 className={`${styles.sectionHeading} ${styles.sectionHeadingDesc}`}>Descrição Reportada</h3>
+          <p className={styles.descText}>
             {ticket.descricao}
           </p>
         </div>
       </div>
 
-      <div style={{
-        position: 'fixed',
-        bottom: 0,
-        left: 0,
-        width: '100%',
-        padding: '1rem',
-        background: 'rgba(11, 17, 32, 0.95)',
-        backdropFilter: 'blur(10px)',
-        borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-        zIndex: 50
-      }}>
-        {geoError && <p style={{ color: '#ef4444', fontSize: '0.8rem', marginBottom: '0.5rem', textAlign: 'center' }}>{geoError}</p>}
+      <div className={styles.bottomBar}>
+        {geoError && <p className={styles.geoError}>{geoError}</p>}
         
         {!isCheckedIn ? (
           <button 
             onClick={handleCheckIn}
             disabled={isCheckingIn}
-            style={{
-              width: '100%',
-              padding: '16px',
-              background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '12px',
-              fontWeight: 'bold',
-              fontSize: '1.1rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              cursor: isCheckingIn ? 'not-allowed' : 'pointer',
-              opacity: isCheckingIn ? 0.7 : 1
-          }}>
+            className={`${styles.btnCheckIn} ${isCheckingIn ? styles.btnCheckInDisabled : ''}`}>
             <Navigation size={22} />
             {isCheckingIn ? 'Registrando Check-in...' : 'Check-in (Cheguei no local)'}
           </button>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div className={styles.actionsContainer}>
             {distanciaAtual !== null && (
-              <div style={{ fontSize: '0.8rem', color: '#94a3b8', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+              <div className={styles.distanceInfo}>
                 {distanciaAtual > 400 ? <AlertTriangle size={14} color="#f59e0b" /> : <MapPin size={14} />}
                 Distância do check-in: {Math.round(distanciaAtual)}m
               </div>
             )}
             <button 
               onClick={() => setShowModal(true)}
-              style={{
-                width: '100%',
-                padding: '16px',
-                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '12px',
-                fontWeight: 'bold',
-                fontSize: '1.1rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                boxShadow: '0 4px 20px rgba(16, 185, 129, 0.4)',
-                cursor: 'pointer'
-            }}>
+              className={styles.btnFinalize}>
               <CheckCircle size={22} />
               Finalizar Chamado na Loja
             </button>

@@ -172,3 +172,36 @@
   font-size: 0.85rem;
   text-align: center;
 }
+
+.loginMain {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.pendenteBox {
+  text-align: center;
+  max-width: 450px;
+}
+
+.pendenteIcon {
+  background: #f59e0b;
+  color: #fff;
+}
+
+.pendenteSubtitle {
+  margin-top: 1rem;
+  color: #64748b;
+}
+
+.pendenteBtnWrapper {
+  margin-top: 2rem;
+}
+
+.pendenteBtn {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  background: #e2e8f0;
+  color: #0f172a;
+}

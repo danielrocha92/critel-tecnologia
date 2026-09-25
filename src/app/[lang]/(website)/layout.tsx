@@ -3,6 +3,8 @@ import Footer from "@/components/Footer/Footer";
 import FloatingActions from "@/components/FloatingActions/FloatingActions";
 import { getDictionary } from "@/dictionaries";
 
+import styles from './layout.module.css';
+
 export default async function WebsiteLayout({
   children,
   params,
@@ -16,7 +18,7 @@ export default async function WebsiteLayout({
   return (
     <>
       <Header lang={resolvedParams.lang} dict={dict.nav} />
-      <main style={{ paddingTop: "80px" }}>
+      <main className={styles.mainContent}>
         {children}
       </main>
       <Footer dict={dict.footer} lang={resolvedParams.lang} />

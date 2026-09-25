@@ -182,3 +182,131 @@
     border-radius: 8px;
   }
 }
+
+/* Additional Styles */
+.geoStatusStrong {
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.geoStatusStrongSuccess {
+  color: #10b981;
+}
+
+.geoStatusStrongLocating {
+  color: #94a3b8;
+}
+
+.geoStatusStrongError {
+  color: #ef4444;
+}
+
+.geoStatusSpan {
+  font-size: 0.85rem;
+  color: #cbd5e1;
+}
+
+.evidenciaSuccessSpan {
+  font-size: 0.75rem;
+  color: #10b981;
+  margin-top: 4px;
+  display: block;
+}
+
+.despesasHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.despesasTitle {
+  margin: 0;
+}
+
+.despesasAddBtn {
+  background: none;
+  border: none;
+  color: #38bdf8;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.despesaActions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.despesaFileLabel {
+  background: #334155;
+  color: #fff;
+  padding: 0.65rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.despesaFileInput {
+  display: none;
+}
+
+.despesaRemoveBtn {
+  background: none;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  padding: 0.5rem;
+}
+
+.signatureSection {
+  margin-bottom: 1rem;
+}
+
+.signatureHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.signatureLabel {
+  margin: 0;
+}
+
+.signatureClearBtn {
+  background: none;
+  border: none;
+  color: #38bdf8;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.signatureCanvasWrapper {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid #334155;
+}
+
+.signatureHint {
+  font-size: 0.75rem;
+  color: #64748b;
+  display: block;
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+.errorBanner {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  padding: 1rem;
+  border-radius: 8px;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 0.9rem;
+}

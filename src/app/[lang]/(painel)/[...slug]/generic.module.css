@@ -1,0 +1,198 @@
+.pageContainer {
+  padding: 24px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #f8fafc;
+  margin: 0;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btnFilter {
+  background: #32394c;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btnNew {
+  background: #10b981;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.tableContainer {
+  background: #1a1d26;
+  border-radius: 8px;
+  border: 1px solid #32394c;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.searchBar {
+  padding: 16px;
+  border-bottom: 1px solid #32394c;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.searchInputWrapper {
+  position: relative;
+  flex: 1;
+  max-width: 400px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 12px;
+  top: 10px;
+  color: #64748b;
+}
+
+.searchInput {
+  width: 100%;
+  background: #161922;
+  border: 1px solid #32394c;
+  color: #fff;
+  padding: 8px 12px 8px 36px;
+  border-radius: 6px;
+  outline: none;
+}
+
+.tableWrapper {
+  flex: 1;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.tableHeaderRow {
+  background: #1e2230;
+  border-bottom: 1px solid #32394c;
+}
+
+.th {
+  padding: 16px;
+  color: #94a3b8;
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+
+.thActions {
+  padding: 16px;
+  color: #94a3b8;
+  font-weight: 500;
+  font-size: 0.85rem;
+  width: 60px;
+}
+
+.tr {
+  border-bottom: 1px solid #32394c;
+}
+
+.tdId {
+  padding: 16px;
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+.tdDesc {
+  padding: 16px;
+  color: #e2e8f0;
+  font-size: 0.9rem;
+}
+
+.tdDate {
+  padding: 16px;
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.tdStatus {
+  padding: 16px;
+}
+
+.statusBadge {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.tdActions {
+  padding: 16px;
+}
+
+.btnMore {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.pagination {
+  padding: 16px;
+  border-top: 1px solid #32394c;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.paginationActions {
+  display: flex;
+  gap: 8px;
+}
+
+.btnPage {
+  background: #252a38;
+  border: 1px solid #32394c;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btnPageActive {
+  background: #3b82f6;
+  border: none;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}

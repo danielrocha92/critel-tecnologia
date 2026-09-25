@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Paperclip, Bold, Italic, Underline, Type, AlignLeft, List, ListOrdered, Quote, Link2, Image as ImageIcon, Plus, BookTemplate } from 'lucide-react';
 import { createClient } from '../../utils/supabase/client';
+import styles from './NovoChamadoModal.module.css';
 
 const supabase = createClient();
 
@@ -100,90 +101,29 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
     }
   };
   return (
-    <div style={{
-      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-      background: 'rgba(11, 17, 32, 0.85)', backdropFilter: 'blur(6px)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      zIndex: 9999,
-      fontFamily: 'Inter, sans-serif'
-    }}>
-      <style dangerouslySetInnerHTML={{__html: `
-        .modal-container {
-          width: 95%;
-          max-width: 1000px;
-          height: 90vh;
-          border-radius: 8px;
-        }
-        .form-row {
-          display: grid;
-          grid-template-columns: 150px 1fr auto;
-          align-items: center;
-          gap: 16px;
-        }
-        .form-row-start {
-          display: grid;
-          grid-template-columns: 150px 1fr auto;
-          align-items: flex-start;
-          gap: 16px;
-        }
-        .form-label {
-          color: #e2e8f0;
-          font-size: 0.9rem;
-          font-weight: 500;
-          text-align: right;
-        }
-        .form-spacer {
-          display: block;
-        }
-        @media (max-width: 768px) {
-          .modal-container {
-            width: 100%;
-            height: 100%;
-            border-radius: 0;
-            border: none !important;
-          }
-          .form-row, .form-row-start {
-            grid-template-columns: 1fr;
-            gap: 8px;
-          }
-          .form-label {
-            text-align: left;
-            margin-top: 8px;
-          }
-          .form-spacer {
-            display: none;
-          }
-        }
-      `}} />
-      <div className="modal-container" style={{
-        background: '#161922', 
-        border: '1px solid #252a38', boxShadow: '0 25px 60px rgba(0,0,0,0.6)',
-        display: 'flex', flexDirection: 'column', overflow: 'hidden'
-      }}>
+    <div className={styles.overlay}>
+      <div className={styles.modalContainer}>
         
         {/* HEADER */}
-        <div style={{ padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #252a38' }}>
-          <h2 style={{ margin: 0, fontSize: '1.2rem', color: '#f8fafc', fontWeight: 600 }}>Novo Chamado</h2>
-          <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px' }}>
+        <div className={styles.header}>
+          <h2 className={styles.headerTitle}>Novo Chamado</h2>
+          <button onClick={onClose} className={styles.closeButton}>
             <X size={20} />
           </button>
         </div>
 
         {/* BODY (Scrollable) */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '32px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div className={styles.body}>
           
           {/* Cliente */}
-          <div className="form-row">
-            <label className="form-label">Cliente:</label>
-            <div style={{ gridColumn: '2 / 3' }}>
+          <div className={styles.formRow}>
+            <label className={styles.formLabel}>Cliente:</label>
+            <div className={styles.inputWrapper}>
               <select 
                 name="cliente"
                 value={formData.cliente}
                 onChange={handleChange}
-                style={{
-                  background: '#1e2230', border: '1px solid #32394c', color: '#94a3b8',
-                  padding: '10px 14px', borderRadius: '4px', fontSize: '0.9rem', width: '100%', outline: 'none', appearance: 'none'
-                }}
+                className={styles.selectField}
               >
                 <option value="">Escolher cliente...</option>
                 <option value="Bacio di Latte">Bacio di Latte</option>
@@ -196,35 +136,29 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
           </div>
 
           {/* Endereço da Loja */}
-          <div className="form-row">
-            <label className="form-label">Endereço da Loja:</label>
-            <div style={{ gridColumn: '2 / 3' }}>
+          <div className={styles.formRow}>
+            <label className={styles.formLabel}>Endereço da Loja:</label>
+            <div className={styles.inputWrapper}>
               <input 
                 type="text" 
                 name="endereco_loja"
                 value={formData.endereco_loja}
                 onChange={handleChange}
                 placeholder="Ex: Av. Paulista, 1000 - Bela Vista"
-                style={{
-                  background: '#1e2230', border: '1px solid #32394c', color: '#f8fafc',
-                  padding: '10px 14px', borderRadius: '4px', fontSize: '0.9rem', width: '100%', outline: 'none'
-                }}
+                className={styles.inputField}
               />
             </div>
           </div>
 
           {/* Departamento */}
-          <div className="form-row">
-            <label className="form-label">Departamento:</label>
-            <div style={{ gridColumn: '2 / 3' }}>
+          <div className={styles.formRow}>
+            <label className={styles.formLabel}>Departamento:</label>
+            <div className={styles.inputWrapper}>
               <select 
                 name="departamento"
                 value={formData.departamento}
                 onChange={handleChange}
-                style={{
-                  background: '#1e2230', border: '1px solid #32394c', color: '#94a3b8',
-                  padding: '10px 14px', borderRadius: '4px', fontSize: '0.9rem', width: '100%', outline: 'none', appearance: 'none'
-                }}
+                className={styles.selectField}
               >
                 <option value="">Escolher departamento...</option>
                 <option value="suporte">Suporte Técnico</option>
@@ -234,74 +168,64 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
           </div>
 
           {/* Assunto */}
-          <div className="form-row">
-            <label className="form-label">Assunto:</label>
-            <div style={{ gridColumn: '2 / 3' }}>
+          <div className={styles.formRow}>
+            <label className={styles.formLabel}>Assunto:</label>
+            <div className={styles.inputWrapper}>
               <input 
                 type="text" 
                 name="assunto"
                 value={formData.assunto}
                 onChange={handleChange}
-                style={{
-                  background: '#1e2230', border: '1px solid #32394c', color: '#f8fafc',
-                  padding: '10px 14px', borderRadius: '4px', fontSize: '0.9rem', width: '100%', outline: 'none'
-                }}
+                className={styles.inputField}
               />
             </div>
           </div>
 
           {/* Mensagem (Rich Text) */}
-          <div className="form-row-start">
-            <label className="form-label" style={{ marginTop: '12px' }}>Mensagem:</label>
-            <div style={{ gridColumn: '2 / 3', background: '#1e2230', border: '1px solid #32394c', borderRadius: '4px', display: 'flex', flexDirection: 'column' }}>
+          <div className={styles.formRowStart}>
+            <label className={`${styles.formLabel} ${styles.msgLabel}`}>Mensagem:</label>
+            <div className={styles.msgContainer}>
               <div 
                 ref={messageRef}
                 contentEditable
-                style={{
-                  background: 'transparent', border: 'none', color: '#f8fafc',
-                  padding: '16px', fontSize: '0.95rem', width: '100%', outline: 'none', 
-                  minHeight: '200px', overflowY: 'auto'
-                }}
+                className={styles.msgEditor}
               />
-              <div style={{ padding: '12px 16px', borderTop: '1px solid #32394c', display: 'flex', gap: '16px', color: '#94a3b8', alignItems: 'center', flexWrap: 'wrap' }}>
-                <Bold size={16} style={{cursor: 'pointer'}} onMouseDown={(e)=>{e.preventDefault(); handleFormat('bold')}} />
-                <Italic size={16} style={{cursor: 'pointer'}} onMouseDown={(e)=>{e.preventDefault(); handleFormat('italic')}} />
-                <Underline size={16} style={{cursor: 'pointer'}} onMouseDown={(e)=>{e.preventDefault(); handleFormat('underline')}} />
-                <Type size={16} style={{cursor: 'pointer'}} onMouseDown={(e)=>{e.preventDefault(); handleFormat('fontSize', '4')}} />
-                <div style={{ width: '1px', height: '16px', background: '#32394c', margin: '0 4px' }} />
-                <AlignLeft size={16} style={{cursor: 'pointer'}} onMouseDown={(e)=>{e.preventDefault(); handleFormat('justifyLeft')}} />
-                <List size={16} style={{cursor: 'pointer'}} onMouseDown={(e)=>{e.preventDefault(); handleFormat('insertUnorderedList')}} />
-                <ListOrdered size={16} style={{cursor: 'pointer'}} onMouseDown={(e)=>{e.preventDefault(); handleFormat('insertOrderedList')}} />
-                <Quote size={16} style={{cursor: 'pointer'}} onMouseDown={(e)=>{e.preventDefault(); handleFormat('formatBlock', 'BLOCKQUOTE')}} />
-                <div style={{ width: '1px', height: '16px', background: '#32394c', margin: '0 4px' }} />
-                <Link2 size={16} style={{cursor: 'pointer'}} onMouseDown={(e)=>{
+              <div className={styles.toolbar}>
+                <Bold size={16} className={styles.toolbarIcon} onMouseDown={(e)=>{e.preventDefault(); handleFormat('bold')}} />
+                <Italic size={16} className={styles.toolbarIcon} onMouseDown={(e)=>{e.preventDefault(); handleFormat('italic')}} />
+                <Underline size={16} className={styles.toolbarIcon} onMouseDown={(e)=>{e.preventDefault(); handleFormat('underline')}} />
+                <Type size={16} className={styles.toolbarIcon} onMouseDown={(e)=>{e.preventDefault(); handleFormat('fontSize', '4')}} />
+                <div className={styles.toolbarDivider} />
+                <AlignLeft size={16} className={styles.toolbarIcon} onMouseDown={(e)=>{e.preventDefault(); handleFormat('justifyLeft')}} />
+                <List size={16} className={styles.toolbarIcon} onMouseDown={(e)=>{e.preventDefault(); handleFormat('insertUnorderedList')}} />
+                <ListOrdered size={16} className={styles.toolbarIcon} onMouseDown={(e)=>{e.preventDefault(); handleFormat('insertOrderedList')}} />
+                <Quote size={16} className={styles.toolbarIcon} onMouseDown={(e)=>{e.preventDefault(); handleFormat('formatBlock', 'BLOCKQUOTE')}} />
+                <div className={styles.toolbarDivider} />
+                <Link2 size={16} className={styles.toolbarIcon} onMouseDown={(e)=>{
                   e.preventDefault();
                   const url = prompt('Digite a URL:');
                   if(url) handleFormat('createLink', url);
                 }} />
-                <ImageIcon size={16} style={{cursor: 'pointer'}} onMouseDown={(e)=>{
+                <ImageIcon size={16} className={styles.toolbarIcon} onMouseDown={(e)=>{
                   e.preventDefault();
                   const url = prompt('URL da Imagem:');
                   if(url) handleFormat('insertImage', url);
                 }} />
-                <div style={{ flex: 1 }} />
-                <BookTemplate size={16} style={{cursor: 'pointer'}} />
+                <div className={styles.toolbarSpacer} />
+                <BookTemplate size={16} className={styles.toolbarIcon} />
               </div>
             </div>
           </div>
 
           {/* Prioridade */}
-          <div className="form-row">
-            <label className="form-label">Prioridade:</label>
-            <div style={{ gridColumn: '2 / 3' }}>
+          <div className={styles.formRow}>
+            <label className={styles.formLabel}>Prioridade:</label>
+            <div className={styles.inputWrapper}>
               <select 
                 name="prioridade"
                 value={formData.prioridade}
                 onChange={handleChange}
-                style={{
-                  background: '#1e2230', border: '1px solid #32394c', color: '#94a3b8',
-                  padding: '10px 14px', borderRadius: '4px', fontSize: '0.9rem', width: '100%', outline: 'none', appearance: 'none'
-                }}
+                className={styles.selectField}
               >
                 <option value="">Definir Prioridade...</option>
                 <option value="baixa">Baixa</option>
@@ -313,17 +237,14 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
           </div>
 
           {/* Atendente (Técnicos Cadastrados) */}
-          <div className="form-row">
-            <label className="form-label">Atendente:</label>
-            <div style={{ gridColumn: '2 / 3' }}>
+          <div className={styles.formRow}>
+            <label className={styles.formLabel}>Atendente:</label>
+            <div className={styles.inputWrapper}>
               <select 
                 name="atendente"
                 value={formData.atendente}
                 onChange={handleChange}
-                style={{
-                  background: '#1e2230', border: '1px solid #32394c', color: '#94a3b8',
-                  padding: '10px 14px', borderRadius: '4px', fontSize: '0.9rem', width: '100%', outline: 'none', appearance: 'none'
-                }}
+                className={styles.selectField}
               >
                 <option value="">Escolher atendente...</option>
                 {tecnicos.map(tec => (
@@ -335,48 +256,34 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
             </div>
           </div>
 
-
-
         </div>
 
         {/* FOOTER */}
-        <div style={{ padding: '16px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #252a38', background: '#1a1d26' }}>
-          <div style={{ display: 'flex', gap: '12px' }}>
+        <div className={styles.footer}>
+          <div className={styles.footerLeft}>
             <button 
               onClick={handleCreateTicket}
               disabled={loading}
-              style={{ 
-                background: '#10b981', color: '#fff', border: 'none', 
-                padding: '10px 24px', borderRadius: '4px', fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer',
-                opacity: loading ? 0.7 : 1
-              }}
+              className={styles.btnCreate}
             >
               {loading ? 'Criando...' : 'Criar Chamado'}
             </button>
             {file ? (
-              <div style={{
-                background: '#252a38', color: '#f8fafc', border: '1px solid #32394c', 
-                padding: '6px 16px', borderRadius: '4px', fontWeight: 500,
-                display: 'flex', alignItems: 'center', gap: '8px'
-              }}>
+              <div className={styles.attachmentBadge}>
                 <Paperclip size={16} /> 
-                <span style={{ maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '0.9rem' }}>
+                <span className={styles.attachmentName}>
                   {file.name}
                 </span>
                 <button 
                   onClick={() => setFile(null)} 
-                  style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '0 4px', marginLeft: '4px' }}
+                  className={styles.btnRemoveAttachment}
                   title="Remover anexo"
                 >
                   <X size={16} />
                 </button>
               </div>
             ) : (
-              <label style={{ 
-                background: '#252a38', color: '#f8fafc', border: '1px solid #32394c', 
-                padding: '10px 16px', borderRadius: '4px', fontWeight: 500, cursor: 'pointer',
-                display: 'flex', alignItems: 'center', gap: '8px'
-              }}>
+              <label className={styles.btnAttach}>
                 <input type="file" hidden onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)} />
                 <Paperclip size={16} /> Anexar
               </label>
@@ -385,10 +292,7 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
           
           <button 
             onClick={onClose}
-            style={{ 
-              background: '#ef4444', color: '#fff', border: 'none', 
-              padding: '10px 24px', borderRadius: '4px', fontWeight: 600, cursor: 'pointer' 
-            }}
+            className={styles.btnCancel}
           >
             Cancelar
           </button>

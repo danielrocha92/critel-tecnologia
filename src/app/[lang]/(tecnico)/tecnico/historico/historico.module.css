@@ -1,0 +1,110 @@
+.loadingContainer {
+  padding: 2rem;
+  text-align: center;
+}
+
+.pageContainer {
+  padding: 1rem;
+  padding-bottom: 6rem;
+}
+
+.title {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  color: #f8fafc;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 3rem 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+}
+
+.emptyIcon {
+  color: #64748b;
+  margin: 0 auto 1rem;
+}
+
+.emptyTitle {
+  margin: 0;
+  color: #f8fafc;
+}
+
+.emptySubtitle {
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.ticketsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ticketCard {
+  background: rgba(30, 41, 59, 0.4);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 12px;
+  padding: 1rem;
+  position: relative;
+}
+
+.ticketStatusBorder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: #10b981;
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
+}
+
+.ticketHeader {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.ticketClient {
+  color: #f8fafc;
+  font-size: 1.1rem;
+}
+
+.ticketStatus {
+  font-size: 0.8rem;
+  color: #10b981;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ticketTitle {
+  color: #94a3b8;
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+  line-height: 1.4;
+}
+
+.ticketFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ticketDate {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.btnDetails {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #00d2ff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  text-decoration: none;
+}

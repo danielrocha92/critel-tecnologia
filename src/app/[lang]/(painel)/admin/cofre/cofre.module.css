@@ -246,3 +246,7 @@
     justify-content: flex-end;
   }
 }
+
+.textMuted {
+  color: #64748b;
+}

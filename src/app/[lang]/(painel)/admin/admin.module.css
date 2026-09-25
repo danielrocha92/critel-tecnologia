@@ -322,3 +322,59 @@
     justify-content: flex-start;
   }
 }
+
+/* Helpers */
+.centerText {
+  text-align: center;
+}
+
+.pad3 {
+  padding: 3rem;
+}
+
+.iconRed {
+  color: #ef4444;
+  margin-bottom: 1rem;
+}
+
+.headingWhite {
+  color: #f8fafc;
+  margin-bottom: 0.5rem;
+}
+
+.headingWhiteLg {
+  font-size: 1.2rem;
+  color: #f8fafc;
+  margin-bottom: 1rem;
+}
+
+.headingAmber {
+  font-size: 1.2rem;
+  color: #fbbf24;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.textMuted {
+  color: #94a3b8;
+}
+
+.errorBox {
+  color: #fca5a5;
+  padding: 1rem;
+  background: rgba(239, 68, 68, 0.2);
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.borderAmber {
+  border-color: rgba(245, 158, 11, 0.3);
+  margin-bottom: 2rem;
+}
+
+.inlineIcon {
+  display: inline;
+  margin-right: 4px;
+}

@@ -45,22 +45,21 @@ export default function PendentePage() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.loginBox} style={{ textAlign: 'center', maxWidth: '450px' }}>
+      <div className={`${styles.loginBox} ${styles.pendenteBox}`}>
         <div className={styles.logoArea}>
-          <div className={styles.logoIcon} style={{ background: '#f59e0b', color: '#fff' }}>
+          <div className={`${styles.logoIcon} ${styles.pendenteIcon}`}>
             <Clock size={28} />
           </div>
           <h1 className={styles.title}>Conta em Análise</h1>
-          <p className={styles.subtitle} style={{ marginTop: '1rem', color: '#64748b' }}>
+          <p className={`${styles.subtitle} ${styles.pendenteSubtitle}`}>
             Seu cadastro foi realizado com sucesso, mas a sua conta ainda precisa ser aprovada pelo administrador para acessar o Portal do Técnico.
           </p>
         </div>
 
-        <div style={{ marginTop: '2rem' }}>
+        <div className={styles.pendenteBtnWrapper}>
           <button 
             onClick={handleLogout}
-            className={styles.loginBtn}
-            style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', background: '#e2e8f0', color: '#0f172a' }}
+            className={`${styles.loginBtn} ${styles.pendenteBtn}`}
           >
             <LogOut size={18} />
             Sair e voltar ao Login

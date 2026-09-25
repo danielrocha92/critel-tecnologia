@@ -1,0 +1,327 @@
+.pageContainer {
+  padding: 2rem;
+  flex: 1;
+  max-width: 1000px;
+}
+
+.header {
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.title {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin: 0;
+  color: #f8fafc;
+}
+
+.subtitle {
+  color: #94a3b8;
+  margin: 4px 0 0 0;
+}
+
+.btnNew {
+  background: #3b82f6;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tableContainer {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tableHeaderRow {
+  background: #0f172a;
+}
+
+.th {
+  padding: 14px 20px;
+  text-align: left;
+  color: #64748b;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.tr {
+  border-top: 1px solid rgba(51, 65, 85, 0.5);
+}
+
+.trFirst {
+  border-top: none;
+}
+
+.td {
+  padding: 14px 20px;
+}
+
+.userCol {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #334155;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #e2e8f0;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.userName {
+  color: #f1f5f9;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.userEmail {
+  color: #64748b;
+  font-size: 0.78rem;
+}
+
+.cargoBadge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.cargoSelect {
+  background: transparent;
+  border: none;
+  color: inherit;
+  font-weight: inherit;
+  font-size: inherit;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  padding-right: 12px;
+}
+
+.cargoSelectDisabled {
+  cursor: not-allowed;
+}
+
+.selectOption {
+  background: #0f172a;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.statusDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.statusSelect {
+  background: transparent;
+  border: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  padding-right: 12px;
+}
+
+.statusSelectDisabled {
+  cursor: not-allowed;
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modalContent {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 400px;
+  padding: 24px;
+  position: relative;
+}
+
+.btnClose {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.modalTitle {
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin: 0 0 20px 0;
+  color: #f8fafc;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.formLabel {
+  display: block;
+  margin-bottom: 6px;
+  color: #cbd5e1;
+  font-size: 0.9rem;
+}
+
+.formInput {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #334155;
+  background: #0f172a;
+  color: #f8fafc;
+  outline: none;
+}
+
+.btnSubmit {
+  margin-top: 10px;
+  background: #3b82f6;
+  color: #fff;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btnSubmitDisabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Color overrides */
+.colorSlate {
+  color: #94a3b8;
+}
+
+.colorBlue {
+  color: #60a5fa;
+}
+
+.colorAmber {
+  color: #fbbf24;
+}
+
+.colorEmerald {
+  color: #34d399;
+}
+
+.colorPurple {
+  color: #a78bfa;
+}
+
+.colorCyan {
+  color: #22d3ee;
+}
+
+.colorGreen {
+  color: #10b981;
+}
+
+.colorRed {
+  color: #ef4444;
+}
+
+.colorOrange {
+  color: #f59e0b;
+}
+
+.bgAdmin {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+}
+
+.bgSuperAdmin {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+}
+
+.bgComercial {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+}
+
+.bgFinanceiro {
+  background: rgba(139, 92, 246, 0.15);
+  color: #a78bfa;
+}
+
+.bgAnalista {
+  background: rgba(6, 182, 212, 0.15);
+  color: #22d3ee;
+}
+
+.bgTecnico {
+  background: rgba(100, 116, 139, 0.15);
+  color: #94a3b8;
+}
+
+.dotAtivo {
+  background-color: #10b981;
+}
+
+.dotBanido {
+  background-color: #ef4444;
+}
+
+.dotPendente {
+  background-color: #f59e0b;
+}

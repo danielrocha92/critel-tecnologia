@@ -118,15 +118,15 @@ export default async function CertificationsPage({
       <section className={styles.awardsSection}>
         <div className="container">
           <ScrollReveal animation="fadeInUp">
-            <div className={styles.sectionHeader} style={{ textAlign: 'center', margin: '0 auto 2.5rem' }}>
-              <div className={styles.badge} style={{ margin: '0 auto 1rem' }}>
+            <div className={`${styles.sectionHeader} ${styles.headerCenter}`}>
+              <div className={`${styles.badge} ${styles.badgeCenter}`}>
                 <Trophy size={14} />
                 <span>Reconhecimento de Mercado</span>
               </div>
-              <h2 className={styles.sectionTitle} style={{ justifyContent: 'center' }}>
+              <h2 className={`${styles.sectionTitle} ${styles.titleCenter}`}>
                 {certPage.awardsSectionTitle}
               </h2>
-              <p className={styles.sectionDesc} style={{ margin: '0 auto' }}>
+              <p className={`${styles.sectionDesc} ${styles.descCenter}`}>
                 {certPage.awardsSectionDesc}
               </p>
             </div>

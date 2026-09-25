@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useCallback } from 'react';
 import { Search, Plus, Building2, Phone, Mail, MoreVertical, ChevronDown, Filter } from 'lucide-react';
+import styles from './clientes.module.css';
 
 const clientes = [
   { id: 1, nome: 'Bacio di Latte', sigla: 'BL', segmento: 'Alimentação', lojas: 142,  contato: 'contato@baciodilatte.com.br',   telefone: '(11) 3000-0000', status: 'Ativo' },
@@ -11,16 +12,16 @@ const clientes = [
   { id: 5, nome: 'Pizza Hut',      sigla: 'PH', segmento: 'Fast Food',   lojas: 200,  contato: 'infra@pizzahut.com.br',         telefone: '(11) 3444-4444', status: 'Em Implantação' },
 ];
 
-const statusConfig: Record<string, { bg: string; color: string; dot: string }> = {
-  'Ativo':          { bg: 'rgba(16,185,129,0.12)',  color: '#34d399', dot: '#10b981' },
-  'Em Implantação': { bg: 'rgba(245,158,11,0.12)',  color: '#fbbf24', dot: '#f59e0b' },
-  'Inativo':        { bg: 'rgba(239,68,68,0.12)',   color: '#f87171', dot: '#ef4444' },
+const statusConfig: Record<string, { bgClass: string; dotClass: string }> = {
+  'Ativo':          { bgClass: styles.statusAtivo,      dotClass: styles.statusAtivoDot },
+  'Em Implantação': { bgClass: styles.statusImplantacao, dotClass: styles.statusImplantacaoDot },
+  'Inativo':        { bgClass: styles.statusInativo,     dotClass: styles.statusInativoDot },
 };
 
-const segmentoColors: Record<string, string> = {
-  'Alimentação': '#a78bfa',
-  'Fast Food':   '#38bdf8',
-  'Varejo':      '#fb923c',
+const segmentoClasses: Record<string, string> = {
+  'Alimentação': styles.segAlimentacao,
+  'Fast Food':   styles.segFastFood,
+  'Varejo':      styles.segVarejo,
 };
 
 // Larguras iniciais de cada coluna (em px). Mínimo de 60px.
@@ -86,52 +87,22 @@ export default function ClientesPage() {
     children: React.ReactNode;
     align?: 'right';
   }) => (
-    <th style={{
-      width: colWidths[col],
-      minWidth: COL_MIN,
-      maxWidth: colWidths[col],
-      position: 'relative',
-      padding: '10px 16px',
-      textAlign: align === 'right' ? 'right' : 'left',
-      fontSize: '0.73rem',
-      fontWeight: 600,
-      textTransform: 'uppercase',
-      letterSpacing: '0.06em',
-      color: '#64748b',
-      background: '#1a1d27',
-      borderBottom: '1px solid #1e2436',
-      whiteSpace: 'nowrap',
-      overflow: 'hidden',
-      userSelect: 'none',
-    }}>
+    <th 
+      className={`${styles.thContainer} ${align === 'right' ? styles.rightAlign : styles.alignLeft}`}
+      style={{
+        width: colWidths[col],
+        minWidth: COL_MIN,
+        maxWidth: colWidths[col],
+      }}>
       {children}
       {/* Alça de resize — aparece como linha vertical na borda direita */}
       {col !== 'acoes' && (
         <span
           onMouseDown={e => onMouseDown(col, e)}
-          style={{
-            position: 'absolute',
-            top: 0, right: 0,
-            width: '5px',
-            height: '100%',
-            cursor: 'col-resize',
-            zIndex: 10,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
+          className={styles.resizeHandle}
           title="Arraste para redimensionar"
         >
-          <span style={{
-            width: '1px',
-            height: '60%',
-            background: '#334155',
-            borderRadius: '1px',
-            transition: 'background 0.15s',
-          }}
-          onMouseEnter={e => (e.currentTarget.style.background = '#8b2cff')}
-          onMouseLeave={e => (e.currentTarget.style.background = '#334155')}
-          />
+          <span className={styles.resizeLine} />
         </span>
       )}
     </th>
@@ -139,117 +110,58 @@ export default function ClientesPage() {
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{ __html: `
-        .clientes-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        .clientes-table td {
-          padding: 13px 16px;
-          font-size: 0.875rem;
-          color: #cbd5e1;
-          border-bottom: 1px solid rgba(30,36,54,0.8);
-          vertical-align: middle;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-        .clientes-row { transition: background 0.15s; }
-        .clientes-row:hover td { background: rgba(139,44,255,0.04); }
-        .clientes-row:hover .row-actions { opacity: 1; }
-        .row-actions { opacity: 0; transition: opacity 0.15s; }
-        .critel-input {
-          background: #1a1d27; border: 1px solid #1e2436; color: #e2e8f0;
-          padding: 9px 12px 9px 38px; border-radius: 6px; outline: none;
-          font-size: 0.875rem; width: 100%; transition: border-color 0.2s; font-family: inherit;
-        }
-        .critel-input:focus { border-color: #8b2cff; }
-        .critel-select {
-          background: #1a1d27; border: 1px solid #1e2436; color: #94a3b8;
-          padding: 9px 32px 9px 12px; border-radius: 6px; outline: none; font-size: 0.875rem;
-          cursor: pointer; font-family: inherit; appearance: none;
-        }
-        .critel-select:focus { border-color: #8b2cff; }
-        .btn-primary {
-          background: #8b2cff; color: #fff; border: none;
-          padding: 9px 18px; border-radius: 6px; cursor: pointer; font-weight: 600;
-          font-size: 0.875rem; display: flex; align-items: center; gap: 7px;
-          transition: background 0.2s; font-family: inherit; white-space: nowrap;
-        }
-        .btn-primary:hover { background: #7c22e8; }
-        .btn-icon {
-          background: transparent; border: none; color: #64748b;
-          cursor: pointer; padding: 4px; border-radius: 4px; transition: color 0.15s;
-          display: flex; align-items: center;
-        }
-        .btn-icon:hover { color: #e2e8f0; background: rgba(255,255,255,0.06); }
-        .avatar-circle {
-          width: 34px; height: 34px; border-radius: 8px; flex-shrink: 0;
-          display: flex; align-items: center; justify-content: center;
-          font-weight: 700; font-size: 0.8rem;
-          background: linear-gradient(135deg,#8b2cff22,#8b2cff44);
-          color: #c084fc; border: 1px solid #8b2cff33;
-        }
-        /* Tooltip do resize */
-        .resize-hint {
-          position: fixed; bottom: 12px; right: 12px; z-index: 999;
-          background: #1a1d27; border: 1px solid #334155; border-radius: 6px;
-          padding: 6px 12px; font-size: 0.75rem; color: #64748b;
-          pointer-events: none;
-        }
-      `}} />
-
-      <div style={{ padding: '2rem', flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+      <div className={styles.pageWrapper}>
 
         {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+        <div className={styles.header}>
           <div>
-            <h1 style={{ fontSize: '1.4rem', fontWeight: 700, margin: 0, color: '#f1f5f9', letterSpacing: '-0.01em' }}>
+            <h1 className={styles.headerTitle}>
               Clientes
             </h1>
-            <p style={{ color: '#475569', margin: '3px 0 0', fontSize: '0.85rem' }}>
+            <p className={styles.headerDesc}>
               {filtrados.length} empresa{filtrados.length !== 1 ? 's' : ''} cadastrada{filtrados.length !== 1 ? 's' : ''}
             </p>
           </div>
-          <button className="btn-primary">
+          <button className={styles.btnPrimary}>
             <Plus size={16} /> Novo Cliente
           </button>
         </div>
 
         {/* Filtros */}
-        <div style={{
-          background: '#181b24', border: '1px solid #1e2436', borderRadius: '8px',
-          padding: '12px 16px', display: 'flex', gap: '10px', marginBottom: '16px', alignItems: 'center'
-        }}>
-          <Filter size={15} color="#64748b" style={{ flexShrink: 0 }} />
+        <div className={styles.filtersContainer}>
+          <Filter size={15} color="#64748b" className={styles.filterIcon} />
 
-          <div style={{ position: 'relative', flex: 1 }}>
-            <Search size={15} color="#64748b" style={{ position: 'absolute', left: '11px', top: '50%', transform: 'translateY(-50%)' }} />
-            <input className="critel-input" type="text" placeholder="Buscar por nome ou e-mail..."
+          <div className={styles.inputWrapper}>
+            <Search size={15} color="#64748b" className={styles.searchIcon} />
+            <input className={styles.critelInput} type="text" placeholder="Buscar por nome ou e-mail..."
               value={busca} onChange={e => setBusca(e.target.value)} />
           </div>
 
-          <div style={{ position: 'relative' }}>
-            <select className="critel-select" value={filtroSeg} onChange={e => setFiltroSeg(e.target.value)}>
+          <div className={styles.selectWrapper}>
+            <select className={styles.critelSelect} value={filtroSeg} onChange={e => setFiltroSeg(e.target.value)}>
               <option value="Todos">Todos os Segmentos</option>
               <option value="Alimentação">Alimentação</option>
               <option value="Fast Food">Fast Food</option>
               <option value="Varejo">Varejo</option>
             </select>
-            <ChevronDown size={14} color="#64748b" style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+            </select>
+            <ChevronDown size={14} color="#64748b" className={styles.selectArrow} />
           </div>
 
-          <div style={{ position: 'relative' }}>
-            <select className="critel-select" value={filtroStatus} onChange={e => setFiltroStatus(e.target.value)}>
+          <div className={styles.selectWrapper}>
+            <select className={styles.critelSelect} value={filtroStatus} onChange={e => setFiltroStatus(e.target.value)}>
               <option value="Todos">Todos os Status</option>
               <option value="Ativo">Ativo</option>
               <option value="Em Implantação">Em Implantação</option>
               <option value="Inativo">Inativo</option>
             </select>
-            <ChevronDown size={14} color="#64748b" style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+            <ChevronDown size={14} color="#64748b" className={styles.selectArrow} />
           </div>
 
           {/* Botão para resetar larguras */}
           <button
             onClick={() => setColWidths(INITIAL_WIDTHS)}
-            style={{ background: 'transparent', border: '1px solid #1e2436', color: '#475569', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.75rem', whiteSpace: 'nowrap', fontFamily: 'inherit' }}
+            className={styles.btnReset}
             title="Restaurar larguras padrão"
           >
             ↺ Resetar
@@ -257,8 +169,8 @@ export default function ClientesPage() {
         </div>
 
         {/* Tabela com overflow horizontal */}
-        <div style={{ background: '#181b24', border: '1px solid #1e2436', borderRadius: '8px', overflow: 'auto', flex: 1 }}>
-          <table className="clientes-table">
+        <div className={styles.tableContainer}>
+          <table className={styles.clientesTable}>
             <colgroup>
               {COL_KEYS.map(col => (
                 <col key={col} style={{ width: colWidths[col] }} />
@@ -268,9 +180,9 @@ export default function ClientesPage() {
               <tr>
                 <Th col="cliente">Cliente</Th>
                 <Th col="segmento">Segmento</Th>
-                <Th col="lojas"><Building2 size={12} style={{ display: 'inline', marginRight: 4, verticalAlign: 'middle' }} />Lojas</Th>
-                <Th col="contato"><Mail size={12} style={{ display: 'inline', marginRight: 4, verticalAlign: 'middle' }} />Contato</Th>
-                <Th col="telefone"><Phone size={12} style={{ display: 'inline', marginRight: 4, verticalAlign: 'middle' }} />Telefone</Th>
+                <Th col="lojas"><Building2 size={12} className={styles.inlineIcon} />Lojas</Th>
+                <Th col="contato"><Mail size={12} className={styles.inlineIcon} />Contato</Th>
+                <Th col="telefone"><Phone size={12} className={styles.inlineIcon} />Telefone</Th>
                 <Th col="status">Status</Th>
                 <Th col="acoes" align="right">Ações</Th>
               </tr>
@@ -278,43 +190,43 @@ export default function ClientesPage() {
             <tbody>
               {filtrados.length === 0 ? (
                 <tr>
-                  <td colSpan={7} style={{ textAlign: 'center', padding: '3rem', color: '#475569' }}>
+                  <td colSpan={7} className={styles.emptyRow}>
                     Nenhum cliente encontrado.
                   </td>
                 </tr>
               ) : filtrados.map(c => {
-                const sc       = statusConfig[c.status] ?? statusConfig['Inativo'];
-                const segColor = segmentoColors[c.segmento] ?? '#94a3b8';
+                const sc = statusConfig[c.status] ?? statusConfig['Inativo'];
+                const segClass = segmentoClasses[c.segmento] ?? styles.segDefault;
 
                 return (
-                  <tr key={c.id} className="clientes-row">
+                  <tr key={c.id} className={styles.clientesRow}>
                     <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <div className="avatar-circle">{c.sigla}</div>
-                        <span style={{ color: '#e2e8f0', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.nome}</span>
+                      <div className={styles.clienteCell}>
+                        <div className={styles.avatarCircle}>{c.sigla}</div>
+                        <span className={styles.clienteName}>{c.nome}</span>
                       </div>
                     </td>
                     <td>
-                      <span style={{ background: `${segColor}18`, color: segColor, padding: '3px 10px', borderRadius: '4px', fontSize: '0.78rem', fontWeight: 600 }}>
+                      <span className={`${styles.segmentoTag} ${segClass}`}>
                         {c.segmento}
                       </span>
                     </td>
                     <td>
-                      <span style={{ color: '#e2e8f0', fontWeight: 600 }}>{c.lojas.toLocaleString('pt-BR')}</span>
-                      <span style={{ color: '#475569', fontSize: '0.78rem', marginLeft: 4 }}>lojas</span>
+                      <span className={styles.lojasCount}>{c.lojas.toLocaleString('pt-BR')}</span>
+                      <span className={styles.lojasLabel}>lojas</span>
                     </td>
-                    <td style={{ color: '#64748b', fontSize: '0.82rem' }}>{c.contato}</td>
-                    <td style={{ color: '#64748b', fontSize: '0.82rem' }}>{c.telefone}</td>
+                    <td className={styles.textCell}>{c.contato}</td>
+                    <td className={styles.textCell}>{c.telefone}</td>
                     <td>
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: sc.bg, color: sc.color, padding: '3px 10px', borderRadius: '4px', fontSize: '0.78rem', fontWeight: 600 }}>
-                        <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: sc.dot, flexShrink: 0 }} />
+                      <span className={`${styles.statusWrapper} ${sc.bgClass}`}>
+                        <span className={`${styles.statusDot} ${sc.dotClass}`} />
                         {c.status}
                       </span>
                     </td>
-                    <td style={{ textAlign: 'right' }}>
-                      <div className="row-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '4px' }}>
-                        <button className="btn-icon" title="Ver chamados"><Building2 size={15} /></button>
-                        <button className="btn-icon" title="Mais opções"><MoreVertical size={15} /></button>
+                    <td className={styles.rightAlign}>
+                      <div className={styles.rowActions}>
+                        <button className={styles.btnIcon} title="Ver chamados"><Building2 size={15} /></button>
+                        <button className={styles.btnIcon} title="Mais opções"><MoreVertical size={15} /></button>
                       </div>
                     </td>
                   </tr>
@@ -325,11 +237,11 @@ export default function ClientesPage() {
         </div>
 
         {/* Rodapé */}
-        <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ color: '#334155', fontSize: '0.75rem' }}>
+        <div className={styles.footer}>
+          <span className={styles.footerHint}>
             💡 Arraste a borda do cabeçalho das colunas para redimensionar
           </span>
-          <span style={{ color: '#334155', fontSize: '0.78rem' }}>
+          <span className={styles.footerCount}>
             Exibindo {filtrados.length} de {clientes.length} clientes
           </span>
         </div>

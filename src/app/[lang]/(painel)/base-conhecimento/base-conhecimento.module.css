@@ -1,0 +1,153 @@
+.pageContainer {
+  padding: 2rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.title {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin: 0;
+  color: #f8fafc;
+}
+
+.subtitle {
+  color: #94a3b8;
+  margin: 4px 0 0 0;
+}
+
+.searchBarContainer {
+  background: #1e293b;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #334155;
+  display: flex;
+  gap: 16px;
+  margin-bottom: 2rem;
+}
+
+.searchInputWrapper {
+  flex: 1;
+  position: relative;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.searchInput {
+  width: 100%;
+  background: #0f172a;
+  border: 1px solid #334155;
+  color: #fff;
+  padding: 10px 10px 10px 40px;
+  border-radius: 8px;
+  outline: none;
+}
+
+.filterSelect {
+  background: #0f172a;
+  border: 1px solid #334155;
+  color: #fff;
+  padding: 0 16px;
+  border-radius: 8px;
+  outline: none;
+}
+
+.gridContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.card {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.iconWrapper {
+  padding: 12px;
+  border-radius: 12px;
+}
+
+.durationBadge {
+  background: #0f172a;
+  color: #94a3b8;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.cardTitle {
+  margin: 0 0 8px 0;
+  color: #f8fafc;
+  font-size: 1.1rem;
+  line-height: 1.4;
+}
+
+.cardType {
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.cardFooter {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid #334155;
+}
+
+.btnAccess {
+  background: transparent;
+  border: none;
+  color: #3b82f6;
+  font-weight: 500;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0;
+}
+
+/* Colors */
+.bgRed {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.bgBlue {
+  background: rgba(59, 130, 246, 0.2);
+}
+
+.bgGreen {
+  background: rgba(16, 185, 129, 0.2);
+}
+
+.bgPurple {
+  background: rgba(139, 92, 246, 0.2);
+}

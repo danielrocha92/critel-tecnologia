@@ -1,6 +1,7 @@
 'use client';
-
 import { useState } from 'react';
+
+import styles from './KillSwitchButton.module.css';
 
 export default function KillSwitchButton({ userId }: { userId: string }) {
   const [loading, setLoading] = useState(false);
@@ -34,19 +35,7 @@ export default function KillSwitchButton({ userId }: { userId: string }) {
     <button
       onClick={handleRevoke}
       disabled={loading || success}
-      style={{
-        backgroundColor: success ? '#28a745' : '#dc3545',
-        color: 'white',
-        padding: '10px 20px',
-        border: 'none',
-        borderRadius: '8px',
-        cursor: loading || success ? 'not-allowed' : 'pointer',
-        fontWeight: 'bold',
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: '8px',
-        boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-      }}
+      className={`${styles.killBtn} ${success ? styles.killBtnSuccess : loading ? styles.killBtnLoading : styles.killBtnDanger}`}
     >
       {loading ? 'Revogando...' : success ? 'Acessos Revogados' : '🚨 Kill Switch (Revogar Acessos)'}
     </button>

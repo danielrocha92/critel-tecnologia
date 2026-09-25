@@ -145,7 +145,7 @@ export default function CofreAdminPage() {
           <h3 className={styles.credentialListTitle}>Credenciais Ativas no Cofre</h3>
           
           {credenciaisCadastradas.length === 0 ? (
-            <p style={{ color: '#64748b' }}>Nenhuma credencial cadastrada.</p>
+            <p className={styles.textMuted}>Nenhuma credencial cadastrada.</p>
           ) : (
             credenciaisCadastradas.map(cred => (
               <div key={cred.id} className={styles.credCard}>

@@ -11,6 +11,7 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import BottomNav from '@/components/Tecnico/BottomNav';
+import styles from './layout.module.css';
 
 export default async function TecnicoLayout({
   children,
@@ -61,41 +62,18 @@ export default async function TecnicoLayout({
   const primeiroNome = perfilData.nome ? perfilData.nome.split(' ')[0] : 'Técnico';
 
   return (
-    <div style={{ minHeight: '100vh', background: '#020617', width: '100%' }}>
-      <div style={{ 
-        minHeight: '100vh', 
-        background: '#0b1120', 
-        color: '#f8fafc',
-        fontFamily: 'Inter, system-ui, sans-serif',
-        display: 'flex',
-        flexDirection: 'column',
-        maxWidth: '600px',
-        margin: '0 auto',
-        width: '100%',
-        position: 'relative',
-        boxShadow: '0 0 20px rgba(0,0,0,0.5)'
-      }}>
+    <div className={styles.layoutWrapper}>
+      <div className={styles.mobileContainer}>
         {/* Topbar minimalista para mobile */}
-      <header style={{
-        background: 'rgba(15, 23, 42, 0.9)',
-        backdropFilter: 'blur(10px)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-        padding: '1rem',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        position: 'sticky',
-        top: 0,
-        zIndex: 10
-      }}>
-        <h1 style={{ fontSize: '1.2rem', margin: 0, color: '#00d2ff', fontWeight: 'bold' }}>Critel Mobile</h1>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>{primeiroNome}</span>
+      <header className={styles.header}>
+        <h1 className={styles.title}>Critel Mobile</h1>
+        <div className={styles.userInfo}>
+          <span className={styles.userName}>{primeiroNome}</span>
         </div>
       </header>
 
       {/* Conteúdo rolável */}
-      <main style={{ flex: 1, overflowY: 'auto' }}>
+      <main className={styles.mainContent}>
         {children}
       </main>
 

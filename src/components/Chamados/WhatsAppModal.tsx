@@ -39,16 +39,16 @@ export function WhatsAppModal({
           <h3 className={styles.floatingWppTitle}>
             <Phone size={18} color="#10b981" /> WhatsApp - {conversaAtiva?.nome_perfil || ticketAtivo?.cliente}
           </h3>
-          <button onClick={() => setIsWppModalOpen(false)} style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '1.2rem' }}>×</button>
+          <button onClick={() => setIsWppModalOpen(false)} className={styles.whatsappCloseBtn}>×</button>
         </div>
         
         <div ref={scrollRef} className={styles.chatMessages}>
           {(!mensagens || mensagens.length === 0) ? (
-            <div style={{ textAlign: 'center', opacity: 0.5, marginTop: '2rem', color: '#fff' }}>
+            <div className={styles.whatsappEmptyState}>
               {!lojaContato ? (
                 <div>
                   <p>Loja sem contato cadastrado.</p>
-                  <button onClick={() => {setIsEditingContact(true); setIsWppModalOpen(false);}} style={{ background: '#3b82f6', color: '#fff', padding: '8px 16px', border: 'none', borderRadius: '4px', cursor: 'pointer', marginTop: '8px' }}>Cadastrar Contato</button>
+                  <button onClick={() => {setIsEditingContact(true); setIsWppModalOpen(false);}} className={styles.whatsappAddContactBtn}>Cadastrar Contato</button>
                 </div>
               ) : 'Inicie o atendimento. Suas mensagens aparecerão aqui.'}
             </div>

@@ -39,10 +39,10 @@ export default async function DashboardPage() {
           <h2 className={styles.warningTitle}>
             <ShieldAlert size={20} /> Comunicados Importantes
           </h2>
-          <ul style={{ paddingLeft: '20px', margin: 0 }}>
+          <ul className={styles.warningList}>
             {comunicados.map(c => (
-              <li key={c.id} style={{ marginBottom: '0.5rem' }}>
-                <strong style={{ color: '#fff' }}>{c.titulo}</strong>: {c.mensagem}
+              <li key={c.id} className={styles.warningItem}>
+                <strong className={styles.warningStrong}>{c.titulo}</strong>: {c.mensagem}
               </li>
             ))}
           </ul>
@@ -51,40 +51,40 @@ export default async function DashboardPage() {
 
       {/* Grid de Sistemas SSO */}
       <section>
-        <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', color: '#f8fafc', fontWeight: 600 }}>Sistemas Homologados</h2>
+        <h2 className={styles.sectionTitle}>Sistemas Homologados</h2>
         <div className={styles.systemGrid}>
           
           <div className={styles.systemCard}>
-            <div className={styles.systemIcon} style={{ background: 'rgba(2, 132, 199, 0.1)', color: '#0ea5e9' }}>
+            <div className={`${styles.systemIcon} ${styles.iconStoq}`}>
               <Inbox size={32} />
             </div>
             <h3 className={styles.systemTitle}>Stoq</h3>
             <p className={styles.systemDesc}>Gestão de PDVs, Faturamento e Retaguarda.</p>
-            <form action="/api/sso" method="POST" style={{ width: '100%' }}>
+            <form action="/api/sso" method="POST" className={styles.ssoForm}>
               <input type="hidden" name="sistema" value="Stoq" />
               <button type="submit" className={styles.accessBtn}>Acessar Plataforma</button>
             </form>
           </div>
 
           <div className={styles.systemCard}>
-            <div className={styles.systemIcon} style={{ background: 'rgba(139, 44, 255, 0.1)', color: '#a855f7' }}>
+            <div className={`${styles.systemIcon} ${styles.iconMilvus}`}>
               <Server size={32} />
             </div>
             <h3 className={styles.systemTitle}>Milvus</h3>
             <p className={styles.systemDesc}>Gestão de Atendimentos e Parque de Máquinas.</p>
-            <form action="/api/sso" method="POST" style={{ width: '100%' }}>
+            <form action="/api/sso" method="POST" className={styles.ssoForm}>
               <input type="hidden" name="sistema" value="Milvus" />
               <button type="submit" className={styles.accessBtn}>Acessar Plataforma</button>
             </form>
           </div>
 
           <div className={styles.systemCard}>
-            <div className={styles.systemIcon} style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444' }}>
+            <div className={`${styles.systemIcon} ${styles.iconWorkspace}`}>
               <Boxes size={32} />
             </div>
             <h3 className={styles.systemTitle}>Workspace</h3>
             <p className={styles.systemDesc}>Correio Eletrônico Corporativo e Docs.</p>
-            <form action="/api/sso" method="POST" style={{ width: '100%' }}>
+            <form action="/api/sso" method="POST" className={styles.ssoForm}>
               <input type="hidden" name="sistema" value="Gmail" />
               <button type="submit" className={styles.accessBtn}>Acessar Plataforma</button>
             </form>

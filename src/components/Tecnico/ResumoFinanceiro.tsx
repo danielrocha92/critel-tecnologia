@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
 import { TrendingUp, Wallet, Receipt, Calendar } from 'lucide-react';
+import styles from './ResumoFinanceiro.module.css';
 
 export default function ResumoFinanceiro({ userId }: { userId: string }) {
   const [loading, setLoading] = useState(true);
@@ -90,28 +91,25 @@ export default function ResumoFinanceiro({ userId }: { userId: string }) {
 
   if (loading) {
     return (
-      <div style={{ padding: '1rem', background: 'rgba(30, 41, 59, 0.4)', borderRadius: '16px', marginBottom: '1.5rem', animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }}>
+      <div className={styles.loadingContainer}>
         Carregando balanço...
       </div>
     );
   }
 
   return (
-    <div style={{ marginBottom: '2rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-        <h2 style={{ fontSize: '1.2rem', margin: 0, color: '#f8fafc' }}>Balanço Financeiro</h2>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(255,255,255,0.05)', padding: '4px 8px', borderRadius: '12px' }}>
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <h2 className={styles.title}>Balanço Financeiro</h2>
+        <div className={styles.selectWrapper}>
           <Calendar size={14} color="#94a3b8" />
           <select 
             value={selectedPeriod} 
             onChange={(e) => setSelectedPeriod(e.target.value)}
-            style={{ 
-              background: 'transparent', border: 'none', color: '#94a3b8', 
-              fontSize: '0.8rem', outline: 'none', appearance: 'none', cursor: 'pointer' 
-            }}
+            className={styles.periodSelect}
           >
             {periodos.map(p => (
-              <option key={p.value} value={p.value} style={{ background: '#1e293b' }}>
+              <option key={p.value} value={p.value} className={styles.periodOption}>
                 {p.label}
               </option>
             ))}
@@ -119,39 +117,33 @@ export default function ResumoFinanceiro({ userId }: { userId: string }) {
         </div>
       </div>
 
-      <div style={{ 
-        background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.2) 100%)',
-        border: '1px solid rgba(16, 185, 129, 0.2)',
-        borderRadius: '16px', 
-        padding: '1.2rem',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1rem' }}>
-          <div style={{ background: '#10b981', padding: '10px', borderRadius: '12px', display: 'flex' }}>
+      <div className={styles.card}>
+        <div className={styles.totalRow}>
+          <div className={styles.iconBox}>
             <Wallet size={24} color="white" />
           </div>
           <div>
-            <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.85rem' }}>Total a Receber</p>
-            <h3 style={{ margin: 0, color: '#f8fafc', fontSize: '1.8rem', fontWeight: 700 }}>
+            <p className={styles.totalLabel}>Total a Receber</p>
+            <h3 className={styles.totalValue}>
               {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totais.geral)}
             </h3>
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '1rem', borderTop: '1px solid rgba(16,185,129,0.1)', paddingTop: '1rem' }}>
+        <div className={styles.detailsGrid}>
           <div>
-            <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <p className={styles.detailLabel}>
               <TrendingUp size={12} color="#10b981" /> Serviços (OS)
             </p>
-            <strong style={{ color: '#f8fafc', fontSize: '1.1rem' }}>
+            <strong className={styles.detailValue}>
               {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totais.servicos)}
             </strong>
           </div>
           <div>
-            <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <p className={styles.detailLabel}>
               <Receipt size={12} color="#3b82f6" /> Reembolsos Extras
             </p>
-            <strong style={{ color: '#f8fafc', fontSize: '1.1rem' }}>
+            <strong className={styles.detailValue}>
               {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totais.despesas)}
             </strong>
           </div>

@@ -103,7 +103,7 @@ export function DashboardTickets({ tickets, perfis, operadorAtual, searchTerm, s
         {isOpen && (
           <div className={styles.accordionContent}>
             {data.length === 0 ? (
-              <div style={{ padding: '24px', textAlign: 'center', color: '#64748b' }}>Nenhum ticket encontrado.</div>
+              <div className={styles.textCenterGray}>Nenhum ticket encontrado.</div>
             ) : (
               <table className={styles.otrsTable}>
                 <thead>
@@ -127,20 +127,20 @@ export function DashboardTickets({ tickets, perfis, operadorAtual, searchTerm, s
                     data.slice(0, limits[sectionKey] || 50).map(ticket => (
                       <tr key={ticket.id} onClick={() => onSelectTicket(ticket)}>
                         <td>#{ticket.protocolo_origem}</td>
-                        <td style={{ fontWeight: 500 }}>{ticket.titulo}</td>
+                        <td className={styles.textMedium}>{ticket.titulo}</td>
                         <td>{ticket.departamento || '-'}</td>
                         <td>{renderBadge(ticket.prioridade)}</td>
                         <td>{ticket.status}</td>
                         <td>{ticket.cliente}</td>
-                        <td style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+                        <td className={styles.textSmallDate}>
                           {new Date(ticket.criado_em).toLocaleDateString()}<br/>
                           {new Date(ticket.criado_em).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </td>
-                        <td style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+                        <td className={styles.textSmallDate}>
                           {ticket.atualizado_em ? new Date(ticket.atualizado_em).toLocaleDateString() : '-'}<br/>
                           {ticket.atualizado_em ? new Date(ticket.atualizado_em).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
                         </td>
-                        <td style={{ color: '#94a3b8' }}>
+                        <td className={styles.textGray}>
                           {(ticket.analista_id || ticket.tecnico_id) 
                             ? (perfis?.find(p => String(p.user_id) === String(ticket.analista_id || ticket.tecnico_id))?.nome || 'Alocado') 
                             : 'Sem Atendente'}
@@ -157,21 +157,10 @@ export function DashboardTickets({ tickets, perfis, operadorAtual, searchTerm, s
             
             {/* Load More Button */}
             {data.length > (limits[sectionKey] || 50) && (
-              <div style={{ padding: '12px', textAlign: 'center', borderTop: '1px solid #334155' }}>
+              <div className={styles.loadMoreContainer}>
                 <button 
                   onClick={() => loadMore(sectionKey)}
-                  style={{
-                    background: 'transparent',
-                    border: '1px solid #475569',
-                    color: '#e2e8f0',
-                    padding: '8px 16px',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: '0.9rem',
-                    transition: 'all 0.2s'
-                  }}
-                  onMouseOver={e => e.currentTarget.style.background = '#334155'}
-                  onMouseOut={e => e.currentTarget.style.background = 'transparent'}
+                  className={styles.btnLoadMore}
                 >
                   Carregar Mais 50
                 </button>

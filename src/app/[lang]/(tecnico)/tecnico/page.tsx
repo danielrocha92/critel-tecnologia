@@ -5,6 +5,7 @@ import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { MapPin, Clock, FileText, CheckCircle, Car, Search } from 'lucide-react';
+import styles from './tecnico.module.css';
 
 import ResumoFinanceiro from '@/components/Tecnico/ResumoFinanceiro';
 
@@ -115,7 +116,7 @@ export default function TecnicoDashboard() {
   }, [router, dateFilter, clientFilter]);
 
   if (loading) {
-    return <div style={{ padding: '2rem', textAlign: 'center' }}>Carregando seus serviços...</div>;
+    return <div className={styles.loadingContainer}>Carregando seus serviços...</div>;
   }
 
   const filteredTickets = tickets.filter(t => {
@@ -128,36 +129,27 @@ export default function TecnicoDashboard() {
   });
 
   return (
-    <div style={{ padding: '1rem', paddingBottom: '5rem' }}>
+    <div className={styles.pageContainer}>
       {userId && <ResumoFinanceiro userId={userId} />}
       
-      <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', color: '#f8fafc' }}>Meus Serviços pendentes</h2>
+      <h2 className={styles.pageTitle}>Meus Serviços pendentes</h2>
 
-      <div style={{ 
-        background: 'rgba(255,255,255,0.05)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)',
-        display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '1.5rem'
-      }}>
-        <div style={{ position: 'relative' }}>
-          <Search size={18} color="#94a3b8" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+      <div className={styles.filtersContainer}>
+        <div className={styles.searchWrapper}>
+          <Search size={18} color="#94a3b8" className={styles.searchIcon} />
           <input 
             type="text" 
             placeholder="Buscar chamado..." 
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
-            style={{ 
-              width: '100%', background: '#0f172a', border: '1px solid #334155', color: '#fff',
-              padding: '12px 12px 12px 40px', borderRadius: '8px', outline: 'none'
-            }}
+            className={styles.searchInput}
           />
         </div>
         <div>
           <select
             value={clientFilter}
             onChange={e => setClientFilter(e.target.value)}
-            style={{ 
-              width: '100%', background: '#0f172a', border: '1px solid #334155', color: '#94a3b8',
-              padding: '12px', borderRadius: '8px', outline: 'none', appearance: 'none'
-            }}
+            className={styles.filterSelect}
           >
             <option value="">Todos os Clientes</option>
             <option value="Bacio di Latte">Bacio di Latte</option>
@@ -172,73 +164,48 @@ export default function TecnicoDashboard() {
             type="date" 
             value={dateFilter}
             onChange={e => setDateFilter(e.target.value)}
-            style={{ 
-              width: '100%', background: '#0f172a', border: '1px solid #334155', color: '#94a3b8',
-              padding: '12px', borderRadius: '8px', outline: 'none'
-            }}
+            className={styles.dateInput}
           />
         </div>
       </div>
       
       {filteredTickets.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '3rem 1rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px' }}>
-          <CheckCircle size={48} style={{ color: '#10b981', margin: '0 auto 1rem' }} />
-          <h3 style={{ margin: 0, color: '#f8fafc' }}>Tudo limpo!</h3>
-          <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Você não tem nenhum serviço pendente.</p>
+        <div className={styles.emptyState}>
+          <CheckCircle size={48} className={styles.emptyStateIcon} />
+          <h3 className={styles.emptyStateTitle}>Tudo limpo!</h3>
+          <p className={styles.emptyStateDesc}>Você não tem nenhum serviço pendente.</p>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div className={styles.ticketsList}>
           {filteredTickets.map(ticket => (
-            <div key={ticket.id} style={{
-              background: 'rgba(30, 41, 59, 0.7)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              borderRadius: '12px',
-              padding: '1rem',
-              position: 'relative',
-              overflow: 'hidden'
-            }}>
+            <div key={ticket.id} className={styles.ticketCard}>
               {ticket.status === 'NOVO' && (
-                <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: '#ef4444' }}></div>
+                <div className={styles.newTicketIndicator}></div>
               )}
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <strong style={{ color: '#00d2ff', fontSize: '1.1rem' }}>{ticket.cliente}</strong>
-                <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>#{ticket.protocolo_origem}</span>
+              <div className={styles.ticketHeader}>
+                <strong className={styles.ticketClient}>{ticket.cliente}</strong>
+                <span className={styles.ticketProtocol}>#{ticket.protocolo_origem}</span>
               </div>
-              <p style={{ color: '#f8fafc', fontSize: '0.95rem', marginBottom: '1rem', lineHeight: '1.4' }}>
+              <p className={styles.ticketTitle}>
                 {ticket.titulo}
               </p>
               
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '1rem' }}>
+              <div className={styles.ticketDetails}>
                 <div 
                   onClick={() => handleNavigate(ticket.endereco)}
-                  style={{ display: 'flex', alignItems: 'flex-start', gap: '6px', color: '#38bdf8', fontSize: '0.85rem', cursor: 'pointer', textDecoration: 'underline' }}
+                  className={styles.addressLink}
                 >
-                  <MapPin size={16} style={{ flexShrink: 0, marginTop: '2px' }} /> 
+                  <MapPin size={16} className={styles.addressIcon} /> 
                   <span>{ticket.endereco || 'Endereço não informado'}</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#94a3b8', fontSize: '0.85rem' }}>
+                <div className={styles.priorityDetail}>
                   <Clock size={14} /> {ticket.prioridade || 'Normal'}
                 </div>
               </div>
 
               <Link 
                 href={`/pt/tecnico/os/${ticket.id}`}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontWeight: 'bold',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                  boxShadow: '0 4px 12px rgba(2, 132, 199, 0.3)',
-                  cursor: 'pointer',
-                  textDecoration: 'none'
-              }}>
+                className={styles.actionButton}>
                 <FileText size={18} /> iniciar/executar chamado
               </Link>
             </div>

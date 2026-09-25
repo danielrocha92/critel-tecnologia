@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTelephony } from '@/contexts/TelephonyContext';
 import { Phone, PhoneOff, PhoneCall, X, GripHorizontal } from 'lucide-react';
+import styles from './TelephonyWidget.module.css';
 
 export default function TelephonyWidget() {
   const { isRegistered, statusText, incomingCall, activeCall, makeCall, acceptCall, rejectCall, hangupCall } = useTelephony();
@@ -55,53 +56,37 @@ export default function TelephonyWidget() {
     setIsOpen(true);
   }
 
+  const widgetRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (widgetRef.current) {
+      widgetRef.current.style.right = position.x < 0 ? `${Math.abs(position.x)}px` : 'auto';
+      widgetRef.current.style.bottom = position.y < 0 ? `${Math.abs(position.y)}px` : 'auto';
+      widgetRef.current.style.left = position.x >= 0 ? `${position.x}px` : 'auto';
+      widgetRef.current.style.top = position.y >= 0 ? `${position.y}px` : 'auto';
+    }
+  }, [position]);
+
   return (
-    <div style={{
-      position: 'fixed',
-      right: position.x < 0 ? Math.abs(position.x) : 'auto',
-      bottom: position.y < 0 ? Math.abs(position.y) : 'auto',
-      left: position.x >= 0 ? position.x : 'auto',
-      top: position.y >= 0 ? position.y : 'auto',
-      zIndex: 9999,
-      fontFamily: 'Inter, sans-serif'
-    }}>
+    <div 
+      ref={widgetRef}
+      className={styles.widgetContainer}
+    >
       {/* Indicador Flutuante (Fechado) */}
       {!isOpen && (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <div className={styles.indicatorWrapper}>
           <div 
             onMouseDown={handleMouseDown}
-            style={{ 
-              cursor: isDragging ? 'grabbing' : 'grab', 
-              color: '#94a3b8', 
-              padding: '4px',
-              background: '#1e2230',
-              borderRadius: '8px 8px 0 0',
-              border: '1px solid #333848',
-              borderBottom: 'none',
-              marginBottom: '-2px',
-              zIndex: 1
-            }}
+            className={`${styles.dragHandle} ${isDragging ? styles.dragHandleGrabbing : styles.dragHandleGrab}`}
             title="Arraste para mover"
           >
             <GripHorizontal size={16} />
           </div>
           <button 
             onClick={() => setIsOpen(true)}
-          style={{
-            background: activeCall ? '#10b981' : (isRegistered ? '#3b82f6' : '#64748b'),
-            color: '#fff',
-            border: 'none',
-            borderRadius: '50px',
-            padding: '12px 20px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            cursor: 'pointer',
-            boxShadow: '0 4px 15px rgba(0,0,0,0.3)',
-            fontWeight: 600
-          }}
-        >
-          {activeCall ? <PhoneCall size={20} className="animate-pulse" /> : <Phone size={20} />}
+            className={`${styles.btnIndicator} ${activeCall ? styles.bgActiveCall : (isRegistered ? styles.bgRegistered : styles.bgUnregistered)}`}
+          >
+          {activeCall ? <PhoneCall size={20} className={styles.animatePulse} /> : <Phone size={20} />}
           <span>{statusText}</span>
         </button>
         </div>
@@ -109,48 +94,36 @@ export default function TelephonyWidget() {
 
       {/* Painel do Softphone Aberto */}
       {isOpen && (
-        <div style={{
-          background: '#1e2230',
-          border: '1px solid #333848',
-          borderRadius: '16px',
-          width: '280px',
-          boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
-          overflow: 'hidden',
-          display: 'flex',
-          flexDirection: 'column'
-        }}>
+        <div className={styles.panelContainer}>
           {/* Header do Softphone */}
           <div 
             onMouseDown={handleMouseDown}
-            style={{ 
-              background: '#252936', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #333848',
-              cursor: isDragging ? 'grabbing' : 'grab'
-            }}
+            className={`${styles.panelHeader} ${isDragging ? styles.dragHandleGrabbing : styles.dragHandleGrab}`}
             title="Arraste para mover"
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: isRegistered ? '#10b981' : '#ef4444' }} />
-              <span style={{ color: '#fff', fontSize: '0.85rem', fontWeight: 600 }}>Asterisk SIP</span>
+            <div className={styles.headerTitleWrapper}>
+              <div className={`${styles.statusDot} ${isRegistered ? styles.statusRegistered : styles.statusUnregistered}`} />
+              <span className={styles.headerTitle}>Asterisk SIP</span>
             </div>
-            <button onClick={() => setIsOpen(false)} style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+            <button onClick={() => setIsOpen(false)} className={styles.btnClose}>
               <X size={18} />
             </button>
           </div>
 
-          <div style={{ padding: '20px', textAlign: 'center' }}>
+          <div className={styles.panelBody}>
             {/* Estado: Chamada Receptiva */}
             {incomingCall && (
-              <div style={{ animation: 'pulse 1s infinite' }}>
-                <PhoneCall size={48} color="#f59e0b" style={{ margin: '0 auto 12px' }} />
-                <h3 style={{ margin: '0 0 4px', color: '#fff' }}>Chamada Recebida</h3>
-                <p style={{ margin: '0 0 20px', color: '#94a3b8', fontSize: '0.85rem' }}>
+              <div className={styles.pulseAnimation}>
+                <PhoneCall size={48} color="#f59e0b" className={styles.phoneCallIcon} />
+                <h3 className={styles.incomingTitle}>Chamada Recebida</h3>
+                <p className={styles.incomingSub}>
                   {incomingCall.remoteIdentity.uri.user}
                 </p>
-                <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-                  <button onClick={rejectCall} style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
+                <div className={styles.actionButtonsWrapper}>
+                  <button onClick={rejectCall} className={styles.btnReject}>
                     Recusar
                   </button>
-                  <button onClick={acceptCall} style={{ background: '#10b981', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
+                  <button onClick={acceptCall} className={styles.btnAccept}>
                     Atender
                   </button>
                 </div>
@@ -160,13 +133,13 @@ export default function TelephonyWidget() {
             {/* Estado: Em Chamada (Ativa) */}
             {activeCall && !incomingCall && (
               <div>
-                <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
+                <div className={styles.activeCallIconWrapper}>
                   <Phone size={32} color="#10b981" />
                 </div>
-                <h3 style={{ margin: '0 0 4px', color: '#fff' }}>Em Ligação</h3>
-                <p style={{ margin: '0 0 20px', color: '#10b981', fontSize: '0.85rem', fontWeight: 'bold' }}>00:00</p>
+                <h3 className={styles.incomingTitle}>Em Ligação</h3>
+                <p className={styles.timer}>00:00</p>
                 
-                <button onClick={hangupCall} style={{ background: '#ef4444', color: '#fff', border: 'none', width: '100%', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                <button onClick={hangupCall} className={styles.btnHangup}>
                   <PhoneOff size={18} /> Desligar
                 </button>
               </div>
@@ -175,41 +148,22 @@ export default function TelephonyWidget() {
             {/* Estado: Ocioso (Dialer) */}
             {!incomingCall && !activeCall && (
               <div>
-                <p style={{ margin: '0 0 16px', color: '#94a3b8', fontSize: '0.85rem' }}>{statusText}</p>
+                <p className={styles.statusText}>{statusText}</p>
                 
                 <input 
                   type="text" 
                   value={dialNumber}
                   onChange={(e) => setDialNumber(e.target.value)}
                   placeholder="Número ou Ramal..."
-                  style={{
-                    width: '100%',
-                    background: '#1a1e29',
-                    border: '1px solid #333848',
-                    color: '#fff',
-                    padding: '12px',
-                    borderRadius: '8px',
-                    textAlign: 'center',
-                    fontSize: '1.2rem',
-                    letterSpacing: '1px',
-                    marginBottom: '16px'
-                  }}
+                  className={styles.dialInput}
                 />
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '16px' }}>
+                <div className={styles.keypadGrid}>
                   {[1,2,3,4,5,6,7,8,9,'*',0,'#'].map((key) => (
                     <button 
                       key={key} 
                       onClick={() => setDialNumber(prev => prev + key)}
-                      style={{
-                        background: '#252936',
-                        border: '1px solid #333848',
-                        color: '#cbd5e1',
-                        padding: '12px',
-                        borderRadius: '8px',
-                        fontSize: '1.2rem',
-                        cursor: 'pointer'
-                      }}
+                      className={styles.keypadButton}
                     >
                       {key}
                     </button>
@@ -219,20 +173,7 @@ export default function TelephonyWidget() {
                 <button 
                   onClick={() => { if(dialNumber) makeCall(dialNumber); }}
                   disabled={!isRegistered || !dialNumber}
-                  style={{ 
-                    background: isRegistered && dialNumber ? '#10b981' : '#3f475e', 
-                    color: '#fff', 
-                    border: 'none', 
-                    width: '100%', 
-                    padding: '12px', 
-                    borderRadius: '8px', 
-                    cursor: isRegistered && dialNumber ? 'pointer' : 'not-allowed', 
-                    fontWeight: 'bold', 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center', 
-                    gap: '8px' 
-                  }}
+                  className={`${styles.btnCall} ${(isRegistered && dialNumber) ? styles.btnCallEnabled : styles.btnCallDisabled}`}
                 >
                   <Phone size={18} /> Chamar
                 </button>
@@ -241,17 +182,6 @@ export default function TelephonyWidget() {
           </div>
         </div>
       )}
-      
-      <style dangerouslySetInnerHTML={{__html: `
-        @keyframes pulse {
-          0% { transform: scale(1); }
-          50% { transform: scale(1.05); }
-          100% { transform: scale(1); }
-        }
-        .animate-pulse {
-          animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-      `}} />
     </div>
   );
 }

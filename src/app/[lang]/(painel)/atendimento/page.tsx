@@ -181,6 +181,7 @@ function CentralAtendimentoContent() {
   const [ticketHistory, setTicketHistory] = useState<ITomTicketReply[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [errorHistory, setErrorHistory] = useState<string | null>(null);
+  const [ticketExtraInfo, setTicketExtraInfo] = useState<{organizacao: string|null, deadline: string|null, agendamento: string|null} | null>(null);
 
   // Milvus Proxy Modal
   const [isMilvusIframeOpen, setIsMilvusIframeOpen] = useState(false);
@@ -207,6 +208,22 @@ function CentralAtendimentoContent() {
         const data = await res.json();
         if (data.success) {
           setTicketHistory(data.messages || []);
+          if (data.ticket_info) {
+            setTicketExtraInfo(data.ticket_info);
+          }
+          if (data.ticket_attachments && data.ticket_attachments.length > 0) {
+            const ttAnexos = data.ticket_attachments.map((a: any) => ({
+              nome_arquivo: a.name,
+              url: a.url || a.link,
+              tamanho_bytes: a.size
+            }));
+            setAnexos(prev => {
+              // Evita duplicados pela URL
+              const novasUrls = ttAnexos.map((ta: any) => ta.url);
+              const filtrados = prev.filter(p => !novasUrls.includes(p.url));
+              return [...filtrados, ...ttAnexos];
+            });
+          }
         } else {
           setTicketHistory([]);
           setErrorHistory('Não foi possível carregar o histórico deste chamado.');
@@ -455,10 +472,10 @@ function CentralAtendimentoContent() {
                   <div className={styles.detailsValue}>{new Date(ticketAtivo.criado_em).toLocaleString()}</div>
 
                   <div className={styles.detailsLabel}>Agendamento:</div>
-                  <div className={styles.detailsValue}>-</div>
+                  <div className={styles.detailsValue}>{ticketExtraInfo?.agendamento ? new Date(ticketExtraInfo.agendamento).toLocaleString() : '-'}</div>
 
                   <div className={styles.detailsLabel}>Deadline:</div>
-                  <div className={styles.detailsValue}>-</div>
+                  <div className={styles.detailsValue}>{ticketExtraInfo?.deadline ? new Date(ticketExtraInfo.deadline).toLocaleString() : '-'}</div>
                </div>
 
                <hr className={styles.divider} />
@@ -468,7 +485,7 @@ function CentralAtendimentoContent() {
                   <div className={styles.detailsValue}>{ticketAtivo.cliente || '-'}</div>
 
                   <div className={styles.detailsLabel}>Organização:</div>
-                  <div className={styles.detailsValue}>-</div>
+                  <div className={styles.detailsValue}>{ticketExtraInfo?.organizacao || '-'}</div>
 
                   <div className={styles.detailsLabel}>Email:</div>
                   <div className={styles.detailsValue}>{ticketAtivo.email_cliente || '-'}</div>
@@ -534,7 +551,7 @@ function CentralAtendimentoContent() {
               Detalhes do Chamado: #{ticketAtivo.protocolo_origem || ticketAtivo.id.substring(0,8)} - {ticketAtivo.titulo}
             </div>
             <div className={styles.headerActionsGroup}>
-              <div style={{ position: 'relative' }}>
+              <div className={styles.dropdownWrapper}>
                 <button 
                   className={styles.btnMais} 
                   onClick={() => setIsMaisDropdownOpen(!isMaisDropdownOpen)}
@@ -735,7 +752,7 @@ function CentralAtendimentoContent() {
                 </div>
                 <div className={styles.panelRow}>
                   <span className={styles.panelLabel}>Organização:</span>
-                  <span className={styles.panelValue}>-</span>
+                  <span className={styles.panelValue}>{ticketExtraInfo?.organizacao || '-'}</span>
                 </div>
                 <div className={styles.panelRow}>
                   <span className={styles.panelLabel}>Email:</span>
@@ -789,7 +806,7 @@ function CentralAtendimentoContent() {
                 </div>
                 <div className={styles.panelRow}>
                   <span className={styles.panelLabel}>Deadline:</span>
-                  <span className={styles.panelValue}>{(ticketAtivo as any).deadline || '-'}</span>
+                  <span className={styles.panelValue}>{ticketExtraInfo?.deadline ? new Date(ticketExtraInfo.deadline).toLocaleString() : '-'}</span>
                 </div>
               </div>
 

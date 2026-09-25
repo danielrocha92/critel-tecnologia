@@ -96,7 +96,7 @@ export default function Header({ dict, lang }: { dict: any, lang: string }) {
                 <ChevronDown size={14} className={styles.dropdownArrow} />
               </div>
               <ul className={styles.dropdown}>
-                <li><Link href={`/${lang}/solucoes`} onClick={closeMobileMenu} style={{ borderBottom: '1px solid var(--border-color)', marginBottom: '4px', paddingBottom: '8px', color: 'var(--accent-brand-text)', fontWeight: 600 }}>{dict.allSolutions || 'Ver Todas as Soluções'} →</Link></li>
+                <li><Link href={`/${lang}/solucoes`} onClick={closeMobileMenu} className={styles.allSolutionsLink}>{dict.allSolutions || 'Ver Todas as Soluções'} →</Link></li>
                 <li><Link href={`/${lang}/solucoes/suporte-ti-empresarial`} onClick={closeMobileMenu}><Laptop size={14} className={styles.menuIcon} /> Suporte de TI Empresarial</Link></li>
                 <li><Link href={`/${lang}/solucoes/cabeamento-estruturado`} onClick={closeMobileMenu}><Network size={14} className={styles.menuIcon} /> {dict.sol_cabling}</Link></li>
                 <li><Link href={`/${lang}/solucoes/ativos-de-rede`} onClick={closeMobileMenu}><Router size={14} className={styles.menuIcon} /> {dict.sol_network}</Link></li>

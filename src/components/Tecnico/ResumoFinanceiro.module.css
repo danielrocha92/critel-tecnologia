@@ -1,0 +1,111 @@
+.loadingContainer {
+  padding: 1rem;
+  background: rgba(30, 41, 59, 0.4);
+  border-radius: 16px;
+  margin-bottom: 1.5rem;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .5; }
+}
+
+.container {
+  margin-bottom: 2rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.title {
+  font-size: 1.2rem;
+  margin: 0;
+  color: #f8fafc;
+}
+
+.selectWrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,0.05);
+  padding: 4px 8px;
+  border-radius: 12px;
+}
+
+.periodSelect {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 0.8rem;
+  outline: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+.periodOption {
+  background: #1e293b;
+}
+
+.card {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.2) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 16px;
+  padding: 1.2rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.totalRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 1rem;
+}
+
+.iconBox {
+  background: #10b981;
+  padding: 10px;
+  border-radius: 12px;
+  display: flex;
+}
+
+.totalLabel {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 0.85rem;
+}
+
+.totalValue {
+  margin: 0;
+  color: #f8fafc;
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.detailsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 1rem;
+  border-top: 1px solid rgba(16,185,129,0.1);
+  padding-top: 1rem;
+}
+
+.detailLabel {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.detailValue {
+  color: #f8fafc;
+  font-size: 1.1rem;
+  font-weight: bold;
+}

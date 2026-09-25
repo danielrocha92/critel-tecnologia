@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, MapPin, Clock, AlertCircle, Bookmark, Tag, User, Activity, ChevronDown, ChevronRight } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
 import { useRouter, usePathname } from 'next/navigation';
+import styles from './TicketList.module.css';
 
 export type TicketFilter = 'all' | 'my-all' | 'my-opened' | 'my-closed';
 
@@ -145,10 +146,10 @@ export default function TicketList({ filterTitle, filterType, excludeTomTicket }
 
   const renderBadge = (priority: string) => {
     const p = String(priority).toLowerCase();
-    if (p === 'alta' || p === '1' || p === 'urgente') return <span style={{ color: '#ef4444', fontWeight: 600 }}>Alta</span>;
-    if (p === 'media' || p === '2' || p === 'normal') return <span style={{ color: '#f59e0b', fontWeight: 600 }}>Média</span>;
-    if (p === 'baixa' || p === '3' || p === 'low') return <span style={{ color: '#10b981', fontWeight: 600 }}>Baixa</span>;
-    return <span style={{ color: '#64748b', fontWeight: 600 }}>Normal</span>;
+    if (p === 'alta' || p === '1' || p === 'urgente') return <span className={styles.priorityHigh}>Alta</span>;
+    if (p === 'media' || p === '2' || p === 'normal') return <span className={styles.priorityMedium}>Média</span>;
+    if (p === 'baixa' || p === '3' || p === 'low') return <span className={styles.priorityLow}>Baixa</span>;
+    return <span className={styles.priorityNormal}>Normal</span>;
   };
 
   const renderDepartmentTotals = () => {
@@ -166,64 +167,35 @@ export default function TicketList({ filterTitle, filterType, excludeTomTicket }
     const sortedDeptos = Object.entries(deptoCounts).sort((a, b) => a[0].localeCompare(b[0]));
 
     return (
-      <div style={{
-        background: '#162032',
-        border: '1px solid rgba(255,255,255,0.1)',
-        borderRadius: '6px',
-        overflow: 'hidden',
-        marginBottom: '2rem'
-      }}>
+      <div className={styles.deptContainer}>
         <div 
           onClick={() => setIsDepartmentsOpen(!isDepartmentsOpen)} 
-          style={{ 
-            display: 'flex', alignItems: 'flex-start', padding: '16px',
-            background: '#1e293b', cursor: 'pointer', userSelect: 'none',
-            borderBottom: '1px solid rgba(255,255,255,0.05)'
-          }}
+          className={styles.deptHeader}
         >
-          <div style={{ marginTop: '2px', color: '#94a3b8' }}>
+          <div className={styles.deptIcon}>
             {isDepartmentsOpen ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', marginLeft: '8px', flex: 1 }}>
-            <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 600, color: '#f8fafc' }}>Total de Chamados Abertos por Departamento</h3>
-            <span style={{ fontSize: '12px', color: '#94a3b8', marginTop: '4px', fontWeight: 'normal' }}>Lista com o total de chamados abertos por departamentos.</span>
+          <div className={styles.deptTitleContainer}>
+            <h3 className={styles.deptTitle}>Total de Chamados Abertos por Departamento</h3>
+            <span className={styles.deptSubtitle}>Lista com o total de chamados abertos por departamentos.</span>
           </div>
         </div>
         
         {isDepartmentsOpen && (
-          <div style={{ padding: '0', maxHeight: '400px', overflowY: 'auto', background: '#162032' }}>
+          <div className={styles.deptListContainer}>
             {sortedDeptos.length === 0 ? (
-               <div style={{ padding: '16px', color: '#94a3b8', fontSize: '13px' }}>Nenhum chamado aberto.</div>
+               <div className={styles.deptEmpty}>Nenhum chamado aberto.</div>
             ) : (
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+              <ul className={styles.deptList}>
                 {sortedDeptos.map(([depto, count], i) => (
                   <li key={depto} 
                     onClick={() => setDepartmentFilter(departmentFilter === depto ? '' : depto)}
-                    style={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between', 
-                    alignItems: 'center',
-                    padding: '12px 16px',
-                    borderBottom: '1px solid rgba(255,255,255,0.05)',
-                    background: departmentFilter === depto ? 'rgba(96, 165, 250, 0.15)' : (i % 2 === 0 ? 'rgba(255,255,255,0.03)' : 'transparent'),
-                    borderLeft: departmentFilter === depto ? '4px solid #3b82f6' : '4px solid transparent',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                    fontSize: '13px',
-                    color: departmentFilter === depto ? '#60a5fa' : '#e2e8f0',
-                    fontWeight: departmentFilter === depto ? 'bold' : 'normal'
-                  }}>
+                    className={`${styles.deptItem} ${departmentFilter === depto ? styles.deptItemActive : (i % 2 === 0 ? styles.deptItemInactiveEven : styles.deptItemInactiveOdd)}`}
+                  >
                     <span>{depto}</span>
-                    <span style={{ 
-                      background: departmentFilter === depto ? '#3b82f6' : 'rgba(255,255,255,0.1)', 
-                      color: '#fff',
-                      padding: '2px 8px', 
-                      borderRadius: '4px',
-                      fontSize: '11px',
-                      fontWeight: 'bold',
-                      minWidth: '24px',
-                      textAlign: 'center'
-                    }}>{count}</span>
+                    <span className={departmentFilter === depto ? styles.deptCountActive : styles.deptCountInactive}>
+                      {count}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -235,40 +207,31 @@ export default function TicketList({ filterTitle, filterType, excludeTomTicket }
   };
 
   return (
-    <div style={{ padding: '2rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
-      <div style={{ marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '1.8rem', fontWeight: 'bold', margin: 0, color: '#f8fafc' }}>{filterTitle}</h1>
-        <p style={{ color: '#94a3b8', margin: '4px 0 0 0' }}>Gerenciamento e acompanhamento de chamados</p>
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <h1 className={styles.title}>{filterTitle}</h1>
+        <p className={styles.subtitle}>Gerenciamento e acompanhamento de chamados</p>
       </div>
 
-      <div style={{
-        background: '#1e293b', padding: '16px', borderRadius: '12px', border: '1px solid #334155',
-        display: 'flex', gap: '16px', marginBottom: '2rem', flexWrap: 'wrap'
-      }}>
-        <div style={{ flex: 1, minWidth: '250px', position: 'relative' }}>
-          <Search size={18} color="#94a3b8" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+      <div className={styles.filtersContainer}>
+        <div className={styles.searchContainer}>
+          <Search size={18} color="#94a3b8" className={styles.searchIcon} />
           <input
             type="text"
             placeholder="Buscar por protocolo, cliente ou título..."
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
-            style={{
-              width: '100%', background: '#0f172a', border: '1px solid #334155', color: '#fff',
-              padding: '10px 10px 10px 40px', borderRadius: '8px', outline: 'none'
-            }}
+            className={styles.searchInput}
           />
         </div>
 
         {/* Filtro de Status (Servidor) - Somente mostrar se não estivermos nas abas travadas */}
         {(filterType === 'all' || filterType === 'my-all') && (
-          <div style={{ position: 'relative', width: '180px' }}>
+          <div className={styles.selectContainer}>
             <select
               value={serverStatusFilter}
               onChange={e => setServerStatusFilter(e.target.value as 'open' | 'closed' | 'all')}
-              style={{
-                width: '100%', background: '#0f172a', border: '1px solid #334155', color: '#94a3b8',
-                padding: '10px', borderRadius: '8px', outline: 'none'
-              }}
+              className={styles.selectInput}
             >
               <option value="open">Somente Abertos</option>
               <option value="closed">Somente Fechados</option>
@@ -277,14 +240,11 @@ export default function TicketList({ filterTitle, filterType, excludeTomTicket }
           </div>
         )}
 
-        <div style={{ position: 'relative', width: '200px' }}>
+        <div className={styles.clientSelectContainer}>
           <select
             value={clientFilter}
             onChange={e => setClientFilter(e.target.value)}
-            style={{
-              width: '100%', background: '#0f172a', border: '1px solid #334155', color: '#94a3b8',
-              padding: '10px', borderRadius: '8px', outline: 'none'
-            }}
+            className={styles.selectInput}
           >
             <option value="">Todos os Clientes</option>
             <option value="Bacio di Latte">Bacio di Latte</option>
@@ -299,90 +259,71 @@ export default function TicketList({ filterTitle, filterType, excludeTomTicket }
       {renderDepartmentTotals()}
 
       {loading ? (
-        <div style={{ color: '#94a3b8', padding: '2rem', textAlign: 'center' }}>Carregando chamados...</div>
+        <div className={styles.loading}>Carregando chamados...</div>
       ) : filteredTickets.length === 0 ? (
-        <div style={{ color: '#94a3b8', padding: '2rem', textAlign: 'center', background: '#1e293b', borderRadius: '12px', border: '1px solid #334155' }}>
+        <div className={styles.emptyState}>
           Nenhum chamado encontrado para este filtro.
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: '16px' }}>
+        <div className={styles.grid}>
           {filteredTickets.map(ticket => (
             <div 
               key={ticket.id} 
               onClick={() => router.push(`/${lang}/atendimento?ticket_id=${ticket.id}`)}
-              style={{
-                background: '#1e293b', border: '1px solid #334155', borderRadius: '12px', padding: '20px',
-                display: 'flex', flexDirection: 'column', gap: '14px', position: 'relative', overflow: 'hidden',
-                cursor: 'pointer', transition: 'transform 0.2s, border-color 0.2s'
-              }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.borderColor = '#475569';
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.transform = 'none';
-                e.currentTarget.style.borderColor = '#334155';
-              }}
+              className={styles.ticketCard}
             >
-              <div style={{
-                position: 'absolute', top: 0, left: 0, width: '4px', height: '100%',
-                background: ticket.status === 'NOVO' ? '#f59e0b' : ticket.status === 'FINALIZADO' ? '#10b981' : '#3b82f6'
-              }} />
+              <div className={`${styles.statusIndicator} ${ticket.status === 'NOVO' ? styles.statusNovo : ticket.status === 'FINALIZADO' ? styles.statusFinalizado : styles.statusDefault}`} />
 
               {/* Header: ID, Titulo, Status */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div style={{ flex: 1, paddingRight: '12px' }}>
-                  <div style={{ fontSize: '0.85rem', color: '#94a3b8', fontWeight: 600, marginBottom: '4px' }}>
+              <div className={styles.ticketHeader}>
+                <div className={styles.ticketInfo}>
+                  <div className={styles.ticketId}>
                     #{ticket.protocolo_origem || ticket.id.split('-')[0]}
                   </div>
-                  <div style={{ fontWeight: 'bold', color: '#e2e8f0', fontSize: '1.1rem', lineHeight: '1.4' }}>
+                  <div className={styles.ticketTitle}>
                     {ticket.titulo}
                   </div>
                 </div>
-                <span style={{
-                  background: 'rgba(59, 130, 246, 0.2)',
-                  color: '#60a5fa',
-                  padding: '4px 12px', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 600, flexShrink: 0
-                }}>
+                <span className={styles.statusBadge}>
                   {ticket.status}
                 </span>
               </div>
 
               {/* Client & Info Badges */}
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', color: '#94a3b8', fontSize: '0.85rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div className={styles.badgesContainer}>
+                <div className={styles.badgeItem}>
                   <MapPin size={14} color="#60a5fa" />
-                  <span style={{ color: '#cbd5e1' }}>{ticket.cliente}</span>
+                  <span className={styles.clientText}>{ticket.cliente}</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <div className={styles.badgeItem}>
                   <Bookmark size={14} color="#818cf8" />
                   <span>{ticket.departamento || '-'}</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <div className={styles.badgeItem}>
                   <Tag size={14} color="#f472b6" />
                   <span>{ticket.categoria || '-'}</span>
                 </div>
               </div>
               
               {/* Prioridade e Atendente */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', background: '#0f172a', padding: '10px 12px', borderRadius: '8px', fontSize: '0.85rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ color: '#64748b' }}>Prioridade:</span>
+              <div className={styles.priorityContainer}>
+                <div className={styles.priorityInfo}>
+                  <span className={styles.priorityLabel}>Prioridade:</span>
                   {renderBadge(ticket.prioridade)}
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#cbd5e1' }}>
+                <div className={styles.assigneeInfo}>
                   <User size={14} color="#94a3b8" />
                   {getAtendenteNome(ticket.analista_id || ticket.tecnico_id)}
                 </div>
               </div>
 
               {/* Footer: Datas */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #334155', paddingTop: '12px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: '#64748b' }}>
+              <div className={styles.ticketFooter}>
+                <div className={styles.timeInfo}>
                   <Clock size={14} /> 
                   <span>{new Date(ticket.criado_em).toLocaleString()}</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: '#64748b' }}>
+                <div className={styles.timeInfo}>
                   <Activity size={14} />
                   <span>Atualizado: {ticket.atualizado_em ? new Date(ticket.atualizado_em).toLocaleDateString() : '-'}</span>
                 </div>

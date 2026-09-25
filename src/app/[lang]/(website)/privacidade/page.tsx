@@ -89,7 +89,7 @@ export default async function PrivacyPage({ params }: { params: Promise<{ lang: 
         <div className={`container ${styles.legalContainer}`}>
           <div className={styles.legalBox}>
             {legal.sections?.map((section: any, index: number) => (
-              <div key={index} style={{ marginBottom: '2rem' }}>
+              <div key={index} className={styles.sectionMargin}>
                 <h2>{section.title}</h2>
                 <p>{section.text}</p>
               </div>

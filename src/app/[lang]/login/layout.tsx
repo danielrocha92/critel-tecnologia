@@ -9,9 +9,11 @@ export const metadata: Metadata = {
   },
 };
 
+import styles from './login.module.css';
+
 export default function LoginLayout({ children }: { children: React.ReactNode }) {
   return (
-    <main style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <main className={styles.loginMain}>
       {children}
     </main>
   );

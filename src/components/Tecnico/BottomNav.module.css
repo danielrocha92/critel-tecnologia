@@ -1,0 +1,54 @@
+.bottomNavContainer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 65px;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 40;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.navItem {
+  background: transparent;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  color: #64748b;
+  width: 100%;
+  padding: 8px 0;
+  text-decoration: none;
+}
+
+.navItemActive {
+  color: #00d2ff;
+}
+
+.iconContainer {
+  background: transparent;
+  padding: 6px 20px;
+  border-radius: 20px;
+  transition: all 0.2s ease;
+}
+
+.iconContainerActive {
+  background: rgba(0, 210, 255, 0.1);
+}
+
+.navLabel {
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.navLabelActive {
+  font-weight: 600;
+}

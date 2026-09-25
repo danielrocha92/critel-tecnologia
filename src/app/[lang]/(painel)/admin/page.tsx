@@ -183,7 +183,7 @@ export default function AdminPage() {
                 </div>
               ) : user.status === 'BANIDO' ? (
                 <span className={`${styles.badge} ${styles.badgeBanned}`}>
-                  <Ban size={12} style={{ display: 'inline', marginRight: 4 }} />
+                  <Ban size={12} className={styles.inlineIcon} />
                   Acesso Revogado
                 </span>
               ) : (
@@ -214,10 +214,10 @@ export default function AdminPage() {
             <p>Verificando permissões...</p>
           </div>
         ) : !isSuperAdmin ? (
-          <div className={styles.glassCard} style={{ textAlign: 'center', padding: '3rem' }}>
-            <ShieldAlert size={48} style={{ color: '#ef4444', marginBottom: '1rem' }} />
-            <h2 style={{ color: '#f8fafc', marginBottom: '0.5rem' }}>Acesso Restrito</h2>
-            <p style={{ color: '#94a3b8' }}>A seção de Governança de Identidade é exclusiva para o Super Administrador.</p>
+          <div className={`${styles.glassCard} ${styles.centerText} ${styles.pad3}`}>
+            <ShieldAlert size={48} className={styles.iconRed} />
+            <h2 className={styles.headingWhite}>Acesso Restrito</h2>
+            <p className={styles.textMuted}>A seção de Governança de Identidade é exclusiva para o Super Administrador.</p>
           </div>
         ) : (
           <>
@@ -227,7 +227,7 @@ export default function AdminPage() {
             </div>
 
             {errorMsg && (
-              <div style={{ color: '#fca5a5', padding: '1rem', background: 'rgba(239, 68, 68, 0.2)', borderRadius: '8px', marginBottom: '1rem' }}>
+              <div className={styles.errorBox}>
                 {errorMsg}
               </div>
             )}
@@ -239,8 +239,8 @@ export default function AdminPage() {
             ) : (
               <>
                 {pendingUsers.length > 0 && (
-                  <div className={styles.glassCard} style={{ borderColor: 'rgba(245, 158, 11, 0.3)', marginBottom: '2rem' }}>
-                    <h2 style={{ fontSize: '1.2rem', color: '#fbbf24', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+                  <div className={`${styles.glassCard} ${styles.borderAmber}`}>
+                    <h2 className={styles.headingAmber}>
                       <Clock size={20} /> Aguardando Aprovação ({pendingUsers.length})
                     </h2>
                     {renderTable(pendingUsers, true)}
@@ -248,7 +248,7 @@ export default function AdminPage() {
                 )}
 
                 <div className={styles.glassCard}>
-                  <h2 style={{ fontSize: '1.2rem', color: '#f8fafc', marginBottom: '1rem' }}>Diretório de Usuários Ativos</h2>
+                  <h2 className={styles.headingWhiteLg}>Diretório de Usuários Ativos</h2>
                   {renderTable(activeUsers, false)}
                 </div>
               </>

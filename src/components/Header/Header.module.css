@@ -212,6 +212,14 @@
   padding-left: 1.25rem;
 }
 
+.allSolutionsLink {
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 4px;
+  padding-bottom: 8px !important;
+  color: var(--accent-brand-text) !important;
+  font-weight: 600 !important;
+}
+
 /* Ações à Direita */
 .actions {
   display: flex;

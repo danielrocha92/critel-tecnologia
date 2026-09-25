@@ -1,0 +1,261 @@
+.widgetContainer {
+  position: fixed;
+  z-index: 9999;
+  font-family: 'Inter', sans-serif;
+}
+
+.indicatorWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dragHandle {
+  color: #94a3b8;
+  padding: 4px;
+  background: #1e2230;
+  border-radius: 8px 8px 0 0;
+  border: 1px solid #333848;
+  border-bottom: none;
+  margin-bottom: -2px;
+  z-index: 1;
+}
+
+.dragHandleGrabbing {
+  cursor: grabbing;
+}
+
+.dragHandleGrab {
+  cursor: grab;
+}
+
+.btnIndicator {
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  font-weight: 600;
+}
+
+.bgActiveCall {
+  background: #10b981;
+}
+
+.bgRegistered {
+  background: #3b82f6;
+}
+
+.bgUnregistered {
+  background: #64748b;
+}
+
+.panelContainer {
+  background: #1e2230;
+  border: 1px solid #333848;
+  border-radius: 16px;
+  width: 280px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.panelHeader {
+  background: #252936;
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #333848;
+}
+
+.headerTitleWrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.statusDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.statusRegistered {
+  background: #10b981;
+}
+
+.statusUnregistered {
+  background: #ef4444;
+}
+
+.headerTitle {
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.btnClose {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.panelBody {
+  padding: 20px;
+  text-align: center;
+}
+
+.pulseAnimation {
+  animation: pulse 1s infinite;
+}
+
+.incomingTitle {
+  margin: 0 0 4px;
+  color: #fff;
+}
+
+.incomingSub {
+  margin: 0 0 20px;
+  color: #94a3b8;
+  font-size: 0.85rem;
+}
+
+.actionButtonsWrapper {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.btnReject {
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btnAccept {
+  background: #10b981;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.activeCallIconWrapper {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(16, 185, 129, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+}
+
+.timer {
+  margin: 0 0 20px;
+  color: #10b981;
+  font-size: 0.85rem;
+  font-weight: bold;
+}
+
+.btnHangup {
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.statusText {
+  margin: 0 0 16px;
+  color: #94a3b8;
+  font-size: 0.85rem;
+}
+
+.dialInput {
+  width: 100%;
+  background: #1a1e29;
+  border: 1px solid #333848;
+  color: #fff;
+  padding: 12px;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 1.2rem;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+  outline: none;
+}
+
+.keypadGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.keypadButton {
+  background: #252936;
+  border: 1px solid #333848;
+  color: #cbd5e1;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.btnCall {
+  color: #fff;
+  border: none;
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btnCallEnabled {
+  background: #10b981;
+  cursor: pointer;
+}
+
+.btnCallDisabled {
+  background: #3f475e;
+  cursor: not-allowed;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.animatePulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.phoneCallIcon {
+  margin: 0 auto 12px;
+}

@@ -585,3 +585,20 @@
     width: 100%;
   }
 }
+
+.headerCenter {
+  text-align: center;
+  margin: 0 auto 2.5rem;
+}
+
+.badgeCenter {
+  margin: 0 auto 1rem;
+}
+
+.titleCenter {
+  justify-content: center;
+}
+
+.descCenter {
+  margin: 0 auto;
+}

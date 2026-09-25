@@ -30,11 +30,17 @@ export async function GET(request: Request) {
     // O retorno da API costuma vir dentro de data ou ticket, dependendo da versão
     const ticketData = data.data || data.ticket || data;
     
-    // Retornamos as respostas (replies) e a mensagem original
+    // Retornamos as respostas (replies), a mensagem original e os anexos do chamado (ticketData.attachments)
     return NextResponse.json({
       success: true,
       messages: ticketData.replies || [],
-      original_message: ticketData.message || ''
+      original_message: ticketData.message || '',
+      ticket_attachments: ticketData.attachments || [],
+      ticket_info: {
+        organizacao: ticketData.customer?.organization?.name || null,
+        deadline: ticketData.sla?.deadline?.date || null,
+        agendamento: ticketData.schedule_date || null
+      }
     });
 
   } catch (error: any) {

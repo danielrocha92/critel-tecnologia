@@ -5,6 +5,7 @@ import { createBrowserClient } from '@supabase/ssr';
 import { CheckCircle, Calendar } from 'lucide-react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
+import styles from './historico.module.css';
 
 export default function HistoricoPage() {
   const [tickets, setTickets] = useState<any[]>([]);
@@ -39,56 +40,41 @@ export default function HistoricoPage() {
   }, [supabase]);
 
   if (loading) {
-    return <div style={{ padding: '2rem', textAlign: 'center' }}>Carregando histórico...</div>;
+    return <div className={styles.loadingContainer}>Carregando histórico...</div>;
   }
 
   return (
-    <div style={{ padding: '1rem', paddingBottom: '6rem' }}>
-      <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', color: '#f8fafc' }}>Histórico</h2>
+    <div className={styles.pageContainer}>
+      <h2 className={styles.title}>Histórico</h2>
       
       {tickets.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '3rem 1rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px' }}>
-          <Calendar size={48} style={{ color: '#64748b', margin: '0 auto 1rem' }} />
-          <h3 style={{ margin: 0, color: '#f8fafc' }}>Nenhum serviço</h3>
-          <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Você ainda não finalizou nenhum chamado.</p>
+        <div className={styles.emptyState}>
+          <Calendar size={48} className={styles.emptyIcon} />
+          <h3 className={styles.emptyTitle}>Nenhum serviço</h3>
+          <p className={styles.emptySubtitle}>Você ainda não finalizou nenhum chamado.</p>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div className={styles.ticketsList}>
           {tickets.map(ticket => (
-            <div key={ticket.id} style={{
-              background: 'rgba(30, 41, 59, 0.4)',
-              border: '1px solid rgba(16, 185, 129, 0.2)',
-              borderRadius: '12px',
-              padding: '1rem',
-              position: 'relative'
-            }}>
-              <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: '#10b981', borderTopLeftRadius: '12px', borderBottomLeftRadius: '12px' }}></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <strong style={{ color: '#f8fafc', fontSize: '1.1rem' }}>{ticket.cliente}</strong>
-                <span style={{ fontSize: '0.8rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <div key={ticket.id} className={styles.ticketCard}>
+              <div className={styles.ticketStatusBorder}></div>
+              <div className={styles.ticketHeader}>
+                <strong className={styles.ticketClient}>{ticket.cliente}</strong>
+                <span className={styles.ticketStatus}>
                   <CheckCircle size={14} /> Concluído
                 </span>
               </div>
-              <p style={{ color: '#94a3b8', fontSize: '0.95rem', marginBottom: '1rem', lineHeight: '1.4' }}>
+              <p className={styles.ticketTitle}>
                 {ticket.titulo}
               </p>
               
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
+              <div className={styles.ticketFooter}>
+                <span className={styles.ticketDate}>
                   {new Date(ticket.atualizado_em).toLocaleDateString('pt-BR')}
                 </span>
                 <Link 
                   href={`/${lang}/tecnico/os/${ticket.id}`}
-                  style={{
-                    background: 'transparent',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    color: '#00d2ff',
-                    padding: '6px 12px',
-                    borderRadius: '6px',
-                    fontSize: '0.8rem',
-                    cursor: 'pointer',
-                    textDecoration: 'none'
-                  }}
+                  className={styles.btnDetails}
                 >
                   Ver Detalhes
                 </Link>

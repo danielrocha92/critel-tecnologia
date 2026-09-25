@@ -224,4 +224,7 @@
   .mobileMenuBtn {
     display: flex;
   }
+  .topbarHeader {
+    padding: 0 1rem !important;
+  }
 }

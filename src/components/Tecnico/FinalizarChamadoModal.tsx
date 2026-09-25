@@ -225,10 +225,10 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
             )}
             
             <div>
-              <strong style={{ display: 'block', color: location ? '#10b981' : (isLocating ? '#94a3b8' : '#ef4444'), marginBottom: '0.25rem' }}>
+              <strong className={`${styles.geoStatusStrong} ${location ? styles.geoStatusStrongSuccess : (isLocating ? styles.geoStatusStrongLocating : styles.geoStatusStrongError)}`}>
                 {isLocating ? 'Capturando GPS...' : location ? 'Geolocalização Ativa' : 'Falha no GPS'}
               </strong>
-              <span style={{ fontSize: '0.85rem', color: '#cbd5e1' }}>
+              <span className={styles.geoStatusSpan}>
                 {isLocating 
                   ? 'Aguarde, obtendo coordenadas...' 
                   : location 
@@ -281,12 +281,12 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
                 <div>
                   <label className={styles.label}>Fachada da Loja (Antes)</label>
                   <input type="file" accept="image/*" capture="environment" onChange={e => handleFileConvert(e, setEvidenciaAntes)} className={styles.input} />
-                  {evidenciaAntes && <span style={{fontSize: '0.75rem', color: '#10b981', marginTop: '4px', display: 'block'}}>✓ Imagem capturada</span>}
+                  {evidenciaAntes && <span className={styles.evidenciaSuccessSpan}>✓ Imagem capturada</span>}
                 </div>
                 <div>
                   <label className={styles.label}>Fachada da Loja (Depois)</label>
                   <input type="file" accept="image/*" capture="environment" onChange={e => handleFileConvert(e, setEvidenciaDepois)} className={styles.input} />
-                  {evidenciaDepois && <span style={{fontSize: '0.75rem', color: '#10b981', marginTop: '4px', display: 'block'}}>✓ Imagem capturada</span>}
+                  {evidenciaDepois && <span className={styles.evidenciaSuccessSpan}>✓ Imagem capturada</span>}
                 </div>
               </div>
             </div>
@@ -303,9 +303,9 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
             </div>
 
             <div className={styles.section}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                <h4 className={styles.sectionTitle} style={{ margin: 0 }}>Despesas Extras (R$)</h4>
-                <button type="button" onClick={addDespesa} style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <div className={styles.despesasHeader}>
+                <h4 className={`${styles.sectionTitle} ${styles.despesasTitle}`}>Despesas Extras (R$)</h4>
+                <button type="button" onClick={addDespesa} className={styles.despesasAddBtn}>
                   <Plus size={16} /> Adicionar
                 </button>
               </div>
@@ -326,13 +326,13 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
                     onChange={e => handleCurrencyChange(index, e.target.value)}
                     className={styles.input}
                   />
-                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                    <label style={{ background: '#334155', color: '#fff', padding: '0.65rem', borderRadius: '8px', cursor: 'pointer', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>
+                  <div className={styles.despesaActions}>
+                    <label className={styles.despesaFileLabel}>
                       {despesa.anexo ? '✓ Anexo' : 'Anexar'}
-                      <input type="file" accept="image/*" capture="environment" style={{ display: 'none' }} onChange={e => handleDespesaFile(e, index)} />
+                      <input type="file" accept="image/*" capture="environment" className={styles.despesaFileInput} onChange={e => handleDespesaFile(e, index)} />
                     </label>
                     {despesas.length > 1 && (
-                      <button type="button" onClick={() => removeDespesa(index)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '0.5rem' }}>
+                      <button type="button" onClick={() => removeDespesa(index)} className={styles.despesaRemoveBtn}>
                         <Trash size={18} />
                       </button>
                     )}
@@ -341,25 +341,25 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
               ))}
             </div>
 
-            <div style={{ marginBottom: '1rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                <label className={styles.label} style={{ margin: 0 }}>Assinatura do Responsável (Obrigatório!)</label>
-                <button type="button" onClick={clearSignature} style={{ background: 'none', border: 'none', color: '#38bdf8', fontSize: '0.8rem', cursor: 'pointer' }}>Limpar</button>
+            <div className={styles.signatureSection}>
+              <div className={styles.signatureHeader}>
+                <label className={`${styles.label} ${styles.signatureLabel}`}>Assinatura do Responsável (Obrigatório!)</label>
+                <button type="button" onClick={clearSignature} className={styles.signatureClearBtn}>Limpar</button>
               </div>
-              <div style={{ background: 'white', borderRadius: '12px', overflow: 'hidden', border: '2px solid #334155' }}>
+              <div className={styles.signatureCanvasWrapper}>
                 <SignatureCanvas 
                   ref={sigCanvas}
                   penColor="black"
                   canvasProps={{ width: 500, height: 200, className: 'sigCanvas', style: { width: '100%', height: '150px' } }} 
                 />
               </div>
-              <span style={{ fontSize: '0.75rem', color: '#64748b', display: 'block', marginTop: '0.5rem', textAlign: 'center' }}>
+              <span className={styles.signatureHint}>
                 Solicite que o cliente assine com o dedo na tela
               </span>
             </div>
 
             {error && (
-              <div style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', padding: '1rem', borderRadius: '8px', display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.9rem' }}>
+              <div className={styles.errorBanner}>
                 <AlertTriangle size={20} />
                 {error}
               </div>
