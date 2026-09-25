@@ -144,7 +144,6 @@ export default function ClientesPage() {
               <option value="Fast Food">Fast Food</option>
               <option value="Varejo">Varejo</option>
             </select>
-            </select>
             <ChevronDown size={14} color="#64748b" className={styles.selectArrow} />
           </div>
 

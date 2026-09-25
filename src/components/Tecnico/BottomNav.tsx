@@ -1,6 +1,6 @@
 'use client';
 
-import { usePathname, useParams } from 'next/navigation';
+import { usePathname, useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Home, ClipboardList, User } from 'lucide-react';
 
@@ -17,14 +17,17 @@ export default function BottomNav() {
     return pathname === base;
   };
 
+  const searchParams = useSearchParams();
+  const ticketId = searchParams.get('ticket_id');
+
   const navItems = [
-    { icon: Home, label: 'Início', path: '/tecnico' },
+    { icon: Home, label: 'Início', path: '/tecnico/os' },
     { icon: ClipboardList, label: 'Histórico', path: '/tecnico/historico' },
     { icon: User, label: 'Perfil', path: '/tecnico/perfil' }
   ];
 
   // Don't show bottom nav inside OS details page to maximize screen space
-  if (pathname.includes('/os/')) {
+  if (pathname.includes('/os') && ticketId) {
     return null;
   }
 

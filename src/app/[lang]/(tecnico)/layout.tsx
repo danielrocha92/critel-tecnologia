@@ -11,6 +11,7 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import BottomNav from '@/components/Tecnico/BottomNav';
+import { Suspense } from 'react';
 import styles from './layout.module.css';
 
 export default async function TecnicoLayout({
@@ -77,7 +78,9 @@ export default async function TecnicoLayout({
         {children}
       </main>
 
-      <BottomNav />
+      <Suspense fallback={null}>
+        <BottomNav />
+      </Suspense>
       </div>
     </div>
   );

@@ -38,7 +38,6 @@ export default async function ContaPage({
     .single();
 
   return (
-  return (
     <div className={styles.container}>
       <header className={styles.header}>
         <h1 className={styles.title}>Minha Conta</h1>

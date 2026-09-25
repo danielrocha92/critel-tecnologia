@@ -5,7 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { createBrowserClient } from '@supabase/ssr';
 import { ChevronLeft, MapPin, Clock, CheckCircle, Navigation, AlertTriangle } from 'lucide-react';
 import FinalizarChamadoModal from '@/components/Tecnico/FinalizarChamadoModal';
-import styles from './os.module.css';
+import styles from './OsDetail.module.css';
 
 // Helper: Haversine distance em metros
 function getDistanceFromLatLonInMeters(lat1: number, lon1: number, lat2: number, lon2: number) {
@@ -20,11 +20,8 @@ function getDistanceFromLatLonInMeters(lat1: number, lon1: number, lat2: number,
   return R * c;
 }
 
-export default function OrdemServicoMobilePage() {
+export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: string }) {
   const router = useRouter();
-  const params = useParams();
-  const lang = params.lang as string;
-  const ticketId = params.id as string;
   
   const [ticket, setTicket] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -148,7 +145,6 @@ export default function OrdemServicoMobilePage() {
 
   const isCheckedIn = !!ticket.check_in_at;
 
-  return (
   return (
     <div className={styles.pageContainer}>
       <header className={styles.header}>

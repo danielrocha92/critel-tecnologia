@@ -562,7 +562,22 @@ function CentralAtendimentoContent() {
                   <div className={styles.maisDropdown}>
                     <button className={styles.dropdownItem}><Trash2 size={16} /> Excluir</button>
                     <button className={styles.dropdownItem}><Printer size={16} /> Imprimir</button>
-                    <button className={styles.dropdownItem}><Pencil size={16} /> Editar</button>
+                    <button 
+                      className={styles.dropdownItem}
+                      onClick={() => {
+                        setEditForm({
+                          titulo: ticketAtivo?.titulo || '',
+                          descricao: ticketAtivo?.descricao || '',
+                          departamento: ticketAtivo?.departamento || '',
+                          categoria: ticketAtivo?.categoria || '',
+                          prioridade: ticketAtivo?.prioridade || 'Baixa'
+                        });
+                        setIsEditModalOpen(true);
+                        setIsMaisDropdownOpen(false);
+                      }}
+                    >
+                      <Pencil size={16} /> Editar
+                    </button>
                     <button className={styles.dropdownItem}><History size={16} /> Log de Alterações</button>
                   </div>
                 )}
