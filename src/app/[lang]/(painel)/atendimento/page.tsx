@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { createClient } from '../../../../utils/supabase/client';
 import { useCentralAtendimento } from '../../../../hooks/useCentralAtendimento';
 import styles from './atendimento.module.css';
-import { Send, User, Phone, Clock, Search, Bot, Server, Key, Video, Activity, Inbox, Settings, Trash2, Printer, Pencil, History } from 'lucide-react';
+import { Send, User, Phone, Clock, Search, Bot, Server, Key, Video, Activity, Inbox, Settings, Trash2, Printer, Pencil, History, X } from 'lucide-react';
 import { DashboardTickets } from '../../../../components/Chamados/DashboardTickets';
 import { TicketEditor } from '../../../../components/Chamados/TicketEditor';
 import { WhatsAppModal } from '../../../../components/Chamados/WhatsAppModal';
@@ -34,6 +34,23 @@ function CentralAtendimentoContent() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('novos');
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+  const getAtendenteNome = (id: string | null | undefined) => {
+    if (!id) return 'Sem Atendente Vinculado';
+    const p = perfis.find(p => String(p.user_id) === String(id));
+    return p ? `${p.nome} - Critel Tecnologia` : 'Alocado';
+  };
+
+  const handleTimelineClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement;
+    if (target.tagName === 'IMG') {
+      setSelectedImage((target as HTMLImageElement).src);
+    } else if (target.tagName === 'A' && target.getAttribute('href')?.match(/\.(jpeg|jpg|gif|png)$/i)) {
+      e.preventDefault();
+      setSelectedImage(target.getAttribute('href')!);
+    }
+  };
 
   const [activeFilter, setActiveFilter] = useState('todos');
   const [isMeus, setIsMeus] = useState(false);
@@ -98,6 +115,7 @@ function CentralAtendimentoContent() {
   
   // Reply Editor States
   const [replyText, setReplyText] = useState('');
+  const [isReplying, setIsReplying] = useState(false);
   const [isSendingReply, setIsSendingReply] = useState(false);
 
   const handleSendReply = async () => {
@@ -382,7 +400,12 @@ function CentralAtendimentoContent() {
           isMeus={isMeus}
           onSelectTicket={(ticket) => {
             setTicketAtivo(ticket);
-            setViewMode('details');
+            setIsReplying(false);
+            if (ticket.tomticket_id) {
+              setViewMode('details');
+            } else {
+              setViewMode('timeline');
+            }
           }}
         />
       ) : viewMode === 'details' ? (
@@ -555,14 +578,64 @@ function CentralAtendimentoContent() {
                     {new Date(ticketAtivo.criado_em).toLocaleDateString()} {new Date(ticketAtivo.criado_em).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </div>
                 </div>
-                <div className={styles.timelineContent} style={{ overflowX: 'auto' }} dangerouslySetInnerHTML={{ __html: ticketAtivo.descricao || '' }} />
-                
-                <TicketEditor 
-                  replyText={replyText}
-                  setReplyText={setReplyText}
-                  isSendingReply={isSendingReply}
-                  handleSendReply={handleSendReply}
+                <div 
+                  className={styles.timelineContent} 
+                  style={{ overflowX: 'auto', cursor: 'pointer' }} 
+                  dangerouslySetInnerHTML={{ __html: ticketAtivo.descricao || '' }} 
+                  onClick={handleTimelineClick}
                 />
+
+                {anexos && anexos.length > 0 && (
+                  <div style={{ marginTop: '16px', borderTop: '1px solid #32394c', paddingTop: '12px' }}>
+                    <h5 style={{ margin: '0 0 8px 0', color: '#94a3b8', fontSize: '0.85rem' }}>Anexos</h5>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      {anexos.map((anexo, idx) => (
+                        <a 
+                          key={idx} 
+                          href={anexo.url} 
+                          target="_blank" 
+                          rel="noreferrer" 
+                          onClick={(e) => {
+                            if (anexo.url.match(/\.(jpeg|jpg|gif|png|webp)$/i)) {
+                              e.preventDefault();
+                              setSelectedImage(anexo.url);
+                            }
+                          }}
+                          style={{ color: '#00d2ff', fontSize: '0.9rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px', width: 'fit-content' }}
+                        >
+                          <File size={14} /> {anexo.nome_arquivo} {anexo.tamanho_bytes ? `(${(anexo.tamanho_bytes / 1024).toFixed(1)} KB)` : ''}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {(!ticketAtivo.tomticket_id || isReplying) ? (
+                  <TicketEditor 
+                    replyText={replyText}
+                    setReplyText={setReplyText}
+                    isSendingReply={isSendingReply}
+                    handleSendReply={handleSendReply}
+                  />
+                ) : (
+                  <div style={{ padding: '16px', display: 'flex', justifyContent: 'center' }}>
+                    <button 
+                      onClick={() => setIsReplying(true)}
+                      style={{
+                        background: 'transparent',
+                        border: '1px solid #32394c',
+                        padding: '8px 24px',
+                        borderRadius: '4px',
+                        color: '#cbd5e1',
+                        cursor: 'pointer',
+                        fontWeight: 500,
+                        fontSize: '0.9rem'
+                      }}
+                    >
+                      Responder Chamado
+                    </button>
+                  </div>
+                )}
               </div>
 
               {isLoadingHistory && <SkeletonHistory />}
@@ -599,7 +672,37 @@ function CentralAtendimentoContent() {
                       {reply.date}
                     </div>
                   </div>
-                  <div className={styles.timelineContent} dangerouslySetInnerHTML={{ __html: reply.message }} />
+                  <div 
+                    className={styles.timelineContent} 
+                    dangerouslySetInnerHTML={{ __html: reply.message }} 
+                    onClick={handleTimelineClick}
+                    style={{ cursor: 'pointer' }}
+                  />
+
+                  {reply.attachments && reply.attachments.length > 0 && (
+                    <div style={{ marginTop: '16px', borderTop: '1px solid #32394c', paddingTop: '12px' }}>
+                      <h5 style={{ margin: '0 0 8px 0', color: '#94a3b8', fontSize: '0.85rem' }}>Anexos</h5>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        {reply.attachments.map((anexo, idx) => (
+                          <a 
+                            key={idx} 
+                            href={anexo.url} 
+                            target="_blank" 
+                            rel="noreferrer" 
+                            onClick={(e) => {
+                              if (anexo.url.match(/\.(jpeg|jpg|gif|png|webp)$/i)) {
+                                e.preventDefault();
+                                setSelectedImage(anexo.url);
+                              }
+                            }}
+                            style={{ color: '#00d2ff', fontSize: '0.9rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px', width: 'fit-content' }}
+                          >
+                            <File size={14} /> {anexo.name || 'Anexo'}
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -690,7 +793,7 @@ function CentralAtendimentoContent() {
                 <h4 className={styles.panelTitle}>Informações do Chamado</h4>
                 <div className={styles.panelRow}>
                   <span className={styles.panelLabel}>Responsável:</span>
-                  <span className={styles.panelValue}>Sem Atendente Vinculado</span>
+                  <span className={styles.panelValue}>{getAtendenteNome(ticketAtivo.analista_id || ticketAtivo.tecnico_id)}</span>
                 </div>
                 <div className={styles.panelRow}>
                   <span className={styles.panelLabel}>Departamento:</span>
@@ -710,7 +813,7 @@ function CentralAtendimentoContent() {
                 </div>
                 <div className={styles.panelRow}>
                   <span className={styles.panelLabel}>Deadline:</span>
-                  <span className={styles.panelValue}>-</span>
+                  <span className={styles.panelValue}>{(ticketAtivo as any).deadline || '-'}</span>
                 </div>
               </div>
 
@@ -898,6 +1001,41 @@ function CentralAtendimentoContent() {
         </div>
       )}
 
+      {selectedImage && (
+        <div 
+          onClick={() => setSelectedImage(null)}
+          style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(0,0,0,0.85)', zIndex: 100000,
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'
+          }}
+        >
+          <div style={{ position: 'absolute', top: '20px', right: '20px', display: 'flex', gap: '16px' }}>
+            <a 
+              href={selectedImage} 
+              download 
+              target="_blank" 
+              rel="noreferrer" 
+              style={{ color: '#fff', cursor: 'pointer', background: 'rgba(255,255,255,0.1)', padding: '8px', borderRadius: '4px' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Download size={24} />
+            </a>
+            <button 
+              onClick={() => setSelectedImage(null)} 
+              style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', cursor: 'pointer', padding: '8px', borderRadius: '4px' }}
+            >
+              <X size={24} />
+            </button>
+          </div>
+          <img 
+            src={selectedImage} 
+            alt="Anexo ampliado" 
+            style={{ maxWidth: '90%', maxHeight: '90%', objectFit: 'contain' }} 
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 }
