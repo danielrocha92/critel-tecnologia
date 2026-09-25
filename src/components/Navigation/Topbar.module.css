@@ -1,0 +1,227 @@
+.topbarHeader {
+  height: 70px;
+  background: transparent;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.leftSection {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.rightSection {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.iconButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.profileContainer {
+  position: relative;
+}
+
+.profileTrigger {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: background 0.2s;
+  background: transparent;
+}
+
+.profileTriggerOpen {
+  background: rgba(255,255,255,0.1);
+}
+
+.profileAvatar {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 10px;
+  width: 280px;
+  background: #1a1d26;
+  border: 1px solid #32394c;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  z-index: 100;
+  overflow: hidden;
+}
+
+.userInfoHeader {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid #32394c;
+}
+
+.userInfoAvatarWrapper {
+  position: relative;
+}
+
+.userInfoAvatar {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+}
+
+.userInfoEdit {
+  position: absolute;
+  bottom: -5px;
+  right: -5px;
+  background: #fff;
+  border-radius: 50%;
+  padding: 4px;
+  display: flex;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  cursor: pointer;
+}
+
+.userInfoText {
+  flex: 1;
+  overflow: hidden;
+}
+
+.userInfoName {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #fff;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.userInfoEmail {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.dropdownGroup {
+  padding: 8px 0;
+  border-bottom: 1px solid #32394c;
+}
+
+.dropdownGroup:last-child {
+  border-bottom: none;
+}
+
+.dropdownItem {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  color: #cbd5e1;
+  padding: 10px 16px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-decoration: none;
+}
+
+.dropdownItem:hover {
+  background: rgba(255,255,255,0.05);
+  color: #fff;
+}
+
+.boldText {
+  font-weight: bold;
+}
+
+.normalText {
+  font-weight: normal;
+}
+
+.toggleSwitch {
+  width: 36px;
+  height: 20px;
+  border-radius: 10px;
+  position: relative;
+  transition: background 0.3s;
+}
+
+.toggleSwitchOn {
+  background: #3b82f6;
+}
+
+.toggleSwitchOff {
+  background: #475569;
+}
+
+.toggleThumb {
+  width: 16px;
+  height: 16px;
+  background: #fff;
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  transition: all 0.3s;
+}
+
+.toggleThumbOn {
+  left: calc(100% - 18px);
+}
+
+.toggleThumbOff {
+  left: 2px;
+}
+
+.mobileMenuBtn {
+  display: none;
+  background: transparent;
+  border: none;
+  color: #cbd5e1;
+  cursor: pointer;
+  padding: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .mobileMenuBtn {
+    display: flex;
+  }
+}

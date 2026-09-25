@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { createClient } from '../../utils/supabase/client';
 import NotificacoesBell from './NotificacoesBell';
+import styles from './Topbar.module.css';
 
 export default function Topbar() {
   const params = useParams();
@@ -51,167 +52,96 @@ export default function Topbar() {
     document.cookie = "user_cargo=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     window.location.href = `/${params.lang}/login`;
   };
+  
   return (
-    <header className="topbar-header" style={{
-      height: '70px',
-      background: 'transparent',
-      borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      padding: '0 2rem',
-      position: 'sticky',
-      top: 0,
-      zIndex: 10
-    }}>
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '1rem' }}>
+    <header className={styles.topbarHeader}>
+      <div className={styles.leftSection}>
         <button 
-          className="mobile-menu-btn" 
+          className={styles.mobileMenuBtn} 
           onClick={() => window.dispatchEvent(new CustomEvent('toggle-mobile-menu'))}
           aria-label="Abrir menu"
         >
           <Menu size={24} />
         </button>
-        {/* Espaço para Search bar futuramente se necessário */}
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+      <div className={styles.rightSection}>
         <NotificacoesBell />
-        <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#cbd5e1' }}>
+        <button className={styles.iconButton}>
           <MessageSquare size={20} />
         </button>
         
-        <div ref={dropdownRef} style={{ position: 'relative' }}>
+        <div ref={dropdownRef} className={styles.profileContainer}>
           <div 
             onClick={() => setIsProfileOpen(!isProfileOpen)}
-            style={{ 
-              display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer',
-              background: isProfileOpen ? 'rgba(255,255,255,0.1)' : 'transparent',
-              padding: '4px 8px', borderRadius: '8px', transition: 'background 0.2s'
-            }}
+            className={`${styles.profileTrigger} ${isProfileOpen ? styles.profileTriggerOpen : ''}`}
           >
-            <div style={{
-              width: '35px',
-              height: '35px',
-              borderRadius: '50%',
-              background: '#e2e8f0',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#94a3b8'
-            }}>
+            <div className={styles.profileAvatar}>
               <User size={24} />
             </div>
             {isProfileOpen ? <ChevronUp size={16} color="#94a3b8" /> : <ChevronDown size={16} color="#94a3b8" />}
           </div>
 
           {isProfileOpen && (
-            <div style={{
-              position: 'absolute',
-              top: '100%',
-              right: 0,
-              marginTop: '10px',
-              width: '280px',
-              background: '#1a1d26',
-              border: '1px solid #32394c',
-              borderRadius: '8px',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
-              zIndex: 100,
-              overflow: 'hidden'
-            }}>
-              <div style={{ padding: '16px', display: 'flex', alignItems: 'center', gap: '12px', borderBottom: '1px solid #32394c' }}>
-                <div style={{ position: 'relative' }}>
-                  <div style={{ width: '45px', height: '45px', borderRadius: '50%', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>
+            <div className={styles.dropdownMenu}>
+              <div className={styles.userInfoHeader}>
+                <div className={styles.userInfoAvatarWrapper}>
+                  <div className={styles.userInfoAvatar}>
                     <User size={30} />
                   </div>
-                  <div style={{ position: 'absolute', bottom: -5, right: -5, background: '#fff', borderRadius: '50%', padding: '4px', display: 'flex', boxShadow: '0 2px 5px rgba(0,0,0,0.2)', cursor: 'pointer' }}>
+                  <div className={styles.userInfoEdit}>
                     <Pencil size={12} color="#000" />
                   </div>
                 </div>
-                <div style={{ flex: 1, overflow: 'hidden' }}>
-                  <div style={{ fontWeight: '600', fontSize: '0.9rem', color: '#fff', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                <div className={styles.userInfoText}>
+                  <div className={styles.userInfoName}>
                     {userData ? userData.nome : 'Carregando...'}
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: '#94a3b8', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                  <div className={styles.userInfoEmail}>
                     {userData ? userData.email : ''}
                   </div>
                 </div>
               </div>
 
-              <div style={{ padding: '8px 0', borderBottom: '1px solid #32394c' }}>
-                <Link href={`/${lang}/tecnico/perfil`} className="topbar-dropdown-item" style={{ display: 'block', textDecoration: 'none' }} onClick={() => setIsProfileOpen(false)}>Meus Dados</Link>
-                <button className="topbar-dropdown-item">Alterar Senha</button>
-                <button className="topbar-dropdown-item">Alterar Foto...</button>
-                <div className="topbar-dropdown-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} onClick={(e) => { e.stopPropagation(); setIsDarkMode(!isDarkMode); }}>
+              <div className={styles.dropdownGroup}>
+                <Link href={`/${lang}/tecnico/perfil`} className={styles.dropdownItem} onClick={() => setIsProfileOpen(false)}>Meus Dados</Link>
+                <button className={styles.dropdownItem}>Alterar Senha</button>
+                <button className={styles.dropdownItem}>Alterar Foto...</button>
+                <div className={styles.dropdownItem} onClick={(e) => { e.stopPropagation(); setIsDarkMode(!isDarkMode); }}>
                   <span>Modo Escuro</span>
-                  <div style={{ width: '36px', height: '20px', background: isDarkMode ? '#3b82f6' : '#475569', borderRadius: '10px', position: 'relative', transition: 'background 0.3s' }}>
-                    <div style={{ width: '16px', height: '16px', background: '#fff', borderRadius: '50%', position: 'absolute', top: '2px', left: isDarkMode ? 'calc(100% - 18px)' : '2px', transition: 'all 0.3s' }}></div>
+                  <div className={`${styles.toggleSwitch} ${isDarkMode ? styles.toggleSwitchOn : styles.toggleSwitchOff}`}>
+                    <div className={`${styles.toggleThumb} ${isDarkMode ? styles.toggleThumbOn : styles.toggleThumbOff}`}></div>
                   </div>
                 </div>
-                <button className="topbar-dropdown-item">Exibir Notificações</button>
+                <button className={styles.dropdownItem}>Exibir Notificações</button>
               </div>
 
-              <div style={{ padding: '8px 0', borderBottom: '1px solid #32394c' }}>
-                <div className="topbar-dropdown-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} onClick={(e) => { e.stopPropagation(); setIsOnline(!isOnline); }}>
-                  <span style={{ fontWeight: isOnline ? 'bold' : 'normal' }}>Online</span>
-                  <div style={{ width: '36px', height: '20px', background: isOnline ? '#3b82f6' : '#475569', borderRadius: '10px', position: 'relative', transition: 'background 0.3s' }}>
-                    <div style={{ width: '16px', height: '16px', background: '#fff', borderRadius: '50%', position: 'absolute', top: '2px', left: isOnline ? 'calc(100% - 18px)' : '2px', transition: 'all 0.3s' }}></div>
+              <div className={styles.dropdownGroup}>
+                <div className={styles.dropdownItem} onClick={(e) => { e.stopPropagation(); setIsOnline(!isOnline); }}>
+                  <span className={isOnline ? styles.boldText : styles.normalText}>Online</span>
+                  <div className={`${styles.toggleSwitch} ${isOnline ? styles.toggleSwitchOn : styles.toggleSwitchOff}`}>
+                    <div className={`${styles.toggleThumb} ${isOnline ? styles.toggleThumbOn : styles.toggleThumbOff}`}></div>
                   </div>
                 </div>
-                <div className="topbar-dropdown-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} onClick={(e) => { e.stopPropagation(); setIsTvMode(!isTvMode); }}>
-                  <span style={{ fontWeight: isTvMode ? 'bold' : 'normal' }}>Modo TV</span>
-                  <div style={{ width: '36px', height: '20px', background: isTvMode ? '#3b82f6' : '#475569', borderRadius: '10px', position: 'relative', transition: 'background 0.3s' }}>
-                    <div style={{ width: '16px', height: '16px', background: '#fff', borderRadius: '50%', position: 'absolute', top: '2px', left: isTvMode ? 'calc(100% - 18px)' : '2px', transition: 'all 0.3s' }}></div>
+                <div className={styles.dropdownItem} onClick={(e) => { e.stopPropagation(); setIsTvMode(!isTvMode); }}>
+                  <span className={isTvMode ? styles.boldText : styles.normalText}>Modo TV</span>
+                  <div className={`${styles.toggleSwitch} ${isTvMode ? styles.toggleSwitchOn : styles.toggleSwitchOff}`}>
+                    <div className={`${styles.toggleThumb} ${isTvMode ? styles.toggleThumbOn : styles.toggleThumbOff}`}></div>
                   </div>
                 </div>
               </div>
 
-              <div style={{ padding: '8px 0', borderBottom: '1px solid #32394c' }}>
-                <button className="topbar-dropdown-item">Contatar Suporte</button>
-                <button className="topbar-dropdown-item">Ajuda</button>
+              <div className={styles.dropdownGroup}>
+                <button className={styles.dropdownItem}>Contatar Suporte</button>
+                <button className={styles.dropdownItem}>Ajuda</button>
               </div>
 
-              <div style={{ padding: '8px 0' }}>
-                <button className="topbar-dropdown-item" onClick={handleLogout}>Sair</button>
+              <div className={styles.dropdownGroup}>
+                <button className={styles.dropdownItem} onClick={handleLogout}>Sair</button>
               </div>
             </div>
           )}
         </div>
-        
-        <style dangerouslySetInnerHTML={{__html: `
-          .topbar-dropdown-item {
-            width: 100%;
-            text-align: left;
-            background: transparent;
-            border: none;
-            color: #cbd5e1;
-            padding: 10px 16px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-family: inherit;
-          }
-          .topbar-dropdown-item:hover {
-            background: rgba(255,255,255,0.05);
-            color: #fff;
-          }
-          .mobile-menu-btn {
-            display: none;
-            background: transparent;
-            border: none;
-            color: #cbd5e1;
-            cursor: pointer;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          }
-          @media (min-width: 769px) {
-            .mobile-menu-btn {
-              display: none !important;
-            }
-          }
-        `}} />
       </div>
     </header>
   );

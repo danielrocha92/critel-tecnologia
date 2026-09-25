@@ -18,7 +18,7 @@ const supabase = createClient();
 
 export default function CentralAtendimentoPage() {
   return (
-    <Suspense fallback={<div style={{ padding: '2rem', color: '#fff' }}>Carregando chamados...</div>}>
+    <Suspense fallback={<div className={styles.loadingEmpty}>Carregando chamados...</div>}>
       <CentralAtendimentoContent />
     </Suspense>
   );
@@ -409,13 +409,13 @@ function CentralAtendimentoContent() {
           }}
         />
       ) : viewMode === 'details' ? (
-         <div className={styles.innerViewContainer} style={{ background: '#0b1120', color: '#fff', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '16px 24px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                 <button onClick={() => setTicketAtivo(null)} style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '1.2rem' }}>⬅</button>
-                 <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 600 }}>Vincular Chamado: #{ticketAtivo.protocolo_origem} - {ticketAtivo.titulo}</h2>
+         <div className={`${styles.innerViewContainer} ${styles.mainContent}`}>
+            <div className={styles.mainHeader}>
+              <div className={styles.mainHeaderLeft}>
+                 <button onClick={() => setTicketAtivo(null)} className={styles.backButton}>⬅</button>
+                 <h2 className={styles.ticketMainTitle}>Vincular Chamado: #{ticketAtivo.protocolo_origem} - {ticketAtivo.titulo}</h2>
               </div>
-              <div style={{ display: 'flex', gap: '8px' }}>
+              <div className={styles.mainHeaderRight}>
                  <button 
                    onClick={() => {
                      setEditForm({
@@ -427,64 +427,64 @@ function CentralAtendimentoContent() {
                      });
                      setIsEditModalOpen(true);
                    }} 
-                   style={{ background: '#162032', color: '#fff', padding: '8px 12px', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', cursor: 'pointer' }}
+                   className={styles.actionButton}
                  >
                    <Pencil size={16} />
                  </button>
-                 <button style={{ background: '#162032', color: '#fff', padding: '8px 12px', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', cursor: 'pointer' }}><Inbox size={16} /></button>
-                 <button style={{ background: '#b71c1c', color: '#fff', padding: '8px 16px', border: 'none', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}><Trash2 size={16}/> Excluir v</button>
-                 <button onClick={() => setTicketAtivo(null)} style={{ background: '#162032', color: '#fff', padding: '8px 16px', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', cursor: 'pointer' }}>Cancelar</button>
+                 <button className={styles.actionButton}><Inbox size={16} /></button>
+                 <button className={styles.actionButtonDanger}><Trash2 size={16}/> Excluir v</button>
+                 <button onClick={() => setTicketAtivo(null)} className={styles.actionButton}>Cancelar</button>
               </div>
             </div>
 
-            <div style={{ padding: '24px', flex: 1, overflowY: 'auto' }}>
-               <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr', gap: '16px', marginBottom: '24px' }}>
-                  <div style={{ color: '#9ca3af', textAlign: 'right', fontWeight: 500, fontSize: '0.9rem' }}>Mensagem:</div>
-                  <div style={{ color: '#f3f4f6', fontSize: '0.9rem', overflowX: 'auto' }} dangerouslySetInnerHTML={{ __html: ticketAtivo.descricao || '-' }} />
+            <div className={styles.detailsView}>
+               <div className={styles.detailsGrid}>
+                  <div className={styles.detailsLabel}>Mensagem:</div>
+                  <div className={styles.detailsValue} dangerouslySetInnerHTML={{ __html: ticketAtivo.descricao || '-' }} />
 
-                  <div style={{ color: '#9ca3af', textAlign: 'right', fontWeight: 500, fontSize: '0.9rem' }}>Departamento:</div>
-                  <div style={{ color: '#f3f4f6', fontSize: '0.9rem' }}>{ticketAtivo.departamento || '-'}</div>
+                  <div className={styles.detailsLabel}>Departamento:</div>
+                  <div className={styles.detailsValue}>{ticketAtivo.departamento || '-'}</div>
 
-                  <div style={{ color: '#9ca3af', textAlign: 'right', fontWeight: 500, fontSize: '0.9rem' }}>Categoria:</div>
-                  <div style={{ color: '#f3f4f6', fontSize: '0.9rem' }}>{ticketAtivo.categoria || '-'}</div>
+                  <div className={styles.detailsLabel}>Categoria:</div>
+                  <div className={styles.detailsValue}>{ticketAtivo.categoria || '-'}</div>
 
-                  <div style={{ color: '#9ca3af', textAlign: 'right', fontWeight: 500, fontSize: '0.9rem' }}>Prioridade:</div>
-                  <div style={{ color: '#f3f4f6', fontSize: '0.9rem' }}>{ticketAtivo.prioridade || '-'}</div>
+                  <div className={styles.detailsLabel}>Prioridade:</div>
+                  <div className={styles.detailsValue}>{ticketAtivo.prioridade || '-'}</div>
 
-                  <div style={{ color: '#9ca3af', textAlign: 'right', fontWeight: 500, fontSize: '0.9rem' }}>Data/Hora:</div>
-                  <div style={{ color: '#f3f4f6', fontSize: '0.9rem' }}>{new Date(ticketAtivo.criado_em).toLocaleString()}</div>
+                  <div className={styles.detailsLabel}>Data/Hora:</div>
+                  <div className={styles.detailsValue}>{new Date(ticketAtivo.criado_em).toLocaleString()}</div>
 
-                  <div style={{ color: '#9ca3af', textAlign: 'right', fontWeight: 500, fontSize: '0.9rem' }}>Agendamento:</div>
-                  <div style={{ color: '#f3f4f6', fontSize: '0.9rem' }}>-</div>
+                  <div className={styles.detailsLabel}>Agendamento:</div>
+                  <div className={styles.detailsValue}>-</div>
 
-                  <div style={{ color: '#9ca3af', textAlign: 'right', fontWeight: 500, fontSize: '0.9rem' }}>Deadline:</div>
-                  <div style={{ color: '#f3f4f6', fontSize: '0.9rem' }}>-</div>
+                  <div className={styles.detailsLabel}>Deadline:</div>
+                  <div className={styles.detailsValue}>-</div>
                </div>
 
-               <hr style={{ borderColor: 'rgba(255,255,255,0.08)', margin: '24px 0' }} />
+               <hr className={styles.divider} />
 
-               <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr', gap: '16px', marginBottom: '24px' }}>
-                  <div style={{ color: '#9ca3af', textAlign: 'right', fontWeight: 500, fontSize: '0.9rem' }}>Cliente:</div>
-                  <div style={{ color: '#f3f4f6', fontSize: '0.9rem' }}>{ticketAtivo.cliente || '-'}</div>
+               <div className={styles.detailsGrid}>
+                  <div className={styles.detailsLabel}>Cliente:</div>
+                  <div className={styles.detailsValue}>{ticketAtivo.cliente || '-'}</div>
 
-                  <div style={{ color: '#9ca3af', textAlign: 'right', fontWeight: 500, fontSize: '0.9rem' }}>Organização:</div>
-                  <div style={{ color: '#f3f4f6', fontSize: '0.9rem' }}>-</div>
+                  <div className={styles.detailsLabel}>Organização:</div>
+                  <div className={styles.detailsValue}>-</div>
 
-                  <div style={{ color: '#9ca3af', textAlign: 'right', fontWeight: 500, fontSize: '0.9rem' }}>Email:</div>
-                  <div style={{ color: '#f3f4f6', fontSize: '0.9rem' }}>{ticketAtivo.email_cliente || '-'}</div>
+                  <div className={styles.detailsLabel}>Email:</div>
+                  <div className={styles.detailsValue}>{ticketAtivo.email_cliente || '-'}</div>
                </div>
 
-               <div style={{ textAlign: 'center', margin: '24px 0' }}>
-                  <button onClick={() => setViewMode('timeline')} style={{ background: 'transparent', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem' }}>Mostrar Detalhes</button>
+               <div className={styles.centerContainer}>
+                  <button onClick={() => setViewMode('timeline')} className={styles.secondaryButton}>Mostrar Detalhes</button>
                </div>
 
-               <hr style={{ borderColor: 'rgba(255,255,255,0.08)', margin: '24px 0' }} />
+               <hr className={styles.divider} />
 
-               <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr', gap: '16px', alignItems: 'center' }}>
-                  <div style={{ color: '#9ca3af', textAlign: 'right', fontWeight: 500, fontSize: '0.9rem' }}>Atendente:</div>
+               <div className={styles.detailsGrid}>
+                  <div className={styles.detailsLabel}>Atendente:</div>
                   <div>
                     <select 
-                      style={{ background: '#162032', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', padding: '10px 12px', borderRadius: '4px', width: '100%', maxWidth: '400px', outline: 'none', fontSize: '0.9rem' }}
+                      className={styles.selectInput}
                       value={ticketAtivo.analista_id || ''}
                       onChange={async (e) => {
                         const novoAtendente = e.target.value;
@@ -500,7 +500,7 @@ function CentralAtendimentoContent() {
                   </div>
                   <div></div>
                   <div>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#f3f4f6', fontSize: '0.85rem' }}>
+                    <label className={styles.checkboxLabel}>
                       <input type="checkbox" defaultChecked />
                       Receber respostas do cliente por email
                     </label>
@@ -508,9 +508,9 @@ function CentralAtendimentoContent() {
                </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '16px 24px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+            <div className={styles.footerActions}>
               <button 
-                style={{ background: '#c9253a', color: '#fff', border: 'none', padding: '8px 24px', borderRadius: '4px', cursor: 'pointer', fontWeight: 500 }}
+                className={styles.primaryButton}
                 onClick={async () => {
                    alert('Atendente vinculado!');
                    setViewMode('timeline');
@@ -518,9 +518,9 @@ function CentralAtendimentoContent() {
               >
                 Vincular
               </button>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <button style={{ background: '#b71c1c', color: '#fff', padding: '8px 16px', border: 'none', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>Excluir v</button>
-                <button onClick={() => setTicketAtivo(null)} style={{ background: 'transparent', color: '#fff', padding: '8px 16px', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', cursor: 'pointer' }}>Cancelar</button>
+              <div className={styles.mainHeaderRight}>
+                <button className={styles.actionButtonDanger}>Excluir v</button>
+                <button onClick={() => setTicketAtivo(null)} className={styles.secondaryButton}>Cancelar</button>
               </div>
             </div>
          </div>
@@ -542,12 +542,7 @@ function CentralAtendimentoContent() {
                   Mais v
                 </button>
                 {isMaisDropdownOpen && (
-                  <div style={{ 
-                    position: 'absolute', top: '100%', left: 0, marginTop: '8px',
-                    background: '#1a1d26', border: '1px solid #32394c', borderRadius: '8px',
-                    minWidth: '200px', padding: '8px 0', zIndex: 50,
-                    boxShadow: '0 4px 15px rgba(0,0,0,0.5)'
-                  }}>
+                  <div className={styles.maisDropdown}>
                     <button className={styles.dropdownItem}><Trash2 size={16} /> Excluir</button>
                     <button className={styles.dropdownItem}><Printer size={16} /> Imprimir</button>
                     <button className={styles.dropdownItem}><Pencil size={16} /> Editar</button>
@@ -580,15 +575,14 @@ function CentralAtendimentoContent() {
                 </div>
                 <div 
                   className={styles.timelineContent} 
-                  style={{ overflowX: 'auto', cursor: 'pointer' }} 
                   dangerouslySetInnerHTML={{ __html: ticketAtivo.descricao || '' }} 
                   onClick={handleTimelineClick}
                 />
 
                 {anexos && anexos.length > 0 && (
-                  <div style={{ marginTop: '16px', borderTop: '1px solid #32394c', paddingTop: '12px' }}>
-                    <h5 style={{ margin: '0 0 8px 0', color: '#94a3b8', fontSize: '0.85rem' }}>Anexos</h5>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <div className={styles.attachmentsSection}>
+                    <h5 className={styles.attachmentsTitle}>Anexos</h5>
+                    <div className={styles.attachmentsList}>
                       {anexos.map((anexo, idx) => (
                         <a 
                           key={idx} 
@@ -601,7 +595,7 @@ function CentralAtendimentoContent() {
                               setSelectedImage(anexo.url);
                             }
                           }}
-                          style={{ color: '#00d2ff', fontSize: '0.9rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px', width: 'fit-content' }}
+                          className={styles.attachmentLink}
                         >
                           <File size={14} /> {anexo.nome_arquivo} {anexo.tamanho_bytes ? `(${(anexo.tamanho_bytes / 1024).toFixed(1)} KB)` : ''}
                         </a>
@@ -618,19 +612,10 @@ function CentralAtendimentoContent() {
                     handleSendReply={handleSendReply}
                   />
                 ) : (
-                  <div style={{ padding: '16px', display: 'flex', justifyContent: 'center' }}>
+                  <div className={styles.replyContainer}>
                     <button 
                       onClick={() => setIsReplying(true)}
-                      style={{
-                        background: 'transparent',
-                        border: '1px solid #32394c',
-                        padding: '8px 24px',
-                        borderRadius: '4px',
-                        color: '#cbd5e1',
-                        cursor: 'pointer',
-                        fontWeight: 500,
-                        fontSize: '0.9rem'
-                      }}
+                      className={styles.replyButton}
                     >
                       Responder Chamado
                     </button>
@@ -641,11 +626,11 @@ function CentralAtendimentoContent() {
               {isLoadingHistory && <SkeletonHistory />}
               
               {errorHistory && (
-                <div style={{ textAlign: 'center', padding: '20px', color: '#ef4444', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '8px', margin: '16px 0', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
-                  <p style={{ margin: '0 0 8px 0', fontWeight: 500 }}>{errorHistory}</p>
+                <div className={styles.errorContainer}>
+                  <p className={styles.errorMessage}>{errorHistory}</p>
                   <button 
                     onClick={() => setTicketAtivo({ ...ticketAtivo })} 
-                    style={{ background: 'transparent', border: '1px solid #ef4444', color: '#ef4444', padding: '4px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}
+                    className={styles.errorRetryBtn}
                   >
                     Tentar Novamente
                   </button>
@@ -653,14 +638,14 @@ function CentralAtendimentoContent() {
               )}
 
               {!isLoadingHistory && !errorHistory && ticketHistory.length === 0 && (
-                <div style={{ textAlign: 'center', padding: '20px', color: '#94a3b8' }}>Nenhuma interação registrada neste chamado ainda.</div>
+                <div className={styles.emptyTimeline}>Nenhuma interação registrada neste chamado ainda.</div>
               )}
 
               {ticketHistory.map((reply) => (
-                <div key={reply.id} className={styles.timelineCard} style={{ marginTop: '16px' }}>
+                <div key={reply.id} className={`${styles.timelineCard} ${styles.timelineCardMargin}`}>
                   <div className={styles.timelineHeader}>
                     <div className={styles.timelineUser}>
-                      <div className={styles.timelineAvatar} style={{ background: reply.sender_type === 'A' ? '#c9253a' : '#334155', color: '#fff' }}>
+                      <div className={`${styles.timelineAvatar} ${reply.sender_type === 'A' ? styles.avatarAtendente : styles.avatarCliente}`}>
                         <User size={20} />
                       </div>
                       <div>
@@ -676,13 +661,12 @@ function CentralAtendimentoContent() {
                     className={styles.timelineContent} 
                     dangerouslySetInnerHTML={{ __html: reply.message }} 
                     onClick={handleTimelineClick}
-                    style={{ cursor: 'pointer' }}
                   />
 
                   {reply.attachments && reply.attachments.length > 0 && (
-                    <div style={{ marginTop: '16px', borderTop: '1px solid #32394c', paddingTop: '12px' }}>
-                      <h5 style={{ margin: '0 0 8px 0', color: '#94a3b8', fontSize: '0.85rem' }}>Anexos</h5>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <div className={styles.attachmentsSection}>
+                      <h5 className={styles.attachmentsTitle}>Anexos</h5>
+                      <div className={styles.attachmentsList}>
                         {reply.attachments.map((anexo, idx) => (
                           <a 
                             key={idx} 
@@ -695,7 +679,7 @@ function CentralAtendimentoContent() {
                                 setSelectedImage(anexo.url);
                               }
                             }}
-                            style={{ color: '#00d2ff', fontSize: '0.9rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px', width: 'fit-content' }}
+                            className={styles.attachmentLink}
                           >
                             <File size={14} /> {anexo.name || 'Anexo'}
                           </a>
@@ -713,36 +697,28 @@ function CentralAtendimentoContent() {
               <div className={styles.panelCard}>
                 <h4 className={styles.panelTitle}>Anexos</h4>
                 {anexos.length === 0 ? (
-                  <div style={{ color: '#94a3b8', fontSize: '0.85rem', padding: '10px 0' }}>Nenhum anexo encontrado.</div>
+                  <div className={styles.noAttachment}>Nenhum anexo encontrado.</div>
                 ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '10px' }}>
+                  <div className={styles.attachmentListWrapper}>
                     {anexos.map((anexo, i) => (
-                      <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-                        <File size={16} color="#00d2ff" style={{ marginTop: '2px' }} />
-                        <div style={{ flex: 1, overflow: 'hidden' }}>
+                      <div key={i} className={styles.attachmentRow}>
+                        <File size={16} color="#00d2ff" className={styles.attachmentIcon} />
+                        <div className={styles.attachmentInfoWrapper}>
                           <a 
                             href={anexo.url} 
                             target="_blank" 
                             rel="noreferrer"
-                            style={{ 
-                              color: '#e2e8f0', 
-                              fontSize: '0.85rem', 
-                              textDecoration: 'none',
-                              display: 'block',
-                              whiteSpace: 'nowrap',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis'
-                            }}
+                            className={styles.attachmentFileName}
                           >
                             {anexo.nome_arquivo}
                           </a>
                           {anexo.tamanho_bytes && (
-                            <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                            <span className={styles.attachmentSize}>
                               {(anexo.tamanho_bytes / 1024).toFixed(1)} KB
                             </span>
                           )}
                         </div>
-                        <a href={anexo.url} download target="_blank" rel="noreferrer" style={{ color: '#94a3b8', cursor: 'pointer' }}>
+                        <a href={anexo.url} download target="_blank" rel="noreferrer" className={styles.attachmentDownload}>
                           <Download size={16} />
                         </a>
                       </div>
@@ -784,7 +760,7 @@ function CentralAtendimentoContent() {
 
               <div className={styles.panelCard}>
                 <h4 className={styles.panelTitle}>Rótulos</h4>
-                <select style={{ width: '100%', background: '#1a1d26', color: '#94a3b8', border: '1px solid #32394c', padding: '10px', borderRadius: '4px', outline: 'none' }}>
+                <select className={styles.selectInputLabel}>
                   <option>Adicionar rótulos</option>
                 </select>
               </div>
@@ -819,13 +795,13 @@ function CentralAtendimentoContent() {
 
               <div className={styles.panelCard}>
                 <h4 className={styles.panelTitle}>Ferramentas Integradas</h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <a href="/api/cofre/stoq" target="_blank" rel="noreferrer" style={{ display: 'block', textAlign: 'center', background: '#00d2ff', color: '#0b1120', textDecoration: 'none', padding: '10px', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600 }}>
+                <div className={styles.toolsWrapper}>
+                  <a href="/api/cofre/stoq" target="_blank" rel="noreferrer" className={styles.btnStoq}>
                     Abrir Stoq ERP (Cofre)
                   </a>
                   <button 
                     onClick={() => setIsMilvusIframeOpen(true)}
-                    style={{ background: '#c9253a', color: '#fff', border: 'none', padding: '10px', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }}
+                    className={styles.btnMilvus}
                   >
                     Abrir Milvus Proxy
                   </button>
@@ -853,31 +829,22 @@ function CentralAtendimentoContent() {
 
       {/* Modal Full-Screen do Milvus Proxy */}
       {isMilvusIframeOpen && (
-        <div style={{
-          position: 'absolute',
-          top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(11, 17, 32, 0.95)',
-          backdropFilter: 'blur(10px)',
-          zIndex: 9999,
-          display: 'flex',
-          flexDirection: 'column',
-          padding: '2rem'
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+        <div className={styles.milvusOverlay}>
+          <div className={styles.milvusHeader}>
             <div>
-              <h2 style={{ margin: 0, color: '#fff', fontFamily: 'var(--font-montserrat)' }}>Milvus IT Management</h2>
-              <p style={{ margin: '4px 0 0 0', color: '#94a3b8', fontSize: '0.9rem' }}>Sessão Única Compartilhada via WebRTC Proxy</p>
+              <h2 className={styles.milvusTitle}>Milvus IT Management</h2>
+              <p className={styles.milvusSubtitle}>Sessão Única Compartilhada via WebRTC Proxy</p>
             </div>
             <button 
               onClick={() => setIsMilvusIframeOpen(false)}
-              style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}
+              className={styles.milvusCloseBtn}
             >
               Fechar Milvus
             </button>
           </div>
           <iframe 
             src="http://localhost:3001" 
-            style={{ flex: 1, border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', background: '#fff', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }}
+            className={styles.milvusIframe}
             allow="camera; microphone; display-capture; fullscreen; clipboard-read; clipboard-write"
           />
         </div>
@@ -885,47 +852,39 @@ function CentralAtendimentoContent() {
 
       {/* Modal Editar Chamado */}
       {isEditModalOpen && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(11, 17, 32, 0.85)', backdropFilter: 'blur(4px)',
-          zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center'
-        }}>
-          <div style={{
-            background: '#1a1d26', width: '100%', maxWidth: '800px',
-            borderRadius: '8px', border: '1px solid #32394c',
-            display: 'flex', flexDirection: 'column'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '16px', borderBottom: '1px solid #32394c' }}>
-              <h3 style={{ margin: 0, color: '#fff' }}>Editar Chamado</h3>
-              <button onClick={() => setIsEditModalOpen(false)} style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '1.2rem' }}>×</button>
+        <div className={styles.modalEditOverlay}>
+          <div className={styles.modalEditContent}>
+            <div className={styles.modalEditHeader}>
+              <h3 className={styles.modalEditTitle}>Editar Chamado</h3>
+              <button onClick={() => setIsEditModalOpen(false)} className={styles.modalEditClose}>×</button>
             </div>
             
-            <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', alignItems: 'center', gap: '16px' }}>
-                <label style={{ textAlign: 'right', color: '#9ca3af', fontSize: '0.9rem' }}>Assunto:</label>
+            <div className={styles.modalEditBody}>
+              <div className={styles.modalEditRow}>
+                <label className={styles.modalEditLabel}>Assunto:</label>
                 <input 
                   type="text" 
                   value={editForm.titulo}
                   onChange={(e) => setEditForm({...editForm, titulo: e.target.value})}
-                  style={{ background: '#0b1120', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', padding: '10px', borderRadius: '4px', width: '100%', outline: 'none' }}
+                  className={styles.modalEditInput}
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', alignItems: 'flex-start', gap: '16px' }}>
-                <label style={{ textAlign: 'right', color: '#9ca3af', fontSize: '0.9rem', marginTop: '10px' }}>Mensagem:</label>
+              <div className={styles.modalEditRowTop}>
+                <label className={styles.modalEditLabelTop}>Mensagem:</label>
                 <textarea 
                   value={editForm.descricao}
                   onChange={(e) => setEditForm({...editForm, descricao: e.target.value})}
-                  style={{ background: '#0b1120', color: '#fff', border: '1px solid #32394c', padding: '10px', borderRadius: '4px', width: '100%', minHeight: '120px', outline: 'none', resize: 'vertical' }}
+                  className={styles.modalEditTextarea}
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', alignItems: 'center', gap: '16px' }}>
-                <label style={{ textAlign: 'right', color: '#9ca3af', fontSize: '0.9rem' }}>Departamento:</label>
+              <div className={styles.modalEditRow}>
+                <label className={styles.modalEditLabel}>Departamento:</label>
                 <select 
                   value={editForm.departamento}
                   onChange={(e) => setEditForm({...editForm, departamento: e.target.value})}
-                  style={{ background: '#0b1120', color: '#fff', border: '1px solid #32394c', padding: '10px', borderRadius: '4px', width: '100%', outline: 'none' }}
+                  className={styles.modalEditSelect}
                 >
                   <option value="">Selecione...</option>
                   <option value="FIN - Contas a Pagar">FIN - Contas a Pagar</option>
@@ -936,12 +895,12 @@ function CentralAtendimentoContent() {
                 </select>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', alignItems: 'center', gap: '16px' }}>
-                <label style={{ textAlign: 'right', color: '#9ca3af', fontSize: '0.9rem' }}>Categoria:</label>
+              <div className={styles.modalEditRow}>
+                <label className={styles.modalEditLabel}>Categoria:</label>
                 <select 
                   value={editForm.categoria}
                   onChange={(e) => setEditForm({...editForm, categoria: e.target.value})}
-                  style={{ background: '#0b1120', color: '#fff', border: '1px solid #32394c', padding: '10px', borderRadius: '4px', width: '100%', outline: 'none' }}
+                  className={styles.modalEditSelect}
                 >
                   <option value="">Selecione...</option>
                   <option value="Solicitação Cartão Vexpenses (Lojas)">Solicitação Cartão Vexpenses (Lojas)</option>
@@ -950,12 +909,12 @@ function CentralAtendimentoContent() {
                 </select>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', alignItems: 'center', gap: '16px' }}>
-                <label style={{ textAlign: 'right', color: '#9ca3af', fontSize: '0.9rem' }}>Prioridade:</label>
+              <div className={styles.modalEditRow}>
+                <label className={styles.modalEditLabel}>Prioridade:</label>
                 <select 
                   value={editForm.prioridade}
                   onChange={(e) => setEditForm({...editForm, prioridade: e.target.value})}
-                  style={{ background: '#0b1120', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', padding: '10px', borderRadius: '4px', width: '100%', outline: 'none' }}
+                  className={styles.modalEditSelect}
                 >
                   <option value="Baixa">Baixa</option>
                   <option value="Normal">Normal</option>
@@ -965,9 +924,9 @@ function CentralAtendimentoContent() {
               </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', padding: '16px', borderTop: '1px solid #32394c', background: '#111520', borderBottomLeftRadius: '8px', borderBottomRightRadius: '8px' }}>
+            <div className={styles.modalEditFooter}>
               <button 
-                style={{ background: '#10b981', color: '#fff', padding: '8px 24px', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 500 }}
+                className={styles.btnSave}
                 onClick={async () => {
                   if (!ticketAtivo) return;
                   const { error } = await supabase.from('tickets').update({
@@ -995,7 +954,7 @@ function CentralAtendimentoContent() {
               >
                 Salvar
               </button>
-              <button onClick={() => setIsEditModalOpen(false)} style={{ background: 'transparent', color: '#fff', padding: '8px 16px', border: '1px solid #32394c', borderRadius: '4px', cursor: 'pointer' }}>Fechar</button>
+              <button onClick={() => setIsEditModalOpen(false)} className={styles.btnCancelEdit}>Fechar</button>
             </div>
           </div>
         </div>
@@ -1004,26 +963,22 @@ function CentralAtendimentoContent() {
       {selectedImage && (
         <div 
           onClick={() => setSelectedImage(null)}
-          style={{
-            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-            background: 'rgba(0,0,0,0.85)', zIndex: 100000,
-            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'
-          }}
+          className={styles.lightboxOverlay}
         >
-          <div style={{ position: 'absolute', top: '20px', right: '20px', display: 'flex', gap: '16px' }}>
+          <div className={styles.lightboxActions}>
             <a 
               href={selectedImage} 
               download 
               target="_blank" 
               rel="noreferrer" 
-              style={{ color: '#fff', cursor: 'pointer', background: 'rgba(255,255,255,0.1)', padding: '8px', borderRadius: '4px' }}
+              className={styles.lightboxActionBtn}
               onClick={(e) => e.stopPropagation()}
             >
               <Download size={24} />
             </a>
             <button 
               onClick={() => setSelectedImage(null)} 
-              style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', cursor: 'pointer', padding: '8px', borderRadius: '4px' }}
+              className={styles.lightboxActionBtn}
             >
               <X size={24} />
             </button>
@@ -1031,7 +986,7 @@ function CentralAtendimentoContent() {
           <img 
             src={selectedImage} 
             alt="Anexo ampliado" 
-            style={{ maxWidth: '90%', maxHeight: '90%', objectFit: 'contain' }} 
+            className={styles.modalImage} 
             onClick={(e) => e.stopPropagation()}
           />
         </div>
