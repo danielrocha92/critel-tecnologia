@@ -12,6 +12,12 @@ export default function Topbar() {
   const lang = params.lang as string;
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [userData, setUserData] = useState<{ nome: string; email: string } | null>(null);
+  
+  // States for toggles
+  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isOnline, setIsOnline] = useState(true);
+  const [isTvMode, setIsTvMode] = useState(false);
+
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -136,26 +142,26 @@ export default function Topbar() {
                 <Link href={`/${lang}/tecnico/perfil`} className="topbar-dropdown-item" style={{ display: 'block', textDecoration: 'none' }} onClick={() => setIsProfileOpen(false)}>Meus Dados</Link>
                 <button className="topbar-dropdown-item">Alterar Senha</button>
                 <button className="topbar-dropdown-item">Alterar Foto...</button>
-                <div className="topbar-dropdown-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div className="topbar-dropdown-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} onClick={(e) => { e.stopPropagation(); setIsDarkMode(!isDarkMode); }}>
                   <span>Modo Escuro</span>
-                  <div style={{ width: '36px', height: '20px', background: '#3b82f6', borderRadius: '10px', position: 'relative' }}>
-                    <div style={{ width: '16px', height: '16px', background: '#fff', borderRadius: '50%', position: 'absolute', top: '2px', right: '2px' }}></div>
+                  <div style={{ width: '36px', height: '20px', background: isDarkMode ? '#3b82f6' : '#475569', borderRadius: '10px', position: 'relative', transition: 'background 0.3s' }}>
+                    <div style={{ width: '16px', height: '16px', background: '#fff', borderRadius: '50%', position: 'absolute', top: '2px', left: isDarkMode ? 'calc(100% - 18px)' : '2px', transition: 'all 0.3s' }}></div>
                   </div>
                 </div>
                 <button className="topbar-dropdown-item">Exibir Notificações</button>
               </div>
 
               <div style={{ padding: '8px 0', borderBottom: '1px solid #32394c' }}>
-                <div className="topbar-dropdown-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontWeight: 'bold' }}>Online</span>
-                  <div style={{ width: '36px', height: '20px', background: '#3b82f6', borderRadius: '10px', position: 'relative' }}>
-                    <div style={{ width: '16px', height: '16px', background: '#fff', borderRadius: '50%', position: 'absolute', top: '2px', right: '2px' }}></div>
+                <div className="topbar-dropdown-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} onClick={(e) => { e.stopPropagation(); setIsOnline(!isOnline); }}>
+                  <span style={{ fontWeight: isOnline ? 'bold' : 'normal' }}>Online</span>
+                  <div style={{ width: '36px', height: '20px', background: isOnline ? '#3b82f6' : '#475569', borderRadius: '10px', position: 'relative', transition: 'background 0.3s' }}>
+                    <div style={{ width: '16px', height: '16px', background: '#fff', borderRadius: '50%', position: 'absolute', top: '2px', left: isOnline ? 'calc(100% - 18px)' : '2px', transition: 'all 0.3s' }}></div>
                   </div>
                 </div>
-                <div className="topbar-dropdown-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span>Modo TV</span>
-                  <div style={{ width: '36px', height: '20px', background: '#475569', borderRadius: '10px', position: 'relative' }}>
-                    <div style={{ width: '16px', height: '16px', background: '#fff', borderRadius: '50%', position: 'absolute', top: '2px', left: '2px' }}></div>
+                <div className="topbar-dropdown-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} onClick={(e) => { e.stopPropagation(); setIsTvMode(!isTvMode); }}>
+                  <span style={{ fontWeight: isTvMode ? 'bold' : 'normal' }}>Modo TV</span>
+                  <div style={{ width: '36px', height: '20px', background: isTvMode ? '#3b82f6' : '#475569', borderRadius: '10px', position: 'relative', transition: 'background 0.3s' }}>
+                    <div style={{ width: '16px', height: '16px', background: '#fff', borderRadius: '50%', position: 'absolute', top: '2px', left: isTvMode ? 'calc(100% - 18px)' : '2px', transition: 'all 0.3s' }}></div>
                   </div>
                 </div>
               </div>
