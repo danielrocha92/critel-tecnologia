@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { MapPin, Clock, FileText, CheckCircle, Car, Search } from 'lucide-react';
+import { MapPin, Clock, FileText, CheckCircle, Search, ClipboardList, Activity, Sparkles } from 'lucide-react';
 import styles from './OsList.module.css';
 
 import ResumoFinanceiro from '@/components/Tecnico/ResumoFinanceiro';
@@ -92,6 +92,7 @@ export default function OsList({ lang }: { lang: string }) {
           .from('tickets')
           .select('*')
           .neq('status', 'FINALIZADO')
+          .neq('status', 'CONCLUIDO')
           .order('criado_em', { ascending: false });
           
         if (clientFilter) {
@@ -131,18 +132,65 @@ export default function OsList({ lang }: { lang: string }) {
     );
   });
 
+  const newTicketsCount = tickets.filter(ticket => ticket.status === 'NOVO').length;
+  const inProgressCount = tickets.filter(ticket => ticket.status === 'EM_ANDAMENTO').length;
+
   return (
     <div className={styles.pageContainer}>
-      {userId && <ResumoFinanceiro userId={userId} />}
-      
-      <h2 className={styles.pageTitle}>Meus Serviços pendentes</h2>
+      <header className={styles.dashboardHeader}>
+        <div className={styles.headerCopy}>
+          <span className={styles.eyebrow}><Sparkles size={14} /> Área do técnico</span>
+          <h2 className={styles.pageTitle}>Painel de serviços</h2>
+          <p className={styles.pageSubtitle}>Acompanhe e organize suas ordens de serviço.</p>
+        </div>
+        <Link href={`/${lang}/tecnico/historico`} className={styles.historyLink}>
+          <ClipboardList size={17} />
+          Histórico
+        </Link>
+      </header>
 
-      <div className={styles.filtersContainer}>
+      <section className={styles.metricsGrid} aria-label="Resumo dos chamados ativos">
+        <article className={styles.metricCard}>
+          <span className={`${styles.metricIcon} ${styles.metricIconBlue}`}><ClipboardList size={18} /></span>
+          <div>
+            <span className={styles.metricLabel}>Chamados ativos</span>
+            <strong className={styles.metricValue}>{tickets.length}</strong>
+          </div>
+        </article>
+        <article className={styles.metricCard}>
+          <span className={`${styles.metricIcon} ${styles.metricIconAmber}`}><Sparkles size={18} /></span>
+          <div>
+            <span className={styles.metricLabel}>Novos</span>
+            <strong className={styles.metricValue}>{newTicketsCount}</strong>
+          </div>
+        </article>
+        <article className={styles.metricCard}>
+          <span className={`${styles.metricIcon} ${styles.metricIconGreen}`}><Activity size={18} /></span>
+          <div>
+            <span className={styles.metricLabel}>Em andamento</span>
+            <strong className={styles.metricValue}>{inProgressCount}</strong>
+          </div>
+        </article>
+      </section>
+
+      {userId && <ResumoFinanceiro userId={userId} />}
+
+      <section className={styles.listSection} aria-labelledby="active-tickets-title">
+        <div className={styles.sectionHeader}>
+          <div>
+            <h3 id="active-tickets-title" className={styles.sectionTitle}>Chamados em aberto</h3>
+            <p className={styles.sectionSubtitle}>Somente serviços que ainda precisam de atendimento.</p>
+          </div>
+          <span className={styles.resultCount}>{filteredTickets.length}</span>
+        </div>
+
+      <div className={styles.filtersContainer} aria-label="Filtros dos chamados">
         <div className={styles.searchWrapper}>
-          <Search size={18} color="#94a3b8" className={styles.searchIcon} />
+          <Search size={18} className={styles.searchIcon} />
           <input 
             type="text" 
             placeholder="Buscar chamado..." 
+            aria-label="Buscar chamado por cliente, endereço ou protocolo"
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
             className={styles.searchInput}
@@ -153,6 +201,7 @@ export default function OsList({ lang }: { lang: string }) {
             value={clientFilter}
             onChange={e => setClientFilter(e.target.value)}
             className={styles.filterSelect}
+            aria-label="Filtrar chamados por cliente"
           >
             <option value="">Todos os Clientes</option>
             <option value="Bacio di Latte">Bacio di Latte</option>
@@ -168,32 +217,44 @@ export default function OsList({ lang }: { lang: string }) {
             value={dateFilter}
             onChange={e => setDateFilter(e.target.value)}
             className={styles.dateInput}
+            aria-label="Filtrar chamados pela data de abertura"
           />
         </div>
       </div>
       
       {filteredTickets.length === 0 ? (
         <div className={styles.emptyState}>
-          <CheckCircle size={48} className={styles.emptyStateIcon} />
-          <h3 className={styles.emptyStateTitle}>Tudo limpo!</h3>
-          <p className={styles.emptyStateDesc}>Você não tem nenhum serviço pendente.</p>
+          <span className={styles.emptyStateIcon}><CheckCircle size={25} /></span>
+          <h3 className={styles.emptyStateTitle}>{tickets.length ? 'Nenhum chamado encontrado' : 'Tudo em dia!'}</h3>
+          <p className={styles.emptyStateDesc}>
+            {tickets.length
+              ? 'Tente ajustar a busca ou os filtros selecionados.'
+              : 'Você não tem serviços pendentes no momento.'}
+          </p>
+          {!tickets.length && (
+            <Link href={`/${lang}/tecnico/historico`} className={styles.emptyHistoryLink}>
+              Consultar chamados finalizados
+            </Link>
+          )}
         </div>
       ) : (
         <div className={styles.ticketsList}>
           {filteredTickets.map(ticket => {
             const endereco = getTicketAddress(ticket);
             return (
-              <div key={ticket.id} className={styles.ticketCard}>
-                {ticket.status === 'NOVO' && (
-                  <div className={styles.newTicketIndicator}></div>
-                )}
+              <article key={ticket.id} className={styles.ticketCard}>
                 <div className={styles.ticketHeader}>
-                  <strong className={styles.ticketClient}>{ticket.cliente}</strong>
-                  <span className={styles.ticketProtocol}>#{ticket.protocolo_origem}</span>
+                  <div className={styles.ticketIdentity}>
+                    <strong className={styles.ticketClient}>{ticket.cliente}</strong>
+                    <span className={styles.ticketProtocol}>OS #{ticket.protocolo_origem}</span>
+                  </div>
+                  <span className={`${styles.statusBadge} ${ticket.status === 'EM_ANDAMENTO' ? styles.statusInProgress : styles.statusNew}`}>
+                    {ticket.status === 'EM_ANDAMENTO' ? 'Em andamento' : ticket.status === 'NOVO' ? 'Novo' : ticket.status}
+                  </span>
                 </div>
-                <p className={styles.ticketTitle}>
+                <h3 className={styles.ticketTitle}>
                   {ticket.titulo}
-                </p>
+                </h3>
 
                 <div className={styles.ticketDetails}>
                   <button
@@ -205,21 +266,22 @@ export default function OsList({ lang }: { lang: string }) {
                     <MapPin size={16} className={styles.addressIcon} />
                     <span>{endereco || 'Endereço não informado'}</span>
                   </button>
-                  <div className={styles.priorityDetail}>
-                    <Clock size={14} /> {ticket.prioridade || 'Normal'}
-                  </div>
+                  <span className={styles.priorityDetail}>
+                    <Clock size={14} /> Prioridade: {ticket.prioridade || 'Normal'}
+                  </span>
                 </div>
 
                 <Link
                   href={`/${lang}/tecnico/os/?ticket_id=${ticket.id}`}
                   className={styles.actionButton}>
-                  <FileText size={18} /> iniciar/executar chamado
+                  <FileText size={18} /> Abrir ordem de serviço
                 </Link>
-              </div>
+              </article>
             );
           })}
         </div>
       )}
+      </section>
     </div>
   );
 }

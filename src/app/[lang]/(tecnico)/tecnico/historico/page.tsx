@@ -28,7 +28,7 @@ export default function HistoricoPage() {
         .from('tickets')
         .select('*')
         .or(`tecnico_id.eq.${userData.user.id},analista_id.eq.${userData.user.id}`)
-        .eq('status', 'FINALIZADO')
+        .in('status', ['FINALIZADO', 'CONCLUIDO'])
         .order('atualizado_em', { ascending: false })
         .limit(20);
 
@@ -70,7 +70,7 @@ export default function HistoricoPage() {
               
               <div className={styles.ticketFooter}>
                 <span className={styles.ticketDate}>
-                  {new Date(ticket.atualizado_em).toLocaleDateString('pt-BR')}
+                  {new Date(ticket.checkout_at || ticket.atualizado_em).toLocaleDateString('pt-BR')}
                 </span>
                 <Link 
                   href={`/${lang}/tecnico/os/${ticket.id}`}

@@ -13,6 +13,7 @@ interface NovoChamadoModalProps {
 
 export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
   const [loading, setLoading] = useState(false);
+  const isSubmitting = useRef(false);
   const [file, setFile] = useState<File | null>(null);
   const messageRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState({
@@ -51,12 +52,15 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
   };
 
   const handleCreateTicket = async () => {
+    if (isSubmitting.current) return;
+
     const descricaoFinal = messageRef.current?.innerHTML || '';
     if (!formData.cliente || !formData.assunto || !descricaoFinal) {
       alert('Por favor, preencha o Cliente, Assunto e Mensagem.');
       return;
     }
 
+    isSubmitting.current = true;
     setLoading(true);
     const protocolo = `OS-${Date.now()}`;
     
@@ -84,9 +88,7 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-      
       const result = await response.json();
-      setLoading(false);
 
       if (!response.ok) {
         console.error('Erro ao criar OS:', result.error);
@@ -95,9 +97,11 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
         window.location.reload();
       }
     } catch (err) {
-      setLoading(false);
       console.error('Erro ao chamar a API:', err);
       alert('Erro de conexão ao criar a Ordem de Serviço.');
+    } finally {
+      isSubmitting.current = false;
+      setLoading(false);
     }
   };
   return (
@@ -107,7 +111,7 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
         {/* HEADER */}
         <div className={styles.header}>
           <h2 className={styles.headerTitle}>Novo Chamado</h2>
-          <button onClick={onClose} className={styles.closeButton}>
+          <button onClick={onClose} disabled={loading} className={styles.closeButton}>
             <X size={20} />
           </button>
         </div>
@@ -264,6 +268,7 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
             <button 
               onClick={handleCreateTicket}
               disabled={loading}
+              aria-busy={loading}
               className={styles.btnCreate}
             >
               {loading ? 'Criando...' : 'Criar Chamado'}
@@ -292,6 +297,7 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
           
           <button 
             onClick={onClose}
+            disabled={loading}
             className={styles.btnCancel}
           >
             Cancelar

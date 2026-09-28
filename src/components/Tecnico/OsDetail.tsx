@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import Link from 'next/link';
 import { createBrowserClient } from '@supabase/ssr';
 import { ChevronLeft, MapPin, Clock, CheckCircle, Navigation, AlertTriangle } from 'lucide-react';
 import FinalizarChamadoModal from '@/components/Tecnico/FinalizarChamadoModal';
@@ -56,7 +57,7 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
 
   // Watch position para check-out automático
   useEffect(() => {
-    if (ticket?.check_in_at && ticket?.status !== 'FINALIZADO') {
+    if (ticket?.check_in_at && ticket?.status !== 'FINALIZADO' && ticket?.status !== 'CONCLUIDO') {
       if ('geolocation' in navigator) {
         watchId.current = navigator.geolocation.watchPosition(
           async (position) => {
@@ -89,7 +90,7 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
                 })
               });
               
-              router.push(`/${lang}/tecnico`);
+              router.replace(`/${lang}/tecnico/historico`);
             }
           },
           (err) => console.warn(err),
@@ -168,6 +169,7 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
   if (!ticket) return <div className={styles.loadingContainer}>OS não encontrada.</div>;
 
   const isCheckedIn = !!ticket.check_in_at;
+  const isFinalized = ticket.status === 'FINALIZADO' || ticket.status === 'CONCLUIDO';
   const { text: descricao, address: enderecoDaDescricao } = formatTicketDescription(ticket.descricao);
   const endereco = getTicketAddress({ endereco: ticket.endereco, descricao: ticket.descricao });
 
@@ -252,32 +254,41 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
       </div>
 
       <div className={styles.bottomBar}>
-        {checkInMessage && <p className={styles.checkInMessage} role="status">{checkInMessage}</p>}
-        {geoError && <p className={styles.geoError}>{geoError}</p>}
-        
-        {!isCheckedIn ? (
-          <button 
-            onClick={handleCheckIn}
-            disabled={isCheckingIn}
-            className={`${styles.btnCheckIn} ${isCheckingIn ? styles.btnCheckInDisabled : ''}`}>
-            <Navigation size={22} />
-            {isCheckingIn ? 'Obtendo localização...' : 'Check-in (Cheguei no local)'}
-          </button>
+        {isFinalized ? (
+          <Link href={`/${lang}/tecnico/historico`} className={styles.btnHistory}>
+            <CheckCircle size={20} />
+            Chamado finalizado · Voltar ao histórico
+          </Link>
         ) : (
-          <div className={styles.actionsContainer}>
-            {distanciaAtual !== null && (
-              <div className={styles.distanceInfo}>
-                {distanciaAtual > 400 ? <AlertTriangle size={14} color="#f59e0b" /> : <MapPin size={14} />}
-                Distância do check-in: {Math.round(distanciaAtual)}m
+          <>
+            {checkInMessage && <p className={styles.checkInMessage} role="status">{checkInMessage}</p>}
+            {geoError && <p className={styles.geoError}>{geoError}</p>}
+
+            {!isCheckedIn ? (
+              <button
+                onClick={handleCheckIn}
+                disabled={isCheckingIn}
+                className={`${styles.btnCheckIn} ${isCheckingIn ? styles.btnCheckInDisabled : ''}`}>
+                <Navigation size={22} />
+                {isCheckingIn ? 'Obtendo localização...' : 'Check-in (Cheguei no local)'}
+              </button>
+            ) : (
+              <div className={styles.actionsContainer}>
+                {distanciaAtual !== null && (
+                  <div className={styles.distanceInfo}>
+                    {distanciaAtual > 400 ? <AlertTriangle size={14} color="#f59e0b" /> : <MapPin size={14} />}
+                    Distância do check-in: {Math.round(distanciaAtual)}m
+                  </div>
+                )}
+                <button
+                  onClick={() => setShowModal(true)}
+                  className={styles.btnFinalize}>
+                  <CheckCircle size={22} />
+                  Finalizar Chamado na Loja
+                </button>
               </div>
             )}
-            <button 
-              onClick={() => setShowModal(true)}
-              className={styles.btnFinalize}>
-              <CheckCircle size={22} />
-              Finalizar Chamado na Loja
-            </button>
-          </div>
+          </>
         )}
       </div>
 
@@ -287,7 +298,7 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
           onClose={() => setShowModal(false)} 
           onSuccess={() => {
             setShowModal(false);
-            router.push(`/${lang}/tecnico`);
+            router.replace(`/${lang}/tecnico/historico`);
           }}
         />
       )}
