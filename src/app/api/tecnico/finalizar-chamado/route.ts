@@ -36,7 +36,18 @@ export async function POST(request: Request) {
       assinatura_datahora
     } = body;
 
-    if (!ticket_id || !latitude || !longitude || !descricao_servicos) {
+    if (
+      !ticket_id ||
+      typeof latitude !== 'number' ||
+      !Number.isFinite(latitude) ||
+      latitude < -90 ||
+      latitude > 90 ||
+      typeof longitude !== 'number' ||
+      !Number.isFinite(longitude) ||
+      longitude < -180 ||
+      longitude > 180 ||
+      !descricao_servicos
+    ) {
       return NextResponse.json({ error: 'Dados obrigatórios ausentes (GPS, Descrição ou Ticket)' }, { status: 400 });
     }
 

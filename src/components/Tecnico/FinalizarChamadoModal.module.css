@@ -206,6 +206,23 @@
   color: #cbd5e1;
 }
 
+.geoRetryButton {
+  display: inline-flex;
+  margin-top: 0.65rem;
+  padding: 0;
+  border: 0;
+  color: #7dd3fc;
+  background: transparent;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.geoRetryButton:hover {
+  color: #bae6fd;
+}
+
 .evidenciaSuccessSpan {
   font-size: 0.75rem;
   color: #10b981;

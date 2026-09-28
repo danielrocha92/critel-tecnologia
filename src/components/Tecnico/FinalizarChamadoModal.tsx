@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, ChangeEvent } from 'react';
+import { useState, useRef, useEffect, useCallback, ChangeEvent } from 'react';
 import { X, MapPin, MapPinOff, AlertTriangle, Send, Clock, Plus, Trash } from 'lucide-react';
 import SignatureCanvas from 'react-signature-canvas';
 import styles from './FinalizarChamadoModal.module.css';
@@ -36,6 +36,44 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
   // Signature
   const sigCanvas = useRef<any>(null);
 
+  const captureLocation = useCallback(() => {
+    setLocation(null);
+    setGeoError(null);
+    setIsLocating(true);
+
+    if (!window.isSecureContext) {
+      setGeoError('O GPS exige uma conexão segura (HTTPS). Abra o sistema pelo endereço HTTPS.');
+      setIsLocating(false);
+      return;
+    }
+
+    if (!navigator.geolocation) {
+      setGeoError('Este navegador não oferece suporte à localização GPS.');
+      setIsLocating(false);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLocation({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        });
+        setIsLocating(false);
+      },
+      (err) => {
+        const messages: Record<number, string> = {
+          1: 'Permissão de localização negada. Autorize o acesso ao GPS nas configurações do navegador.',
+          2: 'Não foi possível obter sua localização. Verifique se a localização está ativada e tente novamente.',
+          3: 'Tempo esgotado ao obter a localização. Verifique o sinal e tente novamente.'
+        };
+        setGeoError(messages[err.code] || err.message || 'Falha ao obter a localização. Tente novamente.');
+        setIsLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 }
+    );
+  }, []);
+
   useEffect(() => {
     // Get current time as default
     const now = new Date();
@@ -55,27 +93,8 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
     }
     setHoraInicio(localISOTimeAgo);
 
-    // Capture Geolocation immediately
-    if ('geolocation' in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          });
-          setIsLocating(false);
-        },
-        (err) => {
-          setGeoError(err.message);
-          setIsLocating(false);
-        },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-      );
-    } else {
-      setGeoError('Geolocalização não suportada pelo navegador.');
-      setIsLocating(false);
-    }
-  }, [ticket.check_in_at]);
+    captureLocation();
+  }, [captureLocation, ticket.check_in_at]);
 
   const clearSignature = () => {
     if (sigCanvas.current) {
@@ -235,6 +254,15 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
                     ? `Lat: ${location.lat.toFixed(5)}, Lng: ${location.lng.toFixed(5)}`
                     : `Erro: ${geoError}. O GPS é obrigatório para auditoria.`}
               </span>
+              {!location && !isLocating && (
+                <button
+                  type="button"
+                  onClick={captureLocation}
+                  className={styles.geoRetryButton}
+                >
+                  Tentar novamente
+                </button>
+              )}
             </div>
           </div>
 
