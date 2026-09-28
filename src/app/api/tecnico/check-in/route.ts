@@ -23,23 +23,35 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { ticket_id, latitude, longitude } = body;
 
-    if (!ticket_id || !latitude || !longitude) {
+    if (
+      typeof ticket_id !== 'string' ||
+      typeof latitude !== 'number' ||
+      !Number.isFinite(latitude) ||
+      typeof longitude !== 'number' ||
+      !Number.isFinite(longitude)
+    ) {
       return NextResponse.json({ error: 'Dados obrigatórios ausentes' }, { status: 400 });
     }
 
-    const { error: ticketError } = await supabaseAdmin
+    const checkInAt = new Date().toISOString();
+    const { data: updatedTicket, error: ticketError } = await supabaseAdmin
       .from('tickets')
       .update({ 
         check_in_lat: latitude,
         check_in_lng: longitude,
-        check_in_at: new Date().toISOString(),
+        check_in_at: checkInAt,
         status: 'EM_ANDAMENTO'
       })
-      .eq('id', ticket_id);
+      .eq('id', ticket_id)
+      .select('id')
+      .maybeSingle();
 
     if (ticketError) throw ticketError;
+    if (!updatedTicket) {
+      return NextResponse.json({ error: 'Ordem de serviço não encontrada.' }, { status: 404 });
+    }
 
-    return NextResponse.json({ success: true, check_in_at: new Date().toISOString() });
+    return NextResponse.json({ success: true, check_in_at: checkInAt });
   } catch (error: any) {
     console.error('Erro no check-in:', error);
     return NextResponse.json({ error: error.message || 'Erro interno' }, { status: 500 });

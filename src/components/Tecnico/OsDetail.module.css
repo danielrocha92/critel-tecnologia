@@ -92,15 +92,43 @@
 }
 
 .detailValue {
+  display: block;
   font-size: 0.85rem;
   color: #94a3b8;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
 .descText {
+  margin: 0;
   color: #cbd5e1;
   font-size: 0.95rem;
   line-height: 1.6;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.addressContent {
+  min-width: 0;
+}
+
+.addressButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.6rem;
+  padding: 0;
+  border: 0;
+  color: #38bdf8;
+  background: transparent;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.addressButton:hover {
+  color: #7dd3fc;
 }
 
 .bottomBar {
@@ -120,6 +148,13 @@
   color: #ef4444;
   font-size: 0.8rem;
   margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.checkInMessage {
+  color: #7dd3fc;
+  font-size: 0.85rem;
+  margin: 0 0 0.75rem;
   text-align: center;
 }
 

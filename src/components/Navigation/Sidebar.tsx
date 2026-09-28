@@ -80,7 +80,7 @@ export default function Sidebar({ lang }: { lang: string }) {
       ],
     },
     { 
-      name: 'Ordens de Serviço', icon: MessageSquare, href: `/${lang}/atendimentos`, section: 'main',
+      name: 'Ordens de Serviço', icon: MessageSquare, href: `/${lang}/os`, section: 'main',
       roles: ['SUPER_ADMIN', 'ADMIN', 'ANALISTA', 'COMERCIAL']
     },
     {

@@ -8,6 +8,7 @@ import { MapPin, Clock, FileText, CheckCircle, Car, Search } from 'lucide-react'
 import styles from './OsList.module.css';
 
 import ResumoFinanceiro from '@/components/Tecnico/ResumoFinanceiro';
+import { getTicketAddress } from '@/utils/tickets/description';
 
 export default function OsList({ lang }: { lang: string }) {
   const [userId, setUserId] = useState<string | null>(null);
@@ -121,10 +122,12 @@ export default function OsList({ lang }: { lang: string }) {
 
   const filteredTickets = tickets.filter(t => {
     const term = searchTerm.toLowerCase();
+    const address = getTicketAddress(t);
     return (
       (t.titulo && t.titulo.toLowerCase().includes(term)) ||
       (t.cliente && t.cliente.toLowerCase().includes(term)) ||
-      (t.protocolo_origem && t.protocolo_origem.toLowerCase().includes(term))
+      (t.protocolo_origem && t.protocolo_origem.toLowerCase().includes(term)) ||
+      address.toLowerCase().includes(term)
     );
   });
 
@@ -177,39 +180,44 @@ export default function OsList({ lang }: { lang: string }) {
         </div>
       ) : (
         <div className={styles.ticketsList}>
-          {filteredTickets.map(ticket => (
-            <div key={ticket.id} className={styles.ticketCard}>
-              {ticket.status === 'NOVO' && (
-                <div className={styles.newTicketIndicator}></div>
-              )}
-              <div className={styles.ticketHeader}>
-                <strong className={styles.ticketClient}>{ticket.cliente}</strong>
-                <span className={styles.ticketProtocol}>#{ticket.protocolo_origem}</span>
-              </div>
-              <p className={styles.ticketTitle}>
-                {ticket.titulo}
-              </p>
-              
-              <div className={styles.ticketDetails}>
-                <div 
-                  onClick={() => handleNavigate(ticket.endereco)}
-                  className={styles.addressLink}
-                >
-                  <MapPin size={16} className={styles.addressIcon} /> 
-                  <span>{ticket.endereco || 'Endereço não informado'}</span>
+          {filteredTickets.map(ticket => {
+            const endereco = getTicketAddress(ticket);
+            return (
+              <div key={ticket.id} className={styles.ticketCard}>
+                {ticket.status === 'NOVO' && (
+                  <div className={styles.newTicketIndicator}></div>
+                )}
+                <div className={styles.ticketHeader}>
+                  <strong className={styles.ticketClient}>{ticket.cliente}</strong>
+                  <span className={styles.ticketProtocol}>#{ticket.protocolo_origem}</span>
                 </div>
-                <div className={styles.priorityDetail}>
-                  <Clock size={14} /> {ticket.prioridade || 'Normal'}
-                </div>
-              </div>
+                <p className={styles.ticketTitle}>
+                  {ticket.titulo}
+                </p>
 
-              <Link 
-                href={`/${lang}/tecnico/os/?ticket_id=${ticket.id}`}
-                className={styles.actionButton}>
-                <FileText size={18} /> iniciar/executar chamado
-              </Link>
-            </div>
-          ))}
+                <div className={styles.ticketDetails}>
+                  <button
+                    type="button"
+                    onClick={() => handleNavigate(endereco)}
+                    disabled={!endereco}
+                    className={endereco ? styles.addressLink : styles.addressUnavailable}
+                  >
+                    <MapPin size={16} className={styles.addressIcon} />
+                    <span>{endereco || 'Endereço não informado'}</span>
+                  </button>
+                  <div className={styles.priorityDetail}>
+                    <Clock size={14} /> {ticket.prioridade || 'Normal'}
+                  </div>
+                </div>
+
+                <Link
+                  href={`/${lang}/tecnico/os/?ticket_id=${ticket.id}`}
+                  className={styles.actionButton}>
+                  <FileText size={18} /> iniciar/executar chamado
+                </Link>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

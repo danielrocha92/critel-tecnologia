@@ -145,12 +145,37 @@
 
 .addressLink {
   display: flex;
+  max-width: 100%;
   align-items: flex-start;
   gap: 6px;
+  padding: 0;
+  border: 0;
   color: #38bdf8;
+  background: transparent;
+  font: inherit;
   font-size: 0.85rem;
   cursor: pointer;
   text-decoration: underline;
+  text-align: left;
+}
+
+.addressUnavailable {
+  display: flex;
+  max-width: 100%;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  color: #94a3b8;
+  background: transparent;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: default;
+  text-align: left;
+}
+
+.addressUnavailable:disabled {
+  opacity: 1;
 }
 
 .addressIcon {

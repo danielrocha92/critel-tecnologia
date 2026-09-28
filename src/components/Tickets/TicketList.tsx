@@ -8,7 +8,7 @@ import styles from './TicketList.module.css';
 
 export type TicketFilter = 'all' | 'my-all' | 'my-opened' | 'my-closed';
 
-export default function TicketList({ filterTitle, filterType, excludeTomTicket }: { filterTitle: string, filterType: TicketFilter, excludeTomTicket?: boolean }) {
+export default function TicketList({ filterTitle, filterType, excludeTomTicket, detailPath }: { filterTitle: string, filterType: TicketFilter, excludeTomTicket?: boolean, detailPath?: string }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [clientFilter, setClientFilter] = useState('');
   const [departmentFilter, setDepartmentFilter] = useState('');
@@ -269,7 +269,9 @@ export default function TicketList({ filterTitle, filterType, excludeTomTicket }
           {filteredTickets.map(ticket => (
             <div 
               key={ticket.id} 
-              onClick={() => router.push(`/${lang}/atendimento?ticket_id=${ticket.id}`)}
+              onClick={() => router.push(detailPath
+                ? `/${lang}${detailPath}/${ticket.id}`
+                : `/${lang}/atendimento?ticket_id=${ticket.id}`)}
               className={styles.ticketCard}
             >
               <div className={`${styles.statusIndicator} ${ticket.status === 'NOVO' ? styles.statusNovo : ticket.status === 'FINALIZADO' ? styles.statusFinalizado : styles.statusDefault}`} />

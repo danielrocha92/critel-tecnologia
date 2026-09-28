@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { createBrowserClient } from '@supabase/ssr';
 import { ChevronLeft, MapPin, Clock, CheckCircle, Navigation, AlertTriangle } from 'lucide-react';
 import FinalizarChamadoModal from '@/components/Tecnico/FinalizarChamadoModal';
+import { formatTicketDescription, getTicketAddress } from '@/utils/tickets/description';
 import styles from './OsDetail.module.css';
 
 // Helper: Haversine distance em metros
@@ -28,6 +29,7 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
   const [showModal, setShowModal] = useState(false);
   const [isCheckingIn, setIsCheckingIn] = useState(false);
   const [geoError, setGeoError] = useState<string | null>(null);
+  const [checkInMessage, setCheckInMessage] = useState<string | null>(null);
   const [distanciaAtual, setDistanciaAtual] = useState<number | null>(null);
 
   const watchId = useRef<number | null>(null);
@@ -104,9 +106,18 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
   const handleCheckIn = () => {
     setIsCheckingIn(true);
     setGeoError(null);
+    setCheckInMessage('Solicitando sua localização GPS...');
 
-    if (!('geolocation' in navigator)) {
-      setGeoError('GPS não suportado.');
+    if (!window.isSecureContext) {
+      setGeoError('O GPS exige uma conexão segura (HTTPS). Abra o sistema pelo endereço HTTPS.');
+      setCheckInMessage(null);
+      setIsCheckingIn(false);
+      return;
+    }
+
+    if (!navigator.geolocation) {
+      setGeoError('Este navegador não oferece suporte à localização GPS.');
+      setCheckInMessage(null);
       setIsCheckingIn(false);
       return;
     }
@@ -114,6 +125,7 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         try {
+          setCheckInMessage('Localização obtida. Registrando o check-in...');
           const res = await fetch('/api/tecnico/check-in', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -123,20 +135,32 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
               longitude: position.coords.longitude
             })
           });
-          
-          if (!res.ok) throw new Error('Erro ao registrar Check-in');
+
+          const result = await res.json();
+          if (!res.ok || !result.success) {
+            throw new Error(result.error || 'Não foi possível registrar o check-in.');
+          }
+
           await fetchTicket();
+          setCheckInMessage(null);
         } catch (err: any) {
-          setGeoError(err.message);
+          setGeoError(err instanceof Error ? err.message : 'Erro inesperado ao registrar o check-in.');
+          setCheckInMessage(null);
         } finally {
           setIsCheckingIn(false);
         }
       },
       (err) => {
-        setGeoError(err.message);
+        const messages: Record<number, string> = {
+          1: 'Permissão de localização negada. Autorize o acesso ao GPS nas configurações do navegador.',
+          2: 'Não foi possível obter sua localização. Verifique se o GPS está ativado e tente novamente.',
+          3: 'A localização demorou demais. Verifique o sinal do GPS e tente novamente.',
+        };
+        setGeoError(messages[err.code] || 'Falha ao obter a localização. Tente novamente.');
+        setCheckInMessage(null);
         setIsCheckingIn(false);
       },
-      { enableHighAccuracy: true }
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
   };
 
@@ -144,6 +168,26 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
   if (!ticket) return <div className={styles.loadingContainer}>OS não encontrada.</div>;
 
   const isCheckedIn = !!ticket.check_in_at;
+  const { text: descricao, address: enderecoDaDescricao } = formatTicketDescription(ticket.descricao);
+  const endereco = getTicketAddress({ endereco: ticket.endereco, descricao: ticket.descricao });
+
+  const handleNavigate = () => {
+    if (!endereco) return;
+    const preference = localStorage.getItem('navAppPref');
+    const useWaze = preference
+      ? preference === 'waze'
+      : window.confirm('Deseja usar o Waze? (Clique "OK" para Waze ou "Cancelar" para Google Maps)');
+
+    if (!preference) {
+      localStorage.setItem('navAppPref', useWaze ? 'waze' : 'maps');
+    }
+
+    const query = encodeURIComponent(endereco);
+    const url = useWaze
+      ? `https://waze.com/ul?q=${query}`
+      : `https://www.google.com/maps/search/?api=1&query=${query}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
 
   return (
     <div className={styles.pageContainer}>
@@ -181,18 +225,34 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
                 <span className={styles.detailValue}>{ticket.departamento}</span>
               </div>
             </div>
+            {(endereco || enderecoDaDescricao) && (
+              <div className={styles.detailItem}>
+                <MapPin size={18} color="#00d2ff" className={styles.detailIcon} />
+                <div className={styles.addressContent}>
+                  <strong className={styles.detailLabel}>Endereço da loja</strong>
+                  <span className={styles.detailValue}>{endereco || enderecoDaDescricao}</span>
+                  {endereco && (
+                    <button type="button" onClick={handleNavigate} className={styles.addressButton}>
+                      <Navigation size={15} />
+                      Abrir no mapa
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
-        <div className={styles.cardSection}>
-          <h3 className={`${styles.sectionHeading} ${styles.sectionHeadingDesc}`}>Descrição Reportada</h3>
-          <p className={styles.descText}>
-            {ticket.descricao}
-          </p>
-        </div>
+        {descricao && (
+          <section className={styles.cardSection}>
+            <h3 className={`${styles.sectionHeading} ${styles.sectionHeadingDesc}`}>Descrição Reportada</h3>
+            <p className={styles.descText}>{descricao}</p>
+          </section>
+        )}
       </div>
 
       <div className={styles.bottomBar}>
+        {checkInMessage && <p className={styles.checkInMessage} role="status">{checkInMessage}</p>}
         {geoError && <p className={styles.geoError}>{geoError}</p>}
         
         {!isCheckedIn ? (
@@ -201,7 +261,7 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
             disabled={isCheckingIn}
             className={`${styles.btnCheckIn} ${isCheckingIn ? styles.btnCheckInDisabled : ''}`}>
             <Navigation size={22} />
-            {isCheckingIn ? 'Registrando Check-in...' : 'Check-in (Cheguei no local)'}
+            {isCheckingIn ? 'Obtendo localização...' : 'Check-in (Cheguei no local)'}
           </button>
         ) : (
           <div className={styles.actionsContainer}>
