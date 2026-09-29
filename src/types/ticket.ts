@@ -33,22 +33,6 @@ export interface ITomTicketReply {
   attachments?: { url: string; name: string }[];
 }
 
-export interface IWhatsAppMessage {
-  id: string;
-  conversa_id: string;
-  conteudo: string;
-  criado_em: string;
-  direcao: 'IN' | 'OUT' | string;
-  is_from_me?: boolean;
-  status?: string;
-}
-
-export interface IWhatsAppConversation {
-  id: string;
-  telefone: string;
-  nome_perfil: string;
-  ultima_mensagem_data?: string;
-}
 
 export interface ILojaContato {
   id?: string;

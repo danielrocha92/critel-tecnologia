@@ -6,12 +6,11 @@ import { toast } from 'sonner';
 import { createClient } from '../../../../utils/supabase/client';
 import { useCentralAtendimento } from '../../../../hooks/useCentralAtendimento';
 import styles from './atendimento.module.css';
-import { Send, User, Phone, Clock, Search, Bot, Server, Key, Video, Activity, Settings, Trash2, Printer, Pencil, History, X } from 'lucide-react';
+import { Send, User, Clock, Search, Bot, Server, Key, Video, Activity, Settings, Trash2, Printer, Pencil, History, X } from 'lucide-react';
 import { DashboardTickets } from '../../../../components/Chamados/DashboardTickets';
 import { TicketEditor } from '../../../../components/Chamados/TicketEditor';
-import { WhatsAppModal } from '../../../../components/Chamados/WhatsAppModal';
 import { SkeletonHistory } from '../../../../components/Chamados/SkeletonHistory';
-import { ITicket, ITomTicketReply, IWhatsAppConversation, IWhatsAppMessage, ILojaContato } from '../../../../types/ticket';
+import { ITicket, ITomTicketReply, ILojaContato } from '../../../../types/ticket';
 import { File, Download } from 'lucide-react';
 
 const supabase = createClient();
@@ -169,19 +168,9 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
     fetchAnexos();
   }, [ticketAtivo]);
 
-  // WhatsApp States
-  const [conversas, setConversas] = useState<IWhatsAppConversation[]>([]);
-  const [conversaAtiva, setConversaAtiva] = useState<IWhatsAppConversation | null>(null);
-  const [mensagens, setMensagens] = useState<IWhatsAppMessage[]>([]);
-  const [inputMensagem, setInputMensagem] = useState('');
-  
+
   // Status PDV e CRM movidos para o final para manter a estrutura, PDVs agora vêm do hook.
   
-  // CRM Lojas (Contatos Dinâmicos)
-  const [lojaContato, setLojaContato] = useState<ILojaContato | null>(null);
-  const [isEditingContact, setIsEditingContact] = useState(false);
-  const [newPhoneValue, setNewPhoneValue] = useState('');
-  const [isLoadingContact, setIsLoadingContact] = useState(false);
 
   // TomTicket History
   const [ticketHistory, setTicketHistory] = useState<ITomTicketReply[]>([]);
@@ -192,8 +181,6 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
   // Milvus Proxy Modal
   const [isMilvusIframeOpen, setIsMilvusIframeOpen] = useState(false);
 
-  // Wpp Modal
-  const [isWppModalOpen, setIsWppModalOpen] = useState(false);
 
   // Dropdown Mais
   const [isMaisDropdownOpen, setIsMaisDropdownOpen] = useState(false);
@@ -243,108 +230,8 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
     fetchHistory();
   }, [ticketAtivo]);
 
-  // 1.5. Carregar Contato Dinâmico da Loja (Micro-CRM)
-  useEffect(() => {
-    if (!ticketAtivo) {
-      setLojaContato(null);
-      setIsEditingContact(false);
-      return;
-    }
-    const fetchContato = async () => {
-      setIsLoadingContact(true);
-      const { data, error } = await supabase
-        .from('lojas_contatos')
-        .select('*')
-        .eq('nome_loja', ticketAtivo.cliente)
-        .maybeSingle();
-      
-      if (data) {
-        setLojaContato(data);
-        setNewPhoneValue(data.telefone_whatsapp);
-      } else {
-        setLojaContato(null);
-        setNewPhoneValue('');
-      }
-      setIsEditingContact(false);
-      setIsLoadingContact(false);
-    };
-    fetchContato();
-  }, [ticketAtivo]);
 
-  // 2. Carregar Conversas do WhatsApp
-  useEffect(() => {
-    const carregarConversas = async () => {
-      const { data } = await supabase
-        .from('whatsapp_conversas')
-        .select('*')
-        .order('ultima_mensagem_data', { ascending: false });
-      if (data) setConversas(data);
-    };
-    carregarConversas();
-  }, []);
 
-  // 3. Carregar mensagens quando uma conversa está ativa
-  useEffect(() => {
-    if (!conversaAtiva) return;
-
-    const carregarMensagens = async () => {
-      const { data } = await supabase
-        .from('whatsapp_mensagens')
-        .select('*')
-        .eq('conversa_id', conversaAtiva.id)
-        .order('criado_em', { ascending: true });
-      if (data) setMensagens(data);
-      rolarParaBaixo();
-    };
-
-    carregarMensagens();
-
-    const subMensagens = supabase
-      .channel(`chat-${conversaAtiva.id}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'whatsapp_mensagens', filter: `conversa_id=eq.${conversaAtiva.id}` }, (payload: any) => {
-        setMensagens((current) => [...current, payload.new]);
-        rolarParaBaixo();
-      })
-      .subscribe();
-
-    return () => { supabase.removeChannel(subMensagens); };
-  }, [conversaAtiva?.id]);
-
-  // 4. Salvar/Atualizar Contato da Loja (Micro-CRM)
-  const handleVincularContato = async () => {
-    if (!ticketAtivo || !ticketAtivo.cliente || !newPhoneValue) return;
-    setIsLoadingContact(true);
-    
-    try {
-      const response = await fetch('/api/contatos/save', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          nome_loja: ticketAtivo?.cliente,
-          telefone_whatsapp: newPhoneValue.replace(/\D/g, '') // Only numbers
-        })
-      });
-
-      if (response.ok) {
-        setLojaContato({
-          nome_loja: ticketAtivo?.cliente || '',
-          telefone_whatsapp: newPhoneValue.replace(/\D/g, '')
-        });
-        setIsEditingContact(false);
-      } else {
-        const errorData = await response.json();
-        console.error('Erro ao salvar contato:', errorData);
-        alert('Erro ao salvar o contato. Verifique as permissões.');
-      }
-    } catch (error) {
-      console.error('Erro na requisição:', error);
-      alert('Erro de conexão ao salvar o contato.');
-    }
-    
-    setIsLoadingContact(false);
-  };
 
   // 5. Checagem On-Demand no Milvus (RF07)
   useEffect(() => {
@@ -374,41 +261,6 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
     }, 100);
   };
 
-  const handleEnviarMensagem = async (e?: React.FormEvent | React.KeyboardEvent) => {
-    if (e) e.preventDefault();
-    if (!inputMensagem.trim() || !conversaAtiva) return;
-
-    const texto = inputMensagem;
-    setInputMensagem(''); 
-
-    let body: any = { to: conversaAtiva.telefone, message: texto, conversaId: conversaAtiva.id, nomePerfil: conversaAtiva.nome_perfil };
-    
-    if (texto.trim() === '/video') {
-      const salaJitsi = `https://meet.jit.si/Critel-${Math.random().toString(36).substring(7)}`;
-      body.message = `Olá! Clique no link a seguir para iniciarmos uma chamada de vídeo para visualizar o equipamento: ${salaJitsi}`;
-    }
-
-    try {
-      const response = await fetch('/api/whatsapp/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
-      
-      if (response.ok) {
-        const result = await response.json();
-        // Se a conversa era 'nova', a API criou no banco e devolveu o UUID real
-        if (conversaAtiva.id === 'nova' && result.conversaId) {
-          const updatedConversa: IWhatsAppConversation = { ...conversaAtiva, id: result.conversaId };
-          setConversaAtiva(updatedConversa);
-          // Atualiza a lista de conversas no menu lateral/fundo
-          setConversas((prev) => [updatedConversa, ...prev]);
-        }
-      }
-    } catch (error) {
-      console.error('Erro ao enviar', error);
-    }
-  };
 
   return (
     <div className={styles.container}>
@@ -668,20 +520,7 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
                   <span className={styles.panelValue}>{ticketAtivo.email_cliente || 'Não Informado'}</span>
                 </div>
                 <button className={styles.btnShowDetails}>Mostrar Detalhes</button>
-                
-                <button 
-                  className={styles.btnWppAction}
-                  onClick={() => {
-                    if (lojaContato) {
-                      const conversa = conversas.find(c => c.telefone === lojaContato.telefone_whatsapp);
-                      setConversaAtiva(conversa || { id: 'nova', telefone: lojaContato.telefone_whatsapp, nome_perfil: ticketAtivo.cliente });
-                      if (!conversa) setMensagens([]);
-                    }
-                    setIsWppModalOpen(true);
-                  }}
-                >
-                  <Phone size={16} /> Acionar WhatsApp {lojaContato ? `(+${lojaContato.telefone_whatsapp})` : ''}
-                </button>
+
               </div>
 
               <div className={styles.panelCard}>
@@ -737,21 +576,6 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
           </div>
         </div>
       )}
-
-      {/* Modal WhatsApp Flutuante */}
-      <WhatsAppModal 
-        isWppModalOpen={isWppModalOpen}
-        setIsWppModalOpen={setIsWppModalOpen}
-        conversaAtiva={conversaAtiva}
-        ticketAtivo={ticketAtivo}
-        mensagens={mensagens}
-        lojaContato={lojaContato}
-        setIsEditingContact={setIsEditingContact}
-        inputMensagem={inputMensagem}
-        setInputMensagem={setInputMensagem}
-        handleEnviarMensagem={handleEnviarMensagem}
-        scrollRef={scrollRef}
-      />
 
       {/* Modal Full-Screen do Milvus Proxy */}
       {isMilvusIframeOpen && (

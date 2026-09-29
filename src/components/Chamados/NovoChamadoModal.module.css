@@ -189,6 +189,12 @@
   opacity: 0.7;
 }
 
+.attachmentListContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .attachmentBadge {
   background: #252a38;
   color: #f8fafc;

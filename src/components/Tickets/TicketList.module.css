@@ -90,17 +90,83 @@
   border: 1px solid #334155;
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+.kanbanBoard {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  padding-bottom: 20px;
+  flex: 1;
+  min-height: 0;
+}
+
+.kanbanBoard::-webkit-scrollbar {
+  height: 10px;
+}
+.kanbanBoard::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+.kanbanBoard::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 8px;
+}
+
+.kanbanColumn {
+  flex: 0 0 350px;
+  background: #1e293b;
+  border-radius: 12px;
+  border: 1px solid #334155;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 12rem);
+}
+
+.kanbanHeader {
+  padding: 16px;
+  border-bottom: 1px solid #334155;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  color: #f8fafc;
+  background: #162032;
+  border-radius: 12px 12px 0 0;
+}
+
+.kanbanBadge {
+  background: #3b82f6;
+  color: #fff;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+.kanbanBody {
+  padding: 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
   gap: 16px;
+  flex: 1;
+}
+
+.kanbanBody::-webkit-scrollbar {
+  width: 6px;
+}
+.kanbanBody::-webkit-scrollbar-track {
+  background: transparent;
+}
+.kanbanBody::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 6px;
 }
 
 .ticketCard {
-  background: #1e293b;
+  background: #0f172a;
   border: 1px solid #334155;
   border-radius: 12px;
-  padding: 20px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 14px;

@@ -14,7 +14,7 @@ interface NovoChamadoModalProps {
 export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
   const [loading, setLoading] = useState(false);
   const isSubmitting = useRef(false);
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const messageRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState({
     cliente: '',
@@ -83,11 +83,26 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
     }
 
     try {
-      const response = await fetch('/api/tickets', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
+      let response;
+      if (files.length > 0) {
+        const formDataPayload = new FormData();
+        formDataPayload.append('payload', JSON.stringify(payload));
+        files.forEach(file => {
+          formDataPayload.append('files', file);
+        });
+
+        response = await fetch('/api/tickets', {
+          method: 'POST',
+          body: formDataPayload
+        });
+      } else {
+        response = await fetch('/api/tickets', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      }
+      
       const result = await response.json();
 
       if (!response.ok) {
@@ -273,26 +288,39 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
             >
               {loading ? 'Criando...' : 'Criar Chamado'}
             </button>
-            {file ? (
-              <div className={styles.attachmentBadge}>
-                <Paperclip size={16} /> 
-                <span className={styles.attachmentName}>
-                  {file.name}
-                </span>
-                <button 
-                  onClick={() => setFile(null)} 
-                  className={styles.btnRemoveAttachment}
-                  title="Remover anexo"
-                >
-                  <X size={16} />
-                </button>
+            {files.length > 0 && (
+              <div className={styles.attachmentListContainer}>
+                {files.map((fileItem, idx) => (
+                  <div key={idx} className={styles.attachmentBadge}>
+                    <Paperclip size={16} /> 
+                    <span className={styles.attachmentName}>
+                      {fileItem.name}
+                    </span>
+                    <button 
+                      onClick={() => setFiles(prev => prev.filter((_, i) => i !== idx))} 
+                      className={styles.btnRemoveAttachment}
+                      title="Remover anexo"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                ))}
               </div>
-            ) : (
-              <label className={styles.btnAttach}>
-                <input type="file" hidden onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)} />
-                <Paperclip size={16} /> Anexar
-              </label>
             )}
+            <label className={styles.btnAttach}>
+              <input 
+                type="file" 
+                multiple 
+                hidden 
+                onChange={(e) => {
+                  if (e.target.files) {
+                    setFiles(prev => [...prev, ...Array.from(e.target.files!)]);
+                  }
+                  e.target.value = '';
+                }} 
+              />
+              <Paperclip size={16} /> Anexar
+            </label>
           </div>
           
           <button 

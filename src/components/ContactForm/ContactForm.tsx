@@ -20,23 +20,17 @@ export default function ContactForm({ dict }: { dict: any }) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Mocking an API call or just alerting for now
+    alert('Sua mensagem foi enviada com sucesso! Entraremos em contato em breve.');
     
-    // Construct WhatsApp message
-    const phoneNumber = "5511996839480"; // The phone number from previous context
-    const message = `Olá, gostaria de solicitar um diagnóstico gratuito!
-    
-*Nome:* ${formData.name}
-*Cargo:* ${formData.role}
-*Empresa:* ${formData.company}
-*E-mail:* ${formData.email}
-
-*Desafio atual em TI:*
-${formData.challenge}`;
-
-    const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
-    
-    window.open(whatsappUrl, '_blank');
+    // Clear form
+    setFormData({
+      name: '',
+      role: '',
+      company: '',
+      email: '',
+      challenge: ''
+    });
   };
 
   return (

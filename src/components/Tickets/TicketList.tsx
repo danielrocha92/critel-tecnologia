@@ -265,8 +265,23 @@ export default function TicketList({ filterTitle, filterType, excludeTomTicket, 
           Nenhum chamado encontrado para este filtro.
         </div>
       ) : (
-        <div className={styles.grid}>
-          {filteredTickets.map(ticket => (
+        <div className={styles.kanbanBoard}>
+          {[
+            { id: 'novo', title: 'Novos', statuses: ['NOVO'] },
+            { id: 'aberto', title: 'Abertos', statuses: ['ABERTO'] },
+            { id: 'andamento', title: 'Em Andamento', statuses: ['EM_ANDAMENTO', 'ATENDIMENTO'] },
+            { id: 'pendente', title: 'Pendentes', statuses: ['PENDENTE', 'AGUARDANDO'] },
+            ...(serverStatusFilter === 'closed' || serverStatusFilter === 'all' ? [{ id: 'finalizado', title: 'Finalizados', statuses: ['FECHADO', 'RESOLVIDO', 'CANCELADO', 'CONCLUIDO', 'FINALIZADO'] }] : [])
+          ].map(col => {
+            const colTickets = filteredTickets.filter(t => col.statuses.includes((t.status || 'NOVO').toUpperCase()));
+            return (
+              <div key={col.id} className={styles.kanbanColumn}>
+                <div className={styles.kanbanHeader}>
+                  <span>{col.title}</span>
+                  <span className={styles.kanbanBadge}>{colTickets.length}</span>
+                </div>
+                <div className={styles.kanbanBody}>
+                  {colTickets.map(ticket => (
             <div 
               key={ticket.id} 
               onClick={() => router.push(detailPath
@@ -330,10 +345,14 @@ export default function TicketList({ filterTitle, filterType, excludeTomTicket, 
                   <span>Atualizado: {ticket.atualizado_em ? new Date(ticket.atualizado_em).toLocaleDateString() : '-'}</span>
                 </div>
               </div>
-            </div>
-          ))}
+              </div>
+            ))}
+          </div>
         </div>
-      )}
-    </div>
-  );
+            );
+          })}
+      </div>
+    )}
+  </div>
+);
 }
