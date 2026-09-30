@@ -1,12 +1,15 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createBrowserClient } from '@supabase/ssr';
 import { ChevronLeft, MapPin, Clock, CheckCircle, Navigation, AlertTriangle } from 'lucide-react';
 import FinalizarChamadoModal from '@/components/Tecnico/FinalizarChamadoModal';
-import { formatTicketDescription, getTicketAddress } from '@/utils/tickets/description';
+import { db } from '@/utils/firebase/client';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { fazerCheckin, autoFinalizar } from '@/lib/firebase/ticket-service';
+import { Ticket } from '@/types/ticket';
 import styles from './OsDetail.module.css';
 
 // Helper: Haversine distance em metros
@@ -25,7 +28,8 @@ function getDistanceFromLatLonInMeters(lat1: number, lon1: number, lat2: number,
 export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: string }) {
   const router = useRouter();
   
-  const [ticket, setTicket] = useState<any>(null);
+  const [ticket, setTicket] = useState<Ticket | null>(null);
+  const [currentUser, setCurrentUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [isCheckingIn, setIsCheckingIn] = useState(false);
@@ -40,56 +44,51 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
-  const fetchTicket = async () => {
-    const { data, error } = await supabase
-      .from('tickets')
-      .select('*')
-      .eq('id', ticketId)
-      .single();
-      
-    if (data) setTicket(data);
-    setLoading(false);
-  };
-
+  // Fetch Auth User
   useEffect(() => {
-    fetchTicket();
-  }, [ticketId, supabase]);
+    supabase.auth.getUser().then(({ data }) => {
+      setCurrentUser(data.user);
+    });
+  }, [supabase]);
+
+  // Firebase Realtime Listener
+  useEffect(() => {
+    const docRef = doc(db, 'tickets', ticketId);
+    const unsubscribe = onSnapshot(docRef, (docSnap) => {
+      if (docSnap.exists()) {
+        setTicket({ id: docSnap.id, ...docSnap.data() } as Ticket);
+      } else {
+        setTicket(null);
+      }
+      setLoading(false);
+    }, (error) => {
+      console.error("Erro no onSnapshot do OS Detail:", error);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [ticketId]);
 
   // Watch position para check-out automático
   useEffect(() => {
-    if (ticket?.check_in_at && ticket?.status !== 'FINALIZADO' && ticket?.status !== 'CONCLUIDO') {
-      if ('geolocation' in navigator) {
+    if (ticket?.checkInAt && ticket?.status !== 'FINALIZADO' && ticket?.status !== 'FECHADO' && ticket?.status !== 'CONCLUIDO') {
+      if ('geolocation' in navigator && ticket.checkInLat && ticket.checkInLng) {
         watchId.current = navigator.geolocation.watchPosition(
           async (position) => {
             const dist = getDistanceFromLatLonInMeters(
-              ticket.check_in_lat,
-              ticket.check_in_lng,
+              ticket.checkInLat!,
+              ticket.checkInLng!,
               position.coords.latitude,
               position.coords.longitude
             );
             setDistanciaAtual(dist);
 
             if (dist > 500) {
-              // Auto close se passou de 500m
               navigator.geolocation.clearWatch(watchId.current!);
               alert('Atenção: Você se afastou mais de 500m do local do Check-in. O chamado está sendo fechado automaticamente por segurança.');
               
-              // Em um ambiente real, aqui chamaríamos um endpoint de 'forçar-fechamento'
-              // Para simplificar, abrimos a modal e mostramos o aviso, ou fechamos via API direto.
-              // Vamos forçar atualizar o status para FECHADO.
-              await fetch('/api/tecnico/finalizar-chamado', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  ticket_id: ticket.id,
-                  hora_inicio: ticket.check_in_at,
-                  hora_termino: new Date().toISOString(),
-                  descricao_servicos: 'Fechamento Automático (Distância > 500m)',
-                  latitude: position.coords.latitude,
-                  longitude: position.coords.longitude
-                })
-              });
-              
+              // Executa Finalização Automática Nativa
+              await autoFinalizar(ticket.id, position.coords.latitude, position.coords.longitude);
               router.replace(`/${lang}/tecnico/historico`);
             }
           },
@@ -102,9 +101,14 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
     return () => {
       if (watchId.current !== null) navigator.geolocation.clearWatch(watchId.current);
     };
-  }, [ticket, lang, router]);
+  }, [ticket?.checkInAt, ticket?.status, ticket?.checkInLat, ticket?.checkInLng, ticket?.id, lang, router]);
 
   const handleCheckIn = () => {
+    if (!currentUser) {
+      setGeoError('Você precisa estar logado para fazer check-in.');
+      return;
+    }
+    
     setIsCheckingIn(true);
     setGeoError(null);
     setCheckInMessage('Solicitando sua localização GPS...');
@@ -126,23 +130,10 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         try {
-          setCheckInMessage('Localização obtida. Registrando o check-in...');
-          const res = await fetch('/api/tecnico/check-in', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              ticket_id: ticket.id,
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude
-            })
-          });
-
-          const result = await res.json();
-          if (!res.ok || !result.success) {
-            throw new Error(result.error || 'Não foi possível registrar o check-in.');
-          }
-
-          await fetchTicket();
+          setCheckInMessage('Localização obtida. Registrando o check-in nativamente...');
+          
+          await fazerCheckin(ticket!.id, currentUser.id, position.coords.latitude, position.coords.longitude);
+          
           setCheckInMessage(null);
         } catch (err: any) {
           setGeoError(err instanceof Error ? err.message : 'Erro inesperado ao registrar o check-in.');
@@ -165,31 +156,11 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
     );
   };
 
-  if (loading) return <div className={styles.loadingContainer}>Carregando dados da OS...</div>;
+  if (loading) return <div className={styles.loadingContainer}>Sincronizando OS com Firebase...</div>;
   if (!ticket) return <div className={styles.loadingContainer}>OS não encontrada.</div>;
 
-  const isCheckedIn = !!ticket.check_in_at;
-  const isFinalized = ticket.status === 'FINALIZADO' || ticket.status === 'CONCLUIDO';
-  const { text: descricao, address: enderecoDaDescricao } = formatTicketDescription(ticket.descricao);
-  const endereco = getTicketAddress({ endereco: ticket.endereco, descricao: ticket.descricao });
-
-  const handleNavigate = () => {
-    if (!endereco) return;
-    const preference = localStorage.getItem('navAppPref');
-    const useWaze = preference
-      ? preference === 'waze'
-      : window.confirm('Deseja usar o Waze? (Clique "OK" para Waze ou "Cancelar" para Google Maps)');
-
-    if (!preference) {
-      localStorage.setItem('navAppPref', useWaze ? 'waze' : 'maps');
-    }
-
-    const query = encodeURIComponent(endereco);
-    const url = useWaze
-      ? `https://waze.com/ul?q=${query}`
-      : `https://www.google.com/maps/search/?api=1&query=${query}`;
-    window.open(url, '_blank', 'noopener,noreferrer');
-  };
+  const isCheckedIn = !!ticket.checkInAt;
+  const isFinalized = ticket.status === 'FECHADO' || ticket.status === 'RESOLVIDO';
 
   return (
     <div className={styles.pageContainer}>
@@ -197,14 +168,14 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
         <button onClick={() => router.back()} className={styles.btnBack}>
           <ChevronLeft size={24} />
         </button>
-        <h2 className={styles.headerTitle}>OS #{ticket.protocolo_origem}</h2>
+        <h2 className={styles.headerTitle}>OS #{ticket.id.substring(0, 6).toUpperCase()}</h2>
       </header>
 
       <div className={styles.contentWrapper}>
         <div className={styles.titleSection}>
-          <h1 className={styles.clientTitle}>{ticket.cliente}</h1>
+          <h1 className={styles.clientTitle}>{ticket.department}</h1>
           <p className={styles.ticketTitle}>
-            {ticket.titulo}
+            {ticket.title}
           </p>
         </div>
 
@@ -216,39 +187,26 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
               <Clock size={18} color="#00d2ff" className={styles.detailIcon} />
               <div>
                 <strong className={styles.detailLabel}>Abertura</strong>
-                <span className={styles.detailValue}>{new Date(ticket.criado_em).toLocaleString('pt-BR')}</span>
+                <span className={styles.detailValue}>
+                  {ticket.createdAt ? new Date(ticket.createdAt).toLocaleString('pt-BR') : '-'}
+                </span>
               </div>
             </div>
             
             <div className={styles.detailItem}>
               <MapPin size={18} color="#00d2ff" className={styles.detailIcon} />
               <div>
-                <strong className={styles.detailLabel}>Departamento</strong>
-                <span className={styles.detailValue}>{ticket.departamento}</span>
+                <strong className={styles.detailLabel}>Departamento / Categoria</strong>
+                <span className={styles.detailValue}>{ticket.department} - {ticket.category}</span>
               </div>
             </div>
-            {(endereco || enderecoDaDescricao) && (
-              <div className={styles.detailItem}>
-                <MapPin size={18} color="#00d2ff" className={styles.detailIcon} />
-                <div className={styles.addressContent}>
-                  <strong className={styles.detailLabel}>Endereço da loja</strong>
-                  <span className={styles.detailValue}>{endereco || enderecoDaDescricao}</span>
-                  {endereco && (
-                    <button type="button" onClick={handleNavigate} className={styles.addressButton}>
-                      <Navigation size={15} />
-                      Abrir no mapa
-                    </button>
-                  )}
-                </div>
-              </div>
-            )}
           </div>
         </div>
 
-        {descricao && (
+        {ticket.description && (
           <section className={styles.cardSection}>
             <h3 className={`${styles.sectionHeading} ${styles.sectionHeadingDesc}`}>Descrição Reportada</h3>
-            <p className={styles.descText}>{descricao}</p>
+            <p className={styles.descText}>{ticket.description}</p>
           </section>
         )}
       </div>

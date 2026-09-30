@@ -10,7 +10,7 @@ import { Send, User, Clock, Search, Bot, Server, Key, Video, Activity, Settings,
 import { DashboardTickets } from '../../../../components/Chamados/DashboardTickets';
 import { TicketEditor } from '../../../../components/Chamados/TicketEditor';
 import { SkeletonHistory } from '../../../../components/Chamados/SkeletonHistory';
-import { ITicket, ITomTicketReply, ILojaContato } from '../../../../types/ticket';
+import { ITicket, ILojaContato } from '../../../../types/ticket';
 import { File, Download } from 'lucide-react';
 
 const supabase = createClient();
@@ -171,64 +171,6 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
 
   // Status PDV e CRM movidos para o final para manter a estrutura, PDVs agora vêm do hook.
   
-
-  // TomTicket History
-  const [ticketHistory, setTicketHistory] = useState<ITomTicketReply[]>([]);
-  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
-  const [errorHistory, setErrorHistory] = useState<string | null>(null);
-  const [ticketExtraInfo, setTicketExtraInfo] = useState<{organizacao: string|null, deadline: string|null, agendamento: string|null} | null>(null);
-
-  // Milvus Proxy Modal
-  const [isMilvusIframeOpen, setIsMilvusIframeOpen] = useState(false);
-
-
-  // Dropdown Mais
-  const [isMaisDropdownOpen, setIsMaisDropdownOpen] = useState(false);
-
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  // 1. Carregar Historico do TomTicket
-  useEffect(() => {
-    if (!ticketAtivo || !ticketAtivo.tomticket_id) {
-      setTicketHistory([]);
-      return;
-    }
-    const fetchHistory = async () => {
-      setIsLoadingHistory(true);
-      setErrorHistory(null);
-      try {
-        const res = await fetch(`/api/tomticket/history?tomticket_id=${ticketAtivo.tomticket_id}`);
-        const data = await res.json();
-        if (data.success) {
-          setTicketHistory(data.messages || []);
-          if (data.ticket_info) {
-            setTicketExtraInfo(data.ticket_info);
-          }
-          if (data.ticket_attachments && data.ticket_attachments.length > 0) {
-            const ttAnexos = data.ticket_attachments.map((a: any) => ({
-              nome_arquivo: a.name,
-              url: a.url || a.link,
-              tamanho_bytes: a.size
-            }));
-            setAnexos(prev => {
-              // Evita duplicados pela URL
-              const novasUrls = ttAnexos.map((ta: any) => ta.url);
-              const filtrados = prev.filter(p => !novasUrls.includes(p.url));
-              return [...filtrados, ...ttAnexos];
-            });
-          }
-        } else {
-          setTicketHistory([]);
-          setErrorHistory('Não foi possível carregar o histórico deste chamado.');
-        }
-      } catch (err) {
-        console.error(err);
-        setErrorHistory('Erro de conexão ao buscar histórico do TomTicket.');
-      }
-      setIsLoadingHistory(false);
-    };
-    fetchHistory();
-  }, [ticketAtivo]);
 
 
 

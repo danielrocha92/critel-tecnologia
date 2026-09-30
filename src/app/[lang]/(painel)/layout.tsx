@@ -1,7 +1,5 @@
 import Sidebar from '@/components/Navigation/Sidebar';
 import Topbar from '@/components/Navigation/Topbar';
-import { TelephonyProvider } from '@/contexts/TelephonyContext';
-import TelephonyWidget from '@/components/Telephony/TelephonyWidget';
 import BackToTop from '@/components/Navigation/BackToTop';
 
 import styles from './layout.module.css';
@@ -14,17 +12,14 @@ export default async function PainelLayout(
 
   return (
     <div className={`layout-root ${styles.layoutRoot}`}>
-      <TelephonyProvider>
-        <Sidebar lang={lang} />
-        <div className={`main-content ${styles.mainContent}`}>
-          <Topbar />
-          <main className={styles.mainArea}>
-            {props.children}
-          </main>
-        </div>
-        <TelephonyWidget />
-        <BackToTop />
-      </TelephonyProvider>
+      <Sidebar lang={lang} />
+      <div className={`main-content ${styles.mainContent}`}>
+        <Topbar />
+        <main className={styles.mainArea}>
+          {props.children}
+        </main>
+      </div>
+      <BackToTop />
     </div>
   );
 }

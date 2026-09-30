@@ -90,18 +90,8 @@ export function useCentralAtendimento() {
             setTickets(currentTickets => {
               const temTicket = currentTickets.some(t => t.cliente === loja && t.status !== 'RESOLVIDO');
               if (!temTicket) {
-                console.log(`Automação: Criando ticket para ${loja} (PDV Offline)`);
-                fetch('/api/tomticket/webhook', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    type: 'ticket',
-                    protocolo: `AUTO-${Date.now()}`,
-                    subject: `[ALERTA AUTOMÁTICO] PDV Offline - ${loja}`,
-                    description: `O monitoramento detectou que um ou mais caixas da loja ${loja} estão offline. Verifique imediatamente.`,
-                    client: { name: loja }
-                  })
-                });
+                // Ação de criação de ticket na base nativa será implementada aqui.
+                console.log(`Automação pendente: Criar ticket nativo para ${loja} (PDV Offline)`);
               }
               return currentTickets;
             });

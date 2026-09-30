@@ -418,3 +418,20 @@
   min-width: 24px;
   text-align: center;
 }
+
+.assumirButton {
+  background: #2563eb;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+  width: 100%;
+}
+
+.assumirButton:hover {
+  background: #1d4ed8;
+}
