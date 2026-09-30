@@ -3,17 +3,24 @@
 import { useState, useRef, useEffect, useCallback, ChangeEvent } from 'react';
 import { X, MapPin, MapPinOff, AlertTriangle, Send, Clock, Plus, Trash } from 'lucide-react';
 import SignatureCanvas from 'react-signature-canvas';
+import { createBrowserClient } from '@supabase/ssr';
+import { storage } from '@/utils/firebase/client';
+import { ref, uploadString, getDownloadURL } from 'firebase/storage';
+import { finalizarChamado } from '@/lib/firebase/ticket-service';
+import { Ticket } from '@/types/ticket';
 import styles from './FinalizarChamadoModal.module.css';
 
 interface FinalizarChamadoModalProps {
-  ticket: any;
+  ticket: Ticket;
   onClose: () => void;
   onSuccess: () => void;
 }
 
 export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: FinalizarChamadoModalProps) {
+  const [currentUser, setCurrentUser] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [progressMsg, setProgressMsg] = useState<string>('');
   
   // Geolocation
   const [location, setLocation] = useState<{lat: number, lng: number} | null>(null);
@@ -35,6 +42,17 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
 
   // Signature
   const sigCanvas = useRef<any>(null);
+
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setCurrentUser(data.user);
+    });
+  }, [supabase]);
 
   const captureLocation = useCallback(() => {
     setLocation(null);
@@ -75,17 +93,15 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
   }, []);
 
   useEffect(() => {
-    // Get current time as default
     const now = new Date();
     const tzOffset = (new Date()).getTimezoneOffset() * 60000;
     const localISOTime = (new Date(now.getTime() - tzOffset)).toISOString().slice(0, 16);
     
     setHoraTermino(localISOTime);
     
-    // If ticket has check_in_at, use it as start time, otherwise use 1 hour ago
     let localISOTimeAgo;
-    if (ticket.check_in_at) {
-      const checkInDate = new Date(ticket.check_in_at);
+    if (ticket.checkInAt) {
+      const checkInDate = new Date(ticket.checkInAt);
       localISOTimeAgo = (new Date(checkInDate.getTime() - tzOffset)).toISOString().slice(0, 16);
     } else {
       const oneHourAgo = new Date(now.getTime() - (60 * 60 * 1000));
@@ -94,7 +110,7 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
     setHoraInicio(localISOTimeAgo);
 
     captureLocation();
-  }, [captureLocation, ticket.check_in_at]);
+  }, [captureLocation, ticket.checkInAt]);
 
   const clearSignature = () => {
     if (sigCanvas.current) {
@@ -112,14 +128,8 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
     reader.readAsDataURL(file);
   };
 
-  const addDespesa = () => {
-    setDespesas([...despesas, { natureza: '', valor: '', anexo: '' }]);
-  };
-
-  const removeDespesa = (index: number) => {
-    setDespesas(despesas.filter((_, i) => i !== index));
-  };
-
+  const addDespesa = () => setDespesas([...despesas, { natureza: '', valor: '', anexo: '' }]);
+  const removeDespesa = (index: number) => setDespesas(despesas.filter((_, i) => i !== index));
   const updateDespesa = (index: number, field: string, value: string) => {
     const newDespesas = [...despesas];
     (newDespesas[index] as any)[field] = value;
@@ -127,14 +137,9 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
   };
 
   const formatCurrency = (value: string) => {
-    // Remove tudo que não for número
     let num = value.replace(/\D/g, "");
     if (!num) return "";
-    
-    // Converte para decimal
     const numValue = (parseInt(num) / 100).toFixed(2);
-    
-    // Adiciona máscara BRL
     return numValue.replace(".", ",").replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
   };
 
@@ -153,10 +158,22 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
     reader.readAsDataURL(file);
   };
 
+  const uploadBase64 = async (path: string, base64: string): Promise<string> => {
+    const fileRef = ref(storage, path);
+    await uploadString(fileRef, base64, 'data_url');
+    return getDownloadURL(fileRef);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
+
+    if (!currentUser) {
+      setError('Usuário não autenticado.');
+      setLoading(false);
+      return;
+    }
 
     if (!location) {
       setError('A geolocalização é obrigatória para finalizar o chamado. Ative o GPS e tente novamente.');
@@ -184,40 +201,54 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
 
     const assinaturaBase64 = sigCanvas.current.getTrimmedCanvas().toDataURL('image/png');
     
-    // Parse expenses back to numbers
     const parsedDespesas = despesas.map(d => ({
       ...d,
       valor_numerico: d.valor ? parseFloat(d.valor.replace(/\./g, '').replace(',', '.')) : 0
     })).filter(d => d.natureza || d.valor_numerico > 0);
 
     try {
-      const res = await fetch('/api/tecnico/finalizar-chamado', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ticket_id: ticket.id,
-          hora_inicio: new Date(horaInicio).toISOString(),
-          hora_termino: new Date(horaTermino).toISOString(),
-          descricao_servicos: descricao,
-          materiais_utilizados: materiais,
-          latitude: location.lat,
-          longitude: location.lng,
-          assinatura_base64: assinaturaBase64,
-          evidencia_antes_base64: evidenciaAntes,
-          evidencia_depois_base64: evidenciaDepois,
-          despesas_json: parsedDespesas,
-          assinatura_datahora: new Date().toISOString()
-        })
-      });
+      const ts = Date.now();
+      
+      setProgressMsg('Upload da assinatura...');
+      const assinaturaUrl = await uploadBase64(`resolutions/${ticket.id}/${ts}_assinatura.png`, assinaturaBase64);
+      
+      setProgressMsg('Upload da fachada (Antes)...');
+      const evidenciaAntesUrl = await uploadBase64(`resolutions/${ticket.id}/${ts}_antes.jpg`, evidenciaAntes);
+      
+      setProgressMsg('Upload da fachada (Depois)...');
+      const evidenciaDepoisUrl = await uploadBase64(`resolutions/${ticket.id}/${ts}_depois.jpg`, evidenciaDepois);
 
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Erro ao finalizar chamado');
+      const finalDespesas = [];
+      for (const d of parsedDespesas) {
+        if (d.anexo) {
+           setProgressMsg(`Upload do anexo da despesa: ${d.natureza}...`);
+           const anexoUrl = await uploadBase64(`resolutions/${ticket.id}/despesa_${ts}_${Math.random().toString(36).substring(7)}.jpg`, d.anexo);
+           finalDespesas.push({ natureza: d.natureza, valor: d.valor_numerico, anexoUrl });
+        } else {
+           finalDespesas.push({ natureza: d.natureza, valor: d.valor_numerico });
+        }
       }
+
+      setProgressMsg('Registrando baixa de OS na base nativa...');
+      await finalizarChamado({
+        ticketId: ticket.id,
+        tecnicoId: currentUser.id,
+        horaInicio: new Date(horaInicio).getTime(),
+        horaTermino: new Date(horaTermino).getTime(),
+        descricaoServicos: descricao,
+        materiaisUtilizados: materiais,
+        latitude: location.lat,
+        longitude: location.lng,
+        assinaturaUrl,
+        evidenciaAntesUrl,
+        evidenciaDepoisUrl,
+        despesas: finalDespesas
+      });
 
       onSuccess();
     } catch (err: any) {
-      setError(err.message || 'Erro inesperado ao conectar com o servidor.');
+      console.error(err);
+      setError(err.message || 'Erro inesperado ao salvar laudo no Firestore.');
       setLoading(false);
     }
   };
@@ -267,7 +298,6 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
           </div>
 
           <form id="finalizarForm" onSubmit={handleSubmit} className={styles.form}>
-            
             <div className={styles.grid}>
               <div>
                 <label className={styles.label}>Início</label>
@@ -403,7 +433,7 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
             className={`${styles.submitBtn} ${(!location || loading) ? styles.submitBtnDisabled : styles.submitBtnActive}`}
           >
             <Send size={20} />
-            {loading ? 'Sincronizando...' : 'Confirmar e Enviar Baixa'}
+            {loading ? progressMsg || 'Sincronizando...' : 'Confirmar e Enviar Baixa'}
           </button>
         </div>
       </div>

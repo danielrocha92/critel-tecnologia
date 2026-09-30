@@ -172,14 +172,14 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
           ].map(col => {
             const colTickets = filteredTickets.filter(t => col.statuses.includes(t.status));
             return (
-              <div key={col.id} className={styles.kanbanColumn}>
+              <section key={col.id} className={styles.kanbanColumn}>
                 <div className={styles.kanbanHeader}>
                   <span>{col.title}</span>
                   <span className={styles.kanbanBadge}>{colTickets.length}</span>
                 </div>
                 <div className={styles.kanbanBody}>
                   {colTickets.map(ticket => (
-                    <div 
+                    <article 
                       key={ticket.id} 
                       onClick={() => router.push(detailPath ? `/${lang}${detailPath}/${ticket.id}` : `/${lang}/atendimento?ticket_id=${ticket.id}`)}
                       className={styles.ticketCard}
@@ -237,10 +237,10 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
                           </div>
                         )}
                       </div>
-                    </div>
+                    </article>
                   ))}
                 </div>
-              </div>
+              </section>
             );
           })}
         </div>

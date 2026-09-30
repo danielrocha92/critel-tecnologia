@@ -197,3 +197,73 @@ export async function autoFinalizar(ticketId: string, lat: number, lng: number):
     throw error;
   }
 }
+
+/**
+ * Interface de payload para o fechamento do chamado
+ */
+export interface TicketResolutionPayload {
+  ticketId: string;
+  tecnicoId: string;
+  horaInicio: number;
+  horaTermino: number;
+  descricaoServicos: string;
+  materiaisUtilizados?: string;
+  latitude: number;
+  longitude: number;
+  assinaturaUrl: string;
+  evidenciaAntesUrl: string;
+  evidenciaDepoisUrl: string;
+  despesas: Array<{
+    natureza: string;
+    valor: number;
+    anexoUrl?: string;
+  }>;
+}
+
+/**
+ * Transação de Baixa/Finalização da OS na Loja.
+ * Atualiza o status e grava o "Laudo de Serviço" acoplado.
+ */
+export async function finalizarChamado(payload: TicketResolutionPayload): Promise<void> {
+  const ticketRef = doc(db, 'tickets', payload.ticketId);
+  const transitionRef = doc(db, `tickets/${payload.ticketId}/transitions`, crypto.randomUUID());
+  const resolutionRef = doc(db, `tickets/${payload.ticketId}/resolutions`, crypto.randomUUID());
+
+  try {
+    await runTransaction(db, async (transaction) => {
+      const ticketDoc = await transaction.get(ticketRef);
+      if (!ticketDoc.exists()) throw new Error('Chamado não encontrado.');
+      
+      const data = ticketDoc.data();
+      if (data.status === 'FECHADO' || data.status === 'RESOLVIDO') {
+        throw new Error('O chamado já encontra-se fechado.');
+      }
+
+      transaction.update(ticketRef, {
+        status: 'RESOLVIDO',
+        updatedAt: serverTimestamp(),
+      });
+
+      // Grava o evento de status
+      const transitionData: Omit<TicketTransition, 'id'> = {
+        ticketId: payload.ticketId,
+        fromStatus: data.status as TicketStatus,
+        toStatus: 'RESOLVIDO',
+        changedBy: payload.tecnicoId,
+        timestamp: Date.now(),
+        reason: `Finalização na Loja: ${payload.descricaoServicos.substring(0, 50)}...`
+      };
+      transaction.set(transitionRef, transitionData);
+
+      // Grava o laudo consolidado e despesas como subcoleção de auditoria
+      transaction.set(resolutionRef, {
+        ...payload,
+        createdAt: serverTimestamp()
+      });
+    });
+  } catch (error) {
+    console.error('Falha ao finalizar OS:', error);
+    throw error;
+  }
+}
+
