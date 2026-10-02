@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-import { abrirChamado } from '@/lib/firebase/ticket-service';
-import { storage } from '@/utils/firebase/client';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 export async function POST(req: NextRequest) {
   try {
@@ -48,36 +45,85 @@ export async function POST(req: NextRequest) {
         if (!file.name) continue;
         
         const arrayBuffer = await file.arrayBuffer();
-        const buffer = new Uint8Array(arrayBuffer);
-        const fileName = `anexos/${Date.now()}-${Math.random().toString(36).substring(7)}-${file.name}`;
+        const buffer = Buffer.from(arrayBuffer);
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
         
-        const storageRef = ref(storage, fileName);
-        await uploadBytes(storageRef, buffer, { contentType: file.type });
+        const { data: uploadData, error: uploadError } = await supabase
+          .storage
+          .from('anexos')
+          .upload(`tickets/${fileName}`, buffer, {
+            contentType: file.type,
+            upsert: false
+          });
+
+        if (uploadError) {
+          console.error('Erro ao fazer upload para o Supabase Storage:', uploadError);
+          continue;
+        }
         
-        const downloadUrl = await getDownloadURL(storageRef);
-        uploadedUrls.push(downloadUrl);
+        const { data: urlData } = supabase.storage.from('anexos').getPublicUrl(`tickets/${fileName}`);
+        uploadedUrls.push(urlData.publicUrl);
       }
     } else {
       parsedData = await req.json();
     }
 
-    const { title, description, department, category, priority } = parsedData;
+    const { titulo, descricao, cliente, departamento, prioridade, status, tecnico_id, protocolo_origem } = parsedData;
 
-    if (!title || !description) {
+    if (!titulo || !descricao) {
       return NextResponse.json({ error: 'Campos título e descrição são obrigatórios' }, { status: 400 });
     }
 
-    // Invoca o Service Nativo para criar o chamado e o registro de Event Sourcing
-    const ticketId = await abrirChamado({
-      title,
-      description,
-      department: department || 'Suporte',
-      category: category || 'Geral',
-      priority: priority || 'Normal',
-      attachments: uploadedUrls
-    }, user.id);
+    // Insere no banco Supabase
+    const { data: ticketData, error: ticketError } = await supabase
+      .from('tickets')
+      .insert({
+        protocolo_origem: protocolo_origem || `OS-${Date.now()}`,
+        titulo,
+        descricao,
+        departamento: departamento || 'Suporte',
+        categoria: 'Geral',
+        prioridade: prioridade || 'Normal',
+        status: status || 'NOVO',
+        cliente: cliente || 'Cliente Padrão',
+        tecnico_id: tecnico_id || null
+      })
+      .select()
+      .single();
 
-    return NextResponse.json({ success: true, ticketId }, { status: 201 });
+    if (ticketError) {
+      console.error('Erro ao inserir ticket no Supabase:', ticketError);
+      throw new Error(ticketError.message);
+    }
+
+    // Adiciona anexos se houver
+    if (uploadedUrls.length > 0 && ticketData) {
+      const anexosPayload = uploadedUrls.map(url => ({
+        ticket_id: ticketData.id,
+        url,
+        nome_arquivo: url.split('/').pop() || 'anexo',
+        tipo_arquivo: 'desconhecido'
+      }));
+
+      const { error: anexosError } = await supabase
+        .from('ticket_anexos')
+        .insert(anexosPayload);
+        
+      if (anexosError) {
+        console.error('Erro ao inserir anexos:', anexosError);
+      }
+    }
+
+    // Event Sourcing
+    await supabase.from('ticket_transitions').insert({
+      ticket_id: ticketData.id,
+      from_status: null,
+      to_status: ticketData.status,
+      changed_by: user.id,
+      reason: 'Criação do chamado'
+    });
+
+    return NextResponse.json({ success: true, ticketId: ticketData.id }, { status: 201 });
 
   } catch (error: any) {
     console.error('Erro na API POST /api/tickets:', error);

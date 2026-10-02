@@ -3,10 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Clock, AlertCircle, Bookmark, Tag, User, Activity, ChevronDown, ChevronRight } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
-import { db } from '@/utils/firebase/client';
-import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
-import { assumirChamado } from '@/lib/firebase/ticket-service';
-import { Ticket } from '@/types/ticket';
+import { ITicket } from '@/types/ticket';
 import { useRouter, usePathname } from 'next/navigation';
 import styles from './TicketList.module.css';
 
@@ -18,7 +15,7 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
   const [serverStatusFilter, setServerStatusFilter] = useState<'open' | 'closed' | 'all'>(
     filterType === 'my-closed' ? 'closed' : (filterType === 'all' || filterType === 'my-all') ? 'all' : 'open'
   );
-  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [tickets, setTickets] = useState<ITicket[]>([]);
   const [perfis, setPerfis] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -42,21 +39,28 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
         setPerfis(perfisData);
       }
 
-      // Realtime listener do Firestore
-      const ticketsRef = collection(db, 'tickets');
-      const q = query(ticketsRef, orderBy('createdAt', 'desc'));
+      // Realtime listener do Supabase
+      const fetchInitial = async () => {
+        const { data } = await supabase.from('tickets').select('*').order('criado_em', { ascending: false });
+        if (data) setTickets(data as ITicket[]);
+        setLoading(false);
+      };
       
-      unsubscribeTickets = onSnapshot(q, (snapshot) => {
-        const fetchedTickets: Ticket[] = [];
-        snapshot.forEach((doc) => {
-          fetchedTickets.push({ id: doc.id, ...doc.data() } as Ticket);
-        });
-        setTickets(fetchedTickets);
-        setLoading(false);
-      }, (error) => {
-        console.error("Erro no onSnapshot do Firebase:", error);
-        setLoading(false);
-      });
+      fetchInitial();
+
+      const channel = supabase.channel('tickets_realtime')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'tickets' }, (payload) => {
+          if (payload.eventType === 'INSERT') {
+            setTickets(prev => [payload.new as ITicket, ...prev]);
+          } else if (payload.eventType === 'UPDATE') {
+            setTickets(prev => prev.map(t => t.id === payload.new.id ? payload.new as ITicket : t));
+          } else if (payload.eventType === 'DELETE') {
+            setTickets(prev => prev.filter(t => t.id !== payload.old.id));
+          }
+        })
+        .subscribe();
+
+      unsubscribeTickets = () => supabase.removeChannel(channel);
     };
 
     initialize();
@@ -70,8 +74,21 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
     e.stopPropagation();
     if (!currentUser) return;
     try {
-      await assumirChamado(ticketId, currentUser.id);
-      // O onSnapshot se encarrega de atualizar a UI instantaneamente
+      const supabase = createClient();
+      const { error } = await supabase.from('tickets').update({
+        tecnico_id: currentUser.id,
+        status: 'EM_ANDAMENTO'
+      }).eq('id', ticketId).eq('status', 'FILA'); // Equivalente a transaction simplificada
+      
+      if (error) throw error;
+      
+      await supabase.from('ticket_transitions').insert({
+        ticket_id: ticketId,
+        from_status: 'FILA',
+        to_status: 'EM_ANDAMENTO',
+        changed_by: currentUser.id,
+        reason: 'Técnico assumiu o chamado na fila.'
+      });
     } catch (error) {
       console.error("Erro ao assumir chamado:", error);
       alert("Não foi possível assumir o chamado. Ele pode já ter sido assumido por outro técnico.");
@@ -79,16 +96,16 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
   };
 
   const filteredTickets = tickets.filter(t => {
-    if (departmentFilter && t.department !== departmentFilter) return false;
+    if (departmentFilter && t.departamento !== departmentFilter) return false;
 
     // Filtros por usuário
     if (filterType === 'my-opened' || filterType === 'my-all' || filterType === 'my-closed') {
-      if (currentUser && t.assigneeId !== currentUser.id && t.requesterId !== currentUser.id) {
+      if (currentUser && t.tecnico_id !== currentUser.id && t.analista_id !== currentUser.id) {
         return false;
       }
     }
 
-    const closedStatuses = ['FECHADO', 'RESOLVIDO'];
+    const closedStatuses = ['FECHADO', 'RESOLVIDO', 'CONCLUIDO'];
     
     if (serverStatusFilter === 'open' || filterType === 'my-opened') {
       if (closedStatuses.includes(t.status)) return false;
@@ -99,7 +116,8 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       const matchTerm = (
-        (t.title && t.title.toLowerCase().includes(term)) ||
+        (t.titulo && t.titulo.toLowerCase().includes(term)) ||
+        (t.protocolo_origem && t.protocolo_origem.toLowerCase().includes(term)) ||
         (t.id && t.id.toLowerCase().includes(term))
       );
       if (!matchTerm) return false;
@@ -126,7 +144,7 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
     <div className={styles.container}>
       <div className={styles.header}>
         <h1 className={styles.title}>{filterTitle}</h1>
-        <p className={styles.subtitle}>Quadro Kanban Nativo (Firestore Real-time)</p>
+        <p className={styles.subtitle}>Quadro Kanban Nativo (Supabase Real-time)</p>
       </div>
 
       <div className={styles.filtersContainer}>
@@ -157,7 +175,7 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
       </div>
 
       {loading ? (
-        <div className={styles.loading}>Sincronizando com Firestore...</div>
+        <div className={styles.loading}>Sincronizando com Supabase...</div>
       ) : filteredTickets.length === 0 ? (
         <div className={styles.emptyState}>
           Nenhum chamado encontrado.

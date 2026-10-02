@@ -10,7 +10,7 @@ import { Send, User, Clock, Search, Bot, Server, Key, Video, Activity, Settings,
 import { DashboardTickets } from '../../../../components/Chamados/DashboardTickets';
 import { TicketEditor } from '../../../../components/Chamados/TicketEditor';
 import { SkeletonHistory } from '../../../../components/Chamados/SkeletonHistory';
-import { ITicket, ILojaContato } from '../../../../types/ticket';
+import { ITicket, ITicketReply, ILojaContato } from '../../../../types/ticket';
 import { File, Download } from 'lucide-react';
 
 const supabase = createClient();
@@ -31,6 +31,15 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
   const [anexos, setAnexos] = useState<any[]>([]);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('novos');
+  
+  // RESTORED STATES THAT WERE OVERWRITTEN BY IDE
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [ticketHistory, setTicketHistory] = useState<ITicketReply[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [errorHistory, setErrorHistory] = useState<string | null>(null);
+  const [isMaisDropdownOpen, setIsMaisDropdownOpen] = useState(false);
+  const [ticketExtraInfo, setTicketExtraInfo] = useState<any>(null);
+  const [isMilvusIframeOpen, setIsMilvusIframeOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
@@ -130,15 +139,15 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
     try {
       await new Promise(resolve => setTimeout(resolve, 800));
       
-      const newReply: ITomTicketReply = {
-        id: Date.now(),
+      const { error } = await supabase.from('ticket_replies').insert({
+        ticket_id: ticketAtivo.id,
         sender_type: 'agent',
         sender: operadorAtual?.nome || 'Você',
-        message: replyText,
-        date: new Date().toISOString()
-      };
+        message: replyText
+      });
+
+      if (error) throw error;
       
-      setTicketHistory(prev => [newReply, ...prev]);
       setReplyText('');
       toast.success('Resposta enviada com sucesso!');
     } catch (error) {
@@ -166,6 +175,50 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
       }
     };
     fetchAnexos();
+
+    const fetchHistory = async () => {
+      setIsLoadingHistory(true);
+      setErrorHistory(null);
+      const { data, error } = await supabase
+        .from('ticket_replies')
+        .select('*')
+        .eq('ticket_id', ticketAtivo.id)
+        .order('criado_em', { ascending: false });
+
+      if (error) {
+        setErrorHistory('Falha ao carregar o histórico de mensagens.');
+      } else if (data) {
+        const formattedHistory: ITicketReply[] = data.map(row => ({
+          id: row.id,
+          sender_type: row.sender_type,
+          sender: row.sender,
+          message: row.message,
+          date: new Date(row.criado_em).toLocaleString()
+        }));
+        setTicketHistory(formattedHistory);
+      }
+      setIsLoadingHistory(false);
+    };
+
+    fetchHistory();
+
+    const channel = supabase.channel(`ticket_${ticketAtivo.id}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'ticket_replies', filter: `ticket_id=eq.${ticketAtivo.id}` }, (payload) => {
+        const row = payload.new;
+        const newReply: ITicketReply = {
+          id: row.id,
+          sender_type: row.sender_type,
+          sender: row.sender,
+          message: row.message,
+          date: new Date(row.criado_em).toLocaleString()
+        };
+        setTicketHistory(prev => [newReply, ...prev]);
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [ticketAtivo]);
 
 
@@ -324,23 +377,14 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
                   </div>
                 )}
                 
-                {(!ticketAtivo.tomticket_id || isReplying) ? (
+                <div className={styles.replyContainer}>
                   <TicketEditor 
                     replyText={replyText}
                     setReplyText={setReplyText}
                     isSendingReply={isSendingReply}
                     handleSendReply={handleSendReply}
                   />
-                ) : (
-                  <div className={styles.replyContainer}>
-                    <button 
-                      onClick={() => setIsReplying(true)}
-                      className={styles.replyButton}
-                    >
-                      Responder Chamado
-                    </button>
-                  </div>
-                )}
+                </div>
               </div>
 
               {isLoadingHistory && <SkeletonHistory />}
@@ -361,16 +405,16 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
                 <div className={styles.emptyTimeline}>Nenhuma interação registrada neste chamado ainda.</div>
               )}
 
-              {ticketHistory.map((reply) => (
+              {ticketHistory.map((reply: ITicketReply) => (
                 <div key={reply.id} className={`${styles.timelineCard} ${styles.timelineCardMargin}`}>
                   <div className={styles.timelineHeader}>
                     <div className={styles.timelineUser}>
-                      <div className={`${styles.timelineAvatar} ${reply.sender_type === 'A' ? styles.avatarAtendente : styles.avatarCliente}`}>
+                      <div className={`${styles.timelineAvatar} ${reply.sender_type === 'agent' ? styles.avatarAtendente : styles.avatarCliente}`}>
                         <User size={20} />
                       </div>
                       <div>
                         <span className={styles.timelineName}>{reply.sender}</span>
-                        <span className={styles.timelineRole}>{reply.sender_type === 'A' ? 'Atendente' : 'Cliente'}</span>
+                        <span className={styles.timelineRole}>{reply.sender_type === 'agent' ? 'Atendente' : 'Cliente'}</span>
                       </div>
                     </div>
                     <div className={styles.timelineDate}>

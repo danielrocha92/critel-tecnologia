@@ -71,7 +71,7 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
 
   // Watch position para check-out automático
   useEffect(() => {
-    if (ticket?.checkInAt && ticket?.status !== 'FINALIZADO' && ticket?.status !== 'FECHADO' && ticket?.status !== 'CONCLUIDO') {
+    if (ticket?.checkInAt && ticket?.status !== 'RESOLVIDO' && ticket?.status !== 'FECHADO') {
       if ('geolocation' in navigator && ticket.checkInLat && ticket.checkInLng) {
         watchId.current = navigator.geolocation.watchPosition(
           async (position) => {

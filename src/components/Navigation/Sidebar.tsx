@@ -57,49 +57,19 @@ export default function Sidebar({ lang }: { lang: string }) {
   const navCategories = [
     { 
       name: 'Início', icon: Home, href: `/${lang}/dashboard`, section: 'main',
-      roles: ['SUPER_ADMIN', 'ADMIN']
+      roles: ['SUPER_ADMIN', 'ADMIN', 'TÉCNICO', 'TECNICO', 'ANALISTA', 'COMERCIAL']
     },
     {
-      name: 'Ambientes Departamentais', icon: Users, hasSubmenu: true, section: 'main',
-      roles: ['SUPER_ADMIN', 'ADMIN'],
-      subItems: [
-        { label: 'Painel Financeiro', href: `/${lang}/financeiro` },
-        { label: 'Painel Comercial', href: `/${lang}/comercial` },
-        { label: 'Painel Analista', href: `/${lang}/analista` },
-        { label: 'Painel Técnico', href: `/${lang}/tecnico` },
-      ],
-    },
-    {
-      name: 'Chamados', icon: Inbox, hasSubmenu: true, section: 'main',
-      roles: ['SUPER_ADMIN', 'ADMIN', 'ANALISTA', 'COMERCIAL'],
-      subItems: [
-        { label: 'Todos os Chamados', href: `/${lang}/all-tickets` },
-        { label: 'Meus Chamados', href: `/${lang}/my-tickets/all` },
-        { label: 'Meus Chamados Abertos', href: `/${lang}/my-tickets/opened` },
-        { label: 'Meus Chamados Finalizados', href: `/${lang}/my-tickets/closed` },
-      ],
+      name: 'Central de Chamados', icon: Inbox, href: `/${lang}/atendimento`, section: 'main',
+      roles: ['SUPER_ADMIN', 'ADMIN', 'TÉCNICO', 'TECNICO', 'ANALISTA', 'COMERCIAL']
     },
     { 
-      name: 'Ordens de Serviço', icon: MessageSquare, href: `/${lang}/os`, section: 'main',
+      name: 'Ordens de Serviço (Técnicos)', icon: MessageSquare, href: `/${lang}/os`, section: 'main',
+      roles: ['SUPER_ADMIN', 'ADMIN', 'TÉCNICO', 'TECNICO', 'ANALISTA']
+    },
+    {
+      name: 'Base de Clientes', icon: Users, href: `/${lang}/clientes/lista`, section: 'main',
       roles: ['SUPER_ADMIN', 'ADMIN', 'ANALISTA', 'COMERCIAL']
-    },
-    {
-      name: 'Clientes', icon: Users, hasSubmenu: true, section: 'main',
-      roles: ['SUPER_ADMIN', 'ADMIN', 'ANALISTA', 'COMERCIAL'],
-      subItems: [
-        { label: 'Todos os Clientes', href: `/${lang}/clientes/lista` },
-        { label: 'Novo Cliente',      href: `/${lang}/clientes/lista?novo=true` },
-      ],
-    },
-    {
-      name: 'Relatórios', icon: PieChart, hasSubmenu: true, section: 'tools',
-      roles: ['SUPER_ADMIN', 'ADMIN', 'ANALISTA', 'COMERCIAL'],
-      subItems: [{ label: 'Acompanhamento CRM', href: `/${lang}/relatorios` }],
-    },
-    {
-      name: 'Base de Conhecimento', icon: GraduationCap, hasSubmenu: true, section: 'tools',
-      roles: ['SUPER_ADMIN', 'ADMIN', 'ANALISTA', 'COMERCIAL', 'FINANCEIRO'],
-      subItems: [{ label: 'Treinamento do Sistema', href: `/${lang}/base-conhecimento` }],
     },
     {
       name: 'Administração', icon: Settings, hasSubmenu: true, section: 'admin',
@@ -107,10 +77,9 @@ export default function Sidebar({ lang }: { lang: string }) {
       subItems: [
         { label: 'Configurações de Sistema', href: `/${lang}/admin/configuracoes` },
         { label: 'Gerenciar Usuários',       href: `/${lang}/admin/usuarios` },
-        { label: 'Governança de Identidade', href: `/${lang}/admin` },
       ]
     },
-    { name: 'Ajuda e Suporte', icon: LifeBuoy, href: `/${lang}/ajuda`, section: 'admin', roles: ['SUPER_ADMIN', 'ADMIN', 'ANALISTA', 'COMERCIAL', 'FINANCEIRO'] },
+    { name: 'Ajuda', icon: LifeBuoy, href: `/${lang}/ajuda`, section: 'admin', roles: ['SUPER_ADMIN', 'ADMIN', 'TÉCNICO', 'TECNICO', 'ANALISTA', 'COMERCIAL', 'FINANCEIRO'] },
   ].filter(cat => !cat.roles || cat.roles.includes(cargo));
 
   // Agrupa por section para renderizar separadores

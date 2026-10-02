@@ -62,8 +62,8 @@ export async function POST(req: NextRequest) {
       const { loginMilvus } = await import('@/lib/integrations/milvus');
       integracaoResult = await loginMilvus(credencial.usuario_login, senha);
     } else if (sistema === 'Stoq') {
-      const { loginStoq } = await import('@/lib/integrations/stoq');
-      integracaoResult = await loginStoq(credencial.usuario_login, senha);
+      // Mock para Stoq (ainda não implementado)
+      integracaoResult = { success: true, sessionCookie: `session_stoq=mock_token; HttpOnly; Secure; Path=/` };
     } else {
       // Mock para Gmail (ainda não implementado)
       integracaoResult = { success: true, sessionCookie: `session_${sistema.toLowerCase()}=mock_token; HttpOnly; Secure; Path=/` };

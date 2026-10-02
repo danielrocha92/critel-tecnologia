@@ -1,7 +1,7 @@
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
-import { getStorage } from 'firebase/storage';
-import { getAuth } from 'firebase/auth';
+import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
+import { getFirestore, Firestore } from 'firebase/firestore';
+import { getStorage, FirebaseStorage } from 'firebase/storage';
+import { getAuth, Auth } from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -13,8 +13,26 @@ const firebaseConfig = {
 };
 
 // Padrão Singleton para evitar reinicialização múltipla no ambiente Serverless/Next.js
-const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+let app: FirebaseApp;
+let db: Firestore;
+let storage: FirebaseStorage;
+let auth: Auth;
 
-export const db = getFirestore(app);
-export const storage = getStorage(app);
-export const auth = getAuth(app);
+try {
+  if (firebaseConfig.apiKey && firebaseConfig.apiKey.length > 20) {
+    app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+    db = getFirestore(app);
+    storage = getStorage(app);
+    auth = getAuth(app);
+  } else {
+    throw new Error('Chave da API ausente ou no formato de placeholder');
+  }
+} catch (error) {
+  console.warn('⚠️ Firebase desabilitado (Credenciais ausentes ou inválidas). Funcionalidades dependentes do Firebase não funcionarão.', error);
+  // Exporta mocks vazios para evitar quebra em tempo de importação de módulos
+  db = {} as Firestore;
+  storage = {} as FirebaseStorage;
+  auth = {} as Auth;
+}
+
+export { app, db, storage, auth };

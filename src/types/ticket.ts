@@ -69,3 +69,29 @@ export interface IFinanceiro {
   criado_em: string;
   atualizado_em: string;
 }
+
+export interface ITicket {
+  id: string;
+  protocolo_origem?: string;
+  titulo: string;
+  descricao?: string;
+  departamento: string;
+  categoria: string;
+  prioridade: string;
+  status: string;
+  cliente: string;
+  email_cliente?: string;
+  criado_em: string | number;
+  atualizado_em?: string | number;
+  analista_id?: string;
+  tecnico_id?: string;
+}
+
+export interface ITicketReply {
+  id: string | number;
+  sender_type: 'agent' | 'customer' | 'system';
+  sender: string;
+  message: string;
+  date: string | number;
+  attachments?: { nome_arquivo: string; tamanho_bytes?: number; url: string }[];
+}

@@ -110,7 +110,7 @@ export default function ConfiguracoesPage() {
       <Section title="Alertas de Chamados" icon={<Ticket size={20} />}>
         <Row
           label="Novo Chamado Recebido"
-          desc="Notifica sempre que um chamado entrar pelo TomTicket"
+          desc="Notifica sempre que um novo chamado for aberto"
           checked={local.novoChamado}
           onChange={v => atualizar('novoChamado', v)}
         />
