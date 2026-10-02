@@ -87,6 +87,9 @@ export interface ITicket {
   atualizado_em?: string | number;
   analista_id?: string;
   tecnico_id?: string;
+  checkInAt?: number | string;
+  checkInLat?: number;
+  checkInLng?: number;
 }
 
 export interface ITicketReply {
