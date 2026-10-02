@@ -16,6 +16,7 @@ export interface Ticket {
   checkInAt?: number;
   checkInLat?: number;
   checkInLng?: number;
+  tomticket_id?: string;
 }
 
 export interface TicketTransition {
@@ -73,6 +74,7 @@ export interface IFinanceiro {
 export interface ITicket {
   id: string;
   protocolo_origem?: string;
+  tomticket_id?: string;
   titulo: string;
   descricao?: string;
   departamento: string;

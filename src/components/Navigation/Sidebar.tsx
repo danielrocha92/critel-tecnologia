@@ -59,10 +59,6 @@ export default function Sidebar({ lang }: { lang: string }) {
       name: 'Início', icon: Home, href: `/${lang}/dashboard`, section: 'main',
       roles: ['SUPER_ADMIN', 'ADMIN', 'TÉCNICO', 'TECNICO', 'ANALISTA', 'COMERCIAL']
     },
-    {
-      name: 'Central de Chamados', icon: Inbox, href: `/${lang}/atendimento`, section: 'main',
-      roles: ['SUPER_ADMIN', 'ADMIN', 'TÉCNICO', 'TECNICO', 'ANALISTA', 'COMERCIAL']
-    },
     { 
       name: 'Ordens de Serviço (Técnicos)', icon: MessageSquare, href: `/${lang}/os`, section: 'main',
       roles: ['SUPER_ADMIN', 'ADMIN', 'TÉCNICO', 'TECNICO', 'ANALISTA']

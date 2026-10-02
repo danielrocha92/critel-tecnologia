@@ -53,7 +53,7 @@ export default async function DashboardPage() {
       <section>
         <h2 className={styles.sectionTitle}>Sistemas Homologados</h2>
         <div className={styles.systemGrid}>
-          
+
           <div className={styles.systemCard}>
             <div className={`${styles.systemIcon} ${styles.iconStoq}`}>
               <Inbox size={32} />

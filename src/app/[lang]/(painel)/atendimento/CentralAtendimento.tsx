@@ -133,7 +133,7 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
   const [isSendingReply, setIsSendingReply] = useState(false);
 
   const handleSendReply = async () => {
-    if (!replyText.trim()) return;
+    if (!replyText.trim() || !ticketAtivo) return;
     setIsSendingReply(true);
     
     try {
@@ -160,11 +160,13 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
 
   // Fetch anexos when ticketAtivo changes
   useEffect(() => {
+    if (!ticketAtivo) {
+      setAnexos([]);
+      setTicketHistory([]);
+      return;
+    }
+
     const fetchAnexos = async () => {
-      if (!ticketAtivo) {
-        setAnexos([]);
-        return;
-      }
       const { data, error } = await supabase
         .from('ticket_anexos')
         .select('*')
@@ -188,7 +190,7 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
       if (error) {
         setErrorHistory('Falha ao carregar o histórico de mensagens.');
       } else if (data) {
-        const formattedHistory: ITicketReply[] = data.map(row => ({
+        const formattedHistory: ITicketReply[] = data.map((row: any) => ({
           id: row.id,
           sender_type: row.sender_type,
           sender: row.sender,
@@ -203,7 +205,7 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
     fetchHistory();
 
     const channel = supabase.channel(`ticket_${ticketAtivo.id}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'ticket_replies', filter: `ticket_id=eq.${ticketAtivo.id}` }, (payload) => {
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'ticket_replies', filter: `ticket_id=eq.${ticketAtivo.id}` }, (payload: any) => {
         const row = payload.new;
         const newReply: ITicketReply = {
           id: row.id,
@@ -445,7 +447,7 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
                             }}
                             className={styles.attachmentLink}
                           >
-                            <File size={14} /> {anexo.name || 'Anexo'}
+                            <File size={14} /> {(anexo as any).nome_arquivo || (anexo as any).name || 'Anexo'}
                           </a>
                         ))}
                       </div>

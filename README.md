@@ -25,7 +25,7 @@ Focado em branding e marketing corporativo:
 ### 2. Critel Core (Intranet / Painel de Atendimento)
 A plataforma interna (acessível via `/atendimento`) automatiza e concentra a operação de suporte técnico:
 
-- **Fila de Chamados Automática**: Integração via **Webhooks** com o **TomTicket**, processando e categorizando chamados (ex: *Radar de Obras* e *Chamados Comuns*) em tempo real no Supabase.
+- **Fila de Chamados Autônoma**: Gestão nativa de chamados, com transições de status 100% controladas pelo banco de dados (Supabase) e atualizadas em tempo real.
 - **Micro-CRM Dinâmico (Integração WhatsApp)**: Elimina o uso de planilhas de Excel. O sistema puxa automaticamente os contatos das lojas. Se o contato não existir, um formulário "on-the-fly" permite o cadastro e acionamento do WhatsApp Web do cliente de forma instantânea. API segura com *Service Role* faz bypass seguro de RLS.
 - **Radar de PDVs (Milvus)**: Integração *On-Demand* com a plataforma Milvus. Ao abrir um chamado, o painel central dispara uma consulta assíncrona ao Milvus que devolve (via WebSockets em tempo real) a disponibilidade (Online/Offline) do terminal da loja na tela do atendente.
 - **Gerador de Salas Jitsi**: Atalho prático no chat (`/video`) que gera links de salas virtuais únicas e seguras para os técnicos e gerentes de loja interagirem sem necessidade de celulares.

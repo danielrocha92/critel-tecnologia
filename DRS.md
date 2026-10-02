@@ -19,7 +19,7 @@ O sistema de Intranet da Critel atuará como o portal centralizador de acessos e
 - **RF03 - Gestão de Revogação Imediata:** O sistema deve possuir um "botão de pânico" no painel do Administrador que encerra todas as sessões ativas de um colaborador específico simultaneamente.
 
 ### Central Unificada e Integrações:
-- **RF04 - Recepção de Webhooks (TomTicket):** O sistema deve possuir uma rota (Endpoint) em Node.js para receber chamados em tempo real do TomTicket, inserindo-os no banco de dados para reflexão imediata na tela do analista.
+- **RF04 - Criação Autônoma de Chamados:** O sistema possui gestão de chamados nativa, permitindo abertura via painel e inserindo-os no banco de dados para reflexão imediata na tela do analista e técnicos.
 - **RF05 - Comunicação Omnichannel (WhatsApp):** O sistema deve integrar o motor do Chatwoot no back-end (conectado à Meta Cloud API), permitindo que múltiplos analistas operem o WhatsApp da Critel simultaneamente com logins individuais.
 - **RF06 - Geração de Salas de Vídeo Sob Demanda:** O sistema deve interpretar o atalho `/video` no chat de atendimento, gerando um link único e seguro (Jitsi/Meet) para visualização de equipamentos em loja, eliminando o uso de celulares físicos.
 - **RF07 - Proxy de Sessão Centralizado (Milvus):** O back-end em Node.js atuará como o único cliente logado no Milvus, fazendo consultas periódicas e atualizando o status dos PDVs no banco da Critel, contornando a limitação de licenças.

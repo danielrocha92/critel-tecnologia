@@ -132,7 +132,7 @@ ON public.cofre_credenciais FOR ALL USING (false);
 -- 8. Tabela de Relacionamento Lojas e Contatos
 CREATE TABLE IF NOT EXISTS public.lojas_contatos (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    loja VARCHAR(150) UNIQUE NOT NULL, -- O nome ou ID da loja vindo do TomTicket
+    loja VARCHAR(150) UNIQUE NOT NULL, -- O nome ou ID da loja
     gerente_nome VARCHAR(150),
     whatsapp_numero VARCHAR(30) NOT NULL,
     atualizado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW()

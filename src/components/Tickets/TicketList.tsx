@@ -26,7 +26,7 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
 
   useEffect(() => {
     let unsubscribeTickets: () => void;
-    
+
     const initialize = async () => {
       setLoading(true);
       const supabase = createClient();
@@ -48,8 +48,9 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
       
       fetchInitial();
 
-      const channel = supabase.channel('tickets_realtime')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'tickets' }, (payload) => {
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      const channel = supabase.channel(`ticketlist_realtime_${Date.now()}`)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'tickets' }, (payload: any) => {
           if (payload.eventType === 'INSERT') {
             setTickets(prev => [payload.new as ITicket, ...prev]);
           } else if (payload.eventType === 'UPDATE') {
@@ -77,15 +78,15 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
       const supabase = createClient();
       const { error } = await supabase.from('tickets').update({
         tecnico_id: currentUser.id,
-        status: 'EM_ANDAMENTO'
-      }).eq('id', ticketId).eq('status', 'FILA'); // Equivalente a transaction simplificada
+        status: 'ABERTO'
+      }).eq('id', ticketId).in('status', ['FILA', 'NOVO']);
       
       if (error) throw error;
       
       await supabase.from('ticket_transitions').insert({
         ticket_id: ticketId,
-        from_status: 'FILA',
-        to_status: 'EM_ANDAMENTO',
+        from_status: 'NOVO',
+        to_status: 'ABERTO',
         changed_by: currentUser.id,
         reason: 'Técnico assumiu o chamado na fila.'
       });
@@ -96,6 +97,9 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
   };
 
   const filteredTickets = tickets.filter(t => {
+    // Hide legacy TomTicket tickets permanently
+    if ((t as any).protocolo_origem || t.tomticket_id) return false;
+
     if (departmentFilter && t.departamento !== departmentFilter) return false;
 
     // Filtros por usuário
@@ -105,8 +109,8 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
       }
     }
 
-    const closedStatuses = ['FECHADO', 'RESOLVIDO', 'CONCLUIDO'];
-    
+    const closedStatuses = ['FECHADO', 'RESOLVIDO'];
+
     if (serverStatusFilter === 'open' || filterType === 'my-opened') {
       if (closedStatuses.includes(t.status)) return false;
     } else if (serverStatusFilter === 'closed' || filterType === 'my-closed') {
@@ -117,7 +121,6 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
       const term = searchTerm.toLowerCase();
       const matchTerm = (
         (t.titulo && t.titulo.toLowerCase().includes(term)) ||
-        (t.protocolo_origem && t.protocolo_origem.toLowerCase().includes(term)) ||
         (t.id && t.id.toLowerCase().includes(term))
       );
       if (!matchTerm) return false;
@@ -184,7 +187,7 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
         <div className={styles.kanbanBoard}>
           {[
             { id: 'fila', title: 'Fila (Novos)', statuses: ['FILA'] },
-            { id: 'andamento', title: 'Em Andamento', statuses: ['EM_ANDAMENTO'] },
+            { id: 'andamento', title: 'Em Andamento', statuses: ['ABERTO', 'EM_ANDAMENTO'] },
             { id: 'pendente', title: 'Pendentes', statuses: ['PENDENTE'] },
             ...(serverStatusFilter === 'closed' || serverStatusFilter === 'all' ? [{ id: 'finalizado', title: 'Finalizados', statuses: ['RESOLVIDO', 'FECHADO'] }] : [])
           ].map(col => {
@@ -197,8 +200,8 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
                 </div>
                 <div className={styles.kanbanBody}>
                   {colTickets.map(ticket => (
-                    <article 
-                      key={ticket.id} 
+                    <article
+                      key={ticket.id}
                       onClick={() => router.push(detailPath ? `/${lang}${detailPath}/${ticket.id}` : `/${lang}/atendimento?ticket_id=${ticket.id}`)}
                       className={styles.ticketCard}
                     >
@@ -210,7 +213,7 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
                             #{ticket.id.substring(0, 6)}
                           </div>
                           <div className={styles.ticketTitle}>
-                            {ticket.title}
+                            {ticket.titulo}
                           </div>
                         </div>
                         <span className={styles.statusBadge}>
@@ -221,33 +224,33 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
                       <div className={styles.badgesContainer}>
                         <div className={styles.badgeItem}>
                           <Bookmark size={14} color="#818cf8" />
-                          <span>{ticket.department}</span>
+                          <span>{ticket.departamento}</span>
                         </div>
                         <div className={styles.badgeItem}>
                           <Tag size={14} color="#f472b6" />
-                          <span>{ticket.category}</span>
+                          <span>{ticket.categoria}</span>
                         </div>
                       </div>
-                      
+
                       <div className={styles.priorityContainer}>
                         <div className={styles.priorityInfo}>
                           <span className={styles.priorityLabel}>Prior:</span>
-                          {renderBadge(ticket.priority)}
+                          {renderBadge(ticket.prioridade)}
                         </div>
                         <div className={styles.assigneeInfo}>
                           <User size={14} color="#94a3b8" />
-                          {getAtendenteNome(ticket.assigneeId)}
+                          {getAtendenteNome(ticket.tecnico_id || '')}
                         </div>
                       </div>
 
                       <div className={styles.ticketFooter}>
-                        {ticket.status === 'FILA' ? (
-                           <button 
-                             onClick={(e) => handleAssumir(e, ticket.id)}
-                             className={styles.assumirButton}
-                           >
-                             Assumir Chamado
-                           </button>
+                        {['FILA', 'NOVO'].includes(ticket.status) && !ticket.tecnico_id ? (
+                          <button
+                            onClick={(e) => handleAssumir(e, ticket.id)}
+                            className={styles.assumirButton}
+                          >
+                            Assumir Chamado
+                          </button>
                         ) : (
                           <div className={styles.timeInfo}>
                             <Activity size={14} />

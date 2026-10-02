@@ -62,14 +62,12 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
 
     isSubmitting.current = true;
     setLoading(true);
-    const protocolo = `OS-${Date.now()}`;
     
     const finalHtml = formData.endereco_loja 
       ? `<div><strong>Endereço da Loja:</strong> ${formData.endereco_loja}</div><br/>${descricaoFinal}`
       : descricaoFinal;
 
     const payload: any = {
-      protocolo_origem: protocolo,
       cliente: formData.cliente,
       titulo: formData.assunto,
       descricao: finalHtml,
@@ -265,7 +263,7 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
                 onChange={handleChange}
                 className={styles.selectField}
               >
-                <option value="">Escolher atendente...</option>
+                <option value="">Fila (Aguardando Atribuição)</option>
                 {tecnicos.map(tec => (
                   <option key={tec.user_id} value={tec.user_id}>
                     {tec.nome} ({tec.cargo === 'TECNICO' ? 'Técnico' : tec.cargo})

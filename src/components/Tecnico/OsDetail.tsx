@@ -6,10 +6,7 @@ import Link from 'next/link';
 import { createBrowserClient } from '@supabase/ssr';
 import { ChevronLeft, MapPin, Clock, CheckCircle, Navigation, AlertTriangle } from 'lucide-react';
 import FinalizarChamadoModal from '@/components/Tecnico/FinalizarChamadoModal';
-import { db } from '@/utils/firebase/client';
-import { doc, onSnapshot } from 'firebase/firestore';
-import { fazerCheckin, autoFinalizar } from '@/lib/firebase/ticket-service';
-import { Ticket } from '@/types/ticket';
+import { ITicket } from '@/types/ticket';
 import styles from './OsDetail.module.css';
 
 // Helper: Haversine distance em metros
@@ -28,10 +25,11 @@ function getDistanceFromLatLonInMeters(lat1: number, lon1: number, lat2: number,
 export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: string }) {
   const router = useRouter();
   
-  const [ticket, setTicket] = useState<Ticket | null>(null);
+  const [ticket, setTicket] = useState<ITicket | null>(null);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [isAccepting, setIsAccepting] = useState(false);
   const [isCheckingIn, setIsCheckingIn] = useState(false);
   const [geoError, setGeoError] = useState<string | null>(null);
   const [checkInMessage, setCheckInMessage] = useState<string | null>(null);
@@ -51,23 +49,25 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
     });
   }, [supabase]);
 
-  // Firebase Realtime Listener
+  // Supabase Realtime Listener
   useEffect(() => {
-    const docRef = doc(db, 'tickets', ticketId);
-    const unsubscribe = onSnapshot(docRef, (docSnap) => {
-      if (docSnap.exists()) {
-        setTicket({ id: docSnap.id, ...docSnap.data() } as Ticket);
-      } else {
-        setTicket(null);
-      }
+    const fetchInitial = async () => {
+      const { data } = await supabase.from('tickets').select('*').eq('id', ticketId).single();
+      if (data) setTicket(data as ITicket);
       setLoading(false);
-    }, (error) => {
-      console.error("Erro no onSnapshot do OS Detail:", error);
-      setLoading(false);
-    });
+    };
+    fetchInitial();
 
-    return () => unsubscribe();
-  }, [ticketId]);
+    const channel = supabase.channel(`ticket_${ticketId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'tickets', filter: `id=eq.${ticketId}` }, (payload) => {
+        setTicket(payload.new as ITicket);
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [ticketId, supabase]);
 
   // Watch position para check-out automático
   useEffect(() => {
@@ -88,7 +88,16 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
               alert('Atenção: Você se afastou mais de 500m do local do Check-in. O chamado está sendo fechado automaticamente por segurança.');
               
               // Executa Finalização Automática Nativa
-              await autoFinalizar(ticket.id, position.coords.latitude, position.coords.longitude);
+              await supabase.from('tickets').update({
+                status: 'RESOLVIDO',
+                resolucao: { autoFinalizado: true, dist: dist }
+              }).eq('id', ticket.id);
+              await supabase.from('ticket_transitions').insert({
+                ticket_id: ticket.id,
+                from_status: ticket.status,
+                to_status: 'RESOLVIDO',
+                reason: 'Auto-finalizado devido a distanciamento do local do check-in.'
+              });
               router.replace(`/${lang}/tecnico/historico`);
             }
           },
@@ -102,6 +111,29 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
       if (watchId.current !== null) navigator.geolocation.clearWatch(watchId.current);
     };
   }, [ticket?.checkInAt, ticket?.status, ticket?.checkInLat, ticket?.checkInLng, ticket?.id, lang, router]);
+
+  const handleAcceptTicket = async () => {
+    if (!currentUser) return;
+    setIsAccepting(true);
+    try {
+      await supabase.from('tickets').update({
+        tecnico_id: currentUser.id,
+        status: 'ABERTO' // Assuming accepting it puts it in ABERTO state before check-in
+      }).eq('id', ticket!.id);
+      
+      await supabase.from('ticket_transitions').insert({
+        ticket_id: ticket!.id,
+        from_status: ticket!.status,
+        to_status: 'ABERTO',
+        changed_by: currentUser.id,
+        reason: 'Chamado aceito pela Fila'
+      });
+    } catch (err) {
+      alert('Erro ao aceitar chamado.');
+    } finally {
+      setIsAccepting(false);
+    }
+  };
 
   const handleCheckIn = () => {
     if (!currentUser) {
@@ -132,7 +164,20 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
         try {
           setCheckInMessage('Localização obtida. Registrando o check-in nativamente...');
           
-          await fazerCheckin(ticket!.id, currentUser.id, position.coords.latitude, position.coords.longitude);
+          await supabase.from('tickets').update({
+            checkInAt: new Date().toISOString(),
+            checkInLat: position.coords.latitude,
+            checkInLng: position.coords.longitude,
+            status: 'EM_ANDAMENTO'
+          }).eq('id', ticket!.id);
+          
+          await supabase.from('ticket_transitions').insert({
+            ticket_id: ticket!.id,
+            from_status: ticket!.status,
+            to_status: 'EM_ANDAMENTO',
+            changed_by: currentUser.id,
+            reason: 'Check-in no local'
+          });
           
           setCheckInMessage(null);
         } catch (err: any) {
@@ -156,7 +201,7 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
     );
   };
 
-  if (loading) return <div className={styles.loadingContainer}>Sincronizando OS com Firebase...</div>;
+  if (loading) return <div className={styles.loadingContainer}>Sincronizando OS com Supabase...</div>;
   if (!ticket) return <div className={styles.loadingContainer}>OS não encontrada.</div>;
 
   const isCheckedIn = !!ticket.checkInAt;
@@ -173,9 +218,9 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
 
       <div className={styles.contentWrapper}>
         <div className={styles.titleSection}>
-          <h1 className={styles.clientTitle}>{ticket.department}</h1>
+          <h1 className={styles.clientTitle}>{ticket.departamento}</h1>
           <p className={styles.ticketTitle}>
-            {ticket.title}
+            {ticket.titulo}
           </p>
         </div>
 
@@ -188,7 +233,7 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
               <div>
                 <strong className={styles.detailLabel}>Abertura</strong>
                 <span className={styles.detailValue}>
-                  {ticket.createdAt ? new Date(ticket.createdAt).toLocaleString('pt-BR') : '-'}
+                  {ticket.criado_em ? new Date(ticket.criado_em).toLocaleString('pt-BR') : '-'}
                 </span>
               </div>
             </div>
@@ -197,16 +242,16 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
               <MapPin size={18} color="#00d2ff" className={styles.detailIcon} />
               <div>
                 <strong className={styles.detailLabel}>Departamento / Categoria</strong>
-                <span className={styles.detailValue}>{ticket.department} - {ticket.category}</span>
+                <span className={styles.detailValue}>{ticket.departamento} - {ticket.categoria}</span>
               </div>
             </div>
           </div>
         </div>
 
-        {ticket.description && (
+        {ticket.descricao && (
           <section className={styles.cardSection}>
             <h3 className={`${styles.sectionHeading} ${styles.sectionHeadingDesc}`}>Descrição Reportada</h3>
-            <p className={styles.descText}>{ticket.description}</p>
+            <p className={styles.descText} dangerouslySetInnerHTML={{__html: ticket.descricao}}></p>
           </section>
         )}
       </div>
@@ -222,7 +267,15 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
             {checkInMessage && <p className={styles.checkInMessage} role="status">{checkInMessage}</p>}
             {geoError && <p className={styles.geoError}>{geoError}</p>}
 
-            {!isCheckedIn ? (
+            {!ticket.tecnico_id ? (
+              <button
+                onClick={handleAcceptTicket}
+                disabled={isAccepting}
+                className={`${styles.btnCheckIn} ${isAccepting ? styles.btnCheckInDisabled : ''}`}>
+                <CheckCircle size={22} />
+                {isAccepting ? 'Aceitando...' : 'Aceitar Chamado'}
+              </button>
+            ) : !isCheckedIn ? (
               <button
                 onClick={handleCheckIn}
                 disabled={isCheckingIn}

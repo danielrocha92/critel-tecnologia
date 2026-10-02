@@ -90,76 +90,72 @@
   border: 1px solid #334155;
 }
 
-.kanbanBoard {
-  display: flex;
-  gap: 20px;
-  overflow-x: auto;
-  padding-bottom: 20px;
-  flex: 1;
-  min-height: 0;
-}
-
-.kanbanBoard::-webkit-scrollbar {
-  height: 10px;
-}
-.kanbanBoard::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-}
-.kanbanBoard::-webkit-scrollbar-thumb {
-  background: #475569;
-  border-radius: 8px;
-}
-
-.kanbanColumn {
-  flex: 0 0 350px;
-  background: #1e293b;
-  border-radius: 12px;
-  border: 1px solid #334155;
+/* FEED LAYOUT */
+.feedContainer {
   display: flex;
   flex-direction: column;
-  max-height: calc(100vh - 12rem);
-}
-
-.kanbanHeader {
-  padding: 16px;
-  border-bottom: 1px solid #334155;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-weight: 600;
-  color: #f8fafc;
-  background: #162032;
-  border-radius: 12px 12px 0 0;
-}
-
-.kanbanBadge {
-  background: #3b82f6;
-  color: #fff;
-  padding: 2px 10px;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: bold;
-}
-
-.kanbanBody {
-  padding: 16px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
   flex: 1;
 }
 
-.kanbanBody::-webkit-scrollbar {
-  width: 6px;
+.feedTabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
 }
-.kanbanBody::-webkit-scrollbar-track {
+
+.feedTab {
   background: transparent;
+  border: none;
+  color: #94a3b8;
+  padding: 0.75rem 1rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  position: relative;
+  transition: color 0.2s;
 }
-.kanbanBody::-webkit-scrollbar-thumb {
-  background: #334155;
-  border-radius: 6px;
+
+.feedTab:hover {
+  color: #f8fafc;
+}
+
+.feedTabActive {
+  color: #38bdf8;
+}
+
+.feedTabActive::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: #38bdf8;
+}
+
+.feedBadge {
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-size: 0.8rem;
+}
+
+.feedTabActive .feedBadge {
+  background: #38bdf8;
+  color: #0f172a;
+}
+
+.feedList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  overflow-y: auto;
+  padding-bottom: 2rem;
 }
 
 .ticketCard {

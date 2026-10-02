@@ -78,7 +78,6 @@ export async function POST(req: NextRequest) {
     const { data: ticketData, error: ticketError } = await supabase
       .from('tickets')
       .insert({
-        protocolo_origem: protocolo_origem || `OS-${Date.now()}`,
         titulo,
         descricao,
         departamento: departamento || 'Suporte',
