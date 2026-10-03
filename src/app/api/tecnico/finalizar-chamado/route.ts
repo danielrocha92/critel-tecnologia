@@ -56,6 +56,8 @@ export async function POST(request: Request) {
       .from('tickets')
       .select('status')
       .eq('id', ticket_id)
+      .is('tomticket_id', null)
+      .not('protocolo_origem', 'ilike', 'DEBUG-%')
       .single();
 
     if (existingTicket?.status === 'FINALIZADO') {
@@ -76,7 +78,9 @@ export async function POST(request: Request) {
         despesas_json,
         assinatura_datahora
       })
-      .eq('id', ticket_id);
+      .eq('id', ticket_id)
+      .is('tomticket_id', null)
+      .not('protocolo_origem', 'ilike', 'DEBUG-%')
 
     if (ticketError) throw ticketError;
 

@@ -2,33 +2,40 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import NovoChamadoModal from '../Chamados/NovoChamadoModal';
+import { usePathname, useRouter } from 'next/navigation';
+import type { LucideIcon } from 'lucide-react';
 import {
-  Home, Inbox, MessageSquare, Users, PieChart,
-  GraduationCap, Settings, LifeBuoy,
-  ChevronDown, ChevronLeft, ChevronRight, Plus, LogOut
+  Home, Inbox, MessageSquare, Users, Settings,
+  ChevronDown, ChevronLeft, ChevronRight, LogOut
 } from 'lucide-react';
 import { createClient } from '../../utils/supabase/client';
 import styles from './Sidebar.module.css';
 
 type Cargo = 'SUPER_ADMIN' | 'ADMIN' | 'TÉCNICO' | 'TECNICO' | string;
+type NavigationSubItem = { label: string; href: string; roles: string[] };
+type NavigationItem = {
+  name: string;
+  icon: LucideIcon;
+  href?: string;
+  hasSubmenu?: boolean;
+  section: string;
+  roles: string[];
+  subItems?: NavigationSubItem[];
+};
 
 export default function Sidebar({ lang }: { lang: string }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [expandedMenu, setExpandedMenu] = useState<string | null>(null);
   const [isCollapsed, setIsCollapsed]   = useState(false);
-  const [isNovoChamadoModalOpen, setIsNovoChamadoModalOpen] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const [cargo, setCargo]               = useState<Cargo>('TECNICO');
+  const [cargo, setCargo]               = useState<Cargo | null>(null);
 
   useEffect(() => {
     const toggleMenu = () => setIsMobileOpen(prev => !prev);
     window.addEventListener('toggle-mobile-menu', toggleMenu);
     return () => window.removeEventListener('toggle-mobile-menu', toggleMenu);
   }, []);
-
-  useEffect(() => { setIsMobileOpen(false); }, [pathname]);
 
   useEffect(() => {
     const root = document.querySelector('.layout-root');
@@ -39,84 +46,98 @@ export default function Sidebar({ lang }: { lang: string }) {
   }, [isCollapsed]);
 
   useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }: any) => {
+    let isMounted = true;
+    const loadCargo = async () => {
+      const supabase = createClient();
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError) {
+        console.error('[Sidebar] Não foi possível identificar o usuário:', userError);
+        return;
+      }
       if (!user) return;
-      supabase.from('perfis').select('cargo').eq('user_id', user.id).eq('status', 'ATIVO').single()
-        .then(({ data }: any) => { if (data?.cargo) setCargo(data.cargo); });
-    });
+
+      const { data, error } = await supabase
+        .from('perfis')
+        .select('cargo')
+        .eq('user_id', user.id)
+        .eq('status', 'ATIVO')
+        .maybeSingle();
+
+      if (error) {
+        console.error('[Sidebar] Não foi possível carregar o cargo do usuário:', error);
+        return;
+      }
+      if (isMounted && data?.cargo) setCargo(data.cargo);
+    };
+
+    void loadCargo();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleLogout = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
     document.cookie = "user_cargo=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    window.location.href = `/${lang}/login`;
+    router.replace(`/${lang}/login`);
+    router.refresh();
   };
 
-  const navCategories = [
+  const cargoNormalizado = cargo?.trim().toUpperCase().replace('É', 'E') || '';
+  const homePath: Record<string, string> = {
+    SUPER_ADMIN: 'dashboard',
+    ADMIN: 'dashboard',
+    FINANCEIRO: 'financeiro',
+    COMERCIAL: 'comercial',
+    ANALISTA: 'analista',
+    TECNICO: 'tecnico/os',
+  };
+  const defaultHome = homePath[cargoNormalizado] || 'dashboard';
+
+  const allCategories: NavigationItem[] = [
     { 
-      name: 'Início', icon: Home, href: `/${lang}/dashboard`, section: 'main',
-      roles: ['SUPER_ADMIN', 'ADMIN']
+      name: 'Início', icon: Home, href: `/${lang}/${defaultHome}`, section: 'main',
+      roles: ['SUPER_ADMIN', 'ADMIN', 'ANALISTA', 'COMERCIAL', 'FINANCEIRO']
     },
     {
       name: 'Ambientes Departamentais', icon: Users, hasSubmenu: true, section: 'main',
-      roles: ['SUPER_ADMIN', 'ADMIN'],
+      roles: ['SUPER_ADMIN', 'ADMIN', 'ANALISTA', 'COMERCIAL', 'FINANCEIRO'],
       subItems: [
-        { label: 'Painel Financeiro', href: `/${lang}/financeiro` },
-        { label: 'Painel Comercial', href: `/${lang}/comercial` },
-        { label: 'Painel Analista', href: `/${lang}/analista` },
-        { label: 'Painel Técnico', href: `/${lang}/tecnico` },
+        { label: 'Painel Financeiro', href: `/${lang}/financeiro`, roles: ['SUPER_ADMIN', 'ADMIN', 'FINANCEIRO'] },
+        { label: 'Painel Comercial', href: `/${lang}/comercial`, roles: ['SUPER_ADMIN', 'ADMIN', 'COMERCIAL'] },
+        { label: 'Painel Analista', href: `/${lang}/analista`, roles: ['SUPER_ADMIN', 'ADMIN', 'ANALISTA'] },
+        { label: 'Painel Técnico', href: `/${lang}/tecnico`, roles: ['SUPER_ADMIN', 'ADMIN', 'TECNICO'] },
       ],
     },
     {
-      name: 'Chamados', icon: Inbox, hasSubmenu: true, section: 'main',
-      roles: ['SUPER_ADMIN', 'ADMIN', 'ANALISTA', 'COMERCIAL'],
-      subItems: [
-        { label: 'Todos os Chamados', href: `/${lang}/all-tickets` },
-        { label: 'Meus Chamados', href: `/${lang}/my-tickets/all` },
-        { label: 'Meus Chamados Abertos', href: `/${lang}/my-tickets/opened` },
-        { label: 'Meus Chamados Finalizados', href: `/${lang}/my-tickets/closed` },
-      ],
+      name: 'Central de Atendimento', icon: Inbox, href: `/${lang}/atendimento`, section: 'main',
+      roles: ['SUPER_ADMIN', 'ADMIN', 'ANALISTA', 'COMERCIAL']
     },
     { 
       name: 'Ordens de Serviço', icon: MessageSquare, href: `/${lang}/os`, section: 'main',
       roles: ['SUPER_ADMIN', 'ADMIN', 'ANALISTA', 'COMERCIAL']
     },
     {
-      name: 'Clientes', icon: Users, hasSubmenu: true, section: 'main',
-      roles: ['SUPER_ADMIN', 'ADMIN', 'ANALISTA', 'COMERCIAL'],
-      subItems: [
-        { label: 'Todos os Clientes', href: `/${lang}/clientes/lista` },
-        { label: 'Novo Cliente',      href: `/${lang}/clientes/lista?novo=true` },
-      ],
-    },
-    {
-      name: 'Relatórios', icon: PieChart, hasSubmenu: true, section: 'tools',
-      roles: ['SUPER_ADMIN', 'ADMIN', 'ANALISTA', 'COMERCIAL'],
-      subItems: [{ label: 'Acompanhamento CRM', href: `/${lang}/relatorios` }],
-    },
-    {
-      name: 'Base de Conhecimento', icon: GraduationCap, hasSubmenu: true, section: 'tools',
-      roles: ['SUPER_ADMIN', 'ADMIN', 'ANALISTA', 'COMERCIAL', 'FINANCEIRO'],
-      subItems: [{ label: 'Treinamento do Sistema', href: `/${lang}/base-conhecimento` }],
-    },
-    {
       name: 'Administração', icon: Settings, hasSubmenu: true, section: 'admin',
       roles: ['SUPER_ADMIN', 'ADMIN'],
       subItems: [
-        { label: 'Configurações de Sistema', href: `/${lang}/admin/configuracoes` },
-        { label: 'Gerenciar Usuários',       href: `/${lang}/admin/usuarios` },
-        { label: 'Governança de Identidade', href: `/${lang}/admin` },
+        { label: 'Configurações de Sistema', href: `/${lang}/admin/configuracoes`, roles: ['SUPER_ADMIN', 'ADMIN'] },
+        { label: 'Gerenciar Usuários',       href: `/${lang}/admin/usuarios`, roles: ['SUPER_ADMIN', 'ADMIN'] },
+        { label: 'Governança de Identidade', href: `/${lang}/admin`, roles: ['SUPER_ADMIN', 'ADMIN'] },
       ]
     },
-    { name: 'Ajuda e Suporte', icon: LifeBuoy, href: `/${lang}/ajuda`, section: 'admin', roles: ['SUPER_ADMIN', 'ADMIN', 'ANALISTA', 'COMERCIAL', 'FINANCEIRO'] },
-  ].filter(cat => !cat.roles || cat.roles.includes(cargo));
+  ];
+  const navCategories = allCategories
+    .filter((category) => category.roles.includes(cargoNormalizado))
+    .map((category) => ({
+      ...category,
+      subItems: category.subItems?.filter((item) => item.roles.includes(cargoNormalizado)),
+    }));
 
   // Agrupa por section para renderizar separadores
   const sectionLabel: Record<string, string> = {
     main:  '',
-    tools: 'FERRAMENTAS',
     admin: 'SISTEMA',
   };
 
@@ -144,24 +165,17 @@ export default function Sidebar({ lang }: { lang: string }) {
           </button>
         </div>
 
-        {/* ── Novo Chamado ── */}
-        <button className={styles.btnNovoChamado} onClick={() => setIsNovoChamadoModalOpen(true)}>
-          <span className={styles.btnNovoIconWrap}>
-            <Plus size={16} />
-            <span className={styles.btnNovoText}>Novo Chamado</span>
-          </span>
-          {!isCollapsed && <ChevronDown size={14} className={styles.btnNovoChevron} />}
-        </button>
-
         {/* ── Nav ── */}
         <nav className={styles.sidebarNav}>
           {navCategories.map(cat => {
             const Icon = cat.icon;
-            const section = (cat as any).section ?? 'main';
+            const section = cat.section;
             const showLabel = !renderedSections.has(section) && sectionLabel[section];
             if (sectionLabel[section] !== undefined) renderedSections.add(section);
 
-            const isActive  = cat.href ? pathname.includes(cat.href.split('/').pop()!) : false;
+            const isActive = cat.href
+              ? pathname === cat.href || pathname.startsWith(`${cat.href}/`)
+              : cat.subItems?.some((item) => pathname === item.href || pathname.startsWith(`${item.href}/`)) ?? false;
             const isExpanded = expandedMenu === cat.name;
 
             const handleToggle = () => {
@@ -173,7 +187,7 @@ export default function Sidebar({ lang }: { lang: string }) {
                 {showLabel && <div className={styles.sectionLabel}>{sectionLabel[section]}</div>}
 
                 {cat.href ? (
-                  <Link href={cat.href} className={styles.navLink}>
+                  <Link href={cat.href} className={styles.navLink} onClick={() => setIsMobileOpen(false)}>
                     <div className={`${styles.navItem} ${isActive ? styles.navItemActive : ''}`}>
                       <div className={styles.navItemLeft}>
                         <Icon size={17} className={styles.navIcon} />
@@ -182,24 +196,31 @@ export default function Sidebar({ lang }: { lang: string }) {
                     </div>
                   </Link>
                 ) : (
-                  <div className={`${styles.navItem} ${isActive ? styles.navItemActive : ''}`} onClick={handleToggle}>
+                  <button
+                    type="button"
+                    className={`${styles.navItem} ${styles.navButton} ${isActive ? styles.navItemActive : ''}`}
+                    onClick={handleToggle}
+                    aria-expanded={isExpanded}
+                  >
                     <div className={styles.navItemLeft}>
                       <Icon size={17} className={styles.navIcon} />
                       <span className={styles.navLabel}>{cat.name}</span>
                     </div>
-                    {cat.hasSubmenu && (
-                      <ChevronDown size={14} className={`${styles.navChevron} ${isExpanded ? styles.navChevronOpen : ''}`} />
-                    )}
-                  </div>
+                    <ChevronDown size={14} className={`${styles.navChevron} ${isExpanded ? styles.navChevronOpen : ''}`} />
+                  </button>
                 )}
 
-                {isExpanded && cat.subItems && (
+                {isExpanded && cat.subItems && cat.subItems.length > 0 && (
                   <ul className={styles.submenuList}>
-                    {cat.subItems.map((sub, idx) => {
+                    {cat.subItems.map((sub) => {
                       const subActive = pathname === sub.href || pathname.startsWith(sub.href.split('?')[0]);
                       return (
-                        <li key={idx} className={styles.submenuItem}>
-                          <Link href={sub.href} className={`${styles.submenuLink} ${subActive ? styles.submenuLinkActive : ''}`}>
+                        <li key={sub.href} className={styles.submenuItem}>
+                          <Link
+                            href={sub.href}
+                            className={`${styles.submenuLink} ${subActive ? styles.submenuLinkActive : ''}`}
+                            onClick={() => setIsMobileOpen(false)}
+                          >
                             {sub.label}
                           </Link>
                         </li>
@@ -221,9 +242,6 @@ export default function Sidebar({ lang }: { lang: string }) {
         </div>
       </aside>
 
-      {isNovoChamadoModalOpen && (
-        <NovoChamadoModal onClose={() => setIsNovoChamadoModalOpen(false)} />
-      )}
     </>
   );
 }

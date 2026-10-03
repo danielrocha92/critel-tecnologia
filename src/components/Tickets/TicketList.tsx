@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Search, Clock, AlertCircle, Bookmark, Tag, User, Activity, ChevronDown, ChevronRight } from 'lucide-react';
+import { Search, Bookmark, Tag, User, Activity } from 'lucide-react';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { createClient } from '@/utils/supabase/client';
 import { db } from '@/utils/firebase/client';
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
@@ -11,27 +12,34 @@ import { useRouter, usePathname } from 'next/navigation';
 import styles from './TicketList.module.css';
 
 export type TicketFilter = 'all' | 'my-all' | 'my-opened' | 'my-closed';
+type TicketProfile = { nome: string; user_id: string };
 
 export default function TicketList({ filterTitle, filterType, detailPath }: { filterTitle: string, filterType: TicketFilter, detailPath?: string }) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [departmentFilter, setDepartmentFilter] = useState('');
   const [serverStatusFilter, setServerStatusFilter] = useState<'open' | 'closed' | 'all'>(
     filterType === 'my-closed' ? 'closed' : (filterType === 'all' || filterType === 'my-all') ? 'all' : 'open'
   );
   const [tickets, setTickets] = useState<Ticket[]>([]);
-  const [perfis, setPerfis] = useState<any[]>([]);
+  const [perfis, setPerfis] = useState<TicketProfile[]>([]);
   const [loading, setLoading] = useState(true);
+  const [firebaseError, setFirebaseError] = useState<string | null>(null);
   const router = useRouter();
   const pathname = usePathname();
   const lang = pathname.split('/')[1] || 'pt';
 
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [currentUser, setCurrentUser] = useState<SupabaseUser | null>(null);
 
   useEffect(() => {
     let unsubscribeTickets: () => void;
     
     const initialize = async () => {
       setLoading(true);
+      if (!db) {
+        setFirebaseError('Firebase não está configurado para carregar os chamados.');
+        setLoading(false);
+        return;
+      }
+
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       setCurrentUser(user);
@@ -79,8 +87,6 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
   };
 
   const filteredTickets = tickets.filter(t => {
-    if (departmentFilter && t.department !== departmentFilter) return false;
-
     // Filtros por usuário
     if (filterType === 'my-opened' || filterType === 'my-all' || filterType === 'my-closed') {
       if (currentUser && t.assigneeId !== currentUser.id && t.requesterId !== currentUser.id) {
@@ -110,7 +116,7 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
 
   const getAtendenteNome = (userId: string | null) => {
     if (!userId) return 'Fila';
-    const p = perfis.find(p => String(p.user_id) === String(userId));
+    const p = perfis.find(p => p.user_id === userId);
     return p ? p.nome : 'Alocado';
   };
 
@@ -158,6 +164,8 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
 
       {loading ? (
         <div className={styles.loading}>Sincronizando com Firestore...</div>
+      ) : firebaseError ? (
+        <div className={styles.emptyState} role="alert">{firebaseError}</div>
       ) : filteredTickets.length === 0 ? (
         <div className={styles.emptyState}>
           Nenhum chamado encontrado.

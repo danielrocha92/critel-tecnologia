@@ -2,13 +2,19 @@
 
 import { useState, useRef, useEffect, useCallback, ChangeEvent } from 'react';
 import { X, MapPin, MapPinOff, AlertTriangle, Send, Clock, Plus, Trash } from 'lucide-react';
-import SignatureCanvas from 'react-signature-canvas';
+import SignatureCanvas, { type SignatureCanvas as SignatureCanvasInstance } from 'react-signature-canvas';
 import { createBrowserClient } from '@supabase/ssr';
+import type { User } from '@supabase/supabase-js';
 import { storage } from '@/utils/firebase/client';
 import { ref, uploadString, getDownloadURL } from 'firebase/storage';
 import { finalizarChamado } from '@/lib/firebase/ticket-service';
 import { Ticket } from '@/types/ticket';
 import styles from './FinalizarChamadoModal.module.css';
+
+const supabase = createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+);
 
 interface FinalizarChamadoModalProps {
   ticket: Ticket;
@@ -16,8 +22,15 @@ interface FinalizarChamadoModalProps {
   onSuccess: () => void;
 }
 
+type ExpenseDraft = { natureza: string; valor: string; anexo: string };
+
+function toLocalDateTimeInput(date: Date) {
+  const timezoneOffset = date.getTimezoneOffset() * 60000;
+  return new Date(date.getTime() - timezoneOffset).toISOString().slice(0, 16);
+}
+
 export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: FinalizarChamadoModalProps) {
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [progressMsg, setProgressMsg] = useState<string>('');
@@ -28,8 +41,10 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
   const [isLocating, setIsLocating] = useState(true);
 
   // Form Fields
-  const [horaInicio, setHoraInicio] = useState('');
-  const [horaTermino, setHoraTermino] = useState('');
+  const [horaInicio, setHoraInicio] = useState(() => toLocalDateTimeInput(
+    ticket.checkInAt ? new Date(ticket.checkInAt) : new Date(Date.now() - 60 * 60 * 1000),
+  ));
+  const [horaTermino, setHoraTermino] = useState(() => toLocalDateTimeInput(new Date()));
   const [descricao, setDescricao] = useState('');
   const [materiais, setMateriais] = useState('');
   
@@ -38,21 +53,27 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
   const [evidenciaDepois, setEvidenciaDepois] = useState<string | null>(null);
 
   // Despesas
-  const [despesas, setDespesas] = useState([{ natureza: '', valor: '', anexo: '' }]);
+  const [despesas, setDespesas] = useState<ExpenseDraft[]>([{ natureza: '', valor: '', anexo: '' }]);
 
   // Signature
-  const sigCanvas = useRef<any>(null);
-
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const sigCanvas = useRef<SignatureCanvasInstance | null>(null);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
+    let isMounted = true;
+    const loadUser = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (!isMounted) return;
+      if (error) {
+        setError(`Não foi possível verificar a sessão: ${error.message}`);
+        return;
+      }
       setCurrentUser(data.user);
-    });
-  }, [supabase]);
+    };
+    void loadUser();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const captureLocation = useCallback(() => {
     setLocation(null);
@@ -93,24 +114,8 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
   }, []);
 
   useEffect(() => {
-    const now = new Date();
-    const tzOffset = (new Date()).getTimezoneOffset() * 60000;
-    const localISOTime = (new Date(now.getTime() - tzOffset)).toISOString().slice(0, 16);
-    
-    setHoraTermino(localISOTime);
-    
-    let localISOTimeAgo;
-    if (ticket.checkInAt) {
-      const checkInDate = new Date(ticket.checkInAt);
-      localISOTimeAgo = (new Date(checkInDate.getTime() - tzOffset)).toISOString().slice(0, 16);
-    } else {
-      const oneHourAgo = new Date(now.getTime() - (60 * 60 * 1000));
-      localISOTimeAgo = (new Date(oneHourAgo.getTime() - tzOffset)).toISOString().slice(0, 16);
-    }
-    setHoraInicio(localISOTimeAgo);
-
     captureLocation();
-  }, [captureLocation, ticket.checkInAt]);
+  }, [captureLocation]);
 
   const clearSignature = () => {
     if (sigCanvas.current) {
@@ -130,14 +135,14 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
 
   const addDespesa = () => setDespesas([...despesas, { natureza: '', valor: '', anexo: '' }]);
   const removeDespesa = (index: number) => setDespesas(despesas.filter((_, i) => i !== index));
-  const updateDespesa = (index: number, field: string, value: string) => {
+  const updateDespesa = (index: number, field: keyof ExpenseDraft, value: string) => {
     const newDespesas = [...despesas];
-    (newDespesas[index] as any)[field] = value;
+    newDespesas[index] = { ...newDespesas[index], [field]: value };
     setDespesas(newDespesas);
   };
 
   const formatCurrency = (value: string) => {
-    let num = value.replace(/\D/g, "");
+    const num = value.replace(/\D/g, '');
     if (!num) return "";
     const numValue = (parseInt(num) / 100).toFixed(2);
     return numValue.replace(".", ",").replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
@@ -159,6 +164,7 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
   };
 
   const uploadBase64 = async (path: string, base64: string): Promise<string> => {
+    if (!storage) throw new Error('Firebase Storage não está configurado.');
     const fileRef = ref(storage, path);
     await uploadString(fileRef, base64, 'data_url');
     return getDownloadURL(fileRef);
@@ -246,9 +252,9 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
       });
 
       onSuccess();
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      setError(err.message || 'Erro inesperado ao salvar laudo no Firestore.');
+      setError(err instanceof Error ? err.message : 'Erro inesperado ao salvar laudo no Firestore.');
       setLoading(false);
     }
   };
@@ -408,7 +414,7 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
                 <SignatureCanvas 
                   ref={sigCanvas}
                   penColor="black"
-                  canvasProps={{ width: 500, height: 200, className: 'sigCanvas', style: { width: '100%', height: '150px' } }} 
+                  canvasProps={{ width: 500, height: 200, className: styles.signatureCanvas }}
                 />
               </div>
               <span className={styles.signatureHint}>

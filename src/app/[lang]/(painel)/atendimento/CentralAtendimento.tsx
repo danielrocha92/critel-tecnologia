@@ -1,19 +1,23 @@
 'use client';
 
-import { useEffect, useState, useRef, Suspense } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { createClient } from '../../../../utils/supabase/client';
 import { useCentralAtendimento } from '../../../../hooks/useCentralAtendimento';
 import styles from './atendimento.module.css';
-import { Send, User, Clock, Search, Bot, Server, Key, Video, Activity, Settings, Trash2, Printer, Pencil, History, X } from 'lucide-react';
+import { User, Trash2, Printer, Pencil, History, X } from 'lucide-react';
 import { DashboardTickets } from '../../../../components/Chamados/DashboardTickets';
-import { TicketEditor } from '../../../../components/Chamados/TicketEditor';
-import { SkeletonHistory } from '../../../../components/Chamados/SkeletonHistory';
-import { ITicket, ILojaContato } from '../../../../types/ticket';
+import { ITicket } from '../../../../types/ticket';
 import { File, Download } from 'lucide-react';
 
 const supabase = createClient();
+
+type TicketAttachment = {
+  url: string;
+  nome_arquivo: string;
+  tamanho_bytes?: number | null;
+};
 
 export default function CentralAtendimento({ ticketId }: { ticketId?: string }) {
   return (
@@ -24,13 +28,28 @@ export default function CentralAtendimento({ ticketId }: { ticketId?: string }) 
 }
 
 function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }) {
-  const { tickets, perfis, pdvs, operadorAtual, loading } = useCentralAtendimento();
+  const {
+    tickets,
+    perfis,
+    operadorAtual,
+    loading,
+    error: ticketsError,
+    hasMoreTickets,
+    loadingMoreTickets,
+    loadMoreTickets,
+  } = useCentralAtendimento();
 
   const searchParams = useSearchParams();
   const [ticketAtivo, setTicketAtivo] = useState<ITicket | null>(null);
-  const [anexos, setAnexos] = useState<any[]>([]);
+  const [isMaisDropdownOpen, setIsMaisDropdownOpen] = useState(false);
+  const safeDateValue = (value?: string | number | Date | null) => {
+    if (value === undefined || value === null || value === '') return null;
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date;
+  };
+  const [isMilvusIframeOpen, setIsMilvusIframeOpen] = useState(false);
+  const [anexos, setAnexos] = useState<TicketAttachment[]>([]);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState('novos');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
@@ -50,11 +69,19 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
     }
   };
 
-  const [activeFilter, setActiveFilter] = useState('todos');
-  const [isMeus, setIsMeus] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const lang = pathname.split('/')[1] || 'pt';
+  const activeFilter = pathname.includes('/my-tickets/opened')
+    ? 'abertos'
+    : pathname.includes('/my-tickets/closed')
+      ? 'finalizados'
+      : searchParams.get('filter') || 'todos';
+  const isMeus = pathname.includes('/my-tickets')
+    ? true
+    : pathname.includes('/all-tickets')
+      ? false
+      : searchParams.get('meus') === 'true';
   const handleBackToTickets = () => {
     if (routeTicketId) {
       router.push(`/${lang}/os`);
@@ -64,50 +91,34 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
   };
 
   useEffect(() => {
-    // Check path for new clean URLs
-    if (pathname.includes('/my-tickets')) {
-      setIsMeus(true);
-      if (pathname.includes('/opened')) setActiveFilter('abertos');
-      else if (pathname.includes('/closed')) setActiveFilter('finalizados');
-      else setActiveFilter('todos');
-    } else if (pathname.includes('/all-tickets')) {
-      setIsMeus(false);
-      setActiveFilter('todos');
-    } else {
-      // Fallback to query params for /atendimento
-      const f = searchParams.get('filter');
-      const m = searchParams.get('meus');
-      setIsMeus(m === 'true');
-      setActiveFilter(f || 'todos');
-    }
-  }, [pathname, searchParams]);
-
-  useEffect(() => {
-    const tid = routeTicketId ?? searchParams.get('ticket_id');
-    if (tid && ticketAtivo?.id !== tid) {
-      toast.info(`Tentando abrir chamado: ${tid.substring(0,6)}...`);
-      const found = tickets.find((t: ITicket) => t.id === tid);
-      if (found) {
-        toast.success(`Chamado encontrado na memória!`);
-        setTicketAtivo(found);
-      } else if (!loading) {
-        toast.info(`Buscando chamado no banco de dados...`);
-        // If not found in loaded tickets, fetch it directly
-        const fetchTicket = async () => {
+    const resolveTicket = async () => {
+      const tid = routeTicketId ?? searchParams.get('ticket_id');
+      if (tid && ticketAtivo?.id !== tid) {
+        const found = tickets.find((ticket) => ticket.id === tid);
+        if (found) {
+          toast.success('Chamado encontrado na lista carregada.');
+          setTicketAtivo(found);
+        } else if (!loading) {
+          toast.info('Buscando chamado no banco de dados...');
           const supabase = createClient();
-          const { data, error } = await supabase.from('tickets').select('*').eq('id', tid).single();
-          if (data) {
-            toast.success(`Chamado carregado do banco!`);
+          const { data, error } = await supabase
+            .from('tickets')
+            .select('*')
+            .eq('id', tid)
+            .is('tomticket_id', null)
+            .not('protocolo_origem', 'ilike', 'DEBUG-%')
+            .maybeSingle();
+          if (data && !error) {
+            toast.success('Chamado carregado do banco.');
             setTicketAtivo(data);
           } else {
-            toast.error(`Falha ao buscar chamado: ${error?.message}`);
+            toast.error(`Falha ao buscar chamado: ${error?.message || 'registro não encontrado'}`);
           }
-        };
-        fetchTicket();
-      } else {
-        toast.info(`Aguardando carregamento da lista...`);
+        }
       }
-    }
+    };
+
+    void resolveTicket();
   }, [routeTicketId, searchParams, tickets, ticketAtivo, loading]);
   // Edit Form States
   const [editForm, setEditForm] = useState({
@@ -118,37 +129,6 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
     prioridade: ''
   });
   
-  // Reply Editor States
-  const [replyText, setReplyText] = useState('');
-  const [isReplying, setIsReplying] = useState(false);
-  const [isSendingReply, setIsSendingReply] = useState(false);
-
-  const handleSendReply = async () => {
-    if (!replyText.trim()) return;
-    setIsSendingReply(true);
-    
-    try {
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      const newReply: ITomTicketReply = {
-        id: Date.now(),
-        sender_type: 'agent',
-        sender: operadorAtual?.nome || 'Você',
-        message: replyText,
-        date: new Date().toISOString()
-      };
-      
-      setTicketHistory(prev => [newReply, ...prev]);
-      setReplyText('');
-      toast.success('Resposta enviada com sucesso!');
-    } catch (error) {
-      console.error(error);
-      toast.error('Erro ao enviar a resposta.');
-    } finally {
-      setIsSendingReply(false);
-    }
-  };
-
   // Fetch anexos when ticketAtivo changes
   useEffect(() => {
     const fetchAnexos = async () => {
@@ -162,50 +142,34 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
         .eq('ticket_id', ticketAtivo.id);
       
       if (data && !error) {
-        setAnexos(data);
+        setAnexos(data as TicketAttachment[]);
       }
     };
     fetchAnexos();
   }, [ticketAtivo]);
 
-
-  // Status PDV e CRM movidos para o final para manter a estrutura, PDVs agora vêm do hook.
-  
-
-
-
-
-  // 5. Checagem On-Demand no Milvus (RF07)
   useEffect(() => {
     if (!ticketAtivo) return;
-    
-    // Dispara a consulta ao Milvus em background
+
     const verificarMilvus = async () => {
       try {
         await fetch('/api/milvus/check', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ loja: ticketAtivo.cliente })
+          body: JSON.stringify({ loja: ticketAtivo.cliente }),
         });
-        // A API vai atualizar o banco Supabase, o que disparará o WebSocket abaixo.
-      } catch (err) {
-        console.error('Erro ao consultar Milvus:', err);
+      } catch (milvusError) {
+        console.error('Erro ao consultar Milvus:', milvusError);
       }
     };
-    verificarMilvus();
-  }, [ticketAtivo]);
 
-
-
-  const rolarParaBaixo = () => {
-    setTimeout(() => {
-      if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }, 100);
-  };
+    void verificarMilvus();
+  }, [ticketAtivo?.cliente, ticketAtivo?.id]);
 
 
   return (
     <div className={styles.container}>
+      {ticketsError && <div className={styles.errorMessage} role="alert">{ticketsError}</div>}
       {!ticketAtivo ? (
         <DashboardTickets 
           tickets={tickets}
@@ -215,9 +179,11 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
           setSearchTerm={setSearchTerm}
           activeFilter={activeFilter}
           isMeus={isMeus}
+          hasMoreTickets={hasMoreTickets}
+          loadingMoreTickets={loadingMoreTickets}
+          onLoadMoreTickets={() => void loadMoreTickets()}
           onSelectTicket={(ticket) => {
             setTicketAtivo(ticket);
-            setIsReplying(false);
           }}
         />
       ) : (
@@ -290,7 +256,7 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
                     </div>
                   </div>
                   <div className={styles.timelineDate}>
-                    {new Date(ticketAtivo.criado_em).toLocaleDateString()} {new Date(ticketAtivo.criado_em).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {safeDateValue(ticketAtivo.criado_em)?.toLocaleDateString() || '-'} {safeDateValue(ticketAtivo.criado_em)?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) || ''}
                   </div>
                 </div>
                 <div 
@@ -323,92 +289,7 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
                     </div>
                   </div>
                 )}
-                
-                {(!ticketAtivo.tomticket_id || isReplying) ? (
-                  <TicketEditor 
-                    replyText={replyText}
-                    setReplyText={setReplyText}
-                    isSendingReply={isSendingReply}
-                    handleSendReply={handleSendReply}
-                  />
-                ) : (
-                  <div className={styles.replyContainer}>
-                    <button 
-                      onClick={() => setIsReplying(true)}
-                      className={styles.replyButton}
-                    >
-                      Responder Chamado
-                    </button>
-                  </div>
-                )}
               </div>
-
-              {isLoadingHistory && <SkeletonHistory />}
-              
-              {errorHistory && (
-                <div className={styles.errorContainer}>
-                  <p className={styles.errorMessage}>{errorHistory}</p>
-                  <button 
-                    onClick={() => setTicketAtivo({ ...ticketAtivo })} 
-                    className={styles.errorRetryBtn}
-                  >
-                    Tentar Novamente
-                  </button>
-                </div>
-              )}
-
-              {!isLoadingHistory && !errorHistory && ticketHistory.length === 0 && (
-                <div className={styles.emptyTimeline}>Nenhuma interação registrada neste chamado ainda.</div>
-              )}
-
-              {ticketHistory.map((reply) => (
-                <div key={reply.id} className={`${styles.timelineCard} ${styles.timelineCardMargin}`}>
-                  <div className={styles.timelineHeader}>
-                    <div className={styles.timelineUser}>
-                      <div className={`${styles.timelineAvatar} ${reply.sender_type === 'A' ? styles.avatarAtendente : styles.avatarCliente}`}>
-                        <User size={20} />
-                      </div>
-                      <div>
-                        <span className={styles.timelineName}>{reply.sender}</span>
-                        <span className={styles.timelineRole}>{reply.sender_type === 'A' ? 'Atendente' : 'Cliente'}</span>
-                      </div>
-                    </div>
-                    <div className={styles.timelineDate}>
-                      {reply.date}
-                    </div>
-                  </div>
-                  <div 
-                    className={styles.timelineContent} 
-                    dangerouslySetInnerHTML={{ __html: reply.message }} 
-                    onClick={handleTimelineClick}
-                  />
-
-                  {reply.attachments && reply.attachments.length > 0 && (
-                    <div className={styles.attachmentsSection}>
-                      <h5 className={styles.attachmentsTitle}>Anexos</h5>
-                      <div className={styles.attachmentsList}>
-                        {reply.attachments.map((anexo, idx) => (
-                          <a 
-                            key={idx} 
-                            href={anexo.url} 
-                            target="_blank" 
-                            rel="noreferrer" 
-                            onClick={(e) => {
-                              if (anexo.url.match(/\.(jpeg|jpg|gif|png|webp)$/i)) {
-                                e.preventDefault();
-                                setSelectedImage(anexo.url);
-                              }
-                            }}
-                            className={styles.attachmentLink}
-                          >
-                            <File size={14} /> {anexo.name || 'Anexo'}
-                          </a>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
             </div>
 
             {/* Coluna Direita: Informações */}
@@ -454,10 +335,6 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
                   <span className={styles.panelValue}>{ticketAtivo.cliente}</span>
                 </div>
                 <div className={styles.panelRow}>
-                  <span className={styles.panelLabel}>Organização:</span>
-                  <span className={styles.panelValue}>{ticketExtraInfo?.organizacao || '-'}</span>
-                </div>
-                <div className={styles.panelRow}>
                   <span className={styles.panelLabel}>Email:</span>
                   <span className={styles.panelValue}>{ticketAtivo.email_cliente || 'Não Informado'}</span>
                 </div>
@@ -488,15 +365,11 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
                 </div>
                 <div className={styles.panelRow}>
                   <span className={styles.panelLabel}>Criado em:</span>
-                  <span className={styles.panelValue}>{new Date(ticketAtivo.criado_em).toLocaleString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                  <span className={styles.panelValue}>{safeDateValue(ticketAtivo.criado_em)?.toLocaleString([], { hour: '2-digit', minute: '2-digit' }) || '-'}</span>
                 </div>
                 <div className={styles.panelRow}>
                   <span className={styles.panelLabel}>Prioridade:</span>
                   <span className={styles.panelValue}>{ticketAtivo.prioridade || 'Não Definida'}</span>
-                </div>
-                <div className={styles.panelRow}>
-                  <span className={styles.panelLabel}>Deadline:</span>
-                  <span className={styles.panelValue}>{ticketExtraInfo?.deadline ? new Date(ticketExtraInfo.deadline).toLocaleString() : '-'}</span>
                 </div>
               </div>
 
@@ -525,7 +398,7 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
           <div className={styles.milvusHeader}>
             <div>
               <h2 className={styles.milvusTitle}>Milvus IT Management</h2>
-              <p className={styles.milvusSubtitle}>Sessão Única Compartilhada via WebRTC Proxy</p>
+              <p className={styles.milvusSubtitle}>Acesso à plataforma pelo cofre Critel</p>
             </div>
             <button 
               onClick={() => setIsMilvusIframeOpen(false)}

@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createBrowserClient } from '@supabase/ssr';
+import type { User } from '@supabase/supabase-js';
 import { ChevronLeft, MapPin, Clock, CheckCircle, Navigation, AlertTriangle } from 'lucide-react';
 import FinalizarChamadoModal from '@/components/Tecnico/FinalizarChamadoModal';
 import { db } from '@/utils/firebase/client';
@@ -11,6 +12,11 @@ import { doc, onSnapshot } from 'firebase/firestore';
 import { fazerCheckin, autoFinalizar } from '@/lib/firebase/ticket-service';
 import { Ticket } from '@/types/ticket';
 import styles from './OsDetail.module.css';
+
+const supabase = createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+);
 
 // Helper: Haversine distance em metros
 function getDistanceFromLatLonInMeters(lat1: number, lon1: number, lat2: number, lon2: number) {
@@ -29,8 +35,8 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
   const router = useRouter();
   
   const [ticket, setTicket] = useState<Ticket | null>(null);
-  const [currentUser, setCurrentUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(db !== null);
   const [showModal, setShowModal] = useState(false);
   const [isCheckingIn, setIsCheckingIn] = useState(false);
   const [geoError, setGeoError] = useState<string | null>(null);
@@ -39,20 +45,28 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
 
   const watchId = useRef<number | null>(null);
 
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-
   // Fetch Auth User
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
+    let isMounted = true;
+    const loadUser = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (!isMounted) return;
+      if (error) {
+        setGeoError(`Não foi possível verificar a sessão: ${error.message}`);
+        return;
+      }
       setCurrentUser(data.user);
-    });
-  }, [supabase]);
+    };
+    void loadUser();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Firebase Realtime Listener
   useEffect(() => {
+    if (!db) return;
+
     const docRef = doc(db, 'tickets', ticketId);
     const unsubscribe = onSnapshot(docRef, (docSnap) => {
       if (docSnap.exists()) {
@@ -62,7 +76,7 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
       }
       setLoading(false);
     }, (error) => {
-      console.error("Erro no onSnapshot do OS Detail:", error);
+      console.error('Erro no onSnapshot do OS Detail:', error);
       setLoading(false);
     });
 
@@ -135,7 +149,7 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
           await fazerCheckin(ticket!.id, currentUser.id, position.coords.latitude, position.coords.longitude);
           
           setCheckInMessage(null);
-        } catch (err: any) {
+        } catch (err) {
           setGeoError(err instanceof Error ? err.message : 'Erro inesperado ao registrar o check-in.');
           setCheckInMessage(null);
         } finally {
@@ -156,6 +170,7 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
     );
   };
 
+  if (!db) return <div className={styles.loadingContainer}>Firebase não está configurado para consultar esta ordem de serviço.</div>;
   if (loading) return <div className={styles.loadingContainer}>Sincronizando OS com Firebase...</div>;
   if (!ticket) return <div className={styles.loadingContainer}>OS não encontrada.</div>;
 

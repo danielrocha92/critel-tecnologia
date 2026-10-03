@@ -1,7 +1,7 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
-import { getStorage } from 'firebase/storage';
-import { getAuth } from 'firebase/auth';
+import { getFirestore, type Firestore } from 'firebase/firestore';
+import { getStorage, type FirebaseStorage } from 'firebase/storage';
+import { getAuth, type Auth } from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -12,9 +12,14 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Padrão Singleton para evitar reinicialização múltipla no ambiente Serverless/Next.js
-const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+const hasFirebaseConfig = Object.values(firebaseConfig).every((value) => typeof value === 'string' && value.trim().length > 0);
 
-export const db = getFirestore(app);
-export const storage = getStorage(app);
-export const auth = getAuth(app);
+// Padrão Singleton para evitar reinicialização múltipla no ambiente Serverless/Next.js.
+// Se as variáveis do Firebase não estiverem configuradas no ambiente, o app não tenta
+// inicializar a SDK e evita quebrar o build em ambientes de desenvolvimento sem credenciais.
+const app = hasFirebaseConfig ? (getApps().length > 0 ? getApp() : initializeApp(firebaseConfig)) : null;
+
+export const isFirebaseConfigured = hasFirebaseConfig;
+export const db: Firestore | null = app ? getFirestore(app) : null;
+export const storage: FirebaseStorage | null = app ? getStorage(app) : null;
+export const auth: Auth | null = app ? getAuth(app) : null;

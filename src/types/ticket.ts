@@ -1,4 +1,12 @@
-export type TicketStatus = 'FILA' | 'EM_ANDAMENTO' | 'PENDENTE' | 'RESOLVIDO' | 'FECHADO';
+export type TicketStatus =
+  | 'FILA'
+  | 'EM_ANDAMENTO'
+  | 'PENDENTE'
+  | 'RESOLVIDO'
+  | 'FECHADO'
+  | 'FINALIZADO'
+  | 'CONCLUIDO'
+  | 'CANCELADO';
 
 export interface Ticket {
   id: string; // ID gerado pelo Firestore
@@ -16,6 +24,21 @@ export interface Ticket {
   checkInAt?: number;
   checkInLat?: number;
   checkInLng?: number;
+}
+
+export interface ITicket extends Ticket {
+  cliente?: string;
+  titulo?: string;
+  protocolo_origem?: string;
+  criado_em?: string | number | Date;
+  atualizado_em?: string | number | Date;
+  email_cliente?: string;
+  analista_id?: string | null;
+  tecnico_id?: string | null;
+  departamento?: string;
+  categoria?: string;
+  prioridade?: string;
+  descricao?: string;
 }
 
 export interface TicketTransition {
@@ -36,12 +59,6 @@ export interface IPerfil {
   cargo: string;
   user_id: string;
   status?: string;
-}
-
-export interface ILojaContato {
-  id?: string;
-  nome_loja: string;
-  telefone_whatsapp: string;
 }
 
 export interface IServicoConcluido {

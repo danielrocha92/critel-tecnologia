@@ -98,7 +98,6 @@
     "title": "Sua infraestrutura de TI está preparada para o futuro?",
     "desc": "Evite paradas não programadas, lentidão na rede e vulnerabilidades de segurança. Solicite uma avaliação técnica gratuita e descubra onde sua operação pode ganhar máxima performance.",
     "ctaPrimary": "Solicitar Diagnóstico Gratuito",
-    "ctaSecondary": "Falar com Especialista",
     "point1_title": "Auditoria de Rede e Cabeamento",
     "point1_desc": "Mapeamento de pontos críticos, certificação e identificação de gargalos de tráfego.",
     "point2_title": "Análise de Riscos e Segurança",
@@ -123,7 +122,7 @@
       "email": "seu.nome@empresa.com.br",
       "challenge": "Conte-nos brevemente o que precisa resolver..."
     },
-    "submitBtn": "Solicitar Diagnóstico Gratuito pelo WhatsApp"
+    "submitBtn": "Solicitar Diagnóstico Gratuito"
   },
   "footer": {
     "brandTitle": "Critel Tecnologia",
@@ -151,7 +150,6 @@
     "contact": {
       "address": "R. Homero Vaz do Amaral, 35 - Veleiros, São Paulo - SP",
       "phone": "(11) 3136-2592",
-      "whatsapp": "WhatsApp",
       "email": "comercial@criteltecnologia.com.br",
       "hours": "Seg-Sex: 8h às 18h"
     },

@@ -29,9 +29,7 @@
 .collapsed .navChevron,
 .collapsed .sectionLabel,
 .collapsed .submenuList,
-.collapsed .btnNovoText,
 .collapsed .logoutLabel { display: none; }
-.collapsed .btnNovoChamado { padding: 10px; justify-content: center; }
 .collapsed .navItem { padding: 10px; justify-content: center; }
 .collapsed .navItem .navIcon { margin: 0; }
 .collapsed .sidebarFooter { padding: 12px; }
@@ -82,38 +80,6 @@
 }
 .btnCollapse:hover { color: #e2e8f0; border-color: rgba(255,255,255,0.2); }
 
-/* ── NEW TICKET BUTTON ── */
-.btnNovoChamado {
-  margin: 12px 14px;
-  width: calc(100% - 28px);
-  background: linear-gradient(135deg, #c9253a, #a01d2a);
-  color: #fff; border: none;
-  padding: 10px 14px; border-radius: 8px;
-  font-weight: 600; font-size: 0.875rem;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 8px;
-  box-shadow: 0 4px 20px rgba(183,28,28,0.25);
-  transition: all 0.2s;
-  font-family: inherit;
-}
-.btnNovoChamado:hover {
-  background: linear-gradient(135deg, #e8344a, #c9253a);
-  box-shadow: 0 6px 24px rgba(183,28,28,0.4);
-  transform: translateY(-1px);
-}
-.btnNovoChamado:active { transform: translateY(0); }
-
-.btnNovoIconWrap {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.btnNovoChevron {
-  opacity: 0.7;
-}
-
 /* ── NAV ── */
 .sidebarNav { padding: 6px 10px; flex: 1; }
 
@@ -139,6 +105,21 @@
   transition: all 0.15s;
   user-select: none;
   position: relative;
+}
+.navButton {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  font-family: inherit;
+}
+.navButton:focus-visible,
+.navLink:focus-visible,
+.submenuLink:focus-visible,
+.logoutBtn:focus-visible,
+.btnCollapse:focus-visible {
+  outline: 2px solid #fb7185;
+  outline-offset: 2px;
 }
 .navItem:hover { background: rgba(255,255,255,0.04); color: #c8d6e5; }
 .navItemActive {

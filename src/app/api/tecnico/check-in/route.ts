@@ -79,6 +79,8 @@ export async function POST(request: Request) {
       .from('tickets')
       .select('id, tecnico_id, analista_id, check_in_at')
       .eq('id', ticket_id)
+      .is('tomticket_id', null)
+      .not('protocolo_origem', 'ilike', 'DEBUG-%')
       .maybeSingle();
 
     if (ticketLookupError) throw ticketLookupError;

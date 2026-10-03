@@ -1,111 +1,144 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 import { createClient } from '../utils/supabase/client';
-import { ITicket, IPerfil } from '../types/ticket';
+import type { ITicket, IPerfil } from '../types/ticket';
+
+const PAGE_SIZE = 250;
+type TicketRealtimeRow = ITicket & { tomticket_id?: string | null } & Record<string, unknown>;
+const supabase = createClient();
 
 export function useCentralAtendimento() {
   const [tickets, setTickets] = useState<ITicket[]>([]);
   const [perfis, setPerfis] = useState<IPerfil[]>([]);
-  const [pdvs, setPdvs] = useState<any[]>([]);
   const [operadorAtual, setOperadorAtual] = useState<IPerfil | null>(null);
   const [loading, setLoading] = useState(true);
-
-  // O cliente deve ser inicializado dentro do hook ou importado do singleton para evitar multiplas instancias
-  const supabase = createClient();
+  const [loadingMoreTickets, setLoadingMoreTickets] = useState(false);
+  const [hasMoreTickets, setHasMoreTickets] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const isMounted = useRef(true);
 
   useEffect(() => {
-    let isMounted = true;
+    isMounted.current = true;
 
-    async function fetchData() {
+    const loadInitialData = async () => {
       try {
-        setLoading(true);
-        // 1. Carregar Tickets
-        const { data: ticketsData } = await supabase
-          .from('tickets')
-          .select('*')
-          .order('criado_em', { ascending: false });
-        if (ticketsData && isMounted) setTickets(ticketsData);
+        const [ticketResult, profilesResult, authResult] = await Promise.all([
+          supabase
+            .from('tickets')
+            .select('*')
+            .is('tomticket_id', null)
+            .not('protocolo_origem', 'ilike', 'DEBUG-%')
+            .order('criado_em', { ascending: false })
+            .range(0, PAGE_SIZE - 1),
+          supabase.from('perfis').select('id, nome, cargo, user_id, status').order('nome'),
+          supabase.auth.getUser(),
+        ]);
 
-        // 2. Carregar Perfis
-        const { data: perfisData } = await supabase
-          .from('perfis')
-          .select('id, nome, cargo, user_id')
-          .order('nome');
-        if (perfisData && isMounted) setPerfis(perfisData);
+        if (!isMounted.current) return;
+        if (ticketResult.error) throw ticketResult.error;
+        setTickets((ticketResult.data || []) as ITicket[]);
+        setHasMoreTickets((ticketResult.data || []).length === PAGE_SIZE);
 
-        // 3. Carregar PDVs (Loja)
-        const { data: pdvsData } = await supabase
-          .from('status_pdv')
-          .select('loja, status_conexao');
-        if (pdvsData && isMounted) setPdvs(pdvsData);
+        if (profilesResult.error) {
+          setError(`Não foi possível carregar os perfis: ${profilesResult.error.message}`);
+        } else {
+          const profileRows = (profilesResult.data || []) as Array<IPerfil & { status: string }>;
+          setPerfis(profileRows);
 
-        // 4. Identificar Operador Logado
-        const { data: authData } = await supabase.auth.getUser();
-        if (authData?.user && isMounted) {
-          const { data: perfil } = await supabase
-            .from('perfis')
-            .select('id, nome, cargo, user_id')
-            .eq('user_id', authData.user.id)
-            .eq('status', 'ATIVO')
-            .single();
-          if (perfil) setOperadorAtual(perfil);
+          if (!authResult.error && authResult.data.user) {
+            const profile = profileRows.find(
+              (item) => item.user_id === authResult.data.user.id && item.status === 'ATIVO',
+            );
+            if (profile) setOperadorAtual(profile);
+          }
         }
-      } catch (error) {
-        console.error('[Atendimento] Erro ao carregar dados:', error);
+
+        if (authResult.error) {
+          setError(`Não foi possível verificar a sessão: ${authResult.error.message}`);
+        }
+      } catch (loadError) {
+        if (!isMounted.current) return;
+        const detail = loadError instanceof Error ? loadError.message : 'Erro desconhecido';
+        setError(`Não foi possível carregar a Central de Atendimento: ${detail}`);
       } finally {
-        if (isMounted) setLoading(false);
+        if (isMounted.current) setLoading(false);
       }
-    }
+    };
 
-    fetchData();
+    void loadInitialData();
 
-    // 5. Configurar Realtime Tickets
-    const channelTickets = supabase.channel('realtime_tickets_atendimento')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'tickets' }, () => {
-        supabase.from('tickets').select('*').order('criado_em', { ascending: false })
-          .then(({ data }: { data: any }) => { if (data && isMounted) setTickets(data); });
-      })
-      .subscribe();
-
-    // 6. Configurar Realtime PDVs (Status e Automação)
-    const channelPdvs = supabase.channel('realtime_pdvs_atendimento')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'status_pdv' }, async (payload: any) => {
-        // Recarrega lista
-        supabase.from('status_pdv').select('loja, status_conexao')
-          .then(({ data }: { data: any }) => { if (data && isMounted) setPdvs(data); });
-        
-        // Automação: Criação automática de ticket se PDV cair
-        const record = payload.new as any;
-        if (record && record.status_conexao) {
-          const loja = record.loja;
-          let isOffline = false;
-          try {
-            const pdvsList = JSON.parse(record.status_conexao);
-            isOffline = pdvsList.some((p: any) => p.status === 'OFFLINE');
-          } catch {
-            isOffline = record.status_conexao === 'OFFLINE';
-          }
-
-          if (isOffline && loja.toLowerCase() !== 'bacio di latte') {
-            // Usa o state mais recente de tickets (pode haver race condition aqui, ideal é fetch no server, mas mantemos a logica do cliente por hr)
-            setTickets(currentTickets => {
-              const temTicket = currentTickets.some(t => t.cliente === loja && t.status !== 'RESOLVIDO');
-              if (!temTicket) {
-                // Ação de criação de ticket na base nativa será implementada aqui.
-                console.log(`Automação pendente: Criar ticket nativo para ${loja} (PDV Offline)`);
-              }
-              return currentTickets;
-            });
-          }
+    const channel = supabase
+      .channel('realtime_tickets_atendimento')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'tickets' },
+        (payload: RealtimePostgresChangesPayload<TicketRealtimeRow>) => {
+        if (payload.eventType === 'DELETE') {
+          const deletedId = String((payload.old as { id?: unknown }).id || '');
+          setTickets((current) => current.filter((ticket) => ticket.id !== deletedId));
+          return;
         }
-      })
-      .subscribe();
+
+        const ticket = payload.new as TicketRealtimeRow;
+        if (ticket.tomticket_id || ticket.protocolo_origem?.toUpperCase().startsWith('DEBUG-')) {
+          setTickets((current) => current.filter((item) => item.id !== ticket.id));
+          return;
+        }
+
+        setTickets((current) => {
+          const merged = [ticket, ...current.filter((item) => item.id !== ticket.id)];
+          merged.sort((a, b) => new Date(b.criado_em || 0).getTime() - new Date(a.criado_em || 0).getTime());
+          return merged.slice(0, Math.max(PAGE_SIZE, current.length));
+        });
+        },
+      )
+      .subscribe((status: string, subscriptionError?: Error) => {
+        if (status === 'CHANNEL_ERROR' && isMounted.current) {
+          setError(`A atualização em tempo real está indisponível: ${subscriptionError?.message || status}`);
+        }
+      });
 
     return () => {
-      isMounted = false;
-      supabase.removeChannel(channelTickets);
-      supabase.removeChannel(channelPdvs);
+      isMounted.current = false;
+      void supabase.removeChannel(channel);
     };
   }, []);
 
-  return { tickets, perfis, pdvs, operadorAtual, loading };
+  const loadMoreTickets = useCallback(async () => {
+    if (!hasMoreTickets || loadingMoreTickets) return;
+
+    setLoadingMoreTickets(true);
+    try {
+      const { data, error: queryError } = await supabase
+        .from('tickets')
+        .select('*')
+        .is('tomticket_id', null)
+        .not('protocolo_origem', 'ilike', 'DEBUG-%')
+        .order('criado_em', { ascending: false })
+        .range(tickets.length, tickets.length + PAGE_SIZE - 1);
+
+      if (queryError) throw queryError;
+      setTickets((current) => {
+        const existingIds = new Set(current.map((ticket) => ticket.id));
+        return [...current, ...((data || []) as ITicket[]).filter((ticket) => !existingIds.has(ticket.id))];
+      });
+      setHasMoreTickets((data || []).length === PAGE_SIZE);
+    } catch (loadError) {
+      const detail = loadError instanceof Error ? loadError.message : 'Erro desconhecido';
+      setError(`Não foi possível carregar mais solicitações: ${detail}`);
+    } finally {
+      setLoadingMoreTickets(false);
+    }
+  }, [hasMoreTickets, loadingMoreTickets, tickets.length]);
+
+  return {
+    tickets,
+    perfis,
+    operadorAtual,
+    loading,
+    error,
+    hasMoreTickets,
+    loadingMoreTickets,
+    loadMoreTickets,
+  };
 }

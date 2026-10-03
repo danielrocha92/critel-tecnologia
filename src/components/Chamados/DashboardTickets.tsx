@@ -14,9 +14,18 @@ interface DashboardTicketsProps {
   isMeus?: boolean;
   onSelectTicket: (ticket: ITicket) => void;
   loading?: boolean;
+  hasMoreTickets: boolean;
+  loadingMoreTickets: boolean;
+  onLoadMoreTickets: () => void;
 }
 
-export function DashboardTickets({ tickets, perfis, operadorAtual, searchTerm, setSearchTerm, activeFilter = 'todos', isMeus = false, onSelectTicket, loading }: DashboardTicketsProps) {
+export function DashboardTickets({ tickets, perfis, operadorAtual, searchTerm, setSearchTerm, activeFilter = 'todos', isMeus = false, onSelectTicket, loading, hasMoreTickets, loadingMoreTickets, onLoadMoreTickets }: DashboardTicketsProps) {
+  const safeDate = (value?: string | number | Date) => {
+    if (value === undefined || value === null || value === '') return null;
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date;
+  };
+
   const [openSections, setOpenSections] = useState({
     reminder: true,
     escalated: true,
@@ -40,8 +49,8 @@ export function DashboardTickets({ tickets, perfis, operadorAtual, searchTerm, s
     setLimits(prev => ({ ...prev, [section]: (prev[section] || 50) + 50 }));
   };
 
-  const renderBadge = (priority: string) => {
-    const p = String(priority).toLowerCase();
+  const renderBadge = (priority?: string) => {
+    const p = String(priority ?? '').toLowerCase();
     if (p === 'alta' || p === '1' || p === 'urgente') return <span className={styles.badgePrioHigh}>Alta</span>;
     if (p === 'media' || p === '2' || p === 'normal') return <span className={styles.badgePrioMedium}>Média</span>;
     if (p === 'baixa' || p === '3' || p === 'low') return <span className={styles.badgePrioLow}>Baixa</span>;
@@ -89,6 +98,8 @@ export function DashboardTickets({ tickets, perfis, operadorAtual, searchTerm, s
 
   const renderTable = (data: ITicket[], sectionTitle: string, sectionKey: keyof typeof openSections) => {
     const isOpen = openSections[sectionKey];
+    const visibleLimit = limits[sectionKey] || 50;
+    const hasMoreLoaded = data.length > visibleLimit;
     
     return (
       <div className={styles.accordionContainer}>
@@ -126,19 +137,19 @@ export function DashboardTickets({ tickets, perfis, operadorAtual, searchTerm, s
                   ) : (
                     data.slice(0, limits[sectionKey] || 50).map(ticket => (
                       <tr key={ticket.id} onClick={() => onSelectTicket(ticket)}>
-                        <td>#{ticket.protocolo_origem}</td>
+                        <td>#{ticket.protocolo_origem || ticket.id?.slice(0, 8) || 'N/A'}</td>
                         <td className={styles.textMedium}>{ticket.titulo}</td>
                         <td>{ticket.departamento || '-'}</td>
                         <td>{renderBadge(ticket.prioridade)}</td>
                         <td>{ticket.status}</td>
                         <td>{ticket.cliente}</td>
                         <td className={styles.textSmallDate}>
-                          {new Date(ticket.criado_em).toLocaleDateString()}<br/>
-                          {new Date(ticket.criado_em).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          {safeDate(ticket.criado_em)?.toLocaleDateString() || '-'}<br/>
+                          {safeDate(ticket.criado_em)?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) || ''}
                         </td>
                         <td className={styles.textSmallDate}>
-                          {ticket.atualizado_em ? new Date(ticket.atualizado_em).toLocaleDateString() : '-'}<br/>
-                          {ticket.atualizado_em ? new Date(ticket.atualizado_em).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
+                          {safeDate(ticket.atualizado_em)?.toLocaleDateString() || '-'}<br/>
+                          {safeDate(ticket.atualizado_em)?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) || ''}
                         </td>
                         <td className={styles.textGray}>
                           {(ticket.analista_id || ticket.tecnico_id) 
@@ -156,13 +167,18 @@ export function DashboardTickets({ tickets, perfis, operadorAtual, searchTerm, s
             )}
             
             {/* Load More Button */}
-            {data.length > (limits[sectionKey] || 50) && (
+            {(hasMoreLoaded || hasMoreTickets) && (
               <div className={styles.loadMoreContainer}>
                 <button 
-                  onClick={() => loadMore(sectionKey)}
+                  type="button"
+                  disabled={loadingMoreTickets}
+                  onClick={() => {
+                    if (hasMoreLoaded) loadMore(sectionKey);
+                    else onLoadMoreTickets();
+                  }}
                   className={styles.btnLoadMore}
                 >
-                  Carregar Mais 50
+                  {loadingMoreTickets ? 'Carregando...' : hasMoreLoaded ? 'Carregar Mais 50' : 'Carregar mais solicitações'}
                 </button>
               </div>
             )}

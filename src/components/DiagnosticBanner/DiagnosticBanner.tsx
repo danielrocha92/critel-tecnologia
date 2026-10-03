@@ -1,9 +1,22 @@
 import styles from './DiagnosticBanner.module.css';
 import ScrollReveal from '../ScrollReveal/ScrollReveal';
-import { ShieldAlert, ArrowRight, MessageSquareCheck } from 'lucide-react';
+import { ShieldAlert, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
-export default function DiagnosticBanner({ dict }: { dict: any }) {
+type DiagnosticBannerCopy = {
+  badge: string;
+  title: string;
+  desc: string;
+  ctaPrimary: string;
+  point1_title: string;
+  point1_desc: string;
+  point2_title: string;
+  point2_desc: string;
+  point3_title: string;
+  point3_desc: string;
+};
+
+export default function DiagnosticBanner({ dict }: { dict: DiagnosticBannerCopy }) {
   return (
     <section className={styles.diagnosticSection}>
       <div className={`container ${styles.container}`}>
@@ -22,15 +35,6 @@ export default function DiagnosticBanner({ dict }: { dict: any }) {
                 <span>{dict.ctaPrimary}</span>
                 <ArrowRight size={18} />
               </Link>
-              <a
-                href="https://wa.me/5511996839480?text=Ol%C3%A1!%20Gostaria%20de%20solicitar%20um%20diagn%C3%B3stico%20gratuito%20de%20TI."
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.secondaryBtn}
-              >
-                <MessageSquareCheck size={18} />
-                <span>{dict.ctaSecondary}</span>
-              </a>
             </div>
           </div>
 

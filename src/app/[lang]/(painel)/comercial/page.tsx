@@ -1,10 +1,11 @@
-import styles from './comercial.module.css';
+import type { Metadata } from 'next';
+import DepartmentEnvironment from '@/components/Dashboard/DepartmentEnvironment';
+
+export const metadata: Metadata = {
+  title: 'Painel Comercial | Critel Core',
+  description: 'Consulte os cadastros comerciais das lojas.',
+};
 
 export default function ComercialPage() {
-  return (
-    <div className={styles.container}>
-      <h1 className={styles.title}>Painel Comercial</h1>
-      <p className={styles.text}>Bem-vindo ao ambiente exclusivo do Comercial. Mais recursos serão adicionados em breve.</p>
-    </div>
-  );
+  return <DepartmentEnvironment department="comercial" />;
 }

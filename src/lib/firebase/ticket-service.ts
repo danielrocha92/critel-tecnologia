@@ -3,7 +3,7 @@ import {
   collection,
   runTransaction, 
   serverTimestamp, 
-  getFirestore 
+  type FieldValue,
 } from 'firebase/firestore';
 import { Ticket, TicketTransition, TicketStatus } from '../../types/ticket';
 import { db } from '../../utils/firebase/client';
@@ -16,6 +16,10 @@ import { db } from '../../utils/firebase/client';
  * @param tecnicoId - O ID do técnico que está assumindo
  */
 export async function assumirChamado(ticketId: string, tecnicoId: string): Promise<void> {
+  if (!db) {
+    throw new Error('Firebase não configurado. Defina as variáveis NEXT_PUBLIC_FIREBASE_* para usar tickets em tempo real.');
+  }
+
   const ticketRef = doc(db, 'tickets', ticketId);
   const transitionRef = doc(db, `tickets/${ticketId}/transitions`, crypto.randomUUID());
 
@@ -79,6 +83,10 @@ export async function abrirChamado(
   data: Pick<Ticket, 'title' | 'description' | 'department' | 'category' | 'priority' | 'attachments'>, 
   requesterId: string
 ): Promise<string> {
+  if (!db) {
+    throw new Error('Firebase não configurado. Defina as variáveis NEXT_PUBLIC_FIREBASE_* para abrir chamados.');
+  }
+
   const ticketRef = doc(collection(db, 'tickets'));
   const ticketId = ticketRef.id;
   const transitionRef = doc(db, `tickets/${ticketId}/transitions`, crypto.randomUUID());
@@ -86,7 +94,7 @@ export async function abrirChamado(
   try {
     await runTransaction(db, async (transaction) => {
       
-      const newTicket: Omit<Ticket, 'createdAt' | 'updatedAt'> & { createdAt: any, updatedAt: any } = {
+      const newTicket: Omit<Ticket, 'createdAt' | 'updatedAt'> & { createdAt: FieldValue, updatedAt: FieldValue } = {
         id: ticketId,
         ...data,
         status: 'FILA',
@@ -123,6 +131,10 @@ export async function abrirChamado(
  * Salva as coordenadas e o timestamp para auditoria de SLA/Distância.
  */
 export async function fazerCheckin(ticketId: string, tecnicoId: string, lat: number, lng: number): Promise<void> {
+  if (!db) {
+    throw new Error('Firebase não configurado. Defina as variáveis NEXT_PUBLIC_FIREBASE_* para registrar check-in.');
+  }
+
   const ticketRef = doc(db, 'tickets', ticketId);
   const transitionRef = doc(db, `tickets/${ticketId}/transitions`, crypto.randomUUID());
 
@@ -166,6 +178,10 @@ export async function fazerCheckin(ticketId: string, tecnicoId: string, lat: num
  * Fecha automaticamente o chamado por segurança se o técnico violar o limite de distância (500m).
  */
 export async function autoFinalizar(ticketId: string, lat: number, lng: number): Promise<void> {
+  if (!db) {
+    throw new Error('Firebase não configurado. Defina as variáveis NEXT_PUBLIC_FIREBASE_* para finalizar chamados automaticamente.');
+  }
+
   const ticketRef = doc(db, 'tickets', ticketId);
   const transitionRef = doc(db, `tickets/${ticketId}/transitions`, crypto.randomUUID());
 
@@ -225,6 +241,10 @@ export interface TicketResolutionPayload {
  * Atualiza o status e grava o "Laudo de Serviço" acoplado.
  */
 export async function finalizarChamado(payload: TicketResolutionPayload): Promise<void> {
+  if (!db) {
+    throw new Error('Firebase não configurado. Defina as variáveis NEXT_PUBLIC_FIREBASE_* para encerrar chamados.');
+  }
+
   const ticketRef = doc(db, 'tickets', payload.ticketId);
   const transitionRef = doc(db, `tickets/${payload.ticketId}/transitions`, crypto.randomUUID());
   const resolutionRef = doc(db, `tickets/${payload.ticketId}/resolutions`, crypto.randomUUID());
@@ -266,4 +286,3 @@ export async function finalizarChamado(payload: TicketResolutionPayload): Promis
     throw error;
   }
 }
-

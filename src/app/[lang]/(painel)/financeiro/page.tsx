@@ -1,10 +1,11 @@
-import styles from './financeiro.module.css';
+import type { Metadata } from 'next';
+import DepartmentEnvironment from '@/components/Dashboard/DepartmentEnvironment';
+
+export const metadata: Metadata = {
+  title: 'Painel Financeiro | Critel Core',
+  description: 'Acompanhe lançamentos financeiros e despesas de ordens de serviço.',
+};
 
 export default function FinanceiroPage() {
-  return (
-    <div className={styles.pageContainer}>
-      <h1 className={styles.pageTitle}>Painel Financeiro</h1>
-      <p className={styles.pageDescription}>Bem-vindo ao ambiente exclusivo do Financeiro. Mais recursos serão adicionados em breve.</p>
-    </div>
-  );
+  return <DepartmentEnvironment department="financeiro" />;
 }

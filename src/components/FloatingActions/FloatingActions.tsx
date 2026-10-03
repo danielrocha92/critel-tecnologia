@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import styles from './FloatingActions.module.css';
 import { ArrowUp } from 'lucide-react';
 
-export default function FloatingActions({ lang }: { lang?: string }) {
+export default function FloatingActions() {
   const [showBackToTop, setShowBackToTop] = useState(false);
 
   useEffect(() => {

@@ -20,15 +20,14 @@ Este projeto foi desenvolvido com as seguintes ferramentas:
 Focado em branding e marketing corporativo:
 - **Header/Footer**: Navegação global, seletor de idiomas (PT, EN, ES) e branding.
 - **ScrollReveal**: Animações suaves de fade-in ao longo da rolagem.
-- **Ações Flutuantes**: Botões adaptativos de WhatsApp e navegação rápida.
+- **Ações Flutuantes**: Navegação rápida para voltar ao topo da página.
 
 ### 2. Critel Core (Intranet / Painel de Atendimento)
 A plataforma interna (acessível via `/atendimento`) automatiza e concentra a operação de suporte técnico:
 
-- **Fila de Chamados Automática**: Integração via **Webhooks** com o **TomTicket**, processando e categorizando chamados (ex: *Radar de Obras* e *Chamados Comuns*) em tempo real no Supabase.
-- **Micro-CRM Dinâmico (Integração WhatsApp)**: Elimina o uso de planilhas de Excel. O sistema puxa automaticamente os contatos das lojas. Se o contato não existir, um formulário "on-the-fly" permite o cadastro e acionamento do WhatsApp Web do cliente de forma instantânea. API segura com *Service Role* faz bypass seguro de RLS.
-- **Radar de PDVs (Milvus)**: Integração *On-Demand* com a plataforma Milvus. Ao abrir um chamado, o painel central dispara uma consulta assíncrona ao Milvus que devolve (via WebSockets em tempo real) a disponibilidade (Online/Offline) do terminal da loja na tela do atendente.
-- **Gerador de Salas Jitsi**: Atalho prático no chat (`/video`) que gera links de salas virtuais únicas e seguras para os técnicos e gerentes de loja interagirem sem necessidade de celulares.
+- **Fila de Atendimento**: Chamados internos consultados no Supabase, atualizados em tempo real e carregados em páginas para reduzir o tempo inicial de abertura.
+- **Painel Comercial**: Consulta e pesquisa dos cadastros de lojas, sem canal externo de mensagens integrado.
+- **Monitoramento de PDVs (Milvus)**: Consulta à plataforma Milvus pela ferramenta administrativa correspondente.
 - **Cofre Zero Trust (SSO Proxy)**: Sistema de redirecionamento interno e seguro para acesso a sistemas terceiros (Stoq ERP, Milvus) ocultando credenciais do frontend.
 
 ---
@@ -36,9 +35,18 @@ A plataforma interna (acessível via `/atendimento`) automatiza e concentra a op
 ## 💻 Como rodar o projeto localmente
 
 ### Pré-requisitos
-- [Node.js](https://nodejs.org/) (versão 20 ou superior)
+- [Node.js](https://nodejs.org/) (versão 22.13.0 ou superior; versão do projeto: 22.23.3)
 - Configuração do **Supabase** (Projetos: `tickets`, `lojas_contatos`, `status_pdv`)
 - Configuração de chaves no arquivo `.env.local`
+
+### Serviços Firebase usados
+
+No Firebase Console, habilite:
+
+- **Cloud Firestore**: usado para chamados/ordens de serviço, transições e resoluções. Crie o banco em modo nativo; as coleções são criadas quando o app grava os primeiros documentos.
+- **Cloud Storage for Firebase**: usado para anexos, assinaturas e evidências de atendimento.
+
+O login do app é feito pelo **Supabase Auth**. Firebase Authentication, Analytics, Hosting e Cloud Messaging não são usados atualmente. A identidade do Supabase não autentica automaticamente requisições ao Firebase; antes de liberar Firestore ou Storage em produção, implemente uma ponte de autenticação com Firebase ou mova essas operações para APIs server-side com Firebase Admin SDK. Não publique regras com leitura/escrita abertas.
 
 ### Instalação
 
@@ -53,19 +61,32 @@ cd critel-tecnologia
 npm install
 ```
 
-3. Configure o `.env.local`:
+3. Configure o `.env.local` (os valores do Firebase Web já foram preenchidos neste ambiente; não compartilhe o arquivo):
 ```env
 NEXT_PUBLIC_SUPABASE_URL=sua_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=sua_chave_anonima
 SUPABASE_SERVICE_ROLE_KEY=sua_chave_admin
+NEXT_PUBLIC_FIREBASE_API_KEY=sua_api_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=seu_projeto.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=seu_project_id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=seu_projeto.firebasestorage.app
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=seu_sender_id
+NEXT_PUBLIC_FIREBASE_APP_ID=seu_app_id
 ```
 
-4. Inicie o servidor de desenvolvimento:
+4. No Windows com nvm-windows, ative a versão do projeto:
+```powershell
+nvm use 22.23.3
+node -v
+```
+O comando `node -v` deve retornar `v22.23.3`. No macOS/Linux com nvm, use `nvm install` e `nvm use`.
+
+5. Inicie o servidor de desenvolvimento:
 ```bash
 npm run dev
 ```
 
-5. Acesse [http://localhost:3000](http://localhost:3000) (Site) ou [http://localhost:3000/pt/atendimento](http://localhost:3000/pt/atendimento) (Critel Core).
+6. Acesse [http://localhost:3000](http://localhost:3000) (Site) ou [http://localhost:3000/pt/atendimento](http://localhost:3000/pt/atendimento) (Critel Core).
 
 ---
 

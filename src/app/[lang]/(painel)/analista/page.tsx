@@ -1,10 +1,11 @@
-import styles from './analista.module.css';
+import type { Metadata } from 'next';
+import DepartmentEnvironment from '@/components/Dashboard/DepartmentEnvironment';
+
+export const metadata: Metadata = {
+  title: 'Painel do Analista | Critel Core',
+  description: 'Acompanhe solicitações e encaminhe atendimentos.',
+};
 
 export default function AnalistaPage() {
-  return (
-    <div className={styles.pageContainer}>
-      <h1 className={styles.pageTitle}>Painel Analista</h1>
-      <p className={styles.pageDescription}>Bem-vindo ao ambiente exclusivo do Analista. Mais recursos serão adicionados em breve.</p>
-    </div>
-  );
+  return <DepartmentEnvironment department="analista" />;
 }

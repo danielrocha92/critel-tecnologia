@@ -22,7 +22,7 @@ export default async function WebsiteLayout({
         {children}
       </main>
       <Footer dict={dict.footer} lang={resolvedParams.lang} />
-      <FloatingActions lang={resolvedParams.lang} />
+      <FloatingActions />
     </>
   );
 }

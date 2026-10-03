@@ -47,45 +47,6 @@ CREATE POLICY "Permitir leitura para analistas logados"
 ON public.tickets FOR SELECT USING (auth.role() = 'authenticated');
 
 -- =========================================================================
--- FASE 3: INTEGRAÇÃO WHATSAPP NATIVA (META CLOUD API)
--- =========================================================================
-
--- 4. Tabela de Conversas (Lista de Contatos ativos)
-CREATE TABLE IF NOT EXISTS public.whatsapp_conversas (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    telefone VARCHAR(30) UNIQUE NOT NULL, -- Ex: 5511999999999
-    nome_perfil VARCHAR(150),
-    ultimo_status VARCHAR(50) DEFAULT 'ABERTA', -- ABERTA, RESPONDIDA, FECHADA
-    ultima_mensagem_data TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    criado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- 5. Tabela de Mensagens do WhatsApp
-CREATE TABLE IF NOT EXISTS public.whatsapp_mensagens (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    conversa_id UUID REFERENCES public.whatsapp_conversas(id) ON DELETE CASCADE,
-    wa_message_id VARCHAR(150) UNIQUE, -- ID único da mensagem gerado pela Meta (wamid...)
-    direcao VARCHAR(20) NOT NULL, -- 'INBOUND' (cliente -> critel) ou 'OUTBOUND' (critel -> cliente)
-    tipo_mensagem VARCHAR(30) DEFAULT 'text', -- text, image, document, audio
-    conteudo TEXT, -- O corpo da mensagem ou URL da mídia
-    status VARCHAR(30) DEFAULT 'delivered', -- sent, delivered, read (para outbound)
-    data_envio TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- Habilitar RLS para as novas tabelas
-ALTER TABLE public.whatsapp_conversas ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.whatsapp_mensagens ENABLE ROW LEVEL SECURITY;
-
--- Políticas de desenvolvimento temporárias para as tabelas do WhatsApp (Desativar em produção)
-DROP POLICY IF EXISTS "Permitir full access anônimo temporário conversas" ON public.whatsapp_conversas;
-CREATE POLICY "Permitir full access anônimo temporário conversas" 
-ON public.whatsapp_conversas FOR ALL USING (true);
-
-DROP POLICY IF EXISTS "Permitir full access anônimo temporário mensagens" ON public.whatsapp_mensagens;
-CREATE POLICY "Permitir full access anônimo temporário mensagens" 
-ON public.whatsapp_mensagens FOR ALL USING (true);
-
--- =========================================================================
 -- FASE 1: AUTENTICAÇÃO E COFRE DE SENHAS
 -- =========================================================================
 
@@ -132,9 +93,8 @@ ON public.cofre_credenciais FOR ALL USING (false);
 -- 8. Tabela de Relacionamento Lojas e Contatos
 CREATE TABLE IF NOT EXISTS public.lojas_contatos (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    loja VARCHAR(150) UNIQUE NOT NULL, -- O nome ou ID da loja vindo do TomTicket
+    loja VARCHAR(150) UNIQUE NOT NULL,
     gerente_nome VARCHAR(150),
-    whatsapp_numero VARCHAR(30) NOT NULL,
     atualizado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -213,4 +173,3 @@ ADD COLUMN IF NOT EXISTS evidencia_antes_base64 TEXT,
 ADD COLUMN IF NOT EXISTS evidencia_depois_base64 TEXT,
 ADD COLUMN IF NOT EXISTS despesas_json JSONB DEFAULT '[]'::jsonb,
 ADD COLUMN IF NOT EXISTS assinatura_datahora TIMESTAMP WITH TIME ZONE;
-

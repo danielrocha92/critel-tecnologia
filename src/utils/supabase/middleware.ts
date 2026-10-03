@@ -92,7 +92,7 @@ export async function updateSession(request: NextRequest) {
         let isShared = false;
         // Técnicos ficam isolados apenas na sua rota mobile (/tecnico)
         if (cargoNormalizado !== 'TECNICO') {
-          const sharedRoutes = ['/conta', '/all-tickets', '/my-tickets', '/atendimentos', '/os', '/clientes', '/relatorios', '/base-conhecimento', '/ajuda'];
+          const sharedRoutes = ['/conta', '/all-tickets', '/my-tickets', '/atendimentos', '/atendimento', '/os', '/clientes', '/relatorios', '/base-conhecimento', '/ajuda'];
           isShared = sharedRoutes.some(route => pathWithoutLang === route || pathWithoutLang.startsWith(`${route}/`));
         }
         

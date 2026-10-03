@@ -27,6 +27,8 @@ export default function HistoricoPage() {
       const { data } = await supabase
         .from('tickets')
         .select('*')
+        .is('tomticket_id', null)
+        .not('protocolo_origem', 'ilike', 'DEBUG-%')
         .or(`tecnico_id.eq.${userData.user.id},analista_id.eq.${userData.user.id}`)
         .in('status', ['FINALIZADO', 'CONCLUIDO'])
         .order('atualizado_em', { ascending: false })

@@ -1,0 +1,195 @@
+.page {
+  width: min(100%, 1440px);
+  margin: 0 auto;
+  padding: 30px clamp(18px, 4vw, 52px) 48px;
+  color: #e8edf5;
+}
+
+.pageHeader, .panelHeader, .toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.pageHeader { margin-bottom: 24px; }
+.eyebrow, .sectionEyebrow {
+  color: #fb7185;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+}
+
+.title {
+  margin: 9px 0 7px;
+  color: #f8fafc;
+  font-size: clamp(1.65rem, 3vw, 2.15rem);
+  letter-spacing: -0.04em;
+}
+
+.description { margin: 0; max-width: 690px; color: #94a3b8; font-size: 0.93rem; line-height: 1.6; }
+
+.refreshButton, .secondaryLink, .contactAction, .openTicketLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 9px;
+  background: #171e2b;
+  color: #d9e2ee;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: border-color 150ms ease, background 150ms ease, color 150ms ease;
+}
+
+.refreshButton { min-height: 39px; padding: 0 13px; cursor: pointer; }
+.refreshButton:hover, .secondaryLink:hover { border-color: rgba(201, 37, 58, 0.5); background: #202838; }
+.refreshButton:disabled { cursor: wait; opacity: 0.7; }
+.refreshButton:focus-visible, .secondaryLink:focus-visible, .contactAction:focus-visible, .openTicketLink:focus-visible { outline: 2px solid #fb7185; outline-offset: 2px; }
+.spinning { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.errorNotice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding: 13px 15px;
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  border-radius: 10px;
+  background: rgba(127, 29, 29, 0.2);
+  color: #fecaca;
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.errorNotice svg { flex: 0 0 auto; margin-top: 1px; }
+.toolbar { justify-content: flex-end; margin: -4px 0 15px; }
+.monthFilter, .searchField, .statusFilter {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 9px;
+  background: #141a26;
+  color: #8795a9;
+}
+
+.monthFilter { font-size: 0.78rem; }
+.monthFilter input, .statusFilter select, .searchField input {
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #e5edf7;
+  font: inherit;
+}
+
+.monthFilter input { color-scheme: dark; }
+.secondaryLink { min-height: 40px; padding: 0 12px; }
+.metricGrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 13px; margin: 0 0 18px; }
+.metricGridCompact { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.metricCard {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-width: 0;
+  min-height: 96px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 14px;
+  background: linear-gradient(145deg, rgba(25, 33, 48, 0.95), rgba(17, 23, 34, 0.95));
+}
+
+.metricIcon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  border-radius: 11px;
+  background: rgba(201, 37, 58, 0.13);
+  color: #fb7185;
+}
+
+.metricCopy { min-width: 0; }
+.metricCopy p { margin: 0 0 5px; color: #91a0b4; font-size: 0.75rem; line-height: 1.35; }
+.metricCopy strong { display: block; overflow: hidden; color: #f5f7fb; font-size: clamp(1rem, 1.7vw, 1.25rem); text-overflow: ellipsis; white-space: nowrap; }
+
+.panel {
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 15px;
+  background: rgba(17, 23, 34, 0.85);
+}
+
+.panelHeader { min-height: 82px; padding: 17px 19px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.panelTitle { margin: 5px 0 0; color: #eff3f8; font-size: 1rem; }
+.panelDescription { margin: 5px 0 0; color: #8795a9; font-size: 0.75rem; line-height: 1.45; }
+.resultCount { color: #8795a9; font-size: 0.75rem; white-space: nowrap; }
+.tableScroll { width: 100%; overflow-x: auto; }
+.dataTable { width: 100%; min-width: 680px; border-collapse: collapse; text-align: left; }
+.dataTable th { padding: 12px 16px; background: rgba(255,255,255,0.025); color: #8190a4; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap; }
+.dataTable td { padding: 13px 16px; border-top: 1px solid rgba(255,255,255,0.045); color: #d6deea; font-size: 0.8rem; vertical-align: middle; }
+.dataTable tbody tr:hover { background: rgba(255,255,255,0.025); }
+.tableMessage { height: 76px; color: #8d9bb0 !important; text-align: center; }
+.tableLink { color: #91baff; text-decoration: none; }
+.tableLink:hover { text-decoration: underline; }
+.statusBadge { display: inline-flex; padding: 4px 8px; border: 1px solid transparent; border-radius: 999px; font-size: 0.68rem; font-weight: 700; white-space: nowrap; }
+.statusDone { border-color: rgba(16,185,129,0.2); background: rgba(16,185,129,0.1); color: #6ee7b7; }
+.statusPending { border-color: rgba(245,158,11,0.2); background: rgba(245,158,11,0.1); color: #fcd34d; }
+.statusActive { border-color: rgba(96,165,250,0.2); background: rgba(96,165,250,0.1); color: #93c5fd; }
+
+.searchField { width: min(340px, 42vw); min-height: 38px; }
+.searchField input { width: 100%; min-width: 0; font-size: 0.77rem; }
+.searchField input::placeholder { color: #738197; }
+.contactGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 11px; padding: 16px; }
+.contactCard { display: flex; align-items: center; gap: 12px; min-width: 0; padding: 14px; border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; background: rgba(255,255,255,0.02); }
+.contactIcon { display: grid; place-items: center; width: 39px; height: 39px; flex: 0 0 auto; border-radius: 10px; background: rgba(16,185,129,0.12); color: #6ee7b7; }
+.contactCopy { min-width: 0; flex: 1; }
+.contactCopy h3 { overflow: hidden; margin: 0 0 4px; color: #edf2f8; font-size: 0.84rem; text-overflow: ellipsis; white-space: nowrap; }
+.contactCopy p { overflow: hidden; margin: 0; color: #8492a6; font-size: 0.73rem; text-overflow: ellipsis; white-space: nowrap; }
+.emptyState { grid-column: 1 / -1; padding: 28px 16px; color: #8e9bae; font-size: 0.85rem; text-align: center; }
+.tableControls { display: flex; align-items: center; justify-content: flex-end; gap: 9px; min-width: 0; }
+.statusFilter { min-height: 38px; padding: 0 9px; }
+.statusFilter select { font-size: 0.75rem; }
+.openTicketLink { min-height: 30px; padding: 0 9px; color: #a9c7ff; font-size: 0.72rem; white-space: nowrap; }
+.openTicketLink:hover { border-color: rgba(125,179,255,0.35); color: #d1e2ff; }
+.visuallyHidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+@media (max-width: 1050px) {
+  .metricGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .contactGrid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 700px) {
+  .page { padding: 20px 14px 32px; }
+  .pageHeader, .panelHeader { align-items: flex-start; flex-direction: column; }
+  .pageHeader { gap: 14px; }
+  .refreshButton { align-self: flex-end; }
+  .metricGrid { grid-template-columns: 1fr 1fr; gap: 9px; }
+  .metricCard { min-height: 85px; gap: 9px; padding: 12px 10px; }
+  .metricIcon { width: 35px; height: 35px; }
+  .metricCopy p { font-size: 0.68rem; }
+  .metricCopy strong { font-size: 0.95rem; }
+  .toolbar { align-items: stretch; flex-direction: column; margin-top: 0; }
+  .monthFilter, .secondaryLink { min-height: 42px; }
+  .monthFilter { justify-content: space-between; }
+  .monthFilter input { flex: 1; }
+  .panelHeader { align-items: stretch; }
+  .searchField { width: 100%; }
+  .tableControls { flex-direction: column; align-items: stretch; }
+  .statusFilter { width: 100%; }
+  .statusFilter select { width: 100%; min-height: 36px; }
+  .contactCard { flex-wrap: wrap; }
+  .contactAction { margin-left: 51px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .refreshButton, .secondaryLink, .contactAction, .openTicketLink { transition: none; }
+  .spinning { animation: none; }
+}

@@ -5,7 +5,7 @@ import ScrollReveal from '@/components/ScrollReveal/ScrollReveal';
 import ContactForm from '@/components/ContactForm/ContactForm';
 import JsonLd, { getBreadcrumbSchema } from '@/components/JsonLd/JsonLd';
 import { getDictionary } from '@/dictionaries';
-import { MapPin, Phone, Mail, MessageSquare, Sparkles } from 'lucide-react';
+import { MapPin, Phone, Mail, Sparkles } from 'lucide-react';
 
 export async function generateMetadata({
   params,
@@ -93,22 +93,6 @@ export default async function ContactPage({ params }: { params: Promise<{ lang: 
               <h3>Telefone Central</h3>
               <p>Atendimento comercial e corporativo</p>
               <a href="tel:+551131362592" className={styles.cardLink}>{footerDict.contact.phone}</a>
-            </div>
-
-            <div className={styles.infoCard}>
-              <div className={styles.iconBox}>
-                <MessageSquare size={24} />
-              </div>
-              <h3>WhatsApp Comercial</h3>
-              <p>Resposta ágil com engenharia consultiva</p>
-              <a
-                href="https://wa.me/5511996839480?text=Ol%C3%A1!%20Gostaria%20de%20um%20atendimento%20para%20minha%20empresa."
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.cardLink}
-              >
-                Conversar pelo WhatsApp →
-              </a>
             </div>
 
             <div className={styles.infoCard}>

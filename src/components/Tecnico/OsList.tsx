@@ -67,6 +67,8 @@ export default function OsList({ lang }: { lang: string }) {
       let query = supabase
         .from('tickets')
         .select('*')
+        .is('tomticket_id', null)
+        .not('protocolo_origem', 'ilike', 'DEBUG-%')
         .or(`tecnico_id.eq.${userData.user.id},analista_id.eq.${userData.user.id}`)
         .neq('status', 'FINALIZADO')
         .neq('status', 'CONCLUIDO')
@@ -91,6 +93,8 @@ export default function OsList({ lang }: { lang: string }) {
         let fallbackQuery = supabase
           .from('tickets')
           .select('*')
+          .is('tomticket_id', null)
+          .not('protocolo_origem', 'ilike', 'DEBUG-%')
           .neq('status', 'FINALIZADO')
           .neq('status', 'CONCLUIDO')
           .order('criado_em', { ascending: false });

@@ -1,5 +1,10 @@
-import TicketList from '@/components/Tickets/TicketList';
+import { redirect } from 'next/navigation';
 
-export default function AllTicketsPage() {
-  return <TicketList filterTitle="Todos os Chamados" filterType="all" />;
+export default async function AllTicketsPage({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}) {
+  const { lang } = await params;
+  redirect(`/${lang}/atendimento?filter=todos&meus=false`);
 }

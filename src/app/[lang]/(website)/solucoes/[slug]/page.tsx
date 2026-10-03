@@ -5,7 +5,7 @@ import styles from './Solution.module.css';
 import ScrollReveal from '@/components/ScrollReveal/ScrollReveal';
 import JsonLd, { getBreadcrumbSchema, getServiceSchema } from '@/components/JsonLd/JsonLd';
 import { getDictionary } from '@/dictionaries';
-import { Sparkles, CheckCircle2, ArrowRight, PhoneCall } from 'lucide-react';
+import { Sparkles, CheckCircle2, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
 export async function generateMetadata({
@@ -129,14 +129,6 @@ export default async function SolutionPage({
               >
                 Solicitar Proposta Técnica
               </Link>
-              <a
-                href="https://wa.me/5511996839480?text=Ol%C3%A1!%20Gostaria%20de%20um%20diagn%C3%B3stico%20t%C3%A9cnico%20de%20infraestrutura."
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.secondaryBtn}
-              >
-                <PhoneCall size={16} /> Atendimento WhatsApp
-              </a>
             </div>
           </ScrollReveal>
         </div>
