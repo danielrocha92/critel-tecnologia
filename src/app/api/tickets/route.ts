@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-import { abrirChamado } from '@/lib/firebase/ticket-service';
-import { isFirebaseConfigured, storage } from '@/utils/firebase/client';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 type TicketPayload = {
   title: string;
@@ -58,12 +55,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
-    if (!isFirebaseConfigured || !storage) {
-      return NextResponse.json({ error: 'Firebase não configurado. Defina as variáveis NEXT_PUBLIC_FIREBASE_*.' }, { status: 503 });
-    }
-
     let payloadValue: unknown;
     let files: File[] = [];
+    const uploadedUrls: string[] = [];
 
     const contentType = req.headers.get('content-type') || '';
     if (contentType.includes('multipart/form-data')) {
@@ -72,12 +66,37 @@ export async function POST(req: NextRequest) {
       if (typeof payloadString !== 'string') {
         return NextResponse.json({ error: 'Payload do chamado inválido' }, { status: 400 });
       }
+
       try {
         payloadValue = JSON.parse(payloadString) as unknown;
       } catch {
         return NextResponse.json({ error: 'Payload do chamado contém JSON inválido' }, { status: 400 });
       }
+
       files = formData.getAll('files').filter((file): file is File => file instanceof File);
+
+      for (const file of files) {
+        if (!file.name) continue;
+
+        const arrayBuffer = await file.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('anexos')
+          .upload(`tickets/${fileName}`, buffer, {
+            contentType: file.type,
+            upsert: false
+          });
+
+        if (uploadError) {
+          console.error('Erro ao fazer upload para o Supabase Storage:', uploadError);
+          continue;
+        }
+
+        const { data: urlData } = supabase.storage.from('anexos').getPublicUrl(`tickets/${fileName}`);
+        uploadedUrls.push(urlData.publicUrl);
+      }
     } else {
       try {
         payloadValue = await req.json();
@@ -91,24 +110,55 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Campos título e descrição são obrigatórios' }, { status: 400 });
     }
 
-    const uploadedUrls: string[] = [];
-    for (const file of files) {
-      if (!file.name) continue;
+    const { data: ticketData, error: ticketError } = await supabase
+      .from('tickets')
+      .insert({
+        titulo: payload.title,
+        descricao: payload.description,
+        departamento: payload.department,
+        categoria: payload.category,
+        prioridade: payload.priority,
+        status: 'NOVO',
+        cliente: 'Cliente Padrão',
+        analista_id: user.id,
+        protocolo_origem: `WEB-${Date.now()}`
+      })
+      .select()
+      .single();
 
-      const buffer = new Uint8Array(await file.arrayBuffer());
-      const fileName = `anexos/${Date.now()}-${crypto.randomUUID()}-${file.name}`;
-      const storageRef = ref(storage, fileName);
-      await uploadBytes(storageRef, buffer, { contentType: file.type });
-      uploadedUrls.push(await getDownloadURL(storageRef));
+    if (ticketError) {
+      console.error('Erro ao inserir ticket no Supabase:', ticketError);
+      throw new Error(ticketError.message);
     }
 
-    // Invoca o Service Nativo para criar o chamado e o registro de Event Sourcing
-    const ticketId = await abrirChamado({
-      ...payload,
-      attachments: uploadedUrls
-    }, user.id);
+    // Adiciona anexos se houver
+    if (uploadedUrls.length > 0 && ticketData) {
+      const anexosPayload = uploadedUrls.map(url => ({
+        ticket_id: ticketData.id,
+        url,
+        nome_arquivo: url.split('/').pop() || 'anexo',
+        tipo_arquivo: 'desconhecido'
+      }));
 
-    return NextResponse.json({ success: true, ticketId }, { status: 201 });
+      const { error: anexosError } = await supabase
+        .from('ticket_anexos')
+        .insert(anexosPayload);
+        
+      if (anexosError) {
+        console.error('Erro ao inserir anexos:', anexosError);
+      }
+    }
+
+    // Event Sourcing
+    await supabase.from('ticket_transitions').insert({
+      ticket_id: ticketData.id,
+      from_status: null,
+      to_status: ticketData.status,
+      changed_by: user.id,
+      reason: 'Criação do chamado'
+    });
+
+    return NextResponse.json({ success: true, ticketId: ticketData.id }, { status: 201 });
 
   } catch (error) {
     console.error('Erro na API POST /api/tickets:', error);

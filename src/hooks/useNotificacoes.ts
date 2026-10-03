@@ -85,8 +85,9 @@ export function useNotificacoes() {
 
   // ✅ FIX 2: Nome de canal único por instância do hook.
   // Mesmo em React Strict Mode (dupla montagem), cada ciclo cria um canal diferente,
-  // eliminando o erro "cannot add postgres_changes after subscribe()".
-  const channelName = useRef(`critel_ti_${Math.random().toString(36).slice(2)}`);
+  // Eliminando o erro "cannot add postgres_changes after subscribe()".
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const channelName = useRef(`critel_ti_${Date.now()}`);
 
   // Carrega notificações e preferências do localStorage
   useEffect(() => {

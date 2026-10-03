@@ -5,10 +5,7 @@ import { X, MapPin, MapPinOff, AlertTriangle, Send, Clock, Plus, Trash } from 'l
 import SignatureCanvas, { type SignatureCanvas as SignatureCanvasInstance } from 'react-signature-canvas';
 import { createBrowserClient } from '@supabase/ssr';
 import type { User } from '@supabase/supabase-js';
-import { storage } from '@/utils/firebase/client';
-import { ref, uploadString, getDownloadURL } from 'firebase/storage';
-import { finalizarChamado } from '@/lib/firebase/ticket-service';
-import { Ticket } from '@/types/ticket';
+import { ITicket } from '@/types/ticket';
 import styles from './FinalizarChamadoModal.module.css';
 
 const supabase = createBrowserClient(
@@ -17,7 +14,7 @@ const supabase = createBrowserClient(
 );
 
 interface FinalizarChamadoModalProps {
-  ticket: Ticket;
+  ticket: ITicket;
   onClose: () => void;
   onSuccess: () => void;
 }
@@ -114,8 +111,24 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
   }, []);
 
   useEffect(() => {
+    const now = new Date();
+    const tzOffset = now.getTimezoneOffset() * 60000;
+    const localISOTime = (new Date(now.getTime() - tzOffset)).toISOString().slice(0, 16);
+
+    setHoraTermino(localISOTime);
+
+    let localISOTimeAgo: string;
+    if (ticket.criado_em) {
+      const checkInDate = new Date(ticket.criado_em);
+      localISOTimeAgo = (new Date(checkInDate.getTime() - tzOffset)).toISOString().slice(0, 16);
+    } else {
+      const oneHourAgo = new Date(now.getTime() - (60 * 60 * 1000));
+      localISOTimeAgo = (new Date(oneHourAgo.getTime() - tzOffset)).toISOString().slice(0, 16);
+    }
+    setHoraInicio(localISOTimeAgo);
+
     captureLocation();
-  }, [captureLocation]);
+  }, [captureLocation, ticket.criado_em]);
 
   const clearSignature = () => {
     if (sigCanvas.current) {
@@ -164,10 +177,17 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
   };
 
   const uploadBase64 = async (path: string, base64: string): Promise<string> => {
-    if (!storage) throw new Error('Firebase Storage não está configurado.');
-    const fileRef = ref(storage, path);
-    await uploadString(fileRef, base64, 'data_url');
-    return getDownloadURL(fileRef);
+    const res = await fetch(base64);
+    const blob = await res.blob();
+
+    const { data, error } = await supabase.storage
+      .from('anexos')
+      .upload(path, blob, { contentType: blob.type, upsert: true });
+
+    if (error) throw error;
+
+    const { data: urlData } = supabase.storage.from('anexos').getPublicUrl(path);
+    return urlData.publicUrl;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -236,19 +256,30 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
       }
 
       setProgressMsg('Registrando baixa de OS na base nativa...');
-      await finalizarChamado({
-        ticketId: ticket.id,
-        tecnicoId: currentUser.id,
-        horaInicio: new Date(horaInicio).getTime(),
-        horaTermino: new Date(horaTermino).getTime(),
-        descricaoServicos: descricao,
-        materiaisUtilizados: materiais,
-        latitude: location.lat,
-        longitude: location.lng,
-        assinaturaUrl,
-        evidenciaAntesUrl,
-        evidenciaDepoisUrl,
-        despesas: finalDespesas
+      const { error: finalError } = await supabase.from('tickets').update({
+        status: 'RESOLVIDO',
+        resolucao: {
+          horaInicio: new Date(horaInicio).getTime(),
+          horaTermino: new Date(horaTermino).getTime(),
+          descricaoServicos: descricao,
+          materiaisUtilizados: materiais,
+          latitude: location.lat,
+          longitude: location.lng,
+          assinaturaUrl,
+          evidenciaAntesUrl,
+          evidenciaDepoisUrl,
+          despesas: finalDespesas
+        }
+      }).eq('id', ticket.id);
+
+      if (finalError) throw finalError;
+
+      await supabase.from('ticket_transitions').insert({
+        ticket_id: ticket.id,
+        from_status: ticket.status,
+        to_status: 'RESOLVIDO',
+        changed_by: currentUser.id,
+        reason: 'Finalização técnica no local'
       });
 
       onSuccess();

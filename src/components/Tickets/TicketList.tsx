@@ -4,10 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Bookmark, Tag, User, Activity } from 'lucide-react';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { createClient } from '@/utils/supabase/client';
-import { db } from '@/utils/firebase/client';
-import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
-import { assumirChamado } from '@/lib/firebase/ticket-service';
-import { Ticket } from '@/types/ticket';
+import { ITicket } from '@/types/ticket';
 import { useRouter, usePathname } from 'next/navigation';
 import styles from './TicketList.module.css';
 
@@ -19,7 +16,7 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
   const [serverStatusFilter, setServerStatusFilter] = useState<'open' | 'closed' | 'all'>(
     filterType === 'my-closed' ? 'closed' : (filterType === 'all' || filterType === 'my-all') ? 'all' : 'open'
   );
-  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [tickets, setTickets] = useState<ITicket[]>([]);
   const [perfis, setPerfis] = useState<TicketProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [firebaseError, setFirebaseError] = useState<string | null>(null);
@@ -31,14 +28,9 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
 
   useEffect(() => {
     let unsubscribeTickets: () => void;
-    
+
     const initialize = async () => {
       setLoading(true);
-      if (!db) {
-        setFirebaseError('Firebase não está configurado para carregar os chamados.');
-        setLoading(false);
-        return;
-      }
 
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
@@ -50,21 +42,29 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
         setPerfis(perfisData);
       }
 
-      // Realtime listener do Firestore
-      const ticketsRef = collection(db, 'tickets');
-      const q = query(ticketsRef, orderBy('createdAt', 'desc'));
+      // Realtime listener do Supabase
+      const fetchInitial = async () => {
+        const { data } = await supabase.from('tickets').select('*').order('criado_em', { ascending: false });
+        if (data) setTickets(data as ITicket[]);
+        setLoading(false);
+      };
       
-      unsubscribeTickets = onSnapshot(q, (snapshot) => {
-        const fetchedTickets: Ticket[] = [];
-        snapshot.forEach((doc) => {
-          fetchedTickets.push({ id: doc.id, ...doc.data() } as Ticket);
-        });
-        setTickets(fetchedTickets);
-        setLoading(false);
-      }, (error) => {
-        console.error("Erro no onSnapshot do Firebase:", error);
-        setLoading(false);
-      });
+      fetchInitial();
+
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      const channel = supabase.channel(`ticketlist_realtime_${Date.now()}`)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'tickets' }, (payload: any) => {
+          if (payload.eventType === 'INSERT') {
+            setTickets(prev => [payload.new as ITicket, ...prev]);
+          } else if (payload.eventType === 'UPDATE') {
+            setTickets(prev => prev.map(t => t.id === payload.new.id ? payload.new as ITicket : t));
+          } else if (payload.eventType === 'DELETE') {
+            setTickets(prev => prev.filter(t => t.id !== payload.old.id));
+          }
+        })
+        .subscribe();
+
+      unsubscribeTickets = () => supabase.removeChannel(channel);
     };
 
     initialize();
@@ -78,8 +78,21 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
     e.stopPropagation();
     if (!currentUser) return;
     try {
-      await assumirChamado(ticketId, currentUser.id);
-      // O onSnapshot se encarrega de atualizar a UI instantaneamente
+      const supabase = createClient();
+      const { error } = await supabase.from('tickets').update({
+        tecnico_id: currentUser.id,
+        status: 'ABERTO'
+      }).eq('id', ticketId).in('status', ['FILA', 'NOVO']);
+      
+      if (error) throw error;
+      
+      await supabase.from('ticket_transitions').insert({
+        ticket_id: ticketId,
+        from_status: 'NOVO',
+        to_status: 'ABERTO',
+        changed_by: currentUser.id,
+        reason: 'Técnico assumiu o chamado na fila.'
+      });
     } catch (error) {
       console.error("Erro ao assumir chamado:", error);
       alert("Não foi possível assumir o chamado. Ele pode já ter sido assumido por outro técnico.");
@@ -89,13 +102,13 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
   const filteredTickets = tickets.filter(t => {
     // Filtros por usuário
     if (filterType === 'my-opened' || filterType === 'my-all' || filterType === 'my-closed') {
-      if (currentUser && t.assigneeId !== currentUser.id && t.requesterId !== currentUser.id) {
+      if (currentUser && t.tecnico_id !== currentUser.id && t.analista_id !== currentUser.id) {
         return false;
       }
     }
 
     const closedStatuses = ['FECHADO', 'RESOLVIDO'];
-    
+
     if (serverStatusFilter === 'open' || filterType === 'my-opened') {
       if (closedStatuses.includes(t.status)) return false;
     } else if (serverStatusFilter === 'closed' || filterType === 'my-closed') {
@@ -105,7 +118,7 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       const matchTerm = (
-        (t.title && t.title.toLowerCase().includes(term)) ||
+        (t.titulo && t.titulo.toLowerCase().includes(term)) ||
         (t.id && t.id.toLowerCase().includes(term))
       );
       if (!matchTerm) return false;
@@ -114,13 +127,13 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
     return true;
   });
 
-  const getAtendenteNome = (userId: string | null) => {
+  const getAtendenteNome = (userId: string | null | undefined) => {
     if (!userId) return 'Fila';
     const p = perfis.find(p => p.user_id === userId);
     return p ? p.nome : 'Alocado';
   };
 
-  const renderBadge = (priority: string) => {
+  const renderBadge = (priority?: string) => {
     const p = String(priority).toLowerCase();
     if (p === 'alta' || p === '1' || p === 'urgente') return <span className={styles.priorityHigh}>Alta</span>;
     if (p === 'media' || p === '2' || p === 'normal') return <span className={styles.priorityMedium}>Média</span>;
@@ -132,7 +145,7 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
     <div className={styles.container}>
       <div className={styles.header}>
         <h1 className={styles.title}>{filterTitle}</h1>
-        <p className={styles.subtitle}>Quadro Kanban Nativo (Firestore Real-time)</p>
+        <p className={styles.subtitle}>Quadro Kanban Nativo (Supabase Real-time)</p>
       </div>
 
       <div className={styles.filtersContainer}>
@@ -163,7 +176,7 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
       </div>
 
       {loading ? (
-        <div className={styles.loading}>Sincronizando com Firestore...</div>
+        <div className={styles.loading}>Sincronizando com Supabase...</div>
       ) : firebaseError ? (
         <div className={styles.emptyState} role="alert">{firebaseError}</div>
       ) : filteredTickets.length === 0 ? (
@@ -174,7 +187,7 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
         <div className={styles.kanbanBoard}>
           {[
             { id: 'fila', title: 'Fila (Novos)', statuses: ['FILA'] },
-            { id: 'andamento', title: 'Em Andamento', statuses: ['EM_ANDAMENTO'] },
+            { id: 'andamento', title: 'Em Andamento', statuses: ['ABERTO', 'EM_ANDAMENTO'] },
             { id: 'pendente', title: 'Pendentes', statuses: ['PENDENTE'] },
             ...(serverStatusFilter === 'closed' || serverStatusFilter === 'all' ? [{ id: 'finalizado', title: 'Finalizados', statuses: ['RESOLVIDO', 'FECHADO'] }] : [])
           ].map(col => {
@@ -187,8 +200,8 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
                 </div>
                 <div className={styles.kanbanBody}>
                   {colTickets.map(ticket => (
-                    <article 
-                      key={ticket.id} 
+                    <article
+                      key={ticket.id}
                       onClick={() => router.push(detailPath ? `/${lang}${detailPath}/${ticket.id}` : `/${lang}/atendimento?ticket_id=${ticket.id}`)}
                       className={styles.ticketCard}
                     >
@@ -197,10 +210,10 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
                       <div className={styles.ticketHeader}>
                         <div className={styles.ticketInfo}>
                           <div className={styles.ticketId}>
-                            #{ticket.id.substring(0, 6)}
+                            #{String(ticket.id).substring(0, 6)}
                           </div>
                           <div className={styles.ticketTitle}>
-                            {ticket.title}
+                            {ticket.titulo}
                           </div>
                         </div>
                         <span className={styles.statusBadge}>
@@ -211,33 +224,33 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
                       <div className={styles.badgesContainer}>
                         <div className={styles.badgeItem}>
                           <Bookmark size={14} color="#818cf8" />
-                          <span>{ticket.department}</span>
+                          <span>{ticket.departamento}</span>
                         </div>
                         <div className={styles.badgeItem}>
                           <Tag size={14} color="#f472b6" />
-                          <span>{ticket.category}</span>
+                          <span>{ticket.categoria}</span>
                         </div>
                       </div>
-                      
+
                       <div className={styles.priorityContainer}>
                         <div className={styles.priorityInfo}>
                           <span className={styles.priorityLabel}>Prior:</span>
-                          {renderBadge(ticket.priority)}
+                          {renderBadge(ticket.prioridade)}
                         </div>
                         <div className={styles.assigneeInfo}>
                           <User size={14} color="#94a3b8" />
-                          {getAtendenteNome(ticket.assigneeId)}
+                          {getAtendenteNome(ticket.tecnico_id || '')}
                         </div>
                       </div>
 
                       <div className={styles.ticketFooter}>
-                        {ticket.status === 'FILA' ? (
-                           <button 
-                             onClick={(e) => handleAssumir(e, ticket.id)}
-                             className={styles.assumirButton}
-                           >
-                             Assumir Chamado
-                           </button>
+                        {['FILA', 'NOVO'].includes(String(ticket.status)) && !ticket.tecnico_id ? (
+                          <button
+                            onClick={(e) => handleAssumir(e, ticket.id)}
+                            className={styles.assumirButton}
+                          >
+                            Assumir Chamado
+                          </button>
                         ) : (
                           <div className={styles.timeInfo}>
                             <Activity size={14} />

@@ -1,4 +1,6 @@
 export type TicketStatus =
+  | 'NOVO'
+  | 'ABERTO'
   | 'FILA'
   | 'EM_ANDAMENTO'
   | 'PENDENTE'
@@ -24,14 +26,32 @@ export interface Ticket {
   checkInAt?: number;
   checkInLat?: number;
   checkInLng?: number;
+  tomticket_id?: string;
 }
 
-export interface ITicket extends Ticket {
+export interface ITicket {
+  id: string;
+  title?: string;
+  description?: string;
+  status: TicketStatus | string;
+  requesterId?: string;
+  assigneeId?: string | null;
+  department?: string;
+  category?: string;
+  priority?: string;
+  createdAt?: number;
+  updatedAt?: number;
+  attachments?: string[];
+  checkInAt?: number | string | null;
+  checkInLat?: number | null;
+  checkInLng?: number | null;
+  tomticket_id?: string | null;
+
   cliente?: string;
   titulo?: string;
   protocolo_origem?: string;
-  criado_em?: string | number | Date;
-  atualizado_em?: string | number | Date;
+  criado_em?: string | number | Date | null;
+  atualizado_em?: string | number | Date | null;
   email_cliente?: string;
   analista_id?: string | null;
   tecnico_id?: string | null;
@@ -85,4 +105,13 @@ export interface IFinanceiro {
   status_faturamento: 'PENDENTE' | 'FATURADO' | 'PAGO';
   criado_em: string;
   atualizado_em: string;
+}
+
+export interface ITicketReply {
+  id: string | number;
+  sender_type: 'agent' | 'customer' | 'system';
+  sender: string;
+  message: string;
+  date: string | number;
+  attachments?: { nome_arquivo: string; tamanho_bytes?: number; url: string }[];
 }

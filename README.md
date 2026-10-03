@@ -25,9 +25,11 @@ Focado em branding e marketing corporativo:
 ### 2. Critel Core (Intranet / Painel de Atendimento)
 A plataforma interna (acessível via `/atendimento`) automatiza e concentra a operação de suporte técnico:
 
-- **Fila de Atendimento**: Chamados internos consultados no Supabase, atualizados em tempo real e carregados em páginas para reduzir o tempo inicial de abertura.
+- **Fila de Atendimento e Chamados Autônomos**: Chamados internos consultados no Supabase, atualizados em tempo real e carregados em páginas para reduzir o tempo inicial de abertura. A gestão nativa de chamados mantém transições de status controladas pelo banco e refletidas imediatamente na operação.
+- **Micro-CRM Dinâmico (Integração WhatsApp)**: Elimina o uso de planilhas de Excel. O sistema puxa automaticamente os contatos das lojas. Se o contato não existir, um formulário "on-the-fly" permite o cadastro e acionamento do WhatsApp Web do cliente de forma instantânea. API segura com *Service Role* faz bypass seguro de RLS.
+- **Monitoramento de PDVs (Milvus)**: Consulta à plataforma Milvus pela ferramenta administrativa correspondente, com integração *On-Demand* para disponibilizar a disponibilidade (Online/Offline) do terminal da loja na tela do atendente.
+- **Gerador de Salas Jitsi**: Atalho prático no chat (`/video`) que gera links de salas virtuais únicas e seguras para os técnicos e gerentes de loja interagirem sem necessidade de celulares.
 - **Painel Comercial**: Consulta e pesquisa dos cadastros de lojas, sem canal externo de mensagens integrado.
-- **Monitoramento de PDVs (Milvus)**: Consulta à plataforma Milvus pela ferramenta administrativa correspondente.
 - **Cofre Zero Trust (SSO Proxy)**: Sistema de redirecionamento interno e seguro para acesso a sistemas terceiros (Stoq ERP, Milvus) ocultando credenciais do frontend.
 
 ---

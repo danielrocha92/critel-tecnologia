@@ -96,7 +96,7 @@ export default function Sidebar({ lang }: { lang: string }) {
   const defaultHome = homePath[cargoNormalizado] || 'dashboard';
 
   const allCategories: NavigationItem[] = [
-    { 
+    {
       name: 'Início', icon: Home, href: `/${lang}/${defaultHome}`, section: 'main',
       roles: ['SUPER_ADMIN', 'ADMIN', 'ANALISTA', 'COMERCIAL', 'FINANCEIRO']
     },
@@ -114,8 +114,12 @@ export default function Sidebar({ lang }: { lang: string }) {
       name: 'Central de Atendimento', icon: Inbox, href: `/${lang}/atendimento`, section: 'main',
       roles: ['SUPER_ADMIN', 'ADMIN', 'ANALISTA', 'COMERCIAL']
     },
-    { 
-      name: 'Ordens de Serviço', icon: MessageSquare, href: `/${lang}/os`, section: 'main',
+    {
+      name: 'Ordens de Serviço (Técnicos)', icon: MessageSquare, href: `/${lang}/os`, section: 'main',
+      roles: ['SUPER_ADMIN', 'ADMIN', 'TÉCNICO', 'TECNICO', 'ANALISTA']
+    },
+    {
+      name: 'Base de Clientes', icon: Users, href: `/${lang}/clientes/lista`, section: 'main',
       roles: ['SUPER_ADMIN', 'ADMIN', 'ANALISTA', 'COMERCIAL']
     },
     {
@@ -123,11 +127,12 @@ export default function Sidebar({ lang }: { lang: string }) {
       roles: ['SUPER_ADMIN', 'ADMIN'],
       subItems: [
         { label: 'Configurações de Sistema', href: `/${lang}/admin/configuracoes`, roles: ['SUPER_ADMIN', 'ADMIN'] },
-        { label: 'Gerenciar Usuários',       href: `/${lang}/admin/usuarios`, roles: ['SUPER_ADMIN', 'ADMIN'] },
+        { label: 'Gerenciar Usuários', href: `/${lang}/admin/usuarios`, roles: ['SUPER_ADMIN', 'ADMIN'] },
         { label: 'Governança de Identidade', href: `/${lang}/admin`, roles: ['SUPER_ADMIN', 'ADMIN'] },
       ]
     },
   ];
+
   const navCategories = allCategories
     .filter((category) => category.roles.includes(cargoNormalizado))
     .map((category) => ({

@@ -20,7 +20,7 @@ interface DashboardTicketsProps {
 }
 
 export function DashboardTickets({ tickets, perfis, operadorAtual, searchTerm, setSearchTerm, activeFilter = 'todos', isMeus = false, onSelectTicket, loading, hasMoreTickets, loadingMoreTickets, onLoadMoreTickets }: DashboardTicketsProps) {
-  const safeDate = (value?: string | number | Date) => {
+  const safeDate = (value?: string | number | Date | null) => {
     if (value === undefined || value === null || value === '') return null;
     const date = new Date(value);
     return Number.isNaN(date.getTime()) ? null : date;
@@ -100,17 +100,17 @@ export function DashboardTickets({ tickets, perfis, operadorAtual, searchTerm, s
     const isOpen = openSections[sectionKey];
     const visibleLimit = limits[sectionKey] || 50;
     const hasMoreLoaded = data.length > visibleLimit;
-    
+
     return (
       <div className={styles.accordionContainer}>
         <div className={styles.accordionHeader} onClick={() => toggleSection(sectionKey)}>
           {isOpen ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
           <h3>{sectionTitle} ({data.length} Registros)</h3>
           <div className={styles.accordionActions}>
-             <Filter size={16} />
+            <Filter size={16} />
           </div>
         </div>
-        
+
         {isOpen && (
           <div className={styles.accordionContent}>
             {data.length === 0 ? (
@@ -152,8 +152,8 @@ export function DashboardTickets({ tickets, perfis, operadorAtual, searchTerm, s
                           {safeDate(ticket.atualizado_em)?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) || ''}
                         </td>
                         <td className={styles.textGray}>
-                          {(ticket.analista_id || ticket.tecnico_id) 
-                            ? (perfis?.find(p => String(p.user_id) === String(ticket.analista_id || ticket.tecnico_id))?.nome || 'Alocado') 
+                          {(ticket.analista_id || ticket.tecnico_id)
+                            ? (perfis?.find(p => String(p.user_id) === String(ticket.analista_id || ticket.tecnico_id))?.nome || 'Alocado')
                             : 'Sem Atendente'}
                         </td>
                         <td>
@@ -165,11 +165,11 @@ export function DashboardTickets({ tickets, perfis, operadorAtual, searchTerm, s
                 </tbody>
               </table>
             )}
-            
+
             {/* Load More Button */}
             {(hasMoreLoaded || hasMoreTickets) && (
               <div className={styles.loadMoreContainer}>
-                <button 
+                <button
                   type="button"
                   disabled={loadingMoreTickets}
                   onClick={() => {
@@ -196,9 +196,9 @@ export function DashboardTickets({ tickets, perfis, operadorAtual, searchTerm, s
       <div className={styles.dashboardToolbar}>
         <div className={styles.searchBox}>
           <Search size={16} />
-          <input 
-            type="text" 
-            placeholder="Buscar chamado..." 
+          <input
+            type="text"
+            placeholder="Buscar chamado..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />

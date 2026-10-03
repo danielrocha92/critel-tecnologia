@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, Suspense, useRef } from 'react';
 import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { createClient } from '../../../../utils/supabase/client';
@@ -8,7 +8,7 @@ import { useCentralAtendimento } from '../../../../hooks/useCentralAtendimento';
 import styles from './atendimento.module.css';
 import { User, Trash2, Printer, Pencil, History, X } from 'lucide-react';
 import { DashboardTickets } from '../../../../components/Chamados/DashboardTickets';
-import { ITicket } from '../../../../types/ticket';
+import { ITicket, ITicketReply } from '../../../../types/ticket';
 import { File, Download } from 'lucide-react';
 
 const supabase = createClient();
@@ -50,6 +50,12 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
   const [isMilvusIframeOpen, setIsMilvusIframeOpen] = useState(false);
   const [anexos, setAnexos] = useState<TicketAttachment[]>([]);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('novos');
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [ticketHistory, setTicketHistory] = useState<ITicketReply[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [errorHistory, setErrorHistory] = useState<string | null>(null);
+  const [ticketExtraInfo, setTicketExtraInfo] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
@@ -90,6 +96,30 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
     setTicketAtivo(null);
   };
 
+  const handleSendReply = async () => {
+    if (!replyText.trim() || !ticketAtivo) return;
+    setIsSendingReply(true);
+
+    try {
+      const { error } = await supabase.from('ticket_replies').insert({
+        ticket_id: ticketAtivo.id,
+        sender_type: 'agent',
+        sender: operadorAtual?.nome || 'Você',
+        message: replyText,
+      });
+
+      if (error) throw error;
+
+      setReplyText('');
+      toast.success('Resposta enviada com sucesso!');
+    } catch (error) {
+      console.error(error);
+      toast.error('Erro ao enviar a resposta.');
+    } finally {
+      setIsSendingReply(false);
+    }
+  };
+
   useEffect(() => {
     const resolveTicket = async () => {
       const tid = routeTicketId ?? searchParams.get('ticket_id');
@@ -128,14 +158,20 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
     categoria: '',
     prioridade: ''
   });
-  
+
+  const [replyText, setReplyText] = useState('');
+  const [isReplying, setIsReplying] = useState(false);
+  const [isSendingReply, setIsSendingReply] = useState(false);
+
   // Fetch anexos when ticketAtivo changes
   useEffect(() => {
+    if (!ticketAtivo) {
+      setAnexos([]);
+      setTicketHistory([]);
+      return;
+    }
+
     const fetchAnexos = async () => {
-      if (!ticketAtivo) {
-        setAnexos([]);
-        return;
-      }
       const { data, error } = await supabase
         .from('ticket_anexos')
         .select('*')
@@ -146,6 +182,50 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
       }
     };
     fetchAnexos();
+
+    const fetchHistory = async () => {
+      setIsLoadingHistory(true);
+      setErrorHistory(null);
+      const { data, error } = await supabase
+        .from('ticket_replies')
+        .select('*')
+        .eq('ticket_id', ticketAtivo.id)
+        .order('criado_em', { ascending: false });
+
+      if (error) {
+        setErrorHistory('Falha ao carregar o histórico de mensagens.');
+      } else if (data) {
+        const formattedHistory: ITicketReply[] = data.map((row: any) => ({
+          id: row.id,
+          sender_type: row.sender_type,
+          sender: row.sender,
+          message: row.message,
+          date: new Date(row.criado_em).toLocaleString()
+        }));
+        setTicketHistory(formattedHistory);
+      }
+      setIsLoadingHistory(false);
+    };
+
+    fetchHistory();
+
+    const channel = supabase.channel(`ticket_${ticketAtivo.id}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'ticket_replies', filter: `ticket_id=eq.${ticketAtivo.id}` }, (payload: any) => {
+        const row = payload.new;
+        const newReply: ITicketReply = {
+          id: row.id,
+          sender_type: row.sender_type,
+          sender: row.sender,
+          message: row.message,
+          date: new Date(row.criado_em).toLocaleString()
+        };
+        setTicketHistory(prev => [newReply, ...prev]);
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [ticketAtivo]);
 
   useEffect(() => {
