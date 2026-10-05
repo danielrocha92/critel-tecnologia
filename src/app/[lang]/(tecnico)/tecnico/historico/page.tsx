@@ -27,8 +27,7 @@ export default function HistoricoPage() {
       const { data } = await supabase
         .from('tickets')
         .select('*')
-        .is('tomticket_id', null)
-        .not('protocolo_origem', 'ilike', 'DEBUG-%')
+        .like('protocolo_origem', 'OS-%')
         .or(`tecnico_id.eq.${userData.user.id},analista_id.eq.${userData.user.id}`)
         .in('status', ['FINALIZADO', 'CONCLUIDO'])
         .order('atualizado_em', { ascending: false })
@@ -48,7 +47,7 @@ export default function HistoricoPage() {
   return (
     <div className={styles.pageContainer}>
       <h2 className={styles.title}>Histórico</h2>
-      
+
       {tickets.length === 0 ? (
         <div className={styles.emptyState}>
           <Calendar size={48} className={styles.emptyIcon} />
@@ -69,12 +68,12 @@ export default function HistoricoPage() {
               <p className={styles.ticketTitle}>
                 {ticket.titulo}
               </p>
-              
+
               <div className={styles.ticketFooter}>
                 <span className={styles.ticketDate}>
                   {new Date(ticket.checkout_at || ticket.atualizado_em).toLocaleDateString('pt-BR')}
                 </span>
-                <Link 
+                <Link
                   href={`/${lang}/tecnico/os/${ticket.id}`}
                   className={styles.btnDetails}
                 >

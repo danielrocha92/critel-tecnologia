@@ -31,7 +31,7 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [progressMsg, setProgressMsg] = useState<string>('');
-  
+
   // Geolocation
   const [location, setLocation] = useState<{lat: number, lng: number} | null>(null);
   const [geoError, setGeoError] = useState<string | null>(null);
@@ -39,12 +39,12 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
 
   // Form Fields
   const [horaInicio, setHoraInicio] = useState(() => toLocalDateTimeInput(
-    ticket.checkInAt ? new Date(ticket.checkInAt) : new Date(Date.now() - 60 * 60 * 1000),
+    ticket.check_in_at ? new Date(ticket.check_in_at) : new Date(Date.now() - 60 * 60 * 1000),
   ));
   const [horaTermino, setHoraTermino] = useState(() => toLocalDateTimeInput(new Date()));
   const [descricao, setDescricao] = useState('');
   const [materiais, setMateriais] = useState('');
-  
+
   // Evidências
   const [evidenciaAntes, setEvidenciaAntes] = useState<string | null>(null);
   const [evidenciaDepois, setEvidenciaDepois] = useState<string | null>(null);
@@ -212,7 +212,7 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
       setLoading(false);
       return;
     }
-    
+
     if (!evidenciaAntes || !evidenciaDepois) {
       setError('Sessão Evidências: As fotos de antes e depois da fachada são obrigatórias.');
       setLoading(false);
@@ -226,7 +226,7 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
     }
 
     const assinaturaBase64 = sigCanvas.current.getTrimmedCanvas().toDataURL('image/png');
-    
+
     const parsedDespesas = despesas.map(d => ({
       ...d,
       valor_numerico: d.valor ? parseFloat(d.valor.replace(/\./g, '').replace(',', '.')) : 0
@@ -234,13 +234,13 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
 
     try {
       const ts = Date.now();
-      
+
       setProgressMsg('Upload da assinatura...');
       const assinaturaUrl = await uploadBase64(`resolutions/${ticket.id}/${ts}_assinatura.png`, assinaturaBase64);
-      
+
       setProgressMsg('Upload da fachada (Antes)...');
       const evidenciaAntesUrl = await uploadBase64(`resolutions/${ticket.id}/${ts}_antes.jpg`, evidenciaAntes);
-      
+
       setProgressMsg('Upload da fachada (Depois)...');
       const evidenciaDepoisUrl = await uploadBase64(`resolutions/${ticket.id}/${ts}_depois.jpg`, evidenciaDepois);
 
@@ -310,15 +310,15 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
             ) : (
               <MapPinOff size={24} color="#ef4444" />
             )}
-            
+
             <div>
               <strong className={`${styles.geoStatusStrong} ${location ? styles.geoStatusStrongSuccess : (isLocating ? styles.geoStatusStrongLocating : styles.geoStatusStrongError)}`}>
                 {isLocating ? 'Capturando GPS...' : location ? 'Geolocalização Ativa' : 'Falha no GPS'}
               </strong>
               <span className={styles.geoStatusSpan}>
-                {isLocating 
-                  ? 'Aguarde, obtendo coordenadas...' 
-                  : location 
+                {isLocating
+                  ? 'Aguarde, obtendo coordenadas...'
+                  : location
                     ? `Lat: ${location.lat.toFixed(5)}, Lng: ${location.lng.toFixed(5)}`
                     : `Erro: ${geoError}. O GPS é obrigatório para auditoria.`}
               </span>
@@ -338,8 +338,8 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
             <div className={styles.grid}>
               <div>
                 <label className={styles.label}>Início</label>
-                <input 
-                  type="datetime-local" 
+                <input
+                  type="datetime-local"
                   value={horaInicio}
                   onChange={e => setHoraInicio(e.target.value)}
                   required
@@ -348,8 +348,8 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
               </div>
               <div>
                 <label className={styles.label}>Término</label>
-                <input 
-                  type="datetime-local" 
+                <input
+                  type="datetime-local"
                   value={horaTermino}
                   onChange={e => setHoraTermino(e.target.value)}
                   required
@@ -360,7 +360,7 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
 
             <div>
               <label className={styles.label}>Serviços Executados *</label>
-              <textarea 
+              <textarea
                 value={descricao}
                 onChange={e => setDescricao(e.target.value)}
                 placeholder="Descreva detalhadamente o que foi feito..."
@@ -388,7 +388,7 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
 
             <div>
               <label className={styles.label}>Materiais / Peças Utilizadas (Opcional)</label>
-              <textarea 
+              <textarea
                 value={materiais}
                 onChange={e => setMateriais(e.target.value)}
                 placeholder="Liste as peças trocadas ou materiais usados..."
@@ -404,17 +404,17 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
                   <Plus size={16} /> Adicionar
                 </button>
               </div>
-              
+
               {despesas.map((despesa, index) => (
                 <div key={index} className={styles.despesaRow}>
-                  <input 
+                  <input
                     type="text"
                     placeholder="Natureza (ex: Pedágio)"
                     value={despesa.natureza}
                     onChange={e => updateDespesa(index, 'natureza', e.target.value)}
                     className={styles.input}
                   />
-                  <input 
+                  <input
                     type="text"
                     placeholder="0,00"
                     value={despesa.valor}
@@ -442,7 +442,7 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
                 <button type="button" onClick={clearSignature} className={styles.signatureClearBtn}>Limpar</button>
               </div>
               <div className={styles.signatureCanvasWrapper}>
-                <SignatureCanvas 
+                <SignatureCanvas
                   ref={sigCanvas}
                   penColor="black"
                   canvasProps={{ width: 500, height: 200, className: styles.signatureCanvas }}
@@ -463,7 +463,7 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
         </div>
 
         <div className={styles.footer}>
-          <button 
+          <button
             type="submit"
             form="finalizarForm"
             disabled={loading || !location}

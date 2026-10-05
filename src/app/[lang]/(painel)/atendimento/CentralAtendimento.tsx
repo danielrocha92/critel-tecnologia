@@ -8,6 +8,7 @@ import { useCentralAtendimento } from '../../../../hooks/useCentralAtendimento';
 import styles from './atendimento.module.css';
 import { User, Trash2, Printer, Pencil, History, X } from 'lucide-react';
 import { DashboardTickets } from '../../../../components/Chamados/DashboardTickets';
+import NovoChamadoModal from '../../../../components/Chamados/NovoChamadoModal';
 import { ITicket, ITicketReply } from '../../../../types/ticket';
 import { File, Download } from 'lucide-react';
 
@@ -19,15 +20,27 @@ type TicketAttachment = {
   tamanho_bytes?: number | null;
 };
 
-export default function CentralAtendimento({ ticketId }: { ticketId?: string }) {
+export default function CentralAtendimento({
+  ticketId,
+  openCreateTicket = false,
+}: {
+  ticketId?: string;
+  openCreateTicket?: boolean;
+}) {
   return (
     <Suspense fallback={<div className={styles.loadingEmpty}>Carregando chamados...</div>}>
-      <CentralAtendimentoContent routeTicketId={ticketId} />
+      <CentralAtendimentoContent routeTicketId={ticketId} openCreateTicket={openCreateTicket} />
     </Suspense>
   );
 }
 
-function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }) {
+function CentralAtendimentoContent({
+  routeTicketId,
+  openCreateTicket,
+}: {
+  routeTicketId?: string;
+  openCreateTicket: boolean;
+}) {
   const {
     tickets,
     perfis,
@@ -41,6 +54,7 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
 
   const searchParams = useSearchParams();
   const [ticketAtivo, setTicketAtivo] = useState<ITicket | null>(null);
+  const [isNewTicketModalOpen, setIsNewTicketModalOpen] = useState(openCreateTicket);
   const [isMaisDropdownOpen, setIsMaisDropdownOpen] = useState(false);
   const safeDateValue = (value?: string | number | Date | null) => {
     if (value === undefined || value === null || value === '') return null;
@@ -88,6 +102,8 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
     : pathname.includes('/all-tickets')
       ? false
       : searchParams.get('meus') === 'true';
+  const cargoAtual = operadorAtual?.cargo?.trim().toUpperCase().replace('É', 'E');
+  const canCreateTicket = cargoAtual === 'ADMIN' || cargoAtual === 'SUPER_ADMIN' || cargoAtual === 'ANALISTA';
   const handleBackToTickets = () => {
     if (routeTicketId) {
       router.push(`/${lang}/os`);
@@ -135,8 +151,7 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
             .from('tickets')
             .select('*')
             .eq('id', tid)
-            .is('tomticket_id', null)
-            .not('protocolo_origem', 'ilike', 'DEBUG-%')
+            .like('protocolo_origem', 'OS-%')
             .maybeSingle();
           if (data && !error) {
             toast.success('Chamado carregado do banco.');
@@ -176,7 +191,7 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
         .from('ticket_anexos')
         .select('*')
         .eq('ticket_id', ticketAtivo.id);
-      
+
       if (data && !error) {
         setAnexos(data as TicketAttachment[]);
       }
@@ -251,21 +266,29 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
     <div className={styles.container}>
       {ticketsError && <div className={styles.errorMessage} role="alert">{ticketsError}</div>}
       {!ticketAtivo ? (
-        <DashboardTickets 
-          tickets={tickets}
-          perfis={perfis}
-          operadorAtual={operadorAtual}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          activeFilter={activeFilter}
-          isMeus={isMeus}
-          hasMoreTickets={hasMoreTickets}
-          loadingMoreTickets={loadingMoreTickets}
-          onLoadMoreTickets={() => void loadMoreTickets()}
-          onSelectTicket={(ticket) => {
-            setTicketAtivo(ticket);
-          }}
-        />
+        <>
+          <DashboardTickets
+            tickets={tickets}
+            perfis={perfis}
+            operadorAtual={operadorAtual}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            activeFilter={activeFilter}
+            isMeus={isMeus}
+            hasMoreTickets={hasMoreTickets}
+            loadingMoreTickets={loadingMoreTickets}
+            onLoadMoreTickets={() => void loadMoreTickets()}
+            onSelectTicket={(ticket) => {
+              setTicketAtivo(ticket);
+            }}
+          />
+          {isNewTicketModalOpen && canCreateTicket && (
+            <NovoChamadoModal onClose={() => {
+              setIsNewTicketModalOpen(false);
+              if (openCreateTicket) router.replace(`/${lang}/atendimento`);
+            }} />
+          )}
+        </>
       ) : (
         <div className={styles.innerViewContainer}>
           <div className={styles.innerHeader}>
@@ -286,8 +309,8 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
             </div>
             <div className={styles.headerActionsGroup}>
               <div className={styles.dropdownWrapper}>
-                <button 
-                  className={styles.btnMais} 
+                <button
+                  className={styles.btnMais}
                   onClick={() => setIsMaisDropdownOpen(!isMaisDropdownOpen)}
                 >
                   Mais v
@@ -296,7 +319,7 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
                   <div className={styles.maisDropdown}>
                     <button className={styles.dropdownItem}><Trash2 size={16} /> Excluir</button>
                     <button className={styles.dropdownItem}><Printer size={16} /> Imprimir</button>
-                    <button 
+                    <button
                       className={styles.dropdownItem}
                       onClick={() => {
                         setEditForm({
@@ -339,9 +362,9 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
                     {safeDateValue(ticketAtivo.criado_em)?.toLocaleDateString() || '-'} {safeDateValue(ticketAtivo.criado_em)?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) || ''}
                   </div>
                 </div>
-                <div 
-                  className={styles.timelineContent} 
-                  dangerouslySetInnerHTML={{ __html: ticketAtivo.descricao || '' }} 
+                <div
+                  className={styles.timelineContent}
+                  dangerouslySetInnerHTML={{ __html: ticketAtivo.descricao || '' }}
                   onClick={handleTimelineClick}
                 />
 
@@ -350,11 +373,11 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
                     <h5 className={styles.attachmentsTitle}>Anexos</h5>
                     <div className={styles.attachmentsList}>
                       {anexos.map((anexo, idx) => (
-                        <a 
-                          key={idx} 
-                          href={anexo.url} 
-                          target="_blank" 
-                          rel="noreferrer" 
+                        <a
+                          key={idx}
+                          href={anexo.url}
+                          target="_blank"
+                          rel="noreferrer"
                           onClick={(e) => {
                             if (anexo.url.match(/\.(jpeg|jpg|gif|png|webp)$/i)) {
                               e.preventDefault();
@@ -385,9 +408,9 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
                       <div key={i} className={styles.attachmentRow}>
                         <File size={16} color="#00d2ff" className={styles.attachmentIcon} />
                         <div className={styles.attachmentInfoWrapper}>
-                          <a 
-                            href={anexo.url} 
-                            target="_blank" 
+                          <a
+                            href={anexo.url}
+                            target="_blank"
                             rel="noreferrer"
                             className={styles.attachmentFileName}
                           >
@@ -459,7 +482,7 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
                   <a href="/api/cofre/stoq" target="_blank" rel="noreferrer" className={styles.btnStoq}>
                     Abrir Stoq ERP (Cofre)
                   </a>
-                  <button 
+                  <button
                     onClick={() => setIsMilvusIframeOpen(true)}
                     className={styles.btnMilvus}
                   >
@@ -480,15 +503,15 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
               <h2 className={styles.milvusTitle}>Milvus IT Management</h2>
               <p className={styles.milvusSubtitle}>Acesso à plataforma pelo cofre Critel</p>
             </div>
-            <button 
+            <button
               onClick={() => setIsMilvusIframeOpen(false)}
               className={styles.milvusCloseBtn}
             >
               Fechar Milvus
             </button>
           </div>
-          <iframe 
-            src="http://localhost:3001" 
+          <iframe
+            src="http://localhost:3001"
             className={styles.milvusIframe}
             allow="camera; microphone; display-capture; fullscreen; clipboard-read; clipboard-write"
           />
@@ -503,12 +526,12 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
               <h3 className={styles.modalEditTitle}>Editar Chamado</h3>
               <button onClick={() => setIsEditModalOpen(false)} className={styles.modalEditClose}>×</button>
             </div>
-            
+
             <div className={styles.modalEditBody}>
               <div className={styles.modalEditRow}>
                 <label className={styles.modalEditLabel}>Assunto:</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={editForm.titulo}
                   onChange={(e) => setEditForm({...editForm, titulo: e.target.value})}
                   className={styles.modalEditInput}
@@ -517,7 +540,7 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
 
               <div className={styles.modalEditRowTop}>
                 <label className={styles.modalEditLabelTop}>Mensagem:</label>
-                <textarea 
+                <textarea
                   value={editForm.descricao}
                   onChange={(e) => setEditForm({...editForm, descricao: e.target.value})}
                   className={styles.modalEditTextarea}
@@ -526,7 +549,7 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
 
               <div className={styles.modalEditRow}>
                 <label className={styles.modalEditLabel}>Departamento:</label>
-                <select 
+                <select
                   value={editForm.departamento}
                   onChange={(e) => setEditForm({...editForm, departamento: e.target.value})}
                   className={styles.modalEditSelect}
@@ -542,7 +565,7 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
 
               <div className={styles.modalEditRow}>
                 <label className={styles.modalEditLabel}>Categoria:</label>
-                <select 
+                <select
                   value={editForm.categoria}
                   onChange={(e) => setEditForm({...editForm, categoria: e.target.value})}
                   className={styles.modalEditSelect}
@@ -556,7 +579,7 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
 
               <div className={styles.modalEditRow}>
                 <label className={styles.modalEditLabel}>Prioridade:</label>
-                <select 
+                <select
                   value={editForm.prioridade}
                   onChange={(e) => setEditForm({...editForm, prioridade: e.target.value})}
                   className={styles.modalEditSelect}
@@ -570,7 +593,7 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
             </div>
 
             <div className={styles.modalEditFooter}>
-              <button 
+              <button
                 className={styles.btnSave}
                 onClick={async () => {
                   if (!ticketAtivo) return;
@@ -581,7 +604,7 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
                     categoria: editForm.categoria,
                     prioridade: editForm.prioridade
                   }).eq('id', ticketAtivo.id);
-                  
+
                   if (!error) {
                     setTicketAtivo({
                       ...(ticketAtivo as ITicket),
@@ -606,32 +629,32 @@ function CentralAtendimentoContent({ routeTicketId }: { routeTicketId?: string }
       )}
 
       {selectedImage && (
-        <div 
+        <div
           onClick={() => setSelectedImage(null)}
           className={styles.lightboxOverlay}
         >
           <div className={styles.lightboxActions}>
-            <a 
-              href={selectedImage} 
-              download 
-              target="_blank" 
-              rel="noreferrer" 
+            <a
+              href={selectedImage}
+              download
+              target="_blank"
+              rel="noreferrer"
               className={styles.lightboxActionBtn}
               onClick={(e) => e.stopPropagation()}
             >
               <Download size={24} />
             </a>
-            <button 
-              onClick={() => setSelectedImage(null)} 
+            <button
+              onClick={() => setSelectedImage(null)}
               className={styles.lightboxActionBtn}
             >
               <X size={24} />
             </button>
           </div>
-          <img 
-            src={selectedImage} 
-            alt="Anexo ampliado" 
-            className={styles.modalImage} 
+          <img
+            src={selectedImage}
+            alt="Anexo ampliado"
+            className={styles.modalImage}
             onClick={(e) => e.stopPropagation()}
           />
         </div>

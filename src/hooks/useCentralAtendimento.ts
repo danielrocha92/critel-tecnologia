@@ -4,7 +4,7 @@ import { createClient } from '../utils/supabase/client';
 import type { ITicket, IPerfil } from '../types/ticket';
 
 const PAGE_SIZE = 250;
-type TicketRealtimeRow = ITicket & { tomticket_id?: string | null } & Record<string, unknown>;
+type TicketRealtimeRow = ITicket & Record<string, unknown>;
 const supabase = createClient();
 
 export function useCentralAtendimento() {
@@ -26,8 +26,7 @@ export function useCentralAtendimento() {
           supabase
             .from('tickets')
             .select('*')
-            .is('tomticket_id', null)
-            .not('protocolo_origem', 'ilike', 'DEBUG-%')
+            .like('protocolo_origem', 'OS-%')
             .order('criado_em', { ascending: false })
             .range(0, PAGE_SIZE - 1),
           supabase.from('perfis').select('id, nome, cargo, user_id, status').order('nome'),
@@ -80,7 +79,7 @@ export function useCentralAtendimento() {
         }
 
         const ticket = payload.new as TicketRealtimeRow;
-        if (ticket.tomticket_id || ticket.protocolo_origem?.toUpperCase().startsWith('DEBUG-')) {
+        if (!ticket.protocolo_origem?.toUpperCase().startsWith('OS-')) {
           setTickets((current) => current.filter((item) => item.id !== ticket.id));
           return;
         }
@@ -112,8 +111,7 @@ export function useCentralAtendimento() {
       const { data, error: queryError } = await supabase
         .from('tickets')
         .select('*')
-        .is('tomticket_id', null)
-        .not('protocolo_origem', 'ilike', 'DEBUG-%')
+        .like('protocolo_origem', 'OS-%')
         .order('criado_em', { ascending: false })
         .range(tickets.length, tickets.length + PAGE_SIZE - 1);
 

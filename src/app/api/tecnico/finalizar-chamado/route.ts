@@ -7,7 +7,7 @@ export async function POST(request: Request) {
     const cookieStore = await cookies();
     const supabaseAdmin = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!, 
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
       {
         cookies: {
           get(name: string) { return cookieStore.get(name)?.value; },
@@ -21,14 +21,14 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { 
-      ticket_id, 
-      hora_inicio, 
-      hora_termino, 
-      descricao_servicos, 
-      materiais_utilizados, 
-      latitude, 
-      longitude, 
+    const {
+      ticket_id,
+      hora_inicio,
+      hora_termino,
+      descricao_servicos,
+      materiais_utilizados,
+      latitude,
+      longitude,
       assinatura_base64,
       evidencia_antes_base64,
       evidencia_depois_base64,
@@ -56,8 +56,7 @@ export async function POST(request: Request) {
       .from('tickets')
       .select('status')
       .eq('id', ticket_id)
-      .is('tomticket_id', null)
-      .not('protocolo_origem', 'ilike', 'DEBUG-%')
+      .like('protocolo_origem', 'OS-%')
       .single();
 
     if (existingTicket?.status === 'FINALIZADO') {
@@ -67,8 +66,8 @@ export async function POST(request: Request) {
     // 1. Update Ticket Status
     const { error: ticketError } = await supabaseAdmin
       .from('tickets')
-      .update({ 
-        status: 'FINALIZADO', 
+      .update({
+        status: 'FINALIZADO',
         atualizado_em: new Date().toISOString(),
         checkout_lat: latitude,
         checkout_lng: longitude,
@@ -79,8 +78,7 @@ export async function POST(request: Request) {
         assinatura_datahora
       })
       .eq('id', ticket_id)
-      .is('tomticket_id', null)
-      .not('protocolo_origem', 'ilike', 'DEBUG-%')
+      .like('protocolo_origem', 'OS-%')
 
     if (ticketError) throw ticketError;
 

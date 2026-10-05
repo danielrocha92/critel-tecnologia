@@ -26,7 +26,6 @@ export interface Ticket {
   checkInAt?: number;
   checkInLat?: number;
   checkInLng?: number;
-  tomticket_id?: string;
 }
 
 export interface ITicket {
@@ -42,10 +41,12 @@ export interface ITicket {
   createdAt?: number;
   updatedAt?: number;
   attachments?: string[];
+  check_in_at?: number | string | null;
+  check_in_lat?: number | null;
+  check_in_lng?: number | null;
   checkInAt?: number | string | null;
   checkInLat?: number | null;
   checkInLng?: number | null;
-  tomticket_id?: string | null;
 
   cliente?: string;
   titulo?: string;

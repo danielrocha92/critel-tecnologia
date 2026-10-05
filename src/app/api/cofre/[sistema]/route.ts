@@ -9,7 +9,7 @@ export async function GET(
 ) {
   // Extract dynamic segment
   const { sistema } = await params;
-  
+
   // 1. Validar se o usuário está logado na Intranet
   const cookieStore = await cookies()
   const supabase = createServerClient(
@@ -72,7 +72,7 @@ export async function GET(
   // 4. Retornar resposta injetando cookies (Simulação Proxy SSO Backend)
   // O payload da senha NUNCA desce para o front-end (Prevenção de vazamento de DOM)
   const response = NextResponse.redirect(new URL(targetUrl))
-  
+
   // Set proxy authenticated session cookie logically in a real world proxy implementation.
   response.headers.set('Set-Cookie', `${targetSistema.toLowerCase()}_session=proxy_token_backend_injected; HttpOnly; Secure; Path=/`)
 

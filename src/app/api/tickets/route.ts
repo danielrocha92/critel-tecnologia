@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
+import { createClient as createSupabaseAdminClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 
 type TicketPayload = {
+  customer: string;
   title: string;
   description: string;
   department: string;
@@ -14,22 +16,31 @@ function parseTicketPayload(value: unknown): TicketPayload | null {
   if (!value || typeof value !== 'object') return null;
 
   const payload = value as Record<string, unknown>;
-  if (typeof payload.title !== 'string' || !payload.title.trim()) return null;
-  if (typeof payload.description !== 'string' || !payload.description.trim()) return null;
+  const customer = payload.cliente ?? payload.customer;
+  const title = payload.titulo ?? payload.title;
+  const description = payload.descricao ?? payload.description;
+  const department = payload.departamento ?? payload.department;
+  const category = payload.categoria ?? payload.category;
+  const priority = payload.prioridade ?? payload.priority;
+
+  if (typeof customer !== 'string' || !customer.trim()) return null;
+  if (typeof title !== 'string' || !title.trim()) return null;
+  if (typeof description !== 'string' || !description.trim()) return null;
 
   return {
-    title: payload.title.trim(),
-    description: payload.description.trim(),
-    department: typeof payload.department === 'string' && payload.department.trim() ? payload.department.trim() : 'Suporte',
-    category: typeof payload.category === 'string' && payload.category.trim() ? payload.category.trim() : 'Geral',
-    priority: typeof payload.priority === 'string' && payload.priority.trim() ? payload.priority.trim() : 'Normal',
+    customer: customer.trim(),
+    title: title.trim(),
+    description: description.trim(),
+    department: typeof department === 'string' && department.trim() ? department.trim() : 'Suporte',
+    category: typeof category === 'string' && category.trim() ? category.trim() : 'Geral',
+    priority: typeof priority === 'string' && priority.trim() ? priority.trim() : 'Normal',
   };
 }
 
 export async function POST(req: NextRequest) {
   try {
     const cookieStore = await cookies();
-    
+
     // Verificação de autenticação com Supabase SSR
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -54,6 +65,30 @@ export async function POST(req: NextRequest) {
     if (authError || !user) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
+
+    const { data: profile, error: profileError } = await supabase
+      .from('perfis')
+      .select('cargo, status')
+      .eq('user_id', user.id)
+      .maybeSingle();
+    const cargo = profile?.cargo?.trim().toUpperCase().replace('É', 'E');
+    if (
+      profileError ||
+      !profile ||
+      profile.status !== 'ATIVO' ||
+      !['ADMIN', 'SUPER_ADMIN', 'ANALISTA'].includes(cargo || '')
+    ) {
+      return NextResponse.json({ error: 'Seu perfil não pode abrir chamados.' }, { status: 403 });
+    }
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!supabaseUrl || !serviceRoleKey) {
+      return NextResponse.json({ error: 'Configuração do Supabase incompleta.' }, { status: 500 });
+    }
+    const supabaseAdmin = createSupabaseAdminClient(supabaseUrl, serviceRoleKey, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
 
     let payloadValue: unknown;
     let files: File[] = [];
@@ -82,7 +117,7 @@ export async function POST(req: NextRequest) {
         const buffer = Buffer.from(arrayBuffer);
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
 
-        const { error: uploadError } = await supabase.storage
+        const { error: uploadError } = await supabaseAdmin.storage
           .from('anexos')
           .upload(`tickets/${fileName}`, buffer, {
             contentType: file.type,
@@ -94,7 +129,7 @@ export async function POST(req: NextRequest) {
           continue;
         }
 
-        const { data: urlData } = supabase.storage.from('anexos').getPublicUrl(`tickets/${fileName}`);
+        const { data: urlData } = supabaseAdmin.storage.from('anexos').getPublicUrl(`tickets/${fileName}`);
         uploadedUrls.push(urlData.publicUrl);
       }
     } else {
@@ -110,7 +145,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Campos título e descrição são obrigatórios' }, { status: 400 });
     }
 
-    const { data: ticketData, error: ticketError } = await supabase
+    const { data: ticketData, error: ticketError } = await supabaseAdmin
       .from('tickets')
       .insert({
         titulo: payload.title,
@@ -118,10 +153,11 @@ export async function POST(req: NextRequest) {
         departamento: payload.department,
         categoria: payload.category,
         prioridade: payload.priority,
-        status: 'NOVO',
-        cliente: 'Cliente Padrão',
+        status: 'FILA',
+        tecnico_id: null,
+        cliente: payload.customer,
         analista_id: user.id,
-        protocolo_origem: `WEB-${Date.now()}`
+        protocolo_origem: `OS-${Date.now()}`
       })
       .select()
       .single();
@@ -140,17 +176,17 @@ export async function POST(req: NextRequest) {
         tipo_arquivo: 'desconhecido'
       }));
 
-      const { error: anexosError } = await supabase
+      const { error: anexosError } = await supabaseAdmin
         .from('ticket_anexos')
         .insert(anexosPayload);
-        
+
       if (anexosError) {
         console.error('Erro ao inserir anexos:', anexosError);
       }
     }
 
     // Event Sourcing
-    await supabase.from('ticket_transitions').insert({
+    await supabaseAdmin.from('ticket_transitions').insert({
       ticket_id: ticketData.id,
       from_status: null,
       to_status: ticketData.status,

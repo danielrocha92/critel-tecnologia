@@ -158,8 +158,7 @@ export default function DepartmentEnvironment({ department }: { department: Depa
           const { data, error: queryError, count } = await supabase
             .from('tickets')
             .select('id, protocolo_origem, titulo, cliente, status, prioridade, departamento, criado_em', { count: 'exact' })
-            .is('tomticket_id', null)
-            .not('protocolo_origem', 'ilike', 'DEBUG-%')
+            .like('protocolo_origem', 'OS-%')
             .order('criado_em', { ascending: false })
             .range(0, 299);
 

@@ -20,11 +20,11 @@ function getDistanceFromLatLonInMeters(lat1: number, lon1: number, lat2: number,
   const R = 6371e3; // Raio da terra em metros
   const dLat = (lat2 - lat1) * (Math.PI / 180);
   const dLon = (lon2 - lon1) * (Math.PI / 180);
-  const a = 
+  const a =
     Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * 
+    Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
     Math.sin(dLon/2) * Math.sin(dLon/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   return R * c;
 }
 
@@ -64,7 +64,7 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
   // Supabase Realtime Listener
   useEffect(() => {
     const fetchInitial = async () => {
-      const { data } = await supabase.from('tickets').select('*').eq('id', ticketId).single();
+      const { data } = await supabase.from('tickets').select('*').eq('id', ticketId).like('protocolo_origem', 'OS-%').single();
       if (data) setTicket(data as ITicket);
       setLoading(false);
     };
@@ -84,13 +84,13 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
 
   // Watch position para check-out automático
   useEffect(() => {
-    if (ticket?.checkInAt && ticket?.status !== 'RESOLVIDO' && ticket?.status !== 'FECHADO') {
-      if ('geolocation' in navigator && ticket.checkInLat && ticket.checkInLng) {
+    if (ticket?.check_in_at && ticket?.status !== 'RESOLVIDO' && ticket?.status !== 'FECHADO') {
+      if ('geolocation' in navigator && ticket.check_in_lat && ticket.check_in_lng) {
         watchId.current = navigator.geolocation.watchPosition(
           async (position) => {
             const dist = getDistanceFromLatLonInMeters(
-              ticket.checkInLat!,
-              ticket.checkInLng!,
+              ticket.check_in_lat!,
+              ticket.check_in_lng!,
               position.coords.latitude,
               position.coords.longitude
             );
@@ -99,7 +99,7 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
             if (dist > 500) {
               navigator.geolocation.clearWatch(watchId.current!);
               alert('Atenção: Você se afastou mais de 500m do local do Check-in. O chamado está sendo fechado automaticamente por segurança.');
-              
+
               // Executa Finalização Automática Nativa
               await supabase.from('tickets').update({
                 status: 'RESOLVIDO',
@@ -123,7 +123,7 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
     return () => {
       if (watchId.current !== null) navigator.geolocation.clearWatch(watchId.current);
     };
-  }, [ticket?.checkInAt, ticket?.status, ticket?.checkInLat, ticket?.checkInLng, ticket?.id, lang, router]);
+  }, [ticket?.check_in_at, ticket?.status, ticket?.check_in_lat, ticket?.check_in_lng, ticket?.id, lang, router]);
 
   const handleAcceptTicket = async () => {
     if (!currentUser) return;
@@ -133,7 +133,7 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
         tecnico_id: currentUser.id,
         status: 'ABERTO' // Assuming accepting it puts it in ABERTO state before check-in
       }).eq('id', ticket!.id);
-      
+
       await supabase.from('ticket_transitions').insert({
         ticket_id: ticket!.id,
         from_status: ticket!.status,
@@ -153,7 +153,7 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
       setGeoError('Você precisa estar logado para fazer check-in.');
       return;
     }
-    
+
     setIsCheckingIn(true);
     setGeoError(null);
     setCheckInMessage('Solicitando sua localização GPS...');
@@ -176,14 +176,14 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
       async (position) => {
         try {
           setCheckInMessage('Localização obtida. Registrando o check-in nativamente...');
-          
+
           await supabase.from('tickets').update({
-            checkInAt: new Date().toISOString(),
-            checkInLat: position.coords.latitude,
-            checkInLng: position.coords.longitude,
+            check_in_at: new Date().toISOString(),
+            check_in_lat: position.coords.latitude,
+            check_in_lng: position.coords.longitude,
             status: 'EM_ANDAMENTO'
           }).eq('id', ticket!.id);
-          
+
           await supabase.from('ticket_transitions').insert({
             ticket_id: ticket!.id,
             from_status: ticket!.status,
@@ -191,7 +191,7 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
             changed_by: currentUser.id,
             reason: 'Check-in no local'
           });
-          
+
           setCheckInMessage(null);
         } catch (err) {
           setGeoError(err instanceof Error ? err.message : 'Erro inesperado ao registrar o check-in.');
@@ -217,7 +217,7 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
   if (loading) return <div className={styles.loadingContainer}>Sincronizando OS com Supabase...</div>;
   if (!ticket) return <div className={styles.loadingContainer}>OS não encontrada.</div>;
 
-  const isCheckedIn = !!ticket.checkInAt;
+  const isCheckedIn = !!ticket.check_in_at;
   const isFinalized = ticket.status === 'FECHADO' || ticket.status === 'RESOLVIDO';
 
   return (
@@ -239,7 +239,7 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
 
         <div className={styles.cardSection}>
           <h3 className={styles.sectionHeading}>Detalhes do Serviço</h3>
-          
+
           <div className={styles.detailsList}>
             <div className={styles.detailItem}>
               <Clock size={18} color="#00d2ff" className={styles.detailIcon} />
@@ -250,7 +250,7 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
                 </span>
               </div>
             </div>
-            
+
             <div className={styles.detailItem}>
               <MapPin size={18} color="#00d2ff" className={styles.detailIcon} />
               <div>
@@ -317,9 +317,9 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
       </div>
 
       {showModal && (
-        <FinalizarChamadoModal 
-          ticket={ticket} 
-          onClose={() => setShowModal(false)} 
+        <FinalizarChamadoModal
+          ticket={ticket}
+          onClose={() => setShowModal(false)}
           onSuccess={() => {
             setShowModal(false);
             router.replace(`/${lang}/tecnico/historico`);

@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import type { LucideIcon } from 'lucide-react';
 import {
   Home, Inbox, MessageSquare, Users, Settings,
-  ChevronDown, ChevronLeft, ChevronRight, LogOut
+  ChevronDown, ChevronLeft, ChevronRight, LogOut, Plus
 } from 'lucide-react';
 import { createClient } from '../../utils/supabase/client';
 import styles from './Sidebar.module.css';
@@ -18,6 +18,7 @@ type NavigationItem = {
   icon: LucideIcon;
   href?: string;
   hasSubmenu?: boolean;
+  isAction?: boolean;
   section: string;
   roles: string[];
   subItems?: NavigationSubItem[];
@@ -97,6 +98,10 @@ export default function Sidebar({ lang }: { lang: string }) {
 
   const allCategories: NavigationItem[] = [
     {
+      name: 'Novo Chamado', icon: Plus, href: `/${lang}/atendimento?novo=1`, section: 'main', isAction: true,
+      roles: ['SUPER_ADMIN', 'ADMIN', 'ANALISTA']
+    },
+    {
       name: 'Início', icon: Home, href: `/${lang}/${defaultHome}`, section: 'main',
       roles: ['SUPER_ADMIN', 'ADMIN', 'ANALISTA', 'COMERCIAL', 'FINANCEIRO']
     },
@@ -109,10 +114,6 @@ export default function Sidebar({ lang }: { lang: string }) {
         { label: 'Painel Analista', href: `/${lang}/analista`, roles: ['SUPER_ADMIN', 'ADMIN', 'ANALISTA'] },
         { label: 'Painel Técnico', href: `/${lang}/tecnico`, roles: ['SUPER_ADMIN', 'ADMIN', 'TECNICO'] },
       ],
-    },
-    {
-      name: 'Central de Atendimento', icon: Inbox, href: `/${lang}/atendimento`, section: 'main',
-      roles: ['SUPER_ADMIN', 'ADMIN', 'ANALISTA', 'COMERCIAL']
     },
     {
       name: 'Ordens de Serviço (Técnicos)', icon: MessageSquare, href: `/${lang}/os`, section: 'main',
@@ -178,7 +179,7 @@ export default function Sidebar({ lang }: { lang: string }) {
             const showLabel = !renderedSections.has(section) && sectionLabel[section];
             if (sectionLabel[section] !== undefined) renderedSections.add(section);
 
-            const isActive = cat.href
+            const isActive = !cat.isAction && cat.href
               ? pathname === cat.href || pathname.startsWith(`${cat.href}/`)
               : cat.subItems?.some((item) => pathname === item.href || pathname.startsWith(`${item.href}/`)) ?? false;
             const isExpanded = expandedMenu === cat.name;
@@ -192,8 +193,8 @@ export default function Sidebar({ lang }: { lang: string }) {
                 {showLabel && <div className={styles.sectionLabel}>{sectionLabel[section]}</div>}
 
                 {cat.href ? (
-                  <Link href={cat.href} className={styles.navLink} onClick={() => setIsMobileOpen(false)}>
-                    <div className={`${styles.navItem} ${isActive ? styles.navItemActive : ''}`}>
+                  <Link href={cat.href} className={styles.navLink} onClick={() => setIsMobileOpen(false)} title={cat.isAction ? cat.name : undefined}>
+                    <div className={`${styles.navItem} ${cat.isAction ? styles.navItemAction : ''} ${isActive ? styles.navItemActive : ''}`}>
                       <div className={styles.navItemLeft}>
                         <Icon size={17} className={styles.navIcon} />
                         <span className={styles.navLabel}>{cat.name}</span>

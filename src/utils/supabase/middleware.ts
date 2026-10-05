@@ -31,15 +31,15 @@ export async function updateSession(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
   const pathWithoutLang = pathname.replace(/^\/(pt|en)/, '') || '/';
-  
+
   const publicRoutes = [
-    '/', '/certificacoes', '/clientes', '/contato', 
+    '/', '/certificacoes', '/clientes', '/contato',
     '/privacidade', '/sobre', '/solucoes', '/termos', '/login'
   ];
 
-  const isPublicPath = 
+  const isPublicPath =
     publicRoutes.some(route => pathWithoutLang === route || pathWithoutLang.startsWith(`${route}/`)) ||
-    pathname.includes('/api/') || 
+    pathname.includes('/api/') ||
     pathname.match(/\.(.*)$/);
 
   const isLoginPath = pathWithoutLang === '/login';
@@ -55,7 +55,7 @@ export async function updateSession(request: NextRequest) {
   // 2. Lógica para usuários logados
   if (user) {
     let cargo = request.cookies.get('user_cargo')?.value || null;
-    
+
     if (!cargo) {
       const { data: perfil } = await supabase.from('perfis').select('cargo').eq('user_id', user.id).single();
       cargo = perfil?.cargo || null;
@@ -65,7 +65,7 @@ export async function updateSession(request: NextRequest) {
     }
 
     const cargoNormalizado = (cargo || 'VISITANTE').trim().toUpperCase().replace('É', 'E');
-    
+
     const roleBasePaths: Record<string, string> = {
       'TECNICO': '/tecnico',
       'FINANCEIRO': '/financeiro',
@@ -88,14 +88,14 @@ export async function updateSession(request: NextRequest) {
     if (!isPublicPath) {
       if (cargoNormalizado !== 'ADMIN' && cargoNormalizado !== 'SUPER_ADMIN') {
         const isOwnBasePath = pathWithoutLang === basePath || pathWithoutLang.startsWith(`${basePath}/`);
-        
+
         let isShared = false;
         // Técnicos ficam isolados apenas na sua rota mobile (/tecnico)
         if (cargoNormalizado !== 'TECNICO') {
-          const sharedRoutes = ['/conta', '/all-tickets', '/my-tickets', '/atendimentos', '/atendimento', '/os', '/clientes', '/relatorios', '/base-conhecimento', '/ajuda'];
+          const sharedRoutes = ['/conta', '/all-tickets', '/my-tickets', '/atendimentos', '/atendimento', '/analista', '/os', '/clientes', '/relatorios', '/base-conhecimento', '/ajuda'];
           isShared = sharedRoutes.some(route => pathWithoutLang === route || pathWithoutLang.startsWith(`${route}/`));
         }
-        
+
         if (!isOwnBasePath && !isShared) {
           const url = request.nextUrl.clone();
           const lang = url.pathname.split('/')[1] || 'pt';

@@ -1,18 +1,22 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { MapPin, Clock, FileText, CheckCircle, Search, ClipboardList, Activity, Sparkles } from 'lucide-react';
+import { createClient } from '@/utils/supabase/client';
 import styles from './OsList.module.css';
 
 import ResumoFinanceiro from '@/components/Tecnico/ResumoFinanceiro';
 import { getTicketAddress } from '@/utils/tickets/description';
+import UnassignedTicketsFeed from '@/components/Tecnico/UnassignedTicketsFeed';
+import type { ITicket } from '@/types/ticket';
+
+const supabase = createClient();
 
 export default function OsList({ lang }: { lang: string }) {
   const [userId, setUserId] = useState<string | null>(null);
-  const [tickets, setTickets] = useState<any[]>([]);
+  const [tickets, setTickets] = useState<ITicket[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState('');
@@ -35,11 +39,6 @@ export default function OsList({ lang }: { lang: string }) {
     }
   };
 
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-
   useEffect(() => {
     const fetchTickets = async () => {
       const { data: userData } = await supabase.auth.getUser();
@@ -57,19 +56,18 @@ export default function OsList({ lang }: { lang: string }) {
 
       const normalizedCargo = perfilData?.cargo?.trim().toUpperCase().replace('É', 'E');
       const isTecnico = normalizedCargo === 'TECNICO';
-      
+
       if (!perfilData || !isTecnico || perfilData.status !== 'ATIVO') {
         router.push('/pt/login');
         return;
       }
 
-      // Buscar os chamados atribuídos a esse técnico (Status ABERTO, EM_ANDAMENTO)
+      // A lista pessoal deve conter somente chamados vinculados ao técnico atual.
       let query = supabase
         .from('tickets')
         .select('*')
-        .is('tomticket_id', null)
-        .not('protocolo_origem', 'ilike', 'DEBUG-%')
-        .or(`tecnico_id.eq.${userData.user.id},analista_id.eq.${userData.user.id}`)
+        .like('protocolo_origem', 'OS-%')
+        .eq('tecnico_id', userData.user.id)
         .neq('status', 'FINALIZADO')
         .neq('status', 'CONCLUIDO')
         .order('criado_em', { ascending: false });
@@ -84,37 +82,12 @@ export default function OsList({ lang }: { lang: string }) {
         query = query.gte('criado_em', `${dateFilter}T00:00:00.000Z`)
                      .lt('criado_em', nextDay.toISOString());
       }
-        
-      const { data, error } = await query;
-        
-      if (error) {
-        console.warn('Erro ao buscar tickets por tecnico_id (talvez a coluna ainda não exista):', error);
-        // Fallback temporário caso a migration ainda não tenha rodado
-        let fallbackQuery = supabase
-          .from('tickets')
-          .select('*')
-          .is('tomticket_id', null)
-          .not('protocolo_origem', 'ilike', 'DEBUG-%')
-          .neq('status', 'FINALIZADO')
-          .neq('status', 'CONCLUIDO')
-          .order('criado_em', { ascending: false });
-          
-        if (clientFilter) {
-          fallbackQuery = fallbackQuery.eq('cliente', clientFilter);
-        }
 
-        if (dateFilter) {
-          const nextDay = new Date(dateFilter);
-          nextDay.setDate(nextDay.getDate() + 1);
-          fallbackQuery = fallbackQuery.gte('criado_em', `${dateFilter}T00:00:00.000Z`)
-                                       .lt('criado_em', nextDay.toISOString());
-        }
-        
-        const fallback = await fallbackQuery;
-        setTickets(fallback.data || []);
-      } else {
-        setTickets(data || []);
+      const { data, error } = await query;
+      if (error) {
+        console.error('Erro ao carregar chamados do técnico:', error);
       }
+      setTickets(data || []);
       setLoading(false);
     };
 
@@ -179,6 +152,14 @@ export default function OsList({ lang }: { lang: string }) {
 
       {userId && <ResumoFinanceiro userId={userId} />}
 
+      {userId && (
+        <UnassignedTicketsFeed
+          onAccepted={(ticket) => {
+            setTickets((current) => [ticket, ...current.filter((item) => item.id !== ticket.id)]);
+          }}
+        />
+      )}
+
       <section className={styles.listSection} aria-labelledby="active-tickets-title">
         <div className={styles.sectionHeader}>
           <div>
@@ -191,9 +172,9 @@ export default function OsList({ lang }: { lang: string }) {
       <div className={styles.filtersContainer} aria-label="Filtros dos chamados">
         <div className={styles.searchWrapper}>
           <Search size={18} className={styles.searchIcon} />
-          <input 
-            type="text" 
-            placeholder="Buscar chamado..." 
+          <input
+            type="text"
+            placeholder="Buscar chamado..."
             aria-label="Buscar chamado por cliente, endereço ou protocolo"
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
@@ -216,8 +197,8 @@ export default function OsList({ lang }: { lang: string }) {
           </select>
         </div>
         <div>
-          <input 
-            type="date" 
+          <input
+            type="date"
             value={dateFilter}
             onChange={e => setDateFilter(e.target.value)}
             className={styles.dateInput}
@@ -225,7 +206,7 @@ export default function OsList({ lang }: { lang: string }) {
           />
         </div>
       </div>
-      
+
       {filteredTickets.length === 0 ? (
         <div className={styles.emptyState}>
           <span className={styles.emptyStateIcon}><CheckCircle size={25} /></span>

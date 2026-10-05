@@ -67,8 +67,7 @@ export default function DashboardHome() {
         supabase
           .from('tickets')
           .select('id', { count: 'exact', head: true })
-          .is('tomticket_id', null)
-          .not('protocolo_origem', 'ilike', 'DEBUG-%'),
+          .like('protocolo_origem', 'OS-%'),
         supabase.from('lojas_contatos').select('nome_loja', { count: 'exact', head: true }),
       ]);
 

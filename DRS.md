@@ -1,6 +1,6 @@
 # Documento de Requisitos do Sistema (DRS)
 
-**Projeto:** Intranet Corporativa Critel & Central Unificada de Atendimento 
+**Projeto:** Intranet Corporativa Critel & Central Unificada de Atendimento
 **Documento:** Especificação Técnica e Regras de Negócio
 
 ## 1. Visão Geral e Perfis de Usuário
@@ -20,16 +20,16 @@ O sistema de Intranet da Critel atuará como o portal centralizador de acessos e
 
 ### Central de Atendimento e Operação Unificada:
 - **RF04 - Gestão de Chamados e Criação Autônoma:** A Central deve consultar chamados internos no Supabase, permitir busca, filtros e encaminhamento, mantendo atualizações em tempo real. O sistema também deve permitir a criação direta de chamados via painel, com reflexão imediata na tela do analista e técnicos.
-- **RF05 - Carga Incremental e Comunicação Omnichannel:** A Central deve apresentar primeiro os chamados mais recentes e buscar páginas adicionais somente quando solicitadas. Quando aplicável, o sistema deve integrar o motor do Chatwoot no back-end (conectado à Meta Cloud API) para permitir atendimento por WhatsApp em múltiplos analistas com logins individuais.
-- **RF06 - Exclusão de Registros Legados e Geração de Salas de Vídeo:** Registros marcados como originados de integrações descontinuadas não devem aparecer na Central nem nos painéis operacionais. O sistema também deve interpretar o atalho `/video` no chat de atendimento para gerar um link único e seguro (Jitsi/Meet) para visualização de equipamentos em loja.
+- **RF05 - Carga Incremental:** A Central deve apresentar primeiro os chamados nativos mais recentes e buscar páginas adicionais somente quando solicitadas.
+- **RF06 - Chamados Nativos e Geração de Salas de Vídeo:** A Central e os painéis operacionais devem exibir somente chamados nativos com protocolo `OS-`. O sistema também deve interpretar o atalho `/video` no chat de atendimento para gerar um link único e seguro (Jitsi/Meet) para visualização de equipamentos em loja.
 - **RF07 - Proxy de Sessão Centralizado (Milvus):** O acesso ao Milvus permanece restrito às ferramentas administrativas autorizadas. O back-end em Node.js atuará como o único cliente logado no Milvus, fazendo consultas periódicas e atualizando o status dos PDVs no banco da Critel, contornando a limitação de licenças.
 
-### Módulos de Negócio (Micro-CRM e Radar):
-- **RF08 - Módulo de Contatos Dinâmicos (Substituição de Planilhas):** O sistema deve cruzar a loja de origem do chamado com a base de dados interna (`lojas_contatos`) para acionamento imediato.
-  - *Fluxo Principal:* O back-end identifica a loja, busca o número e renderiza o botão "Iniciar WhatsApp". O clique abre o chat com o contato já preenchido.
+### Módulos de Negócio (Contatos e Radar):
+- **RF08 - Módulo de Contatos Dinâmicos (Substituição de Planilhas):** O sistema deve cruzar a loja de origem do chamado com a base de dados interna (`lojas_contatos`) para consulta e manutenção dos contatos.
+  - *Fluxo Principal:* O back-end identifica a loja e apresenta os dados de contato cadastrados para a equipe.
   - *Fluxo Alternativo:* O analista identifica um novo gerente, altera o número na própria tela do chamado ativo e o front-end processa um `UPDATE` no banco, atualizando o contato para os próximos acionamentos.
   - *Fluxo de Exceção:* Em caso de lojas novas sem cadastro prévio, a interface exibe um campo de alerta para inserção manual. O sistema salva o contato provisório, permite o atendimento e retroalimenta o banco.
-- **RF09 - Radar de Obras (Mobilização/Desmobilização):** O motor de Webhooks deve rodar uma verificação de Expressões Regulares (Regex: `/(obra|reforma).*?(aprovação|mobilização|desmobilização)/i`).
+- **RF09 - Radar de Obras (Mobilização/Desmobilização):** O processamento interno deve rodar uma verificação de Expressões Regulares (Regex: `/(obra|reforma).*?(aprovação|mobilização|desmobilização)/i`).
   - *Fluxo Alternativo Estratégico:* Caso detecte as palavras-chave, o chamado não entra na fila de suporte técnico. Ele é desviado para a tabela `radar_obras_mobilizacao` e dispara um alerta de e-mail para a diretoria tratar a oportunidade de faturamento.
 
 ## 3. Requisitos Não Funcionais e Arquitetura (RNF)

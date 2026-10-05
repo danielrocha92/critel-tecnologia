@@ -1,11 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { X, Paperclip, Bold, Italic, Underline, Type, AlignLeft, List, ListOrdered, Quote, Link2, Image as ImageIcon, Plus, BookTemplate } from 'lucide-react';
-import { createClient } from '../../utils/supabase/client';
+import React, { useState, useRef } from 'react';
+import { X, Paperclip, Bold, Italic, Underline, Type, AlignLeft, List, ListOrdered, Quote, Link2, Image as ImageIcon, BookTemplate } from 'lucide-react';
 import styles from './NovoChamadoModal.module.css';
-
-const supabase = createClient();
 
 interface NovoChamadoModalProps {
   onClose: () => void;
@@ -21,27 +18,8 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
     endereco_loja: '',
     departamento: '',
     assunto: '',
-    prioridade: '',
-    atendente: ''
+    prioridade: ''
   });
-
-  const [tecnicos, setTecnicos] = useState<{user_id: string, nome: string, cargo: string}[]>([]);
-
-  useEffect(() => {
-    const fetchTecnicos = async () => {
-      const { data, error } = await supabase
-        .from('perfis')
-        .select('user_id, nome, cargo')
-        .eq('status', 'ATIVO')
-        .eq('cargo', 'TECNICO'); // Filtrar apenas técnicos
-      
-      if (!error && data) {
-        // Filtrar opcionalmente apenas técnicos ou deixar todos os ativos
-        setTecnicos(data);
-      }
-    };
-    fetchTecnicos();
-  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -62,23 +40,18 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
 
     isSubmitting.current = true;
     setLoading(true);
-    
-    const finalHtml = formData.endereco_loja 
+
+    const finalHtml = formData.endereco_loja
       ? `<div><strong>Endereço da Loja:</strong> ${formData.endereco_loja}</div><br/>${descricaoFinal}`
       : descricaoFinal;
 
-    const payload: any = {
+    const payload = {
       cliente: formData.cliente,
       titulo: formData.assunto,
       descricao: finalHtml,
       departamento: formData.departamento,
-      prioridade: formData.prioridade,
-      status: formData.atendente ? 'ABERTO' : 'NOVO' // Se já tem técnico, pode ser ABERTO
+      prioridade: formData.prioridade
     };
-
-    if (formData.atendente) {
-      payload.tecnico_id = formData.atendente;
-    }
 
     try {
       let response;
@@ -100,7 +73,7 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
           body: JSON.stringify(payload)
         });
       }
-      
+
       const result = await response.json();
 
       if (!response.ok) {
@@ -120,7 +93,7 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
   return (
     <div className={styles.overlay}>
       <div className={styles.modalContainer}>
-        
+
         {/* HEADER */}
         <div className={styles.header}>
           <h2 className={styles.headerTitle}>Novo Chamado</h2>
@@ -131,12 +104,12 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
 
         {/* BODY (Scrollable) */}
         <div className={styles.body}>
-          
+
           {/* Cliente */}
           <div className={styles.formRow}>
             <label className={styles.formLabel}>Cliente:</label>
             <div className={styles.inputWrapper}>
-              <select 
+              <select
                 name="cliente"
                 value={formData.cliente}
                 onChange={handleChange}
@@ -156,8 +129,8 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
           <div className={styles.formRow}>
             <label className={styles.formLabel}>Endereço da Loja:</label>
             <div className={styles.inputWrapper}>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 name="endereco_loja"
                 value={formData.endereco_loja}
                 onChange={handleChange}
@@ -171,7 +144,7 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
           <div className={styles.formRow}>
             <label className={styles.formLabel}>Departamento:</label>
             <div className={styles.inputWrapper}>
-              <select 
+              <select
                 name="departamento"
                 value={formData.departamento}
                 onChange={handleChange}
@@ -188,8 +161,8 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
           <div className={styles.formRow}>
             <label className={styles.formLabel}>Assunto:</label>
             <div className={styles.inputWrapper}>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 name="assunto"
                 value={formData.assunto}
                 onChange={handleChange}
@@ -202,7 +175,7 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
           <div className={styles.formRowStart}>
             <label className={`${styles.formLabel} ${styles.msgLabel}`}>Mensagem:</label>
             <div className={styles.msgContainer}>
-              <div 
+              <div
                 ref={messageRef}
                 contentEditable
                 className={styles.msgEditor}
@@ -238,7 +211,7 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
           <div className={styles.formRow}>
             <label className={styles.formLabel}>Prioridade:</label>
             <div className={styles.inputWrapper}>
-              <select 
+              <select
                 name="prioridade"
                 value={formData.prioridade}
                 onChange={handleChange}
@@ -253,32 +226,12 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
             </div>
           </div>
 
-          {/* Atendente (Técnicos Cadastrados) */}
-          <div className={styles.formRow}>
-            <label className={styles.formLabel}>Atendente:</label>
-            <div className={styles.inputWrapper}>
-              <select 
-                name="atendente"
-                value={formData.atendente}
-                onChange={handleChange}
-                className={styles.selectField}
-              >
-                <option value="">Fila (Aguardando Atribuição)</option>
-                {tecnicos.map(tec => (
-                  <option key={tec.user_id} value={tec.user_id}>
-                    {tec.nome} ({tec.cargo === 'TECNICO' ? 'Técnico' : tec.cargo})
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
         </div>
 
         {/* FOOTER */}
         <div className={styles.footer}>
           <div className={styles.footerLeft}>
-            <button 
+            <button
               onClick={handleCreateTicket}
               disabled={loading}
               aria-busy={loading}
@@ -290,12 +243,12 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
               <div className={styles.attachmentListContainer}>
                 {files.map((fileItem, idx) => (
                   <div key={idx} className={styles.attachmentBadge}>
-                    <Paperclip size={16} /> 
+                    <Paperclip size={16} />
                     <span className={styles.attachmentName}>
                       {fileItem.name}
                     </span>
-                    <button 
-                      onClick={() => setFiles(prev => prev.filter((_, i) => i !== idx))} 
+                    <button
+                      onClick={() => setFiles(prev => prev.filter((_, i) => i !== idx))}
                       className={styles.btnRemoveAttachment}
                       title="Remover anexo"
                     >
@@ -306,22 +259,22 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
               </div>
             )}
             <label className={styles.btnAttach}>
-              <input 
-                type="file" 
-                multiple 
-                hidden 
+              <input
+                type="file"
+                multiple
+                hidden
                 onChange={(e) => {
                   if (e.target.files) {
                     setFiles(prev => [...prev, ...Array.from(e.target.files!)]);
                   }
                   e.target.value = '';
-                }} 
+                }}
               />
               <Paperclip size={16} /> Anexar
             </label>
           </div>
-          
-          <button 
+
+          <button
             onClick={onClose}
             disabled={loading}
             className={styles.btnCancel}

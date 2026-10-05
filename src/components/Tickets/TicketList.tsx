@@ -44,20 +44,26 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
 
       // Realtime listener do Supabase
       const fetchInitial = async () => {
-        const { data } = await supabase.from('tickets').select('*').order('criado_em', { ascending: false });
+        const { data } = await supabase.from('tickets').select('*').like('protocolo_origem', 'OS-%').order('criado_em', { ascending: false });
         if (data) setTickets(data as ITicket[]);
         setLoading(false);
       };
-      
+
       fetchInitial();
 
       // eslint-disable-next-line react-hooks/exhaustive-deps
       const channel = supabase.channel(`ticketlist_realtime_${Date.now()}`)
         .on('postgres_changes', { event: '*', schema: 'public', table: 'tickets' }, (payload: any) => {
           if (payload.eventType === 'INSERT') {
-            setTickets(prev => [payload.new as ITicket, ...prev]);
+            const ticket = payload.new as ITicket;
+            if (ticket.protocolo_origem?.toUpperCase().startsWith('OS-')) {
+              setTickets(prev => [ticket, ...prev]);
+            }
           } else if (payload.eventType === 'UPDATE') {
-            setTickets(prev => prev.map(t => t.id === payload.new.id ? payload.new as ITicket : t));
+            const ticket = payload.new as ITicket;
+            setTickets(prev => ticket.protocolo_origem?.toUpperCase().startsWith('OS-')
+              ? prev.map(item => item.id === ticket.id ? ticket : item)
+              : prev.filter(item => item.id !== ticket.id));
           } else if (payload.eventType === 'DELETE') {
             setTickets(prev => prev.filter(t => t.id !== payload.old.id));
           }
@@ -83,9 +89,9 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
         tecnico_id: currentUser.id,
         status: 'ABERTO'
       }).eq('id', ticketId).in('status', ['FILA', 'NOVO']);
-      
+
       if (error) throw error;
-      
+
       await supabase.from('ticket_transitions').insert({
         ticket_id: ticketId,
         from_status: 'NOVO',
