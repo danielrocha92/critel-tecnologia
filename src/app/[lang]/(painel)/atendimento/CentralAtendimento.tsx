@@ -74,7 +74,7 @@ function CentralAtendimentoContent({
 
   const getAtendenteNome = (id: string | null | undefined) => {
     if (!id) return 'Sem Atendente Vinculado';
-    const p = perfis.find(p => String(p.user_id) === String(id));
+    const p = perfis.find(p => String(p.id) === String(id) || String(p.user_id) === String(id));
     return p ? `${p.nome} - Critel Tecnologia` : 'Alocado';
   };
 

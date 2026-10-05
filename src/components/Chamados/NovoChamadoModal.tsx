@@ -78,8 +78,8 @@ export default function NovoChamadoModal({ onClose, onSuccess }: NovoChamadoModa
       const result = await response.json();
 
       if (!response.ok) {
-        console.error('Erro ao criar OS:', result.error);
-        alert('Erro ao criar Ordem de Serviço.');
+        console.error('Erro ao criar OS:', result.error, result.details);
+        alert(`Erro ao criar Ordem de Serviço:\n${result.details || result.error}`);
       } else {
         if (onSuccess) onSuccess();
         else window.location.reload();

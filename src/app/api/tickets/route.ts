@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
 
     const { data: profile, error: profileError } = await supabase
       .from('perfis')
-      .select('cargo, status')
+      .select('id, cargo, status')
       .eq('user_id', user.id)
       .maybeSingle();
     const cargo = profile?.cargo?.trim().toUpperCase().replace('É', 'E');
@@ -156,7 +156,7 @@ export async function POST(req: NextRequest) {
         status: 'FILA',
         tecnico_id: null,
         cliente: payload.customer,
-        analista_id: user.id,
+        analista_id: profile.id,
         protocolo_origem: `OS-${Date.now()}`
       })
       .select()

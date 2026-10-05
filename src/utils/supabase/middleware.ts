@@ -54,14 +54,17 @@ export async function updateSession(request: NextRequest) {
 
   // 2. Lógica para usuários logados
   if (user) {
-    let cargo = request.cookies.get('user_cargo')?.value || null;
+    // Fetch cargo and status directly from DB to avoid stale cookies leading to redirect loops
+    const { data: perfil } = await supabase.from('perfis').select('cargo, status').eq('user_id', user.id).single();
+    const cargo = perfil?.cargo || null;
+    const status = perfil?.status || null;
 
-    if (!cargo) {
-      const { data: perfil } = await supabase.from('perfis').select('cargo').eq('user_id', user.id).single();
-      cargo = perfil?.cargo || null;
-      if (cargo) {
-        supabaseResponse.cookies.set('user_cargo', cargo, { path: '/', maxAge: 60 * 60 * 8 });
-      }
+    // Se estiver bloqueado ou pendente e não for rota pública, desloga ou deixa no login
+    if (status && status !== 'ATIVO' && !isPublicPath) {
+      const url = request.nextUrl.clone();
+      const lang = url.pathname.split('/')[1] || 'pt';
+      url.pathname = `/${lang}/login`;
+      return NextResponse.redirect(url);
     }
 
     const cargoNormalizado = (cargo || 'VISITANTE').trim().toUpperCase().replace('É', 'E');
@@ -78,10 +81,13 @@ export async function updateSession(request: NextRequest) {
 
     // 2.a Redireciona da página de login para o painel correto
     if (isLoginPath) {
-      const url = request.nextUrl.clone();
-      const lang = url.pathname.split('/')[1] || 'pt';
-      url.pathname = `/${lang}${basePath}`;
-      return NextResponse.redirect(url);
+      if (status === 'ATIVO') {
+        const url = request.nextUrl.clone();
+        const lang = url.pathname.split('/')[1] || 'pt';
+        url.pathname = `/${lang}${basePath}`;
+        return NextResponse.redirect(url);
+      }
+      return supabaseResponse;
     }
 
     // 2.b Restringe acesso a rotas privadas baseadas no cargo

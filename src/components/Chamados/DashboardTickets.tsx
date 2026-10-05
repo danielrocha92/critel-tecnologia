@@ -70,7 +70,7 @@ export function DashboardTickets({ tickets, perfis, operadorAtual, searchTerm, s
   let filteredTickets = searchedTickets;
 
   if (isMeus && operadorAtual) {
-    filteredTickets = filteredTickets.filter(t => String(t.analista_id) === String(operadorAtual.user_id) || String(t.tecnico_id) === String(operadorAtual.user_id));
+    filteredTickets = filteredTickets.filter(t => String(t.analista_id) === String(operadorAtual.id) || String(t.analista_id) === String(operadorAtual.user_id) || String(t.tecnico_id) === String(operadorAtual.id) || String(t.tecnico_id) === String(operadorAtual.user_id));
   } else if (isMeus && !operadorAtual) {
     // Prevent showing all tickets before operator is loaded
     filteredTickets = [];
@@ -153,7 +153,7 @@ export function DashboardTickets({ tickets, perfis, operadorAtual, searchTerm, s
                         </td>
                         <td className={styles.textGray}>
                           {(ticket.analista_id || ticket.tecnico_id)
-                            ? (perfis?.find(p => String(p.user_id) === String(ticket.analista_id || ticket.tecnico_id))?.nome || 'Alocado')
+                            ? (perfis?.find(p => String(p.id) === String(ticket.analista_id || ticket.tecnico_id) || String(p.user_id) === String(ticket.analista_id || ticket.tecnico_id))?.nome || 'Alocado')
                             : 'Sem Atendente'}
                         </td>
                         <td>
