@@ -9,7 +9,6 @@ import {
   DollarSign,
   Headset,
   Users,
-  UserRoundSearch,
 } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
 import styles from './DashboardHome.module.css';
@@ -93,9 +92,9 @@ export default function DashboardHome() {
 
   const quickLinks = [
     {
-      title: 'Central de Atendimento',
-      description: 'Consulte e acompanhe solicitações dos clientes.',
-      href: `/${lang}/atendimento`,
+      title: 'Painel do Analista',
+      description: 'Acompanhe e gerencie as solicitações recebidas.',
+      href: `/${lang}/analista`,
       icon: Headset,
       className: styles.iconSupport,
     },
@@ -120,13 +119,6 @@ export default function DashboardHome() {
       icon: Users,
       className: styles.iconClients,
     },
-    {
-      title: 'Análise',
-      description: 'Acompanhe a fila recente de solicitações.',
-      href: `/${lang}/analista`,
-      icon: UserRoundSearch,
-      className: styles.iconSupport,
-    },
   ];
 
   return (
@@ -139,8 +131,8 @@ export default function DashboardHome() {
             Acesse suas ferramentas e acompanhe a operação em um só lugar.
           </p>
         </div>
-        <Link href={`/${lang}/atendimento`} className={styles.primaryAction}>
-          Abrir central
+        <Link href={`/${lang}/analista`} className={styles.primaryAction}>
+          Abrir painel
           <ArrowRight size={17} />
         </Link>
       </header>

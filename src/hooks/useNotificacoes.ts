@@ -150,7 +150,7 @@ export function useNotificacoes() {
             tipo: 'novo_chamado',
             titulo: '🎫 Novo Chamado — TI',
             mensagem: `#${ticket.protocolo_origem} · ${ticket.departamento || 'TI'} · ${ticket.cliente}: ${ticket.titulo || 'Sem assunto'}`,
-            href: '/atendimento',
+            href: '/analista',
           }, prefsAtual);
         }
       )
@@ -167,7 +167,7 @@ export function useNotificacoes() {
               tipo: 'chamado_respondido',
               titulo: '💬 Chamado Respondido — TI',
               mensagem: `#${ticket.protocolo_origem} · ${ticket.departamento || 'TI'} · ${ticket.cliente} respondeu`,
-              href: '/atendimento',
+              href: '/analista',
             }, prefsAtual);
           }
 
@@ -176,7 +176,7 @@ export function useNotificacoes() {
               tipo: 'chamado_fechado',
               titulo: '✅ Chamado Encerrado — TI',
               mensagem: `#${ticket.protocolo_origem} · ${ticket.departamento || 'TI'} · ${ticket.cliente} foi encerrado`,
-              href: '/atendimento',
+              href: '/analista',
             }, prefsAtual);
           }
         }

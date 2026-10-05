@@ -1,30 +1,28 @@
 .layoutWrapper {
   min-height: 100vh;
-  background: #020617;
+  background: #0b1120;
   width: 100%;
 }
 
 .mobileContainer {
   min-height: 100vh;
-  background:
-    radial-gradient(ellipse at top, rgba(14, 116, 144, 0.1), transparent 45%),
-    #0b1120;
+  background: #0b1120;
   color: #f8fafc;
-  font-family: Inter, system-ui, sans-serif;
+  font-family: inherit;
   display: flex;
   flex-direction: column;
-  max-width: 760px;
+  max-width: 1440px;
   margin: 0 auto;
   width: 100%;
   position: relative;
-  box-shadow: 0 0 20px rgba(0,0,0,0.5);
 }
 
 .header {
-  background: rgba(15, 23, 42, 0.9);
+  min-height: 64px;
+  background: rgba(11, 17, 32, 0.92);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0 clamp(18px, 4vw, 52px);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -34,10 +32,10 @@
 }
 
 .title {
-  font-size: 1.2rem;
+  font-size: 1rem;
   margin: 0;
-  color: #00d2ff;
-  font-weight: bold;
+  color: #fb7185;
+  font-weight: 700;
 }
 
 .userInfo {
@@ -48,7 +46,7 @@
 
 .userName {
   font-size: 0.8rem;
-  color: #94a3b8;
+  color: #d9e2ee;
 }
 
 .mainContent {

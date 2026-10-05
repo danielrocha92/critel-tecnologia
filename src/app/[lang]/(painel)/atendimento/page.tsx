@@ -1,18 +1,16 @@
-import CentralAtendimento from './CentralAtendimento';
+import { redirect } from 'next/navigation';
 
 export default async function CentralAtendimentoPage({
+  params,
   searchParams,
 }: {
+  params: Promise<{ lang: string }>;
   searchParams: Promise<{ ticket_id?: string; novo?: string }>;
 }) {
+  const { lang } = await params;
   const { ticket_id: ticketId, novo } = await searchParams;
-  const openCreateTicket = novo === '1';
 
-  return (
-    <CentralAtendimento
-      key={ticketId || (openCreateTicket ? 'novo-chamado' : 'lista-chamados')}
-      ticketId={ticketId}
-      openCreateTicket={openCreateTicket}
-    />
-  );
+  if (ticketId) redirect(`/${lang}/os/${encodeURIComponent(ticketId)}`);
+  if (novo === '1') redirect(`/${lang}/analista?novo=1`);
+  redirect(`/${lang}/analista`);
 }

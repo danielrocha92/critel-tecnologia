@@ -6,9 +6,10 @@ import styles from './NovoChamadoModal.module.css';
 
 interface NovoChamadoModalProps {
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
-export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
+export default function NovoChamadoModal({ onClose, onSuccess }: NovoChamadoModalProps) {
   const [loading, setLoading] = useState(false);
   const isSubmitting = useRef(false);
   const [files, setFiles] = useState<File[]>([]);
@@ -80,7 +81,8 @@ export default function NovoChamadoModal({ onClose }: NovoChamadoModalProps) {
         console.error('Erro ao criar OS:', result.error);
         alert('Erro ao criar Ordem de Serviço.');
       } else {
-        window.location.reload();
+        if (onSuccess) onSuccess();
+        else window.location.reload();
       }
     } catch (err) {
       console.error('Erro ao chamar a API:', err);

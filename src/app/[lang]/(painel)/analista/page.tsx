@@ -6,6 +6,19 @@ export const metadata: Metadata = {
   description: 'Acompanhe solicitações e encaminhe atendimentos.',
 };
 
-export default function AnalistaPage() {
-  return <DepartmentEnvironment department="analista" />;
+export default async function AnalistaPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ novo?: string }>;
+}) {
+  const { novo } = await searchParams;
+  const openCreateTicket = novo === '1';
+
+  return (
+    <DepartmentEnvironment
+      key={openCreateTicket ? 'novo-chamado' : 'painel-analista'}
+      department="analista"
+      openCreateTicket={openCreateTicket}
+    />
+  );
 }

@@ -5,12 +5,6 @@ export default async function MyTicketsPage({
 }: {
   params: Promise<{ lang: string; filter: string }>;
 }) {
-  const { lang, filter } = await params;
-  const activeFilter = filter === 'opened'
-    ? 'abertos'
-    : filter === 'closed'
-      ? 'finalizados'
-      : 'todos';
-
-  redirect(`/${lang}/atendimento?filter=${activeFilter}&meus=true`);
+  const { lang } = await params;
+  redirect(`/${lang}/analista`);
 }

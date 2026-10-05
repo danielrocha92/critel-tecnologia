@@ -150,13 +150,16 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h1 className={styles.title}>{filterTitle}</h1>
-        <p className={styles.subtitle}>Quadro Kanban Nativo (Supabase Real-time)</p>
+        <div className={styles.headerCopy}>
+          <span className={styles.eyebrow}>GESTÃO OPERACIONAL</span>
+          <h1 className={styles.title}>{filterTitle}</h1>
+          <p className={styles.subtitle}>Quadro Kanban nativo atualizado em tempo real.</p>
+        </div>
       </div>
 
       <div className={styles.filtersContainer}>
         <div className={styles.searchContainer}>
-          <Search size={18} color="#94a3b8" className={styles.searchIcon} />
+          <Search size={18} className={styles.searchIcon} />
           <input
             type="text"
             placeholder="Buscar por ID ou título..."
@@ -208,7 +211,7 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
                   {colTickets.map(ticket => (
                     <article
                       key={ticket.id}
-                      onClick={() => router.push(detailPath ? `/${lang}${detailPath}/${ticket.id}` : `/${lang}/atendimento?ticket_id=${ticket.id}`)}
+                      onClick={() => router.push(detailPath ? `/${lang}${detailPath}/${ticket.id}` : `/${lang}/os/${ticket.id}`)}
                       className={styles.ticketCard}
                     >
                       <div className={`${styles.statusIndicator} ${ticket.status === 'FILA' ? styles.statusNovo : ticket.status === 'FECHADO' ? styles.statusFinalizado : styles.statusDefault}`} />
@@ -222,18 +225,18 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
                             {ticket.titulo}
                           </div>
                         </div>
-                        <span className={styles.statusBadge}>
+                        <span className={`${styles.statusBadge} ${['FECHADO', 'RESOLVIDO'].includes(ticket.status) ? styles.statusBadgeDone : ['FILA', 'NOVO', 'PENDENTE'].includes(ticket.status) ? styles.statusBadgePending : styles.statusBadgeActive}`}>
                           {ticket.status}
                         </span>
                       </div>
 
                       <div className={styles.badgesContainer}>
                         <div className={styles.badgeItem}>
-                          <Bookmark size={14} color="#818cf8" />
+                          <Bookmark size={14} />
                           <span>{ticket.departamento}</span>
                         </div>
                         <div className={styles.badgeItem}>
-                          <Tag size={14} color="#f472b6" />
+                          <Tag size={14} />
                           <span>{ticket.categoria}</span>
                         </div>
                       </div>
@@ -244,7 +247,7 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
                           {renderBadge(ticket.prioridade)}
                         </div>
                         <div className={styles.assigneeInfo}>
-                          <User size={14} color="#94a3b8" />
+                          <User size={14} />
                           {getAtendenteNome(ticket.tecnico_id || '')}
                         </div>
                       </div>

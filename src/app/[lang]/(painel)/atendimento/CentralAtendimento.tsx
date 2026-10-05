@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { createClient } from '../../../../utils/supabase/client';
 import { useCentralAtendimento } from '../../../../hooks/useCentralAtendimento';
 import styles from './atendimento.module.css';
-import { User, Trash2, Printer, Pencil, History, X } from 'lucide-react';
+import { User, Trash2, Printer, Pencil, History, X, ArrowLeft, ChevronDown } from 'lucide-react';
 import { DashboardTickets } from '../../../../components/Chamados/DashboardTickets';
 import NovoChamadoModal from '../../../../components/Chamados/NovoChamadoModal';
 import { ITicket, ITicketReply } from '../../../../types/ticket';
@@ -61,7 +61,6 @@ function CentralAtendimentoContent({
     const date = new Date(value);
     return Number.isNaN(date.getTime()) ? null : date;
   };
-  const [isMilvusIframeOpen, setIsMilvusIframeOpen] = useState(false);
   const [anexos, setAnexos] = useState<TicketAttachment[]>([]);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('novos');
@@ -243,25 +242,6 @@ function CentralAtendimentoContent({
     };
   }, [ticketAtivo]);
 
-  useEffect(() => {
-    if (!ticketAtivo) return;
-
-    const verificarMilvus = async () => {
-      try {
-        await fetch('/api/milvus/check', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ loja: ticketAtivo.cliente }),
-        });
-      } catch (milvusError) {
-        console.error('Erro ao consultar Milvus:', milvusError);
-      }
-    };
-
-    void verificarMilvus();
-  }, [ticketAtivo?.cliente, ticketAtivo?.id]);
-
-
   return (
     <div className={styles.container}>
       {ticketsError && <div className={styles.errorMessage} role="alert">{ticketsError}</div>}
@@ -285,7 +265,7 @@ function CentralAtendimentoContent({
           {isNewTicketModalOpen && canCreateTicket && (
             <NovoChamadoModal onClose={() => {
               setIsNewTicketModalOpen(false);
-              if (openCreateTicket) router.replace(`/${lang}/atendimento`);
+              if (openCreateTicket) router.replace(`/${lang}/analista`);
             }} />
           )}
         </>
@@ -293,8 +273,8 @@ function CentralAtendimentoContent({
         <div className={styles.innerViewContainer}>
           <div className={styles.innerHeader}>
             <div className={styles.detailHeading}>
-              <button className={styles.btnBack} onClick={handleBackToTickets} title="Voltar" aria-label="Voltar para ordens de serviço">
-                ⬅
+              <button className={styles.btnBack} onClick={handleBackToTickets} title="Voltar" aria-label="Voltar para chamados">
+                <ArrowLeft size={17} aria-hidden="true" />
               </button>
               <div className={styles.detailHeadingText}>
                 <p className={styles.detailEyebrow}>
@@ -312,8 +292,9 @@ function CentralAtendimentoContent({
                 <button
                   className={styles.btnMais}
                   onClick={() => setIsMaisDropdownOpen(!isMaisDropdownOpen)}
+                  aria-expanded={isMaisDropdownOpen}
                 >
-                  Mais v
+                  Mais <ChevronDown size={14} aria-hidden="true" />
                 </button>
                 {isMaisDropdownOpen && (
                   <div className={styles.maisDropdown}>
@@ -476,45 +457,8 @@ function CentralAtendimentoContent({
                 </div>
               </div>
 
-              <div className={styles.panelCard}>
-                <h4 className={styles.panelTitle}>Ferramentas Integradas</h4>
-                <div className={styles.toolsWrapper}>
-                  <a href="/api/cofre/stoq" target="_blank" rel="noreferrer" className={styles.btnStoq}>
-                    Abrir Stoq ERP (Cofre)
-                  </a>
-                  <button
-                    onClick={() => setIsMilvusIframeOpen(true)}
-                    className={styles.btnMilvus}
-                  >
-                    Abrir Milvus Proxy
-                  </button>
-                </div>
-              </div>
             </div>
           </div>
-        </div>
-      )}
-
-      {/* Modal Full-Screen do Milvus Proxy */}
-      {isMilvusIframeOpen && (
-        <div className={styles.milvusOverlay}>
-          <div className={styles.milvusHeader}>
-            <div>
-              <h2 className={styles.milvusTitle}>Milvus IT Management</h2>
-              <p className={styles.milvusSubtitle}>Acesso à plataforma pelo cofre Critel</p>
-            </div>
-            <button
-              onClick={() => setIsMilvusIframeOpen(false)}
-              className={styles.milvusCloseBtn}
-            >
-              Fechar Milvus
-            </button>
-          </div>
-          <iframe
-            src="http://localhost:3001"
-            className={styles.milvusIframe}
-            allow="camera; microphone; display-capture; fullscreen; clipboard-read; clipboard-write"
-          />
         </div>
       )}
 

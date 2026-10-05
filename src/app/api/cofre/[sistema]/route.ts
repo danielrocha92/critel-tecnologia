@@ -66,7 +66,7 @@ export async function GET(
   } else if (targetSistema === 'Milvus') {
     targetUrl = 'https://app.milvus.com.br';
   } else {
-    targetUrl = 'https://intranet.critel.com.br/pt/atendimento';
+    targetUrl = 'https://intranet.critel.com.br/pt/analista';
   }
 
   // 4. Retornar resposta injetando cookies (Simulação Proxy SSO Backend)

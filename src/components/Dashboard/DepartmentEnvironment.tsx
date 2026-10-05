@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   ArrowUpRight,
   Building2,
@@ -17,6 +17,7 @@ import {
   Wallet,
 } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
+import NovoChamadoModal from '@/components/Chamados/NovoChamadoModal';
 import styles from './DepartmentEnvironment.module.css';
 
 type Department = 'financeiro' | 'comercial' | 'analista';
@@ -88,8 +89,15 @@ function statusClass(status: string | null | undefined) {
   return styles.statusActive;
 }
 
-export default function DepartmentEnvironment({ department }: { department: Department }) {
+export default function DepartmentEnvironment({
+  department,
+  openCreateTicket = false,
+}: {
+  department: Department;
+  openCreateTicket?: boolean;
+}) {
   const pathname = usePathname();
+  const router = useRouter();
   const lang = pathname.split('/')[1] || 'pt';
   const [month, setMonth] = useState(() => {
     const now = new Date();
@@ -104,6 +112,7 @@ export default function DepartmentEnvironment({ department }: { department: Depa
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [isNewTicketOpen, setIsNewTicketOpen] = useState(openCreateTicket);
   const copy = departmentLabels[department];
 
   useEffect(() => {
@@ -422,10 +431,10 @@ export default function DepartmentEnvironment({ department }: { department: Depa
                       <td><span className={`${styles.statusBadge} ${statusClass(ticket.status)}`}>{ticket.status || 'Sem status'}</span></td>
                       <td>
                         <Link
-                          href={`/${lang}/atendimento?ticket_id=${encodeURIComponent(ticket.id)}`}
+                          href={`/${lang}/os/${encodeURIComponent(ticket.id)}`}
                           className={styles.openTicketLink}
                         >
-                          Abrir atendimento
+                          Abrir chamado
                           <ArrowUpRight size={14} />
                         </Link>
                       </td>
@@ -436,6 +445,19 @@ export default function DepartmentEnvironment({ department }: { department: Depa
             </div>
           </section>
         </>
+      )}
+      {department === 'analista' && isNewTicketOpen && (
+        <NovoChamadoModal
+          onClose={() => {
+            setIsNewTicketOpen(false);
+            router.replace(`/${lang}/analista`);
+          }}
+          onSuccess={() => {
+            setIsNewTicketOpen(false);
+            setRefreshKey((current) => current + 1);
+            router.replace(`/${lang}/analista`);
+          }}
+        />
       )}
     </div>
   );

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import type { LucideIcon } from 'lucide-react';
 import {
-  Home, Inbox, MessageSquare, Users, Settings,
+  Home, MessageSquare, Users, Settings,
   ChevronDown, ChevronLeft, ChevronRight, LogOut, Plus
 } from 'lucide-react';
 import { createClient } from '../../utils/supabase/client';
@@ -98,7 +98,7 @@ export default function Sidebar({ lang }: { lang: string }) {
 
   const allCategories: NavigationItem[] = [
     {
-      name: 'Novo Chamado', icon: Plus, href: `/${lang}/atendimento?novo=1`, section: 'main', isAction: true,
+      name: 'Novo Chamado', icon: Plus, href: `/${lang}/analista?novo=1`, section: 'main', isAction: true,
       roles: ['SUPER_ADMIN', 'ADMIN', 'ANALISTA']
     },
     {

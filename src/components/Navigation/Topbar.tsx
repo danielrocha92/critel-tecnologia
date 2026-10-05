@@ -121,12 +121,12 @@ export default function Topbar() {
                 Minha conta
               </Link>
               <Link
-                href={`/${lang}/atendimento`}
+                href={`/${lang}/analista`}
                 className={styles.dropdownItem}
                 role="menuitem"
                 onClick={() => setIsProfileOpen(false)}
               >
-                Central de atendimento
+                Painel do Analista
               </Link>
               <button type="button" className={styles.logoutButton} role="menuitem" onClick={handleLogout}>
                 Sair do sistema
