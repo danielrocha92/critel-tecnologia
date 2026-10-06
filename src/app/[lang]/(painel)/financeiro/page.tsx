@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import DepartmentEnvironment from '@/components/Dashboard/DepartmentEnvironment';
+import FinancialOSDashboard from '@/components/FinancialOSDashboard/FinancialOSDashboard';
 
 export const metadata: Metadata = {
   title: 'Painel Financeiro | Critel Core',
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function FinanceiroPage() {
-  return <DepartmentEnvironment department="financeiro" />;
+  return <FinancialOSDashboard />;
 }

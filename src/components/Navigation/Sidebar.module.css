@@ -11,14 +11,12 @@
   top: 0;
   z-index: 100;
   font-family: inherit;
-  overflow-y: auto;
-  overflow-x: hidden;
   transition: width 0.25s cubic-bezier(.4,0,.2,1);
 }
 
-.sidebarAside::-webkit-scrollbar { width: 3px; }
-.sidebarAside::-webkit-scrollbar-track { background: transparent; }
-.sidebarAside::-webkit-scrollbar-thumb { background: var(--bg-tertiary); border-radius: 99px; }
+.sidebarNav::-webkit-scrollbar { width: 3px; }
+.sidebarNav::-webkit-scrollbar-track { background: transparent; }
+.sidebarNav::-webkit-scrollbar-thumb { background: var(--bg-tertiary); border-radius: 99px; }
 
 /* ── COLLAPSED ── */
 .collapsed { width: 68px; }
@@ -39,7 +37,8 @@
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid var(--border-color);
-  min-height: 68px;
+  height: 68px;
+  box-sizing: border-box;
   position: relative;
 }
 
@@ -78,7 +77,12 @@
 .btnCollapse:hover { color: var(--text-primary); border-color: var(--accent-brand); }
 
 /* ── NAV ── */
-.sidebarNav { padding: 6px 10px; flex: 1; }
+.sidebarNav { 
+  padding: 6px 10px; 
+  flex: 1; 
+  overflow-y: auto;
+  overflow-x: hidden;
+}
 
 .sectionLabel {
   padding: 14px 8px 5px;
