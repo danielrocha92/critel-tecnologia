@@ -32,6 +32,26 @@ export interface OSFilterParams {
   searchQuery?: string;
 }
 
+interface FinanceEntry {
+  id: string;
+  valor_servico: number | string | null;
+  valor_despesas: number | string | null;
+  status_faturamento: string | null;
+  criado_em: string | null;
+  ticket: TicketEntry | TicketEntry[] | null;
+  tecnico: TechnicianEntry | TechnicianEntry[] | null;
+}
+
+interface TicketEntry {
+  protocolo_origem: string | null;
+  cliente: string | null;
+  status: string | null;
+}
+
+interface TechnicianEntry {
+  nome: string | null;
+}
+
 export const osFinanceService = {
   /**
    * Obtém o resumo financeiro das Ordens de Serviço
@@ -60,7 +80,7 @@ export const osFinanceService = {
     let inConflict = 0;
     let readyToClose = 0;
 
-    data?.forEach(entry => {
+    (data as Pick<FinanceEntry, 'valor_servico' | 'valor_despesas' | 'status_faturamento'>[] | null)?.forEach(entry => {
       const total = Number(entry.valor_servico || 0) + Number(entry.valor_despesas || 0);
       const status = (entry.status_faturamento || '').toUpperCase();
       
@@ -119,7 +139,7 @@ export const osFinanceService = {
       return [];
     }
 
-    let results = (data || []).map((entry: any) => {
+    let results: FinancialOS[] = ((data || []) as FinanceEntry[]).map(entry => {
       const ticket = Array.isArray(entry.ticket) ? entry.ticket[0] : entry.ticket;
       const tecnico = Array.isArray(entry.tecnico) ? entry.tecnico[0] : entry.tecnico;
       
