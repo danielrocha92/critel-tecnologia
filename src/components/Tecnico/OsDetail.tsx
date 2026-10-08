@@ -154,6 +154,12 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
       return;
     }
 
+    const activeTicket = ticket;
+    if (!activeTicket) {
+      setGeoError('A ordem de serviço ainda está carregando. Tente novamente.');
+      return;
+    }
+
     setIsCheckingIn(true);
     setGeoError(null);
     setCheckInMessage('Solicitando sua localização GPS...');
@@ -181,7 +187,7 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              ticket_id: ticket.id,
+              ticket_id: activeTicket.id,
               latitude: position.coords.latitude,
               longitude: position.coords.longitude,
             }),
