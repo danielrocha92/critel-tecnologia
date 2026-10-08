@@ -13,10 +13,13 @@ import UnassignedTicketsFeed from '@/components/Tecnico/UnassignedTicketsFeed';
 import type { ITicket } from '@/types/ticket';
 
 const supabase = createClient();
+const finalizedStatuses = ['RESOLVIDO', 'FECHADO', 'FINALIZADO', 'CONCLUIDO'];
+type TicketGroup = 'ATIVOS' | 'NOVO' | 'EM_ANDAMENTO' | 'FINALIZADOS';
 
 export default function OsList({ lang }: { lang: string }) {
   const [userId, setUserId] = useState<string | null>(null);
   const [tickets, setTickets] = useState<ITicket[]>([]);
+  const [selectedGroup, setSelectedGroup] = useState<TicketGroup>('ATIVOS');
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState('');
@@ -68,8 +71,6 @@ export default function OsList({ lang }: { lang: string }) {
         .select('*')
         .like('protocolo_origem', 'OS-%')
         .eq('tecnico_id', userData.user.id)
-        .neq('status', 'FINALIZADO')
-        .neq('status', 'CONCLUIDO')
         .order('criado_em', { ascending: false });
 
       if (clientFilter) {
@@ -98,7 +99,19 @@ export default function OsList({ lang }: { lang: string }) {
     return <div className={styles.loadingContainer}>Carregando seus serviços...</div>;
   }
 
+  const activeTickets = tickets.filter((ticket) => !finalizedStatuses.includes(ticket.status));
+  const newTicketsCount = tickets.filter((ticket) => ticket.status === 'NOVO').length;
+  const inProgressCount = tickets.filter((ticket) => ticket.status === 'EM_ANDAMENTO').length;
+  const finalizedCount = tickets.filter((ticket) => finalizedStatuses.includes(ticket.status)).length;
+
   const filteredTickets = tickets.filter(t => {
+    const matchesGroup = selectedGroup === 'ATIVOS'
+      ? !finalizedStatuses.includes(t.status)
+      : selectedGroup === 'FINALIZADOS'
+        ? finalizedStatuses.includes(t.status)
+        : t.status === selectedGroup;
+    if (!matchesGroup) return false;
+
     const term = searchTerm.toLowerCase();
     const address = getTicketAddress(t);
     return (
@@ -109,8 +122,17 @@ export default function OsList({ lang }: { lang: string }) {
     );
   });
 
-  const newTicketsCount = tickets.filter(ticket => ticket.status === 'NOVO').length;
-  const inProgressCount = tickets.filter(ticket => ticket.status === 'EM_ANDAMENTO').length;
+  const selectGroup = (group: TicketGroup) => {
+    setSelectedGroup(group);
+    document.getElementById('ticket-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const groupCopy: Record<TicketGroup, { title: string; subtitle: string }> = {
+    ATIVOS: { title: 'Chamados ativos', subtitle: 'Serviços que ainda precisam de atendimento.' },
+    NOVO: { title: 'Chamados novos', subtitle: 'Serviços aguardando início do atendimento.' },
+    EM_ANDAMENTO: { title: 'Chamados em andamento', subtitle: 'Serviços que já estão sendo executados.' },
+    FINALIZADOS: { title: 'Chamados finalizados', subtitle: 'Serviços concluídos. Abra uma OS para ver o laudo e as evidências.' },
+  };
 
   return (
     <div className={styles.pageContainer}>
@@ -126,28 +148,35 @@ export default function OsList({ lang }: { lang: string }) {
         </Link>
       </header>
 
-      <section className={styles.metricsGrid} aria-label="Resumo dos chamados ativos">
-        <article className={styles.metricCard}>
+      <section className={styles.metricsGrid} aria-label="Filtrar chamados por situação">
+        <button type="button" aria-pressed={selectedGroup === 'ATIVOS'} onClick={() => selectGroup('ATIVOS')} className={`${styles.metricCard} ${selectedGroup === 'ATIVOS' ? styles.metricCardSelected : ''}`}>
           <span className={`${styles.metricIcon} ${styles.metricIconBlue}`}><ClipboardList size={18} /></span>
           <div>
             <span className={styles.metricLabel}>Chamados ativos</span>
-            <strong className={styles.metricValue}>{tickets.length}</strong>
+            <strong className={styles.metricValue}>{activeTickets.length}</strong>
           </div>
-        </article>
-        <article className={styles.metricCard}>
+        </button>
+        <button type="button" aria-pressed={selectedGroup === 'NOVO'} onClick={() => selectGroup('NOVO')} className={`${styles.metricCard} ${selectedGroup === 'NOVO' ? styles.metricCardSelected : ''}`}>
           <span className={`${styles.metricIcon} ${styles.metricIconAmber}`}><Sparkles size={18} /></span>
           <div>
             <span className={styles.metricLabel}>Novos</span>
             <strong className={styles.metricValue}>{newTicketsCount}</strong>
           </div>
-        </article>
-        <article className={styles.metricCard}>
+        </button>
+        <button type="button" aria-pressed={selectedGroup === 'EM_ANDAMENTO'} onClick={() => selectGroup('EM_ANDAMENTO')} className={`${styles.metricCard} ${selectedGroup === 'EM_ANDAMENTO' ? styles.metricCardSelected : ''}`}>
           <span className={`${styles.metricIcon} ${styles.metricIconGreen}`}><Activity size={18} /></span>
           <div>
             <span className={styles.metricLabel}>Em andamento</span>
             <strong className={styles.metricValue}>{inProgressCount}</strong>
           </div>
-        </article>
+        </button>
+        <button type="button" aria-pressed={selectedGroup === 'FINALIZADOS'} onClick={() => selectGroup('FINALIZADOS')} className={`${styles.metricCard} ${selectedGroup === 'FINALIZADOS' ? styles.metricCardSelected : ''}`}>
+          <span className={`${styles.metricIcon} ${styles.metricIconGreen}`}><CheckCircle size={18} /></span>
+          <span>
+            <span className={styles.metricLabel}>Finalizados</span>
+            <strong className={styles.metricValue}>{finalizedCount}</strong>
+          </span>
+        </button>
       </section>
 
       {userId && <ResumoFinanceiro userId={userId} />}
@@ -160,11 +189,11 @@ export default function OsList({ lang }: { lang: string }) {
         />
       )}
 
-      <section className={styles.listSection} aria-labelledby="active-tickets-title">
+      <section className={styles.listSection} id="ticket-list" aria-labelledby="active-tickets-title">
         <div className={styles.sectionHeader}>
           <div>
-            <h3 id="active-tickets-title" className={styles.sectionTitle}>Chamados em aberto</h3>
-            <p className={styles.sectionSubtitle}>Somente serviços que ainda precisam de atendimento.</p>
+            <h3 id="active-tickets-title" className={styles.sectionTitle}>{groupCopy[selectedGroup].title}</h3>
+            <p className={styles.sectionSubtitle}>{groupCopy[selectedGroup].subtitle}</p>
           </div>
           <span className={styles.resultCount}>{filteredTickets.length}</span>
         </div>
@@ -210,13 +239,13 @@ export default function OsList({ lang }: { lang: string }) {
       {filteredTickets.length === 0 ? (
         <div className={styles.emptyState}>
           <span className={styles.emptyStateIcon}><CheckCircle size={25} /></span>
-          <h3 className={styles.emptyStateTitle}>{tickets.length ? 'Nenhum chamado encontrado' : 'Tudo em dia!'}</h3>
+          <h3 className={styles.emptyStateTitle}>{tickets.length ? 'Nenhum chamado encontrado' : selectedGroup === 'FINALIZADOS' ? 'Nenhum chamado finalizado' : 'Tudo em dia!'}</h3>
           <p className={styles.emptyStateDesc}>
             {tickets.length
               ? 'Tente ajustar a busca ou os filtros selecionados.'
               : 'Você não tem serviços pendentes no momento.'}
           </p>
-          {!tickets.length && (
+          {!tickets.length && selectedGroup !== 'FINALIZADOS' && (
             <Link href={`/${lang}/tecnico/historico`} className={styles.emptyHistoryLink}>
               Consultar chamados finalizados
             </Link>
@@ -233,13 +262,16 @@ export default function OsList({ lang }: { lang: string }) {
                     <strong className={styles.ticketClient}>{ticket.cliente}</strong>
                     <span className={styles.ticketProtocol}>OS #{ticket.protocolo_origem}</span>
                   </div>
-                  <span className={`${styles.statusBadge} ${ticket.status === 'EM_ANDAMENTO' ? styles.statusInProgress : styles.statusNew}`}>
-                    {ticket.status === 'EM_ANDAMENTO' ? 'Em andamento' : ticket.status === 'NOVO' ? 'Novo' : ticket.status}
+                  <span className={`${styles.statusBadge} ${finalizedStatuses.includes(ticket.status) ? styles.statusDone : ticket.status === 'EM_ANDAMENTO' ? styles.statusInProgress : styles.statusNew}`}>
+                    {ticket.status === 'EM_ANDAMENTO' ? 'Em andamento' : ticket.status === 'NOVO' ? 'Novo' : ticket.status === 'FECHADO' ? 'Encerrado' : finalizedStatuses.includes(ticket.status) ? 'Finalizado' : ticket.status}
                   </span>
                 </div>
                 <h3 className={styles.ticketTitle}>
                   {ticket.titulo}
                 </h3>
+                {finalizedStatuses.includes(ticket.status) && ticket.resolucao?.descricaoServicos && (
+                  <p className={styles.resolutionPreview}>{ticket.resolucao.descricaoServicos}</p>
+                )}
 
                 <div className={styles.ticketDetails}>
                   <button

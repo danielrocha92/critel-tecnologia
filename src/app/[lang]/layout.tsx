@@ -119,7 +119,7 @@ export default async function RootLayout({
   const dict = await getDictionary(resolvedParams.lang as any);
 
   return (
-    <html lang={resolvedParams.lang} className={`${inter.variable} ${montserrat.variable}`} suppressHydrationWarning>
+    <html lang={resolvedParams.lang} data-scroll-behavior="smooth" className={`${inter.variable} ${montserrat.variable}`} suppressHydrationWarning>
       <head>
         <JsonLd data={getOrganizationSchema()} />
         <Script

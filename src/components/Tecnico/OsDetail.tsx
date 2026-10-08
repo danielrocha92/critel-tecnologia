@@ -230,7 +230,7 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
   if (!ticket) return <div className={styles.loadingContainer}>OS não encontrada.</div>;
 
   const isCheckedIn = !!ticket.check_in_at;
-  const isFinalized = ticket.status === 'FECHADO' || ticket.status === 'RESOLVIDO';
+  const isFinalized = ['FECHADO', 'RESOLVIDO', 'FINALIZADO', 'CONCLUIDO'].includes(ticket.status);
 
   return (
     <div className={styles.pageContainer}>
@@ -243,7 +243,7 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
 
       <div className={styles.contentWrapper}>
         <div className={styles.titleSection}>
-          <h1 className={styles.clientTitle}>{ticket.departamento}</h1>
+          <h2 className={styles.clientTitle}>{ticket.departamento}</h2>
           <p className={styles.ticketTitle}>
             {ticket.titulo}
           </p>
@@ -277,6 +277,48 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
           <section className={styles.cardSection}>
             <h3 className={`${styles.sectionHeading} ${styles.sectionHeadingDesc}`}>Descrição Reportada</h3>
             <p className={styles.descText} dangerouslySetInnerHTML={{__html: ticket.descricao}}></p>
+          </section>
+        )}
+        {isFinalized && (
+          <section className={`${styles.cardSection} ${styles.resolutionSection}`} aria-labelledby="resolution-heading">
+            <div className={styles.resolutionHeader}>
+              <div>
+                <span className={styles.resolutionEyebrow}><CheckCircle size={15} /> Atendimento concluído</span>
+                <h3 id="resolution-heading" className={styles.sectionHeading}>O que foi realizado</h3>
+              </div>
+              <span className={styles.finalStatus}>Finalizado</span>
+            </div>
+            <p className={styles.resolutionText}>
+              {ticket.resolucao?.descricaoServicos || 'Não foi registrada uma descrição dos serviços executados.'}
+            </p>
+            {(ticket.resolucao?.horaInicio || ticket.resolucao?.horaTermino) && (
+              <div className={styles.resolutionTimes}>
+                {ticket.resolucao?.horaInicio && <span><strong>Início</strong>{new Date(ticket.resolucao.horaInicio).toLocaleString('pt-BR')}</span>}
+                {ticket.resolucao?.horaTermino && <span><strong>Término</strong>{new Date(ticket.resolucao.horaTermino).toLocaleString('pt-BR')}</span>}
+              </div>
+            )}
+            {ticket.resolucao?.materiaisUtilizados && (
+              <div className={styles.materialsBlock}>
+                <strong className={styles.detailLabel}>Materiais utilizados</strong>
+                <p className={styles.descText}>{ticket.resolucao?.materiaisUtilizados}</p>
+              </div>
+            )}
+            {(ticket.resolucao?.evidenciaAntesUrl || ticket.resolucao?.evidenciaDepoisUrl) && (
+              <div className={styles.evidenceGrid}>
+                {ticket.resolucao?.evidenciaAntesUrl && (
+                  <figure className={styles.evidenceItem}>
+                    <img src={ticket.resolucao?.evidenciaAntesUrl} alt="Fachada antes do atendimento" width={640} height={400} loading="lazy" />
+                    <figcaption>Antes do atendimento</figcaption>
+                  </figure>
+                )}
+                {ticket.resolucao?.evidenciaDepoisUrl && (
+                  <figure className={styles.evidenceItem}>
+                    <img src={ticket.resolucao?.evidenciaDepoisUrl} alt="Fachada após o atendimento" width={640} height={400} loading="lazy" />
+                    <figcaption>Após o atendimento</figcaption>
+                  </figure>
+                )}
+              </div>
+            )}
           </section>
         )}
       </div>

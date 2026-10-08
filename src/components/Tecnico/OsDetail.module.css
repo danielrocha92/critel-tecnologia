@@ -108,6 +108,121 @@
   overflow-wrap: anywhere;
 }
 
+.resolutionSection {
+  border-color: rgba(52, 211, 153, 0.2);
+  background: linear-gradient(145deg, rgba(16, 45, 43, 0.55), rgba(15, 23, 42, 0.7));
+}
+
+.resolutionHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.85rem;
+}
+
+.resolutionEyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.55rem;
+  color: #6ee7b7;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.resolutionHeader .sectionHeading {
+  margin: 0;
+  color: #e2e8f0;
+  letter-spacing: 0;
+  text-transform: none;
+  font-size: 1.05rem;
+}
+
+.finalStatus {
+  flex: 0 0 auto;
+  padding: 0.35rem 0.6rem;
+  border: 1px solid rgba(52, 211, 153, 0.25);
+  border-radius: 999px;
+  color: #a7f3d0;
+  background: rgba(16, 185, 129, 0.1);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.resolutionText {
+  margin: 0;
+  color: #e2e8f0;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.resolutionTimes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 2rem;
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  color: #cbd5e1;
+  font-size: 0.82rem;
+}
+
+.resolutionTimes span {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.resolutionTimes strong,
+.materialsBlock .detailLabel {
+  color: #94a3b8;
+  font-size: 0.75rem;
+}
+
+.materialsBlock {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 1rem;
+}
+
+.evidenceGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.evidenceItem {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 9px;
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.evidenceItem img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+}
+
+.evidenceItem figcaption {
+  padding: 0.55rem 0.65rem;
+  color: #cbd5e1;
+  font-size: 0.75rem;
+}
+
+@media (max-width: 480px) {
+  .evidenceGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .addressContent {
   min-width: 0;
 }

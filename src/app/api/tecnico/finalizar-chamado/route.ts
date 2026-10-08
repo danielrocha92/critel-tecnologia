@@ -1,23 +1,29 @@
 import { NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 
 export async function POST(request: Request) {
   try {
     const cookieStore = await cookies();
-    const supabaseAdmin = createServerClient(
+    const supabaseAuth = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         cookies: {
-          get(name: string) { return cookieStore.get(name)?.value; },
+          getAll() {
+            return cookieStore.getAll();
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
+          },
         },
-      }
+      },
     );
 
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser();
+    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser();
     if (authError || !user) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+      return NextResponse.json({ error: 'Sessão expirada. Entre novamente.' }, { status: 401 });
     }
 
     const body = await request.json();
@@ -30,59 +36,88 @@ export async function POST(request: Request) {
       latitude,
       longitude,
       assinatura_base64,
-      evidencia_antes_base64,
-      evidencia_depois_base64,
       despesas_json,
-      assinatura_datahora
+      assinatura_datahora,
+      resolucao,
     } = body;
 
     if (
       !ticket_id ||
-      typeof latitude !== 'number' ||
-      !Number.isFinite(latitude) ||
-      latitude < -90 ||
-      latitude > 90 ||
-      typeof longitude !== 'number' ||
-      !Number.isFinite(longitude) ||
-      longitude < -180 ||
-      longitude > 180 ||
-      !descricao_servicos
+      typeof latitude !== 'number' || !Number.isFinite(latitude) || latitude < -90 || latitude > 90 ||
+      typeof longitude !== 'number' || !Number.isFinite(longitude) || longitude < -180 || longitude > 180 ||
+      typeof descricao_servicos !== 'string' || !descricao_servicos.trim() ||
+      !resolucao || typeof resolucao !== 'object'
     ) {
-      return NextResponse.json({ error: 'Dados obrigatórios ausentes (GPS, Descrição ou Ticket)' }, { status: 400 });
+      return NextResponse.json({ error: 'Confira a descrição, localização e dados da ordem de serviço.' }, { status: 400 });
     }
 
-    // Check if it's already finalized to prevent duplicate financial records
-    const { data: existingTicket } = await supabaseAdmin
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!serviceRoleKey) {
+      console.error('SUPABASE_SERVICE_ROLE_KEY não está configurada.');
+      return NextResponse.json({ error: 'Serviço de finalização indisponível no servidor.' }, { status: 500 });
+    }
+
+    const supabaseAdmin = createSupabaseClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      serviceRoleKey,
+      { auth: { autoRefreshToken: false, persistSession: false } },
+    );
+
+    const { data: ticket, error: ticketReadError } = await supabaseAdmin
       .from('tickets')
-      .select('status')
+      .select('status, tecnico_id')
       .eq('id', ticket_id)
       .like('protocolo_origem', 'OS-%')
       .single();
 
-    if (existingTicket?.status === 'FINALIZADO') {
-      return NextResponse.json({ error: 'Este chamado já foi finalizado.' }, { status: 400 });
+    if (ticketReadError || !ticket) {
+      return NextResponse.json({ error: 'Ordem de serviço não encontrada.' }, { status: 404 });
     }
 
-    // 1. Update Ticket Status
-    const { error: ticketError } = await supabaseAdmin
+    const { data: profile } = await supabaseAdmin
+      .from('perfis')
+      .select('id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (ticket.tecnico_id !== user.id && ticket.tecnico_id !== profile?.id) {
+      return NextResponse.json({ error: 'Esta ordem de serviço não está atribuída a você.' }, { status: 403 });
+    }
+
+    if (['RESOLVIDO', 'FECHADO', 'FINALIZADO', 'CONCLUIDO'].includes(ticket.status || '')) {
+      return NextResponse.json({ error: 'Este chamado já foi finalizado.' }, { status: 409 });
+    }
+
+    const finalizedAt = new Date().toISOString();
+    const { error: updateError } = await supabaseAdmin
       .from('tickets')
       .update({
         status: 'FINALIZADO',
-        atualizado_em: new Date().toISOString(),
+        atualizado_em: finalizedAt,
         checkout_lat: latitude,
         checkout_lng: longitude,
-        checkout_at: new Date().toISOString(),
-        evidencia_antes_base64,
-        evidencia_depois_base64,
-        despesas_json,
-        assinatura_datahora
+        checkout_at: finalizedAt,
+        despesas_json: despesas_json || [],
+        assinatura_datahora: assinatura_datahora || finalizedAt,
+        resolucao,
       })
       .eq('id', ticket_id)
-      .like('protocolo_origem', 'OS-%')
+      .like('protocolo_origem', 'OS-%');
 
-    if (ticketError) throw ticketError;
+    if (updateError) throw updateError;
 
-    // 2. Insert into servicos_concluidos
+    const { error: transitionError } = await supabaseAdmin
+      .from('ticket_transitions')
+      .insert({
+        ticket_id,
+        from_status: ticket.status,
+        to_status: 'FINALIZADO',
+        changed_by: user.id,
+        reason: `Finalização técnica: ${descricao_servicos.trim().slice(0, 120)}`,
+      });
+
+    if (transitionError) console.error('Não foi possível registrar a transição da OS:', transitionError);
+
     const { data: servico, error: servicoError } = await supabaseAdmin
       .from('servicos_concluidos')
       .insert({
@@ -90,45 +125,44 @@ export async function POST(request: Request) {
         tecnico_id: user.id,
         hora_inicio,
         hora_termino,
-        descricao_servicos,
+        descricao_servicos: descricao_servicos.trim(),
         materiais_utilizados,
         latitude,
         longitude,
-        assinatura_base64
+        assinatura_base64,
       })
       .select('id')
       .single();
 
     if (servicoError) {
-      console.error('Erro ao inserir servicos_concluidos:', servicoError);
-      throw new Error('Falha ao registrar relatório do serviço.');
+      console.error('Não foi possível registrar o relatório do serviço:', servicoError);
+      return NextResponse.json({ success: true, warning: 'OS finalizada, mas o relatório complementar não foi registrado.' });
     }
 
-    // Calcular total de despesas
-    let totalDespesas = 0;
-    if (despesas_json && Array.isArray(despesas_json)) {
-      totalDespesas = despesas_json.reduce((sum, d) => sum + (d.valor_numerico || 0), 0);
-    }
+    const totalDespesas = Array.isArray(despesas_json)
+      ? despesas_json.reduce((sum: number, item: { valor?: number; valor_numerico?: number }) =>
+          sum + Number(item.valor_numerico ?? item.valor ?? 0), 0)
+      : 0;
 
-    // 3. Insert into financeiro (valor_servico removido das inputs do técnico, assume-se 0)
-    const { error: finError } = await supabaseAdmin
+    const { error: financeError } = await supabaseAdmin
       .from('financeiro')
       .insert({
         ticket_id,
         tecnico_id: user.id,
-        servico_id: servico?.id || null,
+        servico_id: servico.id,
         valor_servico: 0,
         valor_despesas: totalDespesas,
-        status_faturamento: 'PENDENTE'
+        status_faturamento: 'PENDENTE',
       });
 
-    if (finError) {
-      console.error('Erro ao inserir financeiro:', finError);
-    }
+    if (financeError) console.error('Não foi possível registrar o lançamento financeiro:', financeError);
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
-    console.error('Erro em finalizar-chamado:', error);
-    return NextResponse.json({ error: error.message || 'Erro interno do servidor' }, { status: 500 });
+  } catch (error) {
+    console.error('Erro ao finalizar chamado:', error);
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Erro interno ao finalizar a ordem de serviço.' },
+      { status: 500 },
+    );
   }
 }

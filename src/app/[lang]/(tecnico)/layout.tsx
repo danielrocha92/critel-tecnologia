@@ -1,10 +1,16 @@
-import { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 
 export const metadata: Metadata = {
   title: 'Portal do Técnico | Critel',
   description: 'App para execução de serviços técnicos',
+};
+
+export const viewport: Viewport = {
   themeColor: '#0b1120',
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0'
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 import { createServerClient } from '@supabase/ssr';

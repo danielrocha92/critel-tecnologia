@@ -3,15 +3,12 @@
 import { useState, useRef, useEffect, useCallback, ChangeEvent } from 'react';
 import { X, MapPin, MapPinOff, AlertTriangle, Send, Clock, Plus, Trash } from 'lucide-react';
 import SignatureCanvas, { type SignatureCanvas as SignatureCanvasInstance } from 'react-signature-canvas';
-import { createBrowserClient } from '@supabase/ssr';
+import { createClient } from '@/utils/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import { ITicket } from '@/types/ticket';
 import styles from './FinalizarChamadoModal.module.css';
 
-const supabase = createBrowserClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-);
+const supabase = createClient();
 
 interface FinalizarChamadoModalProps {
   ticket: ITicket;
@@ -225,7 +222,7 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
       return;
     }
 
-    const assinaturaBase64 = sigCanvas.current.getTrimmedCanvas().toDataURL('image/png');
+    const assinaturaBase64 = sigCanvas.current.getCanvas().toDataURL('image/png');
 
     const parsedDespesas = despesas.map(d => ({
       ...d,
@@ -256,31 +253,37 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
       }
 
       setProgressMsg('Registrando baixa de OS na base nativa...');
-      const { error: finalError } = await supabase.from('tickets').update({
-        status: 'RESOLVIDO',
-        resolucao: {
-          horaInicio: new Date(horaInicio).getTime(),
-          horaTermino: new Date(horaTermino).getTime(),
-          descricaoServicos: descricao,
-          materiaisUtilizados: materiais,
+      const response = await fetch('/api/tecnico/finalizar-chamado', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ticket_id: ticket.id,
+          hora_inicio: new Date(horaInicio).toISOString(),
+          hora_termino: new Date(horaTermino).toISOString(),
+          descricao_servicos: descricao,
+          materiais_utilizados: materiais,
           latitude: location.lat,
           longitude: location.lng,
-          assinaturaUrl,
-          evidenciaAntesUrl,
-          evidenciaDepoisUrl,
-          despesas: finalDespesas
-        }
-      }).eq('id', ticket.id);
-
-      if (finalError) throw finalError;
-
-      await supabase.from('ticket_transitions').insert({
-        ticket_id: ticket.id,
-        from_status: ticket.status,
-        to_status: 'RESOLVIDO',
-        changed_by: currentUser.id,
-        reason: 'Finalização técnica no local'
+          assinatura_base64: assinaturaBase64,
+          assinatura_datahora: new Date().toISOString(),
+          despesas_json: finalDespesas,
+          resolucao: {
+            horaInicio: new Date(horaInicio).getTime(),
+            horaTermino: new Date(horaTermino).getTime(),
+            descricaoServicos: descricao,
+            materiaisUtilizados: materiais,
+            latitude: location.lat,
+            longitude: location.lng,
+            assinaturaUrl,
+            evidenciaAntesUrl,
+            evidenciaDepoisUrl,
+            despesas: finalDespesas,
+          },
+        }),
       });
+
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Não foi possível finalizar o chamado.');
 
       onSuccess();
     } catch (err) {

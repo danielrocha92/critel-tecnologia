@@ -60,6 +60,18 @@ export interface ITicket {
   categoria?: string;
   prioridade?: string;
   descricao?: string;
+  resolucao?: {
+    horaInicio?: number;
+    horaTermino?: number;
+    descricaoServicos?: string;
+    materiaisUtilizados?: string;
+    assinaturaUrl?: string;
+    evidenciaAntesUrl?: string;
+    evidenciaDepoisUrl?: string;
+    latitude?: number;
+    longitude?: number;
+    despesas?: Array<{ natureza: string; valor: number; anexoUrl?: string }>;
+  } | null;
 }
 
 export interface TicketTransition {
