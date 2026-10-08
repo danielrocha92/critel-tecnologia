@@ -6,27 +6,27 @@
 }
 
 .header {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--border-color);
   padding-bottom: 1rem;
   margin-bottom: 2rem;
 }
 
 .title {
   font-size: 2rem;
-  color: #f8fafc;
+  color: var(--text-primary);
   margin: 0;
 }
 
 .subtitle {
-  color: #94a3b8;
+  color: var(--text-secondary);
   margin-top: 0.5rem;
 }
 
 .card {
-  background: rgba(15, 23, 42, 0.6);
+  background: var(--card-bg);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-color);
   border-radius: 16px;
   padding: 2.5rem;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
@@ -40,7 +40,7 @@
   align-items: center;
   gap: 2rem;
   padding-bottom: 2rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--border-color);
   flex-wrap: wrap;
 }
 
@@ -48,7 +48,7 @@
   width: 100px;
   height: 100px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #00d2ff 0%, #0284c7 100%);
+  background: linear-gradient(135deg, var(--accent-cyan) 0%, #0284c7 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -59,14 +59,14 @@
 .userName {
   margin: 0 0 0.5rem 0;
   font-size: 1.75rem;
-  color: #f8fafc;
+  color: var(--text-primary);
 }
 
 .userEmail {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #94a3b8;
+  color: var(--text-secondary);
 }
 
 .infoGrid {
@@ -76,7 +76,7 @@
 }
 
 .infoItem {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--card-bg);
   padding: 1.5rem;
   border-radius: 12px;
 }
@@ -85,7 +85,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #94a3b8;
+  color: var(--text-secondary);
   margin-bottom: 0.5rem;
 }
 
@@ -97,7 +97,7 @@
 
 .infoValue {
   font-size: 1.1rem;
-  color: #f8fafc;
+  color: var(--text-primary);
   font-weight: 500;
 }
 
@@ -107,8 +107,8 @@
 
 .btnAction {
   background: transparent;
-  color: #f8fafc;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
   padding: 12px 24px;
   border-radius: 8px;
   font-weight: 600;

@@ -1,29 +1,29 @@
 .container {
   display: flex;
   height: calc(100vh - 70px);
-  background: #0b1120;
+  background: var(--bg-primary);
 }
 
 /* Sidebar Esquerda */
 .sidebar {
   width: 320px;
-  background: #162032;
-  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
 }
 
 .searchContainer {
   padding: 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--border-color);
   display: flex;
   gap: 8px;
 }
 
 .searchInput {
   flex: 1;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
   color: #fff;
   padding: 8px 12px;
   border-radius: 6px;
@@ -31,9 +31,9 @@
 }
 
 .filterButton {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #94a3b8;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
   padding: 8px;
   border-radius: 6px;
   cursor: pointer;
@@ -43,15 +43,15 @@
 }
 
 .filterButton:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--card-bg);
 }
 
 .filterMenu {
   position: absolute;
   top: 100%;
   right: 16px;
-  background: #1a1d26;
-  border: 1px solid #32394c;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.5);
   z-index: 10;
@@ -64,18 +64,18 @@
   text-align: left;
   background: transparent;
   border: none;
-  color: #cbd5e1;
+  color: var(--text-secondary);
   padding: 8px 16px;
   font-size: 0.85rem;
   cursor: pointer;
 }
 
 .filterMenuItem:hover {
-  background: rgba(255,255,255,0.05);
+  background: var(--card-bg);
 }
 
 .activeFilterItem {
-  color: #3b82f6;
+  color: var(--status-info-text);
   font-weight: 500;
   background: rgba(59, 130, 246, 0.1);
 }
@@ -87,13 +87,13 @@
 
 .ticketItem {
   padding: 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--border-color);
   cursor: pointer;
   transition: background 0.2s;
 }
 
 .ticketItem:hover {
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--card-bg);
 }
 
 .ticketItemActive {
@@ -110,18 +110,18 @@
 
 .ticketCode {
   font-size: 0.8rem;
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-weight: 500;
 }
 
 .ticketDate {
   font-size: 0.75rem;
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 .ticketTitle {
   font-size: 0.9rem;
-  color: #f1f5f9;
+  color: var(--text-primary);
   font-weight: 500;
   margin: 0 0 8px 0;
   line-height: 1.4;
@@ -137,13 +137,13 @@
   font-size: 0.75rem;
   padding: 4px 8px;
   border-radius: 4px;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--card-bg);
   color: #fff;
 }
 
 .ticketStatusOpen {
   background: rgba(59, 130, 246, 0.2);
-  color: #60a5fa;
+  color: var(--status-info-text);
 }
 
 .ticketStatusClosed {
@@ -153,13 +153,13 @@
 
 .ticketClient {
   font-size: 0.8rem;
-  color: #94a3b8;
+  color: var(--text-secondary);
 }
 
 .loadingEmpty {
   padding: 2rem;
   text-align: center;
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-size: 0.9rem;
 }
 
@@ -168,14 +168,14 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: #0b1120;
+  background: var(--bg-primary);
 }
 
 .mainHeader {
   display: flex;
   justify-content: space-between;
   padding: 16px 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .mainHeaderLeft {
@@ -187,7 +187,7 @@
 .backButton {
   background: transparent;
   border: none;
-  color: #94a3b8;
+  color: var(--text-secondary);
   cursor: pointer;
   font-size: 1.2rem;
   display: none;
@@ -205,10 +205,10 @@
 }
 
 .actionButton {
-  background: #162032;
+  background: var(--bg-secondary);
   color: #fff;
   padding: 8px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   cursor: pointer;
   display: flex;
@@ -217,7 +217,7 @@
 }
 
 .actionButton:hover {
-  background: #1e293b;
+  background: var(--bg-secondary);
 }
 
 .actionButtonDanger {
@@ -271,7 +271,7 @@
 
 .divider {
   border: 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid var(--border-color);
   margin: 24px 0;
 }
 
@@ -283,7 +283,7 @@
 .secondaryButton {
   background: transparent;
   color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-color);
   padding: 8px 16px;
   border-radius: 4px;
   cursor: pointer;
@@ -291,13 +291,13 @@
 }
 
 .secondaryButton:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--card-bg);
 }
 
 .selectInput {
-  background: #162032;
+  background: var(--bg-secondary);
   color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-color);
   padding: 10px 12px;
   border-radius: 4px;
   width: 100%;
@@ -318,7 +318,7 @@
   display: flex;
   justify-content: space-between;
   padding: 16px 24px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid var(--border-color);
 }
 
 .primaryButton {
@@ -353,8 +353,8 @@
 }
 
 .timelineCard {
-  background: #162032;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 16px;
 }
@@ -384,22 +384,22 @@
 
 .timelineName {
   font-weight: 600;
-  color: #f1f5f9;
+  color: var(--text-primary);
   display: block;
 }
 
 .timelineRole {
   font-size: 0.75rem;
-  color: #94a3b8;
+  color: var(--text-secondary);
 }
 
 .timelineDate {
   font-size: 0.75rem;
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 .timelineContent {
-  color: #cbd5e1;
+  color: var(--text-secondary);
   font-size: 0.95rem;
   line-height: 1.5;
   overflow-x: auto;
@@ -408,13 +408,13 @@
 
 .attachmentsSection {
   margin-top: 16px;
-  border-top: 1px solid #32394c;
+  border-top: 1px solid var(--border-color);
   padding-top: 12px;
 }
 
 .attachmentsTitle {
   margin: 0 0 8px 0;
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-size: 0.85rem;
 }
 
@@ -425,7 +425,7 @@
 }
 
 .attachmentLink {
-  color: #00d2ff;
+  color: var(--accent-cyan);
   font-size: 0.9rem;
   text-decoration: none;
   display: flex;
@@ -441,8 +441,8 @@
 /* Sidebar Direita (Informações) */
 .infoSidebar {
   width: 300px;
-  background: #162032;
-  border-left: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--bg-secondary);
+  border-left: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
   overflow-y: auto;
@@ -450,7 +450,7 @@
 
 .infoSection {
   padding: 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .infoSectionTitle {
@@ -468,19 +468,19 @@
 
 .infoItemLabel {
   font-size: 0.75rem;
-  color: #94a3b8;
+  color: var(--text-secondary);
   margin-bottom: 2px;
 }
 
 .infoItemValue {
   font-size: 0.85rem;
-  color: #f1f5f9;
+  color: var(--text-primary);
 }
 
 .infoBadge {
   display: inline-block;
   padding: 4px 8px;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--card-bg);
   border-radius: 4px;
   font-size: 0.75rem;
   font-weight: 500;
@@ -558,8 +558,8 @@
   top: 100%;
   left: 0;
   margin-top: 8px;
-  background: #1a1d26;
-  border: 1px solid #32394c;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   min-width: 200px;
   padding: 8px 0;
@@ -572,7 +572,7 @@
   text-align: left;
   background: transparent;
   border: none;
-  color: #cbd5e1;
+  color: var(--text-secondary);
   padding: 10px 16px;
   font-size: 0.85rem;
   cursor: pointer;
@@ -583,12 +583,12 @@
 }
 
 .dropdownItem:hover {
-  background: rgba(255,255,255,0.05);
+  background: var(--card-bg);
   color: #fff;
 }
 
 .noAttachment {
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-size: 0.85rem;
   padding: 10px 0;
 }
@@ -616,7 +616,7 @@
 }
 
 .attachmentFileName {
-  color: #e2e8f0;
+  color: var(--text-primary);
   font-size: 0.85rem;
   text-decoration: none;
   display: block;
@@ -627,19 +627,19 @@
 
 .attachmentSize {
   font-size: 0.75rem;
-  color: #94a3b8;
+  color: var(--text-secondary);
 }
 
 .attachmentDownload {
-  color: #94a3b8;
+  color: var(--text-secondary);
   cursor: pointer;
 }
 
 .selectInputLabel {
   width: 100%;
-  background: #1a1d26;
-  color: #94a3b8;
-  border: 1px solid #32394c;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
   padding: 10px;
   border-radius: 4px;
   outline: none;
@@ -652,7 +652,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(11, 17, 32, 0.85);
+  background: var(--header-bg);
   backdrop-filter: blur(4px);
   z-index: 9999;
   display: flex;
@@ -661,11 +661,11 @@
 }
 
 .modalEditContent {
-  background: #1a1d26;
+  background: var(--bg-secondary);
   width: 100%;
   max-width: 800px;
   border-radius: 8px;
-  border: 1px solid #32394c;
+  border: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
 }
@@ -674,7 +674,7 @@
   display: flex;
   justify-content: space-between;
   padding: 16px;
-  border-bottom: 1px solid #32394c;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .modalEditTitle {
@@ -685,7 +685,7 @@
 .modalEditClose {
   background: transparent;
   border: none;
-  color: #94a3b8;
+  color: var(--text-secondary);
   cursor: pointer;
   font-size: 1.2rem;
 }
@@ -725,9 +725,9 @@
 }
 
 .modalEditInput {
-  background: #0b1120;
+  background: var(--bg-primary);
   color: #fff;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid var(--border-color);
   padding: 10px;
   border-radius: 4px;
   width: 100%;
@@ -735,9 +735,9 @@
 }
 
 .modalEditTextarea {
-  background: #0b1120;
+  background: var(--bg-primary);
   color: #fff;
-  border: 1px solid #32394c;
+  border: 1px solid var(--border-color);
   padding: 10px;
   border-radius: 4px;
   width: 100%;
@@ -747,9 +747,9 @@
 }
 
 .modalEditSelect {
-  background: #0b1120;
+  background: var(--bg-primary);
   color: #fff;
-  border: 1px solid #32394c;
+  border: 1px solid var(--border-color);
   padding: 10px;
   border-radius: 4px;
   width: 100%;
@@ -761,7 +761,7 @@
   justify-content: flex-end;
   gap: 8px;
   padding: 16px;
-  border-top: 1px solid #32394c;
+  border-top: 1px solid var(--border-color);
   background: #111520;
   border-bottom-left-radius: 8px;
   border-bottom-right-radius: 8px;
@@ -781,7 +781,7 @@
   background: transparent;
   color: #fff;
   padding: 8px 16px;
-  border: 1px solid #32394c;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   cursor: pointer;
 }
@@ -810,7 +810,7 @@
 }
 
 .lightboxActionBtn {
-  background: rgba(255,255,255,0.1);
+  background: var(--card-bg);
   border: none;
   color: #fff;
   cursor: pointer;
@@ -839,17 +839,17 @@
 .searchBox {
   display: flex;
   align-items: center;
-  background: #1e293b;
-  border: 1px solid #334155;
+  background: var(--bg-secondary);
+  border: 1px solid var(--text-secondary);
   border-radius: 6px;
   padding: 8px 12px;
-  color: #94a3b8;
+  color: var(--text-secondary);
 }
 .searchBox input {
   background: transparent;
   border: none;
   outline: none;
-  color: #f8fafc;
+  color: var(--text-primary);
   margin-left: 8px;
   font-size: 0.9rem;
 }
@@ -859,8 +859,8 @@
   gap: 20px;
 }
 .accordionContainer {
-  background: #1e293b;
-  border: 1px solid #334155;
+  background: var(--bg-secondary);
+  border: 1px solid var(--text-secondary);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -869,19 +869,19 @@
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
-  background: #0f172a;
+  background: var(--bg-primary);
   cursor: pointer;
   user-select: none;
 }
 .accordionHeader h3 {
   margin: 0;
   font-size: 0.95rem;
-  color: #f8fafc;
+  color: var(--text-primary);
   font-weight: 600;
   flex: 1;
 }
 .accordionActions {
-  color: #94a3b8;
+  color: var(--text-secondary);
 }
 .accordionContent {
   padding: 0;
@@ -893,55 +893,55 @@
 .otrsTable th {
   text-align: left;
   padding: 12px 16px;
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-size: 0.8rem;
   font-weight: 600;
-  background: rgba(255, 255, 255, 0.02);
-  border-bottom: 1px solid #334155;
+  background: var(--card-bg);
+  border-bottom: 1px solid var(--text-secondary);
 }
 .otrsTable td {
   padding: 12px 16px;
-  color: #e2e8f0;
+  color: var(--text-primary);
   font-size: 0.85rem;
-  border-bottom: 1px solid #334155;
+  border-bottom: 1px solid var(--text-secondary);
 }
 .otrsTable tr {
   cursor: pointer;
   transition: background 0.2s;
 }
 .otrsTable tr:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--card-bg);
 }
 .iconBtn {
   background: transparent;
   border: none;
-  color: #94a3b8;
+  color: var(--text-secondary);
   cursor: pointer;
 }
 .iconBtn:hover {
-  color: #f8fafc;
+  color: var(--text-primary);
 }
 .badgePrioHigh {
-  color: #ef4444;
+  color: var(--status-danger-text);
   font-weight: 600;
 }
 .badgePrioMedium {
-  color: #f59e0b;
+  color: var(--status-warning-text);
   font-weight: 600;
 }
 .badgePrioLow {
-  color: #10b981;
+  color: var(--status-success-text);
   font-weight: 600;
 }
 .loadMoreContainer {
   padding: 12px;
   text-align: center;
-  border-top: 1px solid #334155;
+  border-top: 1px solid var(--text-secondary);
 }
 .btnLoadMore {
   background: transparent;
-  border: 1px solid #475569;
-  color: #e2e8f0;
+  border: 1px solid var(--text-muted);
+  color: var(--text-primary);
   padding: 8px 16px;
   border-radius: 4px;
   cursor: pointer;
@@ -949,22 +949,22 @@
   transition: all 0.2s;
 }
 .btnLoadMore:hover {
-  background: #334155;
+  background: var(--text-secondary);
 }
 .textSmallDate {
   font-size: 0.8rem;
-  color: #94a3b8;
+  color: var(--text-secondary);
 }
 .textMedium {
   font-weight: 500;
 }
 .textGray {
-  color: #94a3b8;
+  color: var(--text-secondary);
 }
 .textCenterGray {
   padding: 24px;
   text-align: center;
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 .dropdownWrapper {
@@ -978,7 +978,7 @@
   min-width: 0;
   min-height: 0;
   overflow: hidden;
-  color: #e2e8f0;
+  color: var(--text-primary);
   background: #050b14;
   position: relative;
 }
@@ -990,7 +990,7 @@
   justify-content: space-between;
   gap: 1.25rem;
   padding: 1.5rem clamp(1.2rem, 3vw, 2.5rem);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--border-color);
   background: rgba(10, 15, 26, 0.7);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -1011,10 +1011,10 @@
   height: 2.75rem;
   flex: 0 0 auto;
   place-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
-  color: #94a3b8;
-  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-secondary);
+  background: var(--card-bg);
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -1022,7 +1022,7 @@
 .btnBack:hover {
   color: #fff;
   border-color: rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--card-bg);
   transform: translateX(-2px);
 }
 
@@ -1039,7 +1039,7 @@
   align-items: center;
   gap: 0.5rem;
   margin: 0;
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.1em;
@@ -1050,7 +1050,7 @@
   padding: 4px 8px;
   border: 1px solid rgba(56, 189, 248, 0.3);
   border-radius: 6px;
-  color: #38bdf8;
+  color: var(--accent-cyan);
   background: rgba(56, 189, 248, 0.1);
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -1059,7 +1059,7 @@
 .detailTitle {
   overflow-wrap: anywhere;
   margin: 0;
-  background: linear-gradient(to right, #ffffff, #94a3b8);
+  background: linear-gradient(to right, #ffffff, var(--text-secondary));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   font-size: clamp(1.4rem, 2.5vw, 1.8rem);
@@ -1073,7 +1073,7 @@
   align-items: center;
   gap: 0.75rem;
   margin-top: 0.4rem;
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-size: 0.85rem;
   font-weight: 500;
 }
@@ -1082,7 +1082,7 @@
   padding: 0.35rem 0.8rem;
   border: 1px solid rgba(16, 185, 129, 0.3);
   border-radius: 999px;
-  color: #34d399;
+  color: var(--status-success-text);
   background: rgba(16, 185, 129, 0.1);
   font-size: 0.75rem;
   font-weight: 700;
@@ -1105,10 +1105,10 @@
   justify-content: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  color: #e2e8f0;
-  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-primary);
+  background: var(--card-bg);
   font: inherit;
   font-size: 0.85rem;
   font-weight: 600;
@@ -1120,7 +1120,7 @@
 .btnMais:hover,
 .btnCancelar:hover {
   border-color: rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--card-bg);
   transform: translateY(-1px);
 }
 
@@ -1165,9 +1165,9 @@
 
 .innerTimeline > .timelineCard {
   padding: clamp(1.5rem, 3vw, 2rem);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
   border-radius: 16px;
-  background: rgba(17, 24, 39, 0.6);
+  background: var(--card-bg);
   backdrop-filter: blur(12px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -1184,7 +1184,7 @@
   gap: 1rem;
   margin-bottom: 1.5rem;
   padding-bottom: 1.25rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--border-color);
   display: flex;
   justify-content: space-between;
 }
@@ -1210,12 +1210,12 @@
 .timelineName {
   font-size: 1rem;
   font-weight: 700;
-  color: #f8fafc;
+  color: var(--text-primary);
 }
 
 .timelineRole {
   font-size: 0.75rem;
-  color: #94a3b8;
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-weight: 600;
@@ -1223,10 +1223,10 @@
 
 .timelineDate {
   padding: 0.4rem 0.8rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.03);
-  color: #94a3b8;
+  background: var(--card-bg);
+  color: var(--text-secondary);
   font-size: 0.8rem;
   font-weight: 500;
   display: flex;
@@ -1236,7 +1236,7 @@
 
 .timelineContent {
   overflow-wrap: anywhere;
-  color: #cbd5e1;
+  color: var(--text-secondary);
   font-size: 0.95rem;
   line-height: 1.8;
   padding: 0.5rem 0;
@@ -1244,9 +1244,9 @@
 
 .panelCard {
   padding: 1.25rem;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
   border-radius: 16px;
-  background: rgba(17, 24, 39, 0.6);
+  background: var(--card-bg);
   backdrop-filter: blur(12px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -1261,8 +1261,8 @@
 .panelTitle {
   margin: 0 0 1rem;
   padding-bottom: 0.75rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  color: #f8fafc;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
   font-size: 0.95rem;
   font-weight: 700;
   display: flex;
@@ -1275,7 +1275,7 @@
   flex-direction: column;
   gap: 0.35rem;
   padding: 0.6rem 0;
-  border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
+  border-bottom: 1px dashed var(--border-color);
 }
 
 .panelRow:last-child {
@@ -1283,7 +1283,7 @@
 }
 
 .panelLabel {
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -1292,7 +1292,7 @@
 
 .panelValue {
   overflow-wrap: anywhere;
-  color: #f1f5f9;
+  color: var(--text-primary);
   font-size: 0.9rem;
   font-weight: 500;
   line-height: 1.5;
@@ -1308,10 +1308,10 @@
   gap: 0.5rem;
   margin-top: 1rem;
   padding: 0.6rem 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-color);
   border-radius: 10px;
-  color: #f8fafc;
-  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-primary);
+  background: var(--card-bg);
   font: inherit;
   font-size: 0.85rem;
   font-weight: 600;
@@ -1320,7 +1320,7 @@
 }
 
 .btnShowDetails:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--card-bg);
   border-color: rgba(255, 255, 255, 0.2);
 }
 
@@ -1341,9 +1341,9 @@
   width: 100%;
   min-height: 2.75rem;
   border-radius: 10px;
-  color: #f1f5f9;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(15, 23, 42, 0.6);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
   font: inherit;
   font-size: 0.85rem;
   padding: 0.5rem 1rem;

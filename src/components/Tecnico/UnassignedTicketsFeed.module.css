@@ -1,7 +1,7 @@
 .feed {
   margin-top: 18px;
   padding: 17px 19px;
-  border: 1px solid rgba(255, 255, 255, 0.075);
+  border: 1px solid var(--border-color);
   border-radius: 15px;
   background: rgba(17, 23, 34, 0.85);
 }
@@ -16,7 +16,7 @@
 
 .eyebrow {
   margin: 0 0 0.3rem;
-  color: #fb7185;
+  color: var(--accent-brand-text);
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.15em;
@@ -25,7 +25,7 @@
 
 .title {
   margin: 0;
-  color: #eff3f8;
+  color: var(--text-primary);
   font-size: 1rem;
   font-weight: 700;
 }
@@ -38,7 +38,7 @@
   place-items: center;
   border: 1px solid rgba(201, 37, 58, 0.25);
   border-radius: 9px;
-  color: #fecdd3;
+  color: var(--status-danger-text);
   background: rgba(201, 37, 58, 0.12);
   font-size: 0.8rem;
   font-weight: 700;
@@ -55,7 +55,7 @@
 .card {
   padding: 14px 0;
   border: 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid var(--border-color);
   border-radius: 0;
   background: transparent;
 }
@@ -75,12 +75,12 @@
 
 .identity strong {
   overflow-wrap: anywhere;
-  color: #f8fafc;
+  color: var(--text-primary);
   font-size: 0.9rem;
 }
 
 .identity span {
-  color: #8795a9;
+  color: var(--text-secondary);
   font-size: 0.7rem;
 }
 
@@ -88,7 +88,7 @@
   flex-shrink: 0;
   padding: 0.25rem 0.45rem;
   border-radius: 999px;
-  color: #fda4af;
+  color: var(--status-danger-text);
   background: rgba(201, 37, 58, 0.12);
   font-size: 0.65rem;
   font-weight: 700;
@@ -96,7 +96,7 @@
 
 .ticketTitle {
   margin: 0.65rem 0;
-  color: #e2e8f0;
+  color: var(--text-primary);
   font-size: 0.88rem;
   line-height: 1.4;
 }
@@ -106,7 +106,7 @@
   align-items: flex-start;
   gap: 0.4rem;
   margin: 0 0 0.75rem;
-  color: #8795a9;
+  color: var(--text-secondary);
   font-size: 0.76rem;
   line-height: 1.4;
 }
@@ -114,7 +114,7 @@
 .address svg {
   flex: 0 0 auto;
   margin-top: 1px;
-  color: #fda4af;
+  color: var(--status-danger-text);
 }
 
 .acceptButton {
@@ -139,7 +139,7 @@
 }
 
 .acceptButton:focus-visible {
-  outline: 2px solid #fb7185;
+  outline: 2px solid var(--accent-brand-text);
   outline-offset: 2px;
 }
 
@@ -152,13 +152,13 @@
 .error {
   margin: 0;
   padding: 1rem 0.25rem;
-  color: #8795a9;
+  color: var(--text-secondary);
   font-size: 0.82rem;
 }
 
 .error {
   padding: 0.55rem 0.7rem;
   border-radius: 8px;
-  color: #fecaca;
+  color: var(--status-danger-text);
   background: rgba(127, 29, 29, 0.28);
 }

@@ -15,7 +15,7 @@
 .title {
   font-size: 1.5rem;
   font-weight: 600;
-  color: #f8fafc;
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -25,7 +25,7 @@
 }
 
 .btnFilter {
-  background: #32394c;
+  background: var(--border-color);
   color: #fff;
   border: none;
   padding: 8px 16px;
@@ -47,9 +47,9 @@
 }
 
 .tableContainer {
-  background: #1a1d26;
+  background: var(--bg-secondary);
   border-radius: 8px;
-  border: 1px solid #32394c;
+  border: 1px solid var(--border-color);
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -58,7 +58,7 @@
 
 .searchBar {
   padding: 16px;
-  border-bottom: 1px solid #32394c;
+  border-bottom: 1px solid var(--border-color);
   display: flex;
   gap: 16px;
   align-items: center;
@@ -74,13 +74,13 @@
   position: absolute;
   left: 12px;
   top: 10px;
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 .searchInput {
   width: 100%;
-  background: #161922;
-  border: 1px solid #32394c;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   color: #fff;
   padding: 8px 12px 8px 36px;
   border-radius: 6px;
@@ -99,27 +99,27 @@
 }
 
 .tableHeaderRow {
-  background: #1e2230;
-  border-bottom: 1px solid #32394c;
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .th {
   padding: 16px;
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-weight: 500;
   font-size: 0.85rem;
 }
 
 .thActions {
   padding: 16px;
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-weight: 500;
   font-size: 0.85rem;
   width: 60px;
 }
 
 .tr {
-  border-bottom: 1px solid #32394c;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .tdId {
@@ -130,13 +130,13 @@
 
 .tdDesc {
   padding: 16px;
-  color: #e2e8f0;
+  color: var(--text-primary);
   font-size: 0.9rem;
 }
 
 .tdDate {
   padding: 16px;
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-size: 0.9rem;
 }
 
@@ -146,7 +146,7 @@
 
 .statusBadge {
   background: rgba(16, 185, 129, 0.1);
-  color: #10b981;
+  color: var(--status-success-text);
   padding: 4px 8px;
   border-radius: 12px;
   font-size: 0.75rem;
@@ -160,17 +160,17 @@
 .btnMore {
   background: none;
   border: none;
-  color: #94a3b8;
+  color: var(--text-secondary);
   cursor: pointer;
 }
 
 .pagination {
   padding: 16px;
-  border-top: 1px solid #32394c;
+  border-top: 1px solid var(--border-color);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.85rem;
 }
 
@@ -180,8 +180,8 @@
 }
 
 .btnPage {
-  background: #252a38;
-  border: 1px solid #32394c;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
   color: #fff;
   padding: 6px 12px;
   border-radius: 4px;

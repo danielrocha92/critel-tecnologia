@@ -3,14 +3,14 @@
   max-width: 1300px;
   margin: 0 auto;
   font-family: var(--font-inter), sans-serif;
-  color: #f8fafc;
+  color: var(--text-primary);
 }
 
 /* HERO SECTION */
 .hero {
   position: relative;
-  background: linear-gradient(135deg, rgba(30, 41, 59, 0.4), rgba(15, 23, 42, 0.8));
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--bg-tertiary) 55%, transparent), var(--bg-secondary));
+  border: 1px solid var(--border-color);
   border-radius: 24px;
   padding: 3rem;
   margin-bottom: 3rem;
@@ -25,7 +25,7 @@
   left: -10%;
   width: 300px;
   height: 300px;
-  background: radial-gradient(circle, rgba(0, 210, 255, 0.15) 0%, transparent 70%);
+  background: radial-gradient(circle, color-mix(in srgb, var(--accent-cyan) 18%, transparent) 0%, transparent 70%);
   border-radius: 50%;
   pointer-events: none;
   filter: blur(40px);
@@ -48,7 +48,7 @@
   font-size: 2.8rem;
   font-weight: 800;
   margin: 0;
-  background: linear-gradient(90deg, #ffffff, #94a3b8);
+  background: linear-gradient(90deg, #ffffff, var(--text-secondary));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -56,7 +56,7 @@
 }
 
 .subtitle {
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-size: 1.15rem;
   margin-top: 0.75rem;
   max-width: 600px;
@@ -88,7 +88,7 @@
 .warningTitle {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #fcd34d;
+  color: var(--status-warning-text);
   margin-top: 0;
   display: flex;
   align-items: center;
@@ -109,15 +109,15 @@
   background: rgba(0, 0, 0, 0.2);
   padding: 1rem 1.5rem;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-color);
   font-size: 0.95rem;
-  color: #cbd5e1;
+  color: var(--text-secondary);
   display: flex;
   align-items: center;
 }
 
 .warningStrong {
-  color: #f8fafc;
+  color: var(--text-primary);
   font-weight: 600;
   margin-right: 8px;
 }
@@ -126,7 +126,7 @@
 .sectionTitle {
   font-size: 1.8rem;
   margin-bottom: 2rem;
-  color: #f8fafc;
+  color: var(--text-primary);
   font-weight: 700;
   letter-spacing: -0.5px;
 }
@@ -139,8 +139,8 @@
 
 .systemCard {
   position: relative;
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
   border-radius: 20px;
   padding: 2.5rem 2rem;
   display: flex;
@@ -208,13 +208,13 @@
 
 .systemTitle {
   margin: 0 0 0.75rem 0;
-  color: #f8fafc;
+  color: var(--text-primary);
   font-size: 1.4rem;
   font-weight: 700;
 }
 
 .systemDesc {
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-size: 0.95rem;
   margin-bottom: 2rem;
   line-height: 1.6;
@@ -227,9 +227,9 @@
 }
 
 .accessBtn {
-  background: rgba(255, 255, 255, 0.05);
-  color: #f8fafc;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--card-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
   padding: 14px 24px;
   border-radius: 12px;
   font-weight: 600;
@@ -244,9 +244,9 @@
 }
 
 .systemCard:hover .accessBtn {
-  background: #f8fafc;
-  color: #0f172a;
-  border-color: #f8fafc;
+  background: var(--text-primary);
+  color: var(--bg-primary);
+  border-color: var(--text-primary);
   box-shadow: 0 4px 15px rgba(255, 255, 255, 0.15);
 }
 
@@ -282,8 +282,8 @@
 }
 
 .kpiCard {
-  background: rgba(15, 23, 42, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
   border-radius: 16px;
   padding: 1.5rem;
   display: flex;
@@ -295,7 +295,7 @@
 
 .kpiCard:hover {
   transform: translateY(-4px);
-  background: rgba(30, 41, 59, 0.7);
+  background: var(--bg-tertiary);
   border-color: rgba(255, 255, 255, 0.15);
 }
 
@@ -316,13 +316,13 @@
 .kpiValue {
   font-size: 1.8rem;
   font-weight: 800;
-  color: #f8fafc;
+  color: var(--text-primary);
   line-height: 1.1;
 }
 
 .kpiLabel {
   font-size: 0.85rem;
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-weight: 500;
   margin-top: 4px;
 }
@@ -343,8 +343,8 @@
 
 /* RECENT TICKETS */
 .recentSection {
-  background: rgba(15, 23, 42, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
   border-radius: 20px;
   padding: 2rem;
   backdrop-filter: blur(12px);
@@ -357,22 +357,22 @@
 }
 
 .emptyRecent {
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.95rem;
   text-align: center;
   padding: 2rem 0;
 }
 
 .recentItem {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.03);
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 1.25rem;
   transition: background 0.2s;
 }
 
 .recentItem:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--card-bg);
 }
 
 .recentHeader {
@@ -384,7 +384,7 @@
 
 .recentId {
   font-family: monospace;
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-size: 0.85rem;
 }
 
@@ -398,18 +398,18 @@
 
 .badgeNovo {
   background: rgba(14, 165, 233, 0.15);
-  color: #38bdf8;
+  color: var(--accent-cyan);
 }
 
 .badgeAndamento {
   background: rgba(245, 158, 11, 0.15);
-  color: #fbbf24;
+  color: var(--status-warning-text);
 }
 
 .recentTitle {
   font-size: 1rem;
   font-weight: 600;
-  color: #f8fafc;
+  color: var(--text-primary);
   margin: 0 0 0.5rem 0;
   white-space: nowrap;
   overflow: hidden;
@@ -418,7 +418,7 @@
 
 .recentDept {
   font-size: 0.8rem;
-  color: #64748b;
+  color: var(--text-muted);
   margin: 0;
 }
 

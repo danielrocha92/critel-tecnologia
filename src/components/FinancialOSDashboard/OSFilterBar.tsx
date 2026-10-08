@@ -17,8 +17,8 @@ export default function OSFilterBar({ filters, onFilterChange }: OSFilterBarProp
   return (
     <section className={styles.filterSection} aria-label="Barra de Filtros">
       <div className={styles.filterGroup}>
-        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', flex: 1 }}>
-          <Search size={16} style={{ position: 'absolute', left: '12px', color: 'var(--text-secondary)' }} aria-hidden="true" />
+        <div className={styles.searchControl}>
+          <Search size={16} className={styles.searchIcon} aria-hidden="true" />
           <input
             type="search"
             name="searchQuery"
@@ -27,7 +27,6 @@ export default function OSFilterBar({ filters, onFilterChange }: OSFilterBarProp
             placeholder="Buscar por Nº OS, Cliente ou CNPJ..."
             className={styles.searchInput}
             aria-label="Buscar Ordens de Serviço"
-            style={{ paddingLeft: '36px' }}
           />
         </div>
 
@@ -39,7 +38,7 @@ export default function OSFilterBar({ filters, onFilterChange }: OSFilterBarProp
           className={styles.dateInput}
           aria-label="Data Inicial"
         />
-        <span style={{ color: 'var(--text-secondary)' }}>até</span>
+        <span className={styles.dateRangeSeparator}>até</span>
         <input
           type="date"
           name="endDate"

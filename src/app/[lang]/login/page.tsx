@@ -5,6 +5,7 @@ import { createBrowserClient } from '@supabase/ssr';
 import { useRouter, useParams } from 'next/navigation';
 import { LogIn } from 'lucide-react';
 import styles from './login.module.css';
+import ThemeToggle from '@/components/ThemeToggle/ThemeToggle';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -54,7 +55,11 @@ export default function LoginPage() {
       }
 
       // Redirecionamento baseado em cargo
-      const normalizedCargo = perfilData?.cargo?.trim().toUpperCase().replace('É', 'E');
+      const normalizedCargo = perfilData?.cargo
+        ?.normalize('NFD')
+        .replace(/\p{Diacritic}/gu, '')
+        .trim()
+        .toUpperCase();
       const isTecnico = normalizedCargo === 'TECNICO';
 
       if (isTecnico) {
@@ -89,6 +94,9 @@ export default function LoginPage() {
 
   return (
     <div className={styles.container}>
+      <div className={styles.themeSelector}>
+        <ThemeToggle />
+      </div>
       <div className={styles.loginBox}>
         <div className={styles.logoArea}>
           <div className={styles.logoWrapper}>

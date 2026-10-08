@@ -1,0 +1,978 @@
+[
+  {
+    "code": "0001",
+    "name": "LJ 0001 - OSCAR FREIRE"
+  },
+  {
+    "code": "0002",
+    "name": "LJ 0002 - MOEMA ROUXINOL"
+  },
+  {
+    "code": "0003",
+    "name": "LJ 0003 - SHOP JK"
+  },
+  {
+    "code": "0004",
+    "name": "LJ 0004 - BELA CINTRA"
+  },
+  {
+    "code": "0005",
+    "name": "LJ 0005 - VILA MADALENA"
+  },
+  {
+    "code": "0006",
+    "name": "LJ 0006 - SHOP PATIO PAULISTA"
+  },
+  {
+    "code": "0007",
+    "name": "LJ 0007 - SHOP MORUMBI"
+  },
+  {
+    "code": "0008",
+    "name": "LJ 0008 - SHOP IBIRAPUERA"
+  },
+  {
+    "code": "0009",
+    "name": "LJ 0009 - SHOP HIGIENOPOLIS"
+  },
+  {
+    "code": "0011",
+    "name": "LJ 0011 - SHOP BARRA"
+  },
+  {
+    "code": "0012",
+    "name": "LJ 0012 - SHOP LEBLON"
+  },
+  {
+    "code": "0013",
+    "name": "LJ 0013 - SHOP ELDORADO"
+  },
+  {
+    "code": "0014",
+    "name": "LJ 0014 - MOEMA ANAPURUS"
+  },
+  {
+    "code": "0015",
+    "name": "LJ 0015 - SHOP PQ MAIA"
+  },
+  {
+    "code": "0016",
+    "name": "LJ 0016 - SHOP TOP CENTER"
+  },
+  {
+    "code": "0017",
+    "name": "LJ 0017 - SHOP VILLA LOBOS"
+  },
+  {
+    "code": "0018",
+    "name": "LJ 0018 - SHOP PQ DOM PEDRO"
+  },
+  {
+    "code": "0019",
+    "name": "LJ 0019 - SHOP BOURBON"
+  },
+  {
+    "code": "0020",
+    "name": "LJ 0020 - SHOP RIO SUL"
+  },
+  {
+    "code": "0021",
+    "name": "LJ 0021 - SHOP RIBEIRAO"
+  },
+  {
+    "code": "0022",
+    "name": "LJ 0022 - SHOP ANALIA FRANCO"
+  },
+  {
+    "code": "0023",
+    "name": "LJ 0023 - SHOP DIAMOND MALL"
+  },
+  {
+    "code": "0024",
+    "name": "LJ 0024 - SHOP PLAZA NITEROI"
+  },
+  {
+    "code": "0025",
+    "name": "LJ 0025 - SHOP TAMBORE"
+  },
+  {
+    "code": "0026",
+    "name": "LJ 0026 - BH SHOP"
+  },
+  {
+    "code": "0027",
+    "name": "LJ 0027 - PARK SHOP BRASILIA"
+  },
+  {
+    "code": "0028",
+    "name": "LJ 0028 - AV PAULISTA"
+  },
+  {
+    "code": "0029",
+    "name": "LJ 0029 - SHOP CONJUNTO NACIONAL"
+  },
+  {
+    "code": "0030",
+    "name": "LJ 0030 - SHOP TIJUCA"
+  },
+  {
+    "code": "0031",
+    "name": "LJ 0031 - SHOP IGUATEMI CAMPINAS"
+  },
+  {
+    "code": "0032",
+    "name": "LJ 0032 - FLAMBOYANT SHOP CENTER"
+  },
+  {
+    "code": "0033",
+    "name": "LJ 0033 - SHOP JUNDIAI"
+  },
+  {
+    "code": "0034",
+    "name": "LJ 0034 - SHOP PATIO SAVASSI"
+  },
+  {
+    "code": "0035",
+    "name": "LJ 0035 - CENTER SHOP UBERLANDIA"
+  },
+  {
+    "code": "0036",
+    "name": "LJ 0036 - RIO PRETO SHOP"
+  },
+  {
+    "code": "0037",
+    "name": "LJ 0037 - AL. CAMPINAS"
+  },
+  {
+    "code": "0038",
+    "name": "LJ 0038 - SHOP MOOCA"
+  },
+  {
+    "code": "0039",
+    "name": "LJ 0039 - SHOP PRAIAMAR"
+  },
+  {
+    "code": "0040",
+    "name": "LJ 0040 - SHOP GOIANIA"
+  },
+  {
+    "code": "0041",
+    "name": "LJ 0041 - SHOP PATIO BATEL"
+  },
+  {
+    "code": "0042",
+    "name": "LJ 0042 - SHOP BOULEVARD BH"
+  },
+  {
+    "code": "0043",
+    "name": "LJ 0043 - SHOP WEST PLAZA"
+  },
+  {
+    "code": "0044",
+    "name": "LJ 0044 - SHOP RECIFE"
+  },
+  {
+    "code": "0045",
+    "name": "LJ 0045 - RIOMAR SHOP RECIFE"
+  },
+  {
+    "code": "0046",
+    "name": "LJ 0046 - SHOP GRAND PLAZA ABC"
+  },
+  {
+    "code": "0048",
+    "name": "LJ 0048 - NORTE SHOP"
+  },
+  {
+    "code": "0049",
+    "name": "LJ 0049 - SHOP INTERNACIONAL GRU"
+  },
+  {
+    "code": "0050",
+    "name": "LJ 0050 - RUA DOS PINHEIROS"
+  },
+  {
+    "code": "0052",
+    "name": "LJ 0052 - SHOP PLAZA SUL"
+  },
+  {
+    "code": "0053",
+    "name": "LJ 0053 - RUA CARDOSO DE ALMEIDA"
+  },
+  {
+    "code": "0054",
+    "name": "LJ 0054 - RUA ANTONIO CARLOS"
+  },
+  {
+    "code": "0055",
+    "name": "LJ 0055 - BOTAFOGO PRAIA SHOP"
+  },
+  {
+    "code": "0056",
+    "name": "LJ 0056 - SHOP CURITIBA"
+  },
+  {
+    "code": "0057",
+    "name": "LJ 0057 - SHOP MUELLER"
+  },
+  {
+    "code": "0058",
+    "name": "LJ 0058 - PARAISO"
+  },
+  {
+    "code": "0059",
+    "name": "LJ 0059 - PINHEIROS VUPABUSSU"
+  },
+  {
+    "code": "0060",
+    "name": "LJ 0060 - SANTANA BRAS LEME"
+  },
+  {
+    "code": "0061",
+    "name": "LJ 0061 - LEOPOLDINA CARLOS WEBER"
+  },
+  {
+    "code": "0062",
+    "name": "LJ 0062 - TATUAPE ITAPURA"
+  },
+  {
+    "code": "0063",
+    "name": "LJ 0063 - PARK SHOP SÃO CAETANO"
+  },
+  {
+    "code": "0064",
+    "name": "LJ 0064 - ITAIM BIBI"
+  },
+  {
+    "code": "0065",
+    "name": "LJ 0065 - IPANEMA"
+  },
+  {
+    "code": "0066",
+    "name": "LJ 0066 - REPUBLICA"
+  },
+  {
+    "code": "0067",
+    "name": "LJ 0067 - SHOP JD SUL"
+  },
+  {
+    "code": "0068",
+    "name": "LJ 0068 - SHOP METRO STA CRUZ"
+  },
+  {
+    "code": "0070",
+    "name": "LJ 0070 - SHOP VITORIA"
+  },
+  {
+    "code": "0071",
+    "name": "LJ 0071 - SHOP VILA VELHA"
+  },
+  {
+    "code": "0072",
+    "name": "LJ 0072 - SHOP BARRA SUL"
+  },
+  {
+    "code": "0073",
+    "name": "LJ 0073 - SHOP MARKET PLACE"
+  },
+  {
+    "code": "0074",
+    "name": "LJ 0074 - SHOP IGUATEMI ALPHAVILLE"
+  },
+  {
+    "code": "0075",
+    "name": "LJ 0075 - SHOP NOVA AMERICA"
+  },
+  {
+    "code": "0076",
+    "name": "LJ 0076 - SHOP CENTER NORTE"
+  },
+  {
+    "code": "0077",
+    "name": "LJ 0077 - POMPÉIA"
+  },
+  {
+    "code": "0078",
+    "name": "LJ 0078 - SHOP TABOÃO DA SERRA"
+  },
+  {
+    "code": "0079",
+    "name": "LJ 0079 - SHOP PRAIA DA COSTA"
+  },
+  {
+    "code": "0080",
+    "name": "LJ 0080 - RUA LEOPOLDO COUTO"
+  },
+  {
+    "code": "0081",
+    "name": "LJ 0081 - SHOP BOULEVARD BSB"
+  },
+  {
+    "code": "0082",
+    "name": "LJ 0082 - SHOP BUTANTÃ"
+  },
+  {
+    "code": "0083",
+    "name": "LJ 0083 - SHOP CENTER VALE"
+  },
+  {
+    "code": "0084",
+    "name": "LJ 0084 - SHOP METROPOLE"
+  },
+  {
+    "code": "0085",
+    "name": "LJ 0085 - SHOP SP MARKET"
+  },
+  {
+    "code": "0086",
+    "name": "LJ 0086 - SHOP IGUATEMI FORTALEZA"
+  },
+  {
+    "code": "0087",
+    "name": "LJ 0087 - SHOP BARRA SALVADOR"
+  },
+  {
+    "code": "0088",
+    "name": "LJ 0088 - SALVADOR SHOP"
+  },
+  {
+    "code": "0089",
+    "name": "LJ 0089 - VILA NOVA CONCEIÇÃO"
+  },
+  {
+    "code": "0091",
+    "name": "LJ 0091 - SHOP DA BAHIA"
+  },
+  {
+    "code": "0092",
+    "name": "LJ 0092 - RUA PADRE CHAGAS"
+  },
+  {
+    "code": "0093",
+    "name": "LJ 0093 - SHOP IGUATEMI POA"
+  },
+  {
+    "code": "0094",
+    "name": "LJ 0094 - SHOP METRO TATUAPE"
+  },
+  {
+    "code": "0095",
+    "name": "LJ 0095 - SHOP PIRACICABA"
+  },
+  {
+    "code": "0096",
+    "name": "LJ 0096 - SHOP ABC"
+  },
+  {
+    "code": "0097",
+    "name": "LJ 0097 - SHOP RIOMAR FORTALEZA"
+  },
+  {
+    "code": "0098",
+    "name": "LJ 0098 - SHOP CIDADE SÃO PAULO"
+  },
+  {
+    "code": "0099",
+    "name": "LJ 0099 - SHOP PRAIA DE BELAS"
+  },
+  {
+    "code": "0100",
+    "name": "LJ 0100 - SHOP GOLDEN SQUARE"
+  },
+  {
+    "code": "0101",
+    "name": "LJ 0101 - SHOP IGUATEMI SJRP"
+  },
+  {
+    "code": "0102",
+    "name": "LJ 0102 - RUA JUVENTUS"
+  },
+  {
+    "code": "0103",
+    "name": "LJ 0103 - SHOP VILA ROMANA"
+  },
+  {
+    "code": "0104",
+    "name": "LJ 0104 - PAULO GUSTAVO"
+  },
+  {
+    "code": "0105",
+    "name": "LJ 0105 - CONTINENTE SHOP"
+  },
+  {
+    "code": "0106",
+    "name": "LJ 0106 - BALNEÁRIO SHOP"
+  },
+  {
+    "code": "0107",
+    "name": "LJ 0107 - PARQUE SHOP MACEIÓ"
+  },
+  {
+    "code": "0108",
+    "name": "LJ 0108 - VIEIRA DE MORAES"
+  },
+  {
+    "code": "0109",
+    "name": "LJ 0109 - OLEGÁRIO MACIEL"
+  },
+  {
+    "code": "0110",
+    "name": "LJ 0110 - LUIZ CARLOS BERRINI"
+  },
+  {
+    "code": "0111",
+    "name": "LJ 0111 - ESPAÇO MEIRELES"
+  },
+  {
+    "code": "0113",
+    "name": "LJ 0113 - MIGUEL LEMOS"
+  },
+  {
+    "code": "0114",
+    "name": "LJ 0114 - SIQUEIRA CAMPOS"
+  },
+  {
+    "code": "0115",
+    "name": "LJ 0115 - RUA CORONEL QUIRINO"
+  },
+  {
+    "code": "0117",
+    "name": "LJ 0117 - BEIRAMAR SHOP"
+  },
+  {
+    "code": "0118",
+    "name": "LJ 0118 - BIANCO MOLINA"
+  },
+  {
+    "code": "0119",
+    "name": "LJ 0119 - DOMINGUES DE SÁ"
+  },
+  {
+    "code": "0120",
+    "name": "LJ 0120 - MACEIO SHOP"
+  },
+  {
+    "code": "0121",
+    "name": "LJ 0121 - SHOP IGUATEMI FARIA LIMA"
+  },
+  {
+    "code": "0122",
+    "name": "LJ 0122 - BRASCAN ITAIM"
+  },
+  {
+    "code": "0123",
+    "name": "LJ 0123 - MIDWAY MALL"
+  },
+  {
+    "code": "0124",
+    "name": "LJ 0124 - SHOP DA GAVEA"
+  },
+  {
+    "code": "0125",
+    "name": "LJ 0125 - OUTLET ITUPEVA"
+  },
+  {
+    "code": "0126",
+    "name": "LJ 0126 - MAG SHOP"
+  },
+  {
+    "code": "0127",
+    "name": "LJ 0127 - OUTLET IMIGRANTES"
+  },
+  {
+    "code": "0128",
+    "name": "LJ 0128 - AUGUSTO TOLLE"
+  },
+  {
+    "code": "0129",
+    "name": "LJ 0129 - PLAZA SHOP CASA FORTE"
+  },
+  {
+    "code": "0130",
+    "name": "LJ 0130 - SHOP CENTER GALLERIA"
+  },
+  {
+    "code": "0131",
+    "name": "LJ 0131 - RUA AMELIA"
+  },
+  {
+    "code": "0132",
+    "name": "LJ 0132 - RUA VISCONDE DE PIRAJA"
+  },
+  {
+    "code": "0133",
+    "name": "LJ 0133 - IGUATEMI RIBEIRAO PRETO"
+  },
+  {
+    "code": "0134",
+    "name": "LJ 0134 - GILBERTO SALOMAO"
+  },
+  {
+    "code": "0135",
+    "name": "LJ 0135 - NATAL SHOP"
+  },
+  {
+    "code": "0136",
+    "name": "LJ 0136 - RUA JARDIM BOTANICO"
+  },
+  {
+    "code": "0137",
+    "name": "LJ 0137 - SHOP VILA OLIMPIA"
+  },
+  {
+    "code": "0138",
+    "name": "LJ 0138 - RUA MOLIERE"
+  },
+  {
+    "code": "0139",
+    "name": "LJ 0139 - RUA PEDRO MOLINA"
+  },
+  {
+    "code": "0140",
+    "name": "LJ 0140 - RUA VEREADOR PEDRO MOURA"
+  },
+  {
+    "code": "0141",
+    "name": "LJ 0141 - RUA VOLUNTARIOS DA PATRIA"
+  },
+  {
+    "code": "0142",
+    "name": "LJ 0142 - OSCAR FREIRE II PICOLE"
+  },
+  {
+    "code": "0143",
+    "name": "LJ 0143 - RUA ANTONIO DE ALBUQUERQUE"
+  },
+  {
+    "code": "0144",
+    "name": "LJ 0144 - MOEMA JAUAPERI"
+  },
+  {
+    "code": "0145",
+    "name": "LJ 0145 - RUA DAS LARANJEIRAS"
+  },
+  {
+    "code": "0146",
+    "name": "LJ 0146 - MANHATTAN SHOP"
+  },
+  {
+    "code": "0148",
+    "name": "LJ 0148 - PARK SHOP BARIGUI"
+  },
+  {
+    "code": "0149",
+    "name": "LJ 0149 - MOGI SHOP"
+  },
+  {
+    "code": "0150",
+    "name": "LJ 0150 - SHOP IGUATEMI FORTALEZA II PICOLE"
+  },
+  {
+    "code": "0151",
+    "name": "LJ 0151 - PRAIA DO CANTO (DAY BY DAY)"
+  },
+  {
+    "code": "0153",
+    "name": "LJ 0153 - AV. AYRTON SENNA"
+  },
+  {
+    "code": "0154",
+    "name": "LJ 0154 - RUA FRANCISCO OTAVIANO"
+  },
+  {
+    "code": "0155",
+    "name": "LJ 0155 - SHOP UBERABA"
+  },
+  {
+    "code": "0156",
+    "name": "LJ 0156 - TRANCOSO"
+  },
+  {
+    "code": "0157",
+    "name": "LJ 0157 - SHOP DEL REY"
+  },
+  {
+    "code": "0159",
+    "name": "LJ 0159 - SHOP CATUAI LONDRINA"
+  },
+  {
+    "code": "0160",
+    "name": "LJ 0160 - RUA TEODORO SAMPAIO"
+  },
+  {
+    "code": "0161",
+    "name": "LJ 0161 - JOCKEY PLAZA SHOP"
+  },
+  {
+    "code": "0162",
+    "name": "LJ 0162 - MAXI SHOP JUNDIAÍ"
+  },
+  {
+    "code": "0163",
+    "name": "LJ 0163 - AV. NILO PEÇANHA"
+  },
+  {
+    "code": "0164",
+    "name": "LJ 0164 - AERO CGH"
+  },
+  {
+    "code": "0165",
+    "name": "LJ 0165 - SHOP JARDINS"
+  },
+  {
+    "code": "0166",
+    "name": "LJ 0166 - SEBBA GARDENS SHOP"
+  },
+  {
+    "code": "0167",
+    "name": "LJ 0167 - SHOP CATUAI MARINGA"
+  },
+  {
+    "code": "0168",
+    "name": "LJ 0168 - SHOP RIOMAR ARACAJU"
+  },
+  {
+    "code": "0169",
+    "name": "LJ 0169 - SHOP CATUAI CASCAVEL"
+  },
+  {
+    "code": "0170",
+    "name": "LJ 0170 - AERO GRU T?"
+  },
+  {
+    "code": "0171",
+    "name": "LJ 0171 - LITORAL PLAZA SHOP I"
+  },
+  {
+    "code": "0172",
+    "name": "LJ 0172 - ALAMEDA OSCAR NIEMEYER"
+  },
+  {
+    "code": "0173",
+    "name": "LJ 0173 - SHOP RECREIO"
+  },
+  {
+    "code": "0174",
+    "name": "LJ 0174 - ITAIPU MULTICENTER"
+  },
+  {
+    "code": "0175",
+    "name": "LJ 0175 - RUA JOAQUIM TAVORA"
+  },
+  {
+    "code": "0176",
+    "name": "LJ 0176 - AV. DOM SEVERINO"
+  },
+  {
+    "code": "0177",
+    "name": "LJ 0177 - AV AFONSO PENA"
+  },
+  {
+    "code": "0178",
+    "name": "LJ 0178 - TIETÊ PLAZA SHOP"
+  },
+  {
+    "code": "0179",
+    "name": "LJ 0179 - BOSQUE GRAO-PARA SHOP"
+  },
+  {
+    "code": "0180",
+    "name": "LJ 0180 - SHOP LESTE ARICANDUVA I"
+  },
+  {
+    "code": "0181",
+    "name": "LJ 0181 - BRASILIA ASA SUL 403"
+  },
+  {
+    "code": "0182",
+    "name": "LJ 0182 - SHOP PATIO BELEM"
+  },
+  {
+    "code": "0183",
+    "name": "LJ 0183 - BOULEVARD SHOP BELEM I"
+  },
+  {
+    "code": "0184",
+    "name": "LJ 0184 - SHOP DA ILHA"
+  },
+  {
+    "code": "0185",
+    "name": "LJ 0185 - SÃO LUIS SHOP"
+  },
+  {
+    "code": "0186",
+    "name": "LJ 0186 - SHOP MESTRE ALVARO"
+  },
+  {
+    "code": "0187",
+    "name": "LJ 0187 - TERESINA SHOP"
+  },
+  {
+    "code": "0188",
+    "name": "LJ 0188 - SHOP RIO POTY"
+  },
+  {
+    "code": "0189",
+    "name": "LJ 0189 - PARQUE SHOP BAHIA"
+  },
+  {
+    "code": "0190",
+    "name": "LJ 0190- JASMIM MALL"
+  },
+  {
+    "code": "0192",
+    "name": "LJ 0192 - SHOP PARALELA"
+  },
+  {
+    "code": "3009",
+    "name": "LJ 3009 - SHOP CENTER NORTE II"
+  },
+  {
+    "code": "3016",
+    "name": "LJ 3016 - SHOP LIGHT"
+  },
+  {
+    "code": "3018",
+    "name": "LJ 3018 - AERO GRU T2"
+  },
+  {
+    "code": "3022",
+    "name": "LJ 3022 - SHOP BARRA II"
+  },
+  {
+    "code": "3023",
+    "name": "LJ 3023 - AERO GRU T3"
+  },
+  {
+    "code": "3025",
+    "name": "LJ 3025 - SHOP RIO DESIGN"
+  },
+  {
+    "code": "3026",
+    "name": "LJ 3026 - SHOP ELDORADO II"
+  },
+  {
+    "code": "3028",
+    "name": "LJ 3028 - SHOP METRO STA CRUZ II"
+  },
+  {
+    "code": "3029",
+    "name": "LJ 3029 - SHOP PQ DOM PEDRO II"
+  },
+  {
+    "code": "3030",
+    "name": "LJ 3030 - SHOP PARTAGE"
+  },
+  {
+    "code": "3031",
+    "name": "LJ 3031 - SHOP MORUMBI II"
+  },
+  {
+    "code": "3032",
+    "name": "LJ 3032 - SHOP RIBEIRAO II"
+  },
+  {
+    "code": "3036",
+    "name": "LJ 3036 - SHOP TIJUCA II"
+  },
+  {
+    "code": "3041",
+    "name": "LJ 3041 - PARK SHOP BARIGUI II"
+  },
+  {
+    "code": "3042",
+    "name": "LJ 3042 - SHOP VILLAGE MALL"
+  },
+  {
+    "code": "3044",
+    "name": "LJ 3044 - BRASILIA SHOP"
+  },
+  {
+    "code": "3045",
+    "name": "LJ 3045 - SHOP IGUATEMI BRASILIA"
+  },
+  {
+    "code": "3046",
+    "name": "LJ 3046 - SHOP CENTER FLAMBOYANT II"
+  },
+  {
+    "code": "3050",
+    "name": "LJ 3050 - TERRAÇO SHOP"
+  },
+  {
+    "code": "3057",
+    "name": "LJ 3057 - LITORAL PLAZA SHOP II"
+  },
+  {
+    "code": "3059",
+    "name": "LJ 3059 - SHOP MIRAMAR"
+  },
+  {
+    "code": "3060",
+    "name": "LJ 3060 - SHOP RIO SUL II"
+  },
+  {
+    "code": "3063",
+    "name": "LJ 3063 - SHOP UNIÃO OSASCO"
+  },
+  {
+    "code": "3067",
+    "name": "LJ 3067 - ALBERT EINSTEIN"
+  },
+  {
+    "code": "3068",
+    "name": "LJ 3068 - SUPER SHOP OSASCO"
+  },
+  {
+    "code": "3069",
+    "name": "LJ 3069 - SHOP BOULEVARD TIJUCA"
+  },
+  {
+    "code": "3073",
+    "name": "LJ 3073 - SHOP CATARINA FASHION OUTLET"
+  },
+  {
+    "code": "3074",
+    "name": "LJ 3074 - SHOP METROPOLITANO"
+  },
+  {
+    "code": "3078",
+    "name": "LJ 3078 - SHOP CIDADE JARDIM"
+  },
+  {
+    "code": "3080",
+    "name": "LJ 3080 - PQ PONTÃO BSB"
+  },
+  {
+    "code": "3081",
+    "name": "LJ 3081 - SHOP IGUATEMI ESPLANADA"
+  },
+  {
+    "code": "3083",
+    "name": "LJ 3083 - PARK SHOP JACAREPAGUA"
+  },
+  {
+    "code": "3084",
+    "name": "LJ 3084 - SHOP GRAND PLAZA ABC II"
+  },
+  {
+    "code": "3085",
+    "name": "LJ 3085 - SHOP OPEN MALL"
+  },
+  {
+    "code": "3086",
+    "name": "LJ 3086 - TIETE PLAZA SHOP"
+  },
+  {
+    "code": "3088",
+    "name": "LJ 3088 - SHOP CONTINENTAL"
+  },
+  {
+    "code": "3089",
+    "name": "LJ 3089 - SHOP RECIFE II"
+  },
+  {
+    "code": "3092",
+    "name": "LJ 3092 - ORLA RIO IPANEMA"
+  },
+  {
+    "code": "3095",
+    "name": "LJ 3095 - PALLADIUM SHOP"
+  },
+  {
+    "code": "3096",
+    "name": "LJ 3096 - SHOP CIDADE BH"
+  },
+  {
+    "code": "3097",
+    "name": "LJ 3097 - SHOP HIGIENÓPOLIS II PICOLÉ"
+  },
+  {
+    "code": "3098",
+    "name": "LJ 3098 - ORLA BARRA BB BEACH"
+  },
+  {
+    "code": "3099",
+    "name": "LJ 3099 - RIOMAR SHOP RECIFE II"
+  },
+  {
+    "code": "3100",
+    "name": "LJ 3100 - AERO BSB I"
+  },
+  {
+    "code": "3101",
+    "name": "LJ 3101 - DF PLAZA SHOP"
+  },
+  {
+    "code": "3102",
+    "name": "LJ 3102 - AERO BSB II"
+  },
+  {
+    "code": "3103",
+    "name": "LJ 3103 - PATTEO URUPEMA SHOP"
+  },
+  {
+    "code": "3105",
+    "name": "LJ 3105 - SHOP IGUATEMI POA II"
+  },
+  {
+    "code": "3106",
+    "name": "LJ 3106 - CANOAS SHOP"
+  },
+  {
+    "code": "3107",
+    "name": "LJ 3107 - SHOP IBIRAPUERA II"
+  },
+  {
+    "code": "3108",
+    "name": "LJ 3108 - MOGI SHOP II"
+  },
+  {
+    "code": "3109",
+    "name": "LJ 3109 - AMERICAS SHOP"
+  },
+  {
+    "code": "3110",
+    "name": "LJ 3110 - SALVADOR SHOP II"
+  },
+  {
+    "code": "3111",
+    "name": "LJ 3111 - VOGUE SQUARE"
+  },
+  {
+    "code": "3112",
+    "name": "LJ 3112 - ILHA PLAZA SHOP"
+  },
+  {
+    "code": "3113",
+    "name": "LJ 3113 - SHOP JK CEILÂNDIA"
+  },
+  {
+    "code": "3114",
+    "name": "LJ 3114 - SHOP RIOMAR FORTALEZA II"
+  },
+  {
+    "code": "3115",
+    "name": "LJ 3115 - SHOP NOVA IGUAÇU"
+  },
+  {
+    "code": "3116",
+    "name": "LJ 3116 - BOULEVARD SHOP BELEM II"
+  },
+  {
+    "code": "3117",
+    "name": "LJ 3117 - TAGUATINGA SHOP"
+  },
+  {
+    "code": "3118",
+    "name": "LJ 3118 - PARK SHOP BRASILIA II"
+  },
+  {
+    "code": "3120",
+    "name": "LJ 3120 - SHOP INTERNACIONAL GRU II"
+  },
+  {
+    "code": "3900",
+    "name": "LJ 3900 - EVENTOS SP"
+  }
+]

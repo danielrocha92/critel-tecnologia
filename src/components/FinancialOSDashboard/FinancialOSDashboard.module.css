@@ -27,6 +27,18 @@
   margin: 0;
 }
 
+.batchActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.loadingState {
+  padding: 40px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
 /* === SUMMARY CARDS === */
 .summaryGrid {
   display: grid;
@@ -45,6 +57,24 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+.summaryCardButton {
+  width: 100%;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.summaryCardButton:focus-visible {
+  outline: 2px solid var(--accent-brand-text);
+  outline-offset: 3px;
+}
+
+.summaryCardSelected {
+  border-color: var(--accent-brand);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-brand) 30%, transparent);
+}
+
 .summaryCard:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
@@ -55,6 +85,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  width: 100%;
 }
 
 .cardTitle {
@@ -79,9 +110,9 @@
 }
 
 /* Specific Card Colors */
-.cardPrimary .cardIcon { color: #3b82f6; }
+.cardPrimary .cardIcon { color: var(--status-info-text); }
 .cardWarning .cardIcon { color: #eab308; }
-.cardDanger .cardIcon { color: #ef4444; }
+.cardDanger .cardIcon { color: var(--status-danger-text); }
 .cardSuccess .cardIcon { color: #22c55e; }
 
 /* === FILTER BAR === */
@@ -115,6 +146,28 @@
   color: var(--text-primary);
   font-size: 0.9rem;
   transition: border-color 0.2s ease;
+}
+
+.searchControl {
+  position: relative;
+  display: flex;
+  flex: 1;
+  align-items: center;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 12px;
+  color: var(--text-secondary);
+  pointer-events: none;
+}
+
+.searchControl .searchInput {
+  padding-left: 36px;
+}
+
+.dateRangeSeparator {
+  color: var(--text-secondary);
 }
 
 .searchInput:focus-visible {
@@ -276,6 +329,22 @@
   color: var(--accent-brand);
 }
 
+.checkboxCell {
+  width: 42px;
+}
+
+.tableSubtext {
+  margin-top: 0.25rem;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+}
+
+.emptyTableCell {
+  padding: 32px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
 .currency {
   font-family: monospace;
   font-size: 0.95rem;
@@ -306,19 +375,19 @@
 
 .badgePendente {
   background: color-mix(in srgb, #f59e0b 15%, transparent);
-  color: #f59e0b;
+  color: var(--status-warning-text);
   border: 1px solid color-mix(in srgb, #f59e0b 30%, transparent);
 }
 
 .badgeAprovada, .badgeConciliado, .badgeFaturada {
   background: color-mix(in srgb, #10b981 15%, transparent);
-  color: #10b981;
+  color: var(--status-success-text);
   border: 1px solid color-mix(in srgb, #10b981 30%, transparent);
 }
 
 .badgeDivergente, .badgeGlosada {
   background: color-mix(in srgb, #ef4444 15%, transparent);
-  color: #ef4444;
+  color: var(--status-danger-text);
   border: 1px solid color-mix(in srgb, #ef4444 30%, transparent);
 }
 
@@ -401,6 +470,24 @@
 
 .summaryList li strong {
   color: var(--text-primary);
+}
+
+.modalDescription {
+  margin: 0 0 1.2rem;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.summaryList .summaryTotal {
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--border-color);
+  font-weight: 700;
+}
+
+.summaryList .summaryTotal strong {
+  color: var(--accent-brand-text);
+  font-size: 1.15rem;
 }
 
 .modalFooter {

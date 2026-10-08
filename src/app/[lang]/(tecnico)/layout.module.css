@@ -1,13 +1,13 @@
 .layoutWrapper {
   min-height: 100vh;
-  background: #0b1120;
+  background: var(--bg-primary);
   width: 100%;
 }
 
 .mobileContainer {
   min-height: 100vh;
-  background: #0b1120;
-  color: #f8fafc;
+  background: var(--bg-primary);
+  color: var(--text-primary);
   font-family: inherit;
   display: flex;
   flex-direction: column;
@@ -19,9 +19,9 @@
 
 .header {
   min-height: 64px;
-  background: rgba(11, 17, 32, 0.92);
+  background: var(--header-bg);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid var(--header-border);
   padding: 0 clamp(18px, 4vw, 52px);
   display: flex;
   align-items: center;
@@ -34,7 +34,7 @@
 .title {
   font-size: 1rem;
   margin: 0;
-  color: #fb7185;
+  color: var(--accent-brand-text);
   font-weight: 700;
 }
 
@@ -46,7 +46,7 @@
 
 .userName {
   font-size: 0.8rem;
-  color: #d9e2ee;
+  color: var(--text-secondary);
 }
 
 .mainContent {

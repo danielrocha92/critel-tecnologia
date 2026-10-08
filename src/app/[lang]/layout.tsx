@@ -106,7 +106,7 @@ export async function generateMetadata({
   };
 }
 
-import { Toaster } from 'sonner';
+import ThemeToaster from '@/components/ThemeToggle/ThemeToaster';
 
 export default async function RootLayout({
   children,
@@ -130,12 +130,12 @@ export default async function RootLayout({
               (function() {
                 try {
                   var saved = localStorage.getItem('theme');
-                  if (saved) {
-                    document.documentElement.setAttribute('data-theme', saved);
-                  } else {
-                    var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                    document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
-                  }
+                  var theme = saved === 'dark' ? 'dark' : 'light';
+                  document.documentElement.setAttribute('data-theme', theme);
+                  document.documentElement.style.colorScheme = theme;
+                  document.querySelectorAll('meta[name="theme-color"]').forEach(function(meta) {
+                    meta.setAttribute('content', theme === 'dark' ? '#0b1120' : '#f4f6fa');
+                  });
                 } catch (e) {}
               })();
             `,
@@ -143,7 +143,7 @@ export default async function RootLayout({
         />
       </head>
       <body>
-        <Toaster theme="dark" position="top-right" richColors />
+        <ThemeToaster />
         {children}
       </body>
     </html>

@@ -57,7 +57,11 @@ export default function OsList({ lang }: { lang: string }) {
         .eq('user_id', userData.user.id)
         .single();
 
-      const normalizedCargo = perfilData?.cargo?.trim().toUpperCase().replace('É', 'E');
+      const normalizedCargo = perfilData?.cargo
+        ?.normalize('NFD')
+        .replace(/\p{Diacritic}/gu, '')
+        .trim()
+        .toUpperCase();
       const isTecnico = normalizedCargo === 'TECNICO';
 
       if (!perfilData || !isTecnico || perfilData.status !== 'ATIVO') {

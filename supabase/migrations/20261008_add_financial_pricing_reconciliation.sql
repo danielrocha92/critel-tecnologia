@@ -1,0 +1,9 @@
+ALTER TABLE public.financeiro
+ADD COLUMN IF NOT EXISTS valor_custo_total NUMERIC(14, 2) NOT NULL DEFAULT 0,
+ADD COLUMN IF NOT EXISTS valor_total_faturavel NUMERIC(14, 2) NOT NULL DEFAULT 0,
+ADD COLUMN IF NOT EXISTS valor_impostos NUMERIC(14, 2) NOT NULL DEFAULT 0,
+ADD COLUMN IF NOT EXISTS impostos_percentual NUMERIC(5, 2) NOT NULL DEFAULT 10.00,
+ADD COLUMN IF NOT EXISTS margem_lucro_percentual NUMERIC(5, 2) NOT NULL DEFAULT 40.00,
+ADD COLUMN IF NOT EXISTS composicao_precificacao JSONB;
+
+NOTIFY pgrst, 'reload schema';

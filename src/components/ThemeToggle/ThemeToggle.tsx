@@ -5,29 +5,50 @@ import styles from './ThemeToggle.module.css';
 import { Sun, Moon } from 'lucide-react';
 
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // Check saved theme in localStorage or system preference
-    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
-    if (savedTheme) {
-      setTheme(savedTheme);
-      document.documentElement.setAttribute('data-theme', savedTheme);
-    } else {
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const initialTheme = prefersDark ? 'dark' : 'light';
-      setTheme(initialTheme);
-      document.documentElement.setAttribute('data-theme', initialTheme);
-    }
+    const savedTheme = localStorage.getItem('theme');
+    const initialTheme = savedTheme === 'dark' ? 'dark' : 'light';
+    setTheme(initialTheme);
+    document.documentElement.setAttribute('data-theme', initialTheme);
+    document.documentElement.style.colorScheme = initialTheme;
     setMounted(true);
+
+    const syncTheme = () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+      setTheme(currentTheme);
+    };
+    const syncFromStorage = (event: StorageEvent) => {
+      if (event.key !== 'theme') return;
+      const currentTheme = event.newValue === 'dark' ? 'dark' : 'light';
+      setTheme(currentTheme);
+      document.documentElement.setAttribute('data-theme', currentTheme);
+      document.documentElement.style.colorScheme = currentTheme;
+      window.dispatchEvent(new Event('critel-theme-change'));
+      document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]').forEach((meta) => {
+        meta.content = currentTheme === 'dark' ? '#0b1120' : '#f4f6fa';
+      });
+    };
+    window.addEventListener('critel-theme-change', syncTheme);
+    window.addEventListener('storage', syncFromStorage);
+    return () => {
+      window.removeEventListener('critel-theme-change', syncTheme);
+      window.removeEventListener('storage', syncFromStorage);
+    };
   }, []);
 
   const toggleTheme = () => {
     const nextTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(nextTheme);
     document.documentElement.setAttribute('data-theme', nextTheme);
+    document.documentElement.style.colorScheme = nextTheme;
     localStorage.setItem('theme', nextTheme);
+    document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]').forEach((meta) => {
+      meta.content = nextTheme === 'dark' ? '#0b1120' : '#f4f6fa';
+    });
+    window.dispatchEvent(new Event('critel-theme-change'));
   };
 
   if (!mounted) {

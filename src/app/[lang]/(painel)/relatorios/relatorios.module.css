@@ -16,11 +16,11 @@
   font-size: 1.8rem;
   font-weight: bold;
   margin: 0;
-  color: #f8fafc;
+  color: var(--text-primary);
 }
 
 .subtitle {
-  color: #94a3b8;
+  color: var(--text-secondary);
   margin: 4px 0 0 0;
 }
 
@@ -30,9 +30,9 @@
 }
 
 .btnDate {
-  background: #1e293b;
+  background: var(--bg-secondary);
   color: #fff;
-  border: 1px solid #334155;
+  border: 1px solid var(--text-secondary);
   padding: 10px 16px;
   border-radius: 8px;
   cursor: pointer;
@@ -59,8 +59,8 @@
 }
 
 .kpiCard {
-  background: #1e293b;
-  border: 1px solid #334155;
+  background: var(--bg-secondary);
+  border: 1px solid var(--text-secondary);
   border-radius: 12px;
   padding: 20px;
   display: flex;
@@ -75,7 +75,7 @@
 }
 
 .kpiTitle {
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-size: 0.9rem;
   font-weight: 500;
 }
@@ -94,7 +94,7 @@
 .kpiValue {
   font-size: 2rem;
   font-weight: bold;
-  color: #f8fafc;
+  color: var(--text-primary);
 }
 
 .kpiTrend {
@@ -110,8 +110,8 @@
 }
 
 .chartCard {
-  background: #1e293b;
-  border: 1px solid #334155;
+  background: var(--bg-secondary);
+  border: 1px solid var(--text-secondary);
   border-radius: 12px;
   padding: 24px;
   display: flex;
@@ -120,7 +120,7 @@
 
 .chartTitle {
   margin: 0 0 16px 0;
-  color: #f8fafc;
+  color: var(--text-primary);
   font-size: 1.1rem;
 }
 
@@ -147,7 +147,7 @@
 }
 
 .barLabel {
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-size: 0.8rem;
   font-weight: 500;
 }
@@ -174,13 +174,13 @@
 
 .categoryName {
   flex: 1;
-  color: #e2e8f0;
+  color: var(--text-primary);
   font-size: 0.9rem;
 }
 
 .categoryPercent {
   font-weight: bold;
-  color: #f8fafc;
+  color: var(--text-primary);
 }
 
 /* Colors and states */
@@ -201,7 +201,7 @@
 }
 
 .trendUp {
-  color: #10b981;
+  color: var(--status-success-text);
 }
 
 .trendDown {

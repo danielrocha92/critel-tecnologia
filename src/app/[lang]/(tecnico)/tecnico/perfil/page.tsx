@@ -1,10 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createBrowserClient } from '@supabase/ssr';
 import { User, LogOut, Settings, Shield, Bell, Camera, MapPin } from 'lucide-react';
 import { useRouter, useParams } from 'next/navigation';
+import { createClient } from '@/utils/supabase/client';
 import styles from './perfil.module.css';
+
+const supabase = createClient();
 
 export default function PerfilPage() {
   const [profile, setProfile] = useState<any>(null);
@@ -23,28 +25,27 @@ export default function PerfilPage() {
     setConfigs(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-
   useEffect(() => {
     const fetchProfile = async () => {
       const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) return;
+      if (!userData.user) {
+        router.replace(`/${lang}/login`);
+        return;
+      }
 
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('perfis')
         .select('*')
         .eq('user_id', userData.user.id)
         .single();
 
+      if (error) console.error('Erro ao carregar perfil do técnico:', error);
       setProfile(data);
       setLoading(false);
     };
 
-    fetchProfile();
-  }, [supabase]);
+    void fetchProfile();
+  }, [lang, router]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();

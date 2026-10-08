@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: 'Soluções corporativas em Infraestrutura de TI, Segurança da Informação, Cabeamento Estruturado, Ativos de Rede e Field Services desde 1994.',
     start_url: '/pt',
     display: 'standalone',
-    background_color: '#0A0F1D',
-    theme_color: '#0052FF',
+    background_color: '#f4f6fa',
+    theme_color: '#f4f6fa',
     icons: [
       {
         src: '/icon-192x192.png',

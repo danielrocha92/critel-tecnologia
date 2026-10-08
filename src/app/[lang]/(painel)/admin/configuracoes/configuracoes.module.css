@@ -9,18 +9,18 @@
 }
 
 .toggleTrackOn {
-  background: #3b82f6;
+  background: var(--status-info-text);
 }
 
 .toggleTrackOff {
-  background: #334155;
+  background: var(--text-secondary);
 }
 
 .toggleThumb {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--bg-secondary);
   position: absolute;
   top: 3px;
   transition: left 0.2s;
@@ -35,8 +35,8 @@
 }
 
 .sectionCard {
-  background: #1e293b;
-  border: 1px solid #334155;
+  background: var(--bg-secondary);
+  border: 1px solid var(--text-secondary);
   border-radius: 12px;
   padding: 24px;
   margin-bottom: 20px;
@@ -50,12 +50,12 @@
 }
 
 .sectionIcon {
-  color: #3b82f6;
+  color: var(--status-info-text);
 }
 
 .sectionTitle {
   margin: 0;
-  color: #f8fafc;
+  color: var(--text-primary);
   font-size: 1.1rem;
   font-weight: 700;
 }
@@ -76,13 +76,13 @@
 }
 
 .rowLabel {
-  color: #e2e8f0;
+  color: var(--text-primary);
   font-weight: 500;
   font-size: 0.95rem;
 }
 
 .rowDesc {
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.82rem;
   margin-top: 2px;
 }
@@ -101,11 +101,11 @@
   font-size: 1.8rem;
   font-weight: bold;
   margin: 0;
-  color: #f8fafc;
+  color: var(--text-primary);
 }
 
 .pageSubtitle {
-  color: #94a3b8;
+  color: var(--text-secondary);
   margin: 4px 0 0 0;
 }
 
@@ -142,12 +142,12 @@
 
 .permTitle {
   font-weight: 600;
-  color: #f8fafc;
+  color: var(--text-primary);
   font-size: 0.95rem;
 }
 
 .permDesc {
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-size: 0.82rem;
   margin-top: 2px;
 }
@@ -173,8 +173,8 @@
 
 .btnCancel {
   background: transparent;
-  border: 1px solid #334155;
-  color: #94a3b8;
+  border: 1px solid var(--text-secondary);
+  color: var(--text-secondary);
   padding: 10px 24px;
   border-radius: 8px;
   cursor: pointer;

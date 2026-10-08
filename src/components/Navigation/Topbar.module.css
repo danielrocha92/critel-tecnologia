@@ -14,10 +14,10 @@
 
 .leftSection, .rightSection { display: flex; align-items: center; gap: 14px; }
 .rightSection { gap: 20px; }
-.productLabel { color: #9aa8ba; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.02em; }
-.mobileMenuBtn { display: none; align-items: center; justify-content: center; padding: 7px; border: 0; border-radius: 8px; background: transparent; color: #dbe4ef; cursor: pointer; }
-.mobileMenuBtn:hover { background: rgba(255,255,255,0.06); }
-.mobileMenuBtn:focus-visible, .profileTrigger:focus-visible, .dropdownItem:focus-visible, .logoutButton:focus-visible { outline: 2px solid #fb7185; outline-offset: 2px; }
+.productLabel { color: var(--text-secondary); font-size: 0.82rem; font-weight: 600; letter-spacing: 0.02em; }
+.mobileMenuBtn { display: none; align-items: center; justify-content: center; padding: 7px; border: 0; border-radius: 8px; background: transparent; color: var(--text-primary); cursor: pointer; }
+.mobileMenuBtn:hover { background: var(--surface-hover); }
+.mobileMenuBtn:focus-visible, .profileTrigger:focus-visible, .dropdownItem:focus-visible, .logoutButton:focus-visible { outline: 2px solid var(--accent-brand-text); outline-offset: 2px; }
 
 .profileContainer { position: relative; }
 .profileTrigger {
@@ -29,16 +29,16 @@
   border: 1px solid transparent;
   border-radius: 10px;
   background: transparent;
-  color: #dce4ee;
+  color: var(--text-primary);
   cursor: pointer;
   font: inherit;
   transition: border-color 150ms ease, background 150ms ease;
 }
 
-.profileTrigger:hover, .profileTriggerOpen { border-color: rgba(255,255,255,0.07); background: rgba(255,255,255,0.045); }
-.profileAvatar { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 9px; background: #273247; color: #c7d5e8; }
+.profileTrigger:hover, .profileTriggerOpen { border-color: var(--border-color); background: var(--surface-hover); }
+.profileAvatar { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 9px; background: var(--bg-tertiary); color: var(--text-primary); }
 .profileName { max-width: 180px; overflow: hidden; font-size: 0.8rem; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
-.profileTrigger > svg { color: #8795a9; transition: transform 150ms ease; }
+.profileTrigger > svg { color: var(--text-secondary); transition: transform 150ms ease; }
 .chevronOpen { transform: rotate(180deg); }
 
 .dropdownMenu {
@@ -48,18 +48,18 @@
   z-index: 30;
   width: 250px;
   overflow: hidden;
-  border: 1px solid #2a3445;
+  border: 1px solid var(--border-color);
   border-radius: 12px;
-  background: #151c29;
+  background: var(--dropdown-bg);
   box-shadow: 0 18px 45px rgba(0,0,0,0.35);
 }
 
-.userInfo { display: grid; gap: 4px; padding: 15px 16px; border-bottom: 1px solid rgba(255,255,255,0.07); }
-.userInfo strong { overflow: hidden; color: #f1f5f9; font-size: 0.82rem; text-overflow: ellipsis; white-space: nowrap; }
-.userInfo span { overflow: hidden; color: #8492a6; font-size: 0.73rem; text-overflow: ellipsis; white-space: nowrap; }
-.dropdownItem, .logoutButton { display: block; width: 100%; padding: 11px 16px; border: 0; background: transparent; color: #c6d0de; font: inherit; font-size: 0.8rem; text-align: left; text-decoration: none; cursor: pointer; }
-.dropdownItem:hover { background: rgba(255,255,255,0.045); color: #fff; }
-.logoutButton { border-top: 1px solid rgba(255,255,255,0.07); color: #fda4af; }
+.userInfo { display: grid; gap: 4px; padding: 15px 16px; border-bottom: 1px solid var(--border-color); }
+.userInfo strong { overflow: hidden; color: var(--text-primary); font-size: 0.82rem; text-overflow: ellipsis; white-space: nowrap; }
+.userInfo span { overflow: hidden; color: var(--text-secondary); font-size: 0.73rem; text-overflow: ellipsis; white-space: nowrap; }
+.dropdownItem, .logoutButton { display: block; width: 100%; padding: 11px 16px; border: 0; background: transparent; color: var(--text-primary); font: inherit; font-size: 0.8rem; text-align: left; text-decoration: none; cursor: pointer; }
+.dropdownItem:hover { background: var(--surface-hover); color: var(--text-primary); }
+.logoutButton { border-top: 1px solid var(--border-color); color: var(--accent-brand-text); }
 .logoutButton:hover { background: rgba(239,68,68,0.09); }
 
 @media (max-width: 768px) {

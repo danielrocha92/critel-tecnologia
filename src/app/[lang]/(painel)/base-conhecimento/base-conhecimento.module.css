@@ -16,19 +16,19 @@
   font-size: 1.8rem;
   font-weight: bold;
   margin: 0;
-  color: #f8fafc;
+  color: var(--text-primary);
 }
 
 .subtitle {
-  color: #94a3b8;
+  color: var(--text-secondary);
   margin: 4px 0 0 0;
 }
 
 .searchBarContainer {
-  background: #1e293b;
+  background: var(--bg-secondary);
   padding: 16px;
   border-radius: 12px;
-  border: 1px solid #334155;
+  border: 1px solid var(--text-secondary);
   display: flex;
   gap: 16px;
   margin-bottom: 2rem;
@@ -48,8 +48,8 @@
 
 .searchInput {
   width: 100%;
-  background: #0f172a;
-  border: 1px solid #334155;
+  background: var(--bg-primary);
+  border: 1px solid var(--text-secondary);
   color: #fff;
   padding: 10px 10px 10px 40px;
   border-radius: 8px;
@@ -57,8 +57,8 @@
 }
 
 .filterSelect {
-  background: #0f172a;
-  border: 1px solid #334155;
+  background: var(--bg-primary);
+  border: 1px solid var(--text-secondary);
   color: #fff;
   padding: 0 16px;
   border-radius: 8px;
@@ -72,8 +72,8 @@
 }
 
 .card {
-  background: #1e293b;
-  border: 1px solid #334155;
+  background: var(--bg-secondary);
+  border: 1px solid var(--text-secondary);
   border-radius: 12px;
   padding: 24px;
   display: flex;
@@ -99,8 +99,8 @@
 }
 
 .durationBadge {
-  background: #0f172a;
-  color: #94a3b8;
+  background: var(--bg-primary);
+  color: var(--text-secondary);
   padding: 4px 12px;
   border-radius: 999px;
   font-size: 0.8rem;
@@ -109,26 +109,26 @@
 
 .cardTitle {
   margin: 0 0 8px 0;
-  color: #f8fafc;
+  color: var(--text-primary);
   font-size: 1.1rem;
   line-height: 1.4;
 }
 
 .cardType {
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-size: 0.9rem;
 }
 
 .cardFooter {
   margin-top: auto;
   padding-top: 16px;
-  border-top: 1px solid #334155;
+  border-top: 1px solid var(--text-secondary);
 }
 
 .btnAccess {
   background: transparent;
   border: none;
-  color: #3b82f6;
+  color: var(--status-info-text);
   font-weight: 500;
   cursor: pointer;
   font-size: 0.9rem;

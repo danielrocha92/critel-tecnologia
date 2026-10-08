@@ -123,22 +123,20 @@ a.secondary {
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  .logo {
-    filter: invert();
-  }
+:global(:root[data-theme='dark']) .page .logo {
+  filter: invert();
+}
 
-  .page {
-    --background: #000;
-    --foreground: #000;
+:global(:root[data-theme='dark']) .page {
+  --background: #000;
+  --foreground: #000;
 
-    --text-primary: #ededed;
-    --text-secondary: #999;
+  --text-primary: #ededed;
+  --text-secondary: #999;
 
-    --button-primary-hover: #ccc;
-    --button-secondary-hover: #1a1a1a;
-    --button-secondary-border: #1a1a1a;
-  }
+  --button-primary-hover: #ccc;
+  --button-secondary-hover: #1a1a1a;
+  --button-secondary-border: #1a1a1a;
 }
 
 .code {

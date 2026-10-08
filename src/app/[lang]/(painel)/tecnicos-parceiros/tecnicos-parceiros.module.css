@@ -42,16 +42,16 @@
 .status,
 .accessPending,
 .accessLinked { display: inline-flex; border-radius: 999px; padding: .3rem .6rem; background: rgba(148, 163, 184, .12); color: var(--text-secondary); font-size: .76rem; line-height: 1.2; }
-.accessPending { color: #b45309; background: rgba(245, 158, 11, .12); }
-.accessLinked { color: #047857; background: rgba(16, 185, 129, .12); }
+.accessPending { color: var(--status-warning-text); background: rgba(245, 158, 11, .12); }
+.accessLinked { color: var(--status-success-text); background: rgba(16, 185, 129, .12); }
 .actionsCell { white-space: nowrap; text-align: right; }
 .textButton { padding: .3rem .4rem; border: 0; background: transparent; color: var(--accent-brand-text); font: inherit; font-size: .85rem; font-weight: 700; cursor: pointer; }
 .textButton:hover { text-decoration: underline; }
 .emptyState { margin: 0; padding: 2rem 1rem; color: var(--text-secondary); text-align: center; }
 .successNotice,
 .errorNotice { margin: 0; padding: .8rem 1rem; border-radius: 9px; }
-.successNotice { color: #047857; background: rgba(16, 185, 129, .12); }
-.errorNotice { color: #b91c1c; background: rgba(239, 68, 68, .1); }
+.successNotice { color: var(--status-success-text); background: rgba(16, 185, 129, .12); }
+.errorNotice { color: var(--status-danger-text); background: rgba(239, 68, 68, .1); }
 .modalBackdrop { position: fixed; inset: 0; z-index: 1200; display: flex; align-items: center; justify-content: center; padding: 1rem; background: rgba(2, 6, 23, .72); }
 .modal { width: min(100%, 760px); max-height: min(92dvh, 900px); overflow-y: auto; padding: clamp(1rem, 3vw, 1.5rem); border: 1px solid var(--border-color); border-radius: 16px; background: var(--card-bg); box-shadow: 0 25px 80px rgba(0, 0, 0, .35); }
 .detailsModal { width: min(100%, 820px); }

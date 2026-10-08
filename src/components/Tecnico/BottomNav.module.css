@@ -4,9 +4,9 @@
   left: 0;
   right: 0;
   height: 65px;
-  background: rgba(15, 23, 42, 0.95);
+  background: var(--header-bg);
   backdrop-filter: blur(10px);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid var(--header-border);
   display: flex;
   justify-content: space-around;
   align-items: center;
@@ -22,14 +22,14 @@
   align-items: center;
   gap: 4px;
   cursor: pointer;
-  color: #64748b;
+  color: var(--text-muted);
   width: 100%;
   padding: 8px 0;
   text-decoration: none;
 }
 
 .navItemActive {
-  color: #fb7185;
+  color: var(--accent-brand-text);
 }
 
 .iconContainer {

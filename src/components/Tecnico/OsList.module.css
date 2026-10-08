@@ -2,12 +2,12 @@
   width: min(100%, 1440px);
   margin: 0 auto;
   padding: 30px clamp(18px, 4vw, 52px) 48px;
-  color: #e8edf5;
+  color: var(--text-primary);
 }
 
 .loadingContainer {
   padding: 3rem 1rem;
-  color: #94a3b8;
+  color: var(--text-secondary);
   text-align: center;
 }
 
@@ -28,7 +28,7 @@
   align-items: center;
   gap: 0.4rem;
   margin-bottom: 0.65rem;
-  color: #fb7185;
+  color: var(--accent-brand-text);
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.15em;
@@ -37,14 +37,14 @@
 
 .pageTitle {
   margin: 0;
-  color: #f8fafc;
+  color: var(--text-primary);
   font-size: clamp(1.65rem, 3vw, 2.15rem);
   font-weight: 750;
 }
 
 .pageSubtitle {
   margin: 0.45rem 0 0;
-  color: #94a3b8;
+  color: var(--text-secondary);
   max-width: 690px;
   font-size: 0.93rem;
   line-height: 1.6;
@@ -58,10 +58,10 @@
   gap: 0.45rem;
   min-height: 40px;
   padding: 0 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-color);
   border-radius: 9px;
-  color: #d9e2ee;
-  background: #171e2b;
+  color: var(--text-primary);
+  background: var(--bg-secondary);
   font-size: 0.8rem;
   font-weight: 600;
   text-decoration: none;
@@ -70,7 +70,7 @@
 
 .historyLink:hover {
   border-color: rgba(201, 37, 58, 0.5);
-  background: #202838;
+  background: var(--bg-tertiary);
 }
 
 .metricsGrid {
@@ -88,7 +88,7 @@
   min-width: 0;
   min-height: 96px;
   padding: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.075);
+  border: 1px solid var(--border-color);
   border-radius: 14px;
   background: linear-gradient(145deg, rgba(25, 33, 48, 0.95), rgba(17, 23, 34, 0.95));
 }
@@ -143,17 +143,17 @@
 }
 
 .metricIconBlue {
-  color: #fb7185;
+  color: var(--accent-brand-text);
   background: rgba(201, 37, 58, 0.13);
 }
 
 .metricIconAmber {
-  color: #fca5a5;
+  color: var(--status-danger-text);
   background: rgba(201, 37, 58, 0.13);
 }
 
 .metricIconGreen {
-  color: #fecaca;
+  color: var(--status-danger-text);
   background: rgba(201, 37, 58, 0.13);
 }
 
@@ -164,7 +164,7 @@
 
 .metricLabel {
   overflow: hidden;
-  color: #91a0b4;
+  color: var(--text-secondary);
   font-size: 0.75rem;
   line-height: 1.35;
   text-overflow: ellipsis;
@@ -172,7 +172,7 @@
 }
 
 .metricValue {
-  color: #f5f7fb;
+  color: var(--text-primary);
   font-size: 1.2rem;
   line-height: 1.2;
 }
@@ -180,7 +180,7 @@
 .listSection {
   margin-top: 18px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.075);
+  border: 1px solid var(--border-color);
   border-radius: 15px;
   background: rgba(17, 23, 34, 0.85);
 }
@@ -192,19 +192,19 @@
   gap: 1rem;
   margin: 0;
   padding: 17px 19px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .sectionTitle {
   margin: 0;
-  color: #eff3f8;
+  color: var(--text-primary);
   font-size: 1rem;
   font-weight: 700;
 }
 
 .sectionSubtitle {
   margin: 0.3rem 0 0;
-  color: #8795a9;
+  color: var(--text-secondary);
   font-size: 0.75rem;
   line-height: 1.45;
 }
@@ -217,7 +217,7 @@
   place-items: center;
   border: 1px solid rgba(201, 37, 58, 0.25);
   border-radius: 9px;
-  color: #fecdd3;
+  color: var(--status-danger-text);
   background: rgba(201, 37, 58, 0.12);
   font-size: 0.8rem;
   font-weight: 700;
@@ -239,7 +239,7 @@
   position: absolute;
   top: 50%;
   left: 13px;
-  color: #8795a9;
+  color: var(--text-secondary);
   transform: translateY(-50%);
 }
 
@@ -249,10 +249,10 @@
   box-sizing: border-box;
   width: 100%;
   min-height: 40px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-color);
   border-radius: 9px;
-  color: #e5edf7;
-  background: #141a26;
+  color: var(--text-primary);
+  background: var(--bg-secondary);
   font: inherit;
   font-size: 0.77rem;
   transition: border-color 150ms ease, box-shadow 150ms ease;
@@ -288,15 +288,15 @@
 
 .ticketCard {
   padding: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-color);
   border-radius: 11px;
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--card-bg);
   transition: border-color 150ms ease, background 150ms ease;
 }
 
 .ticketCard:hover {
   border-color: rgba(201, 37, 58, 0.35);
-  background: rgba(255, 255, 255, 0.035);
+  background: var(--card-bg);
 }
 
 .ticketHeader {
@@ -315,13 +315,13 @@
 
 .ticketClient {
   overflow-wrap: anywhere;
-  color: #f8fafc;
+  color: var(--text-primary);
   font-size: 0.98rem;
   line-height: 1.25;
 }
 
 .ticketProtocol {
-  color: #8795a9;
+  color: var(--text-secondary);
   font-size: 0.72rem;
 }
 
@@ -336,25 +336,25 @@
 
 .statusNew {
   border-color: rgba(251, 191, 36, 0.16);
-  color: #fcd34d;
+  color: var(--status-warning-text);
   background: rgba(245, 158, 11, 0.1);
 }
 
 .statusInProgress {
   border-color: rgba(52, 211, 153, 0.16);
-  color: #6ee7b7;
+  color: var(--status-success-text);
   background: rgba(16, 185, 129, 0.1);
 }
 
 .statusDone {
   border-color: rgba(52, 211, 153, 0.2);
-  color: #6ee7b7;
+  color: var(--status-success-text);
   background: rgba(16, 185, 129, 0.1);
 }
 
 .ticketTitle {
   margin: 0.6rem 0 0.85rem;
-  color: #e2e8f0;
+  color: var(--text-primary);
   font-size: 0.94rem;
   font-weight: 600;
   line-height: 1.45;
@@ -364,7 +364,7 @@
   display: -webkit-box;
   overflow: hidden;
   margin: -0.35rem 0 0.9rem;
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-size: 0.8rem;
   line-height: 1.5;
   white-space: pre-wrap;
@@ -396,12 +396,12 @@
 }
 
 .addressLink {
-  color: #fda4af;
+  color: var(--status-danger-text);
   cursor: pointer;
 }
 
 .addressUnavailable {
-  color: #8795a9;
+  color: var(--text-secondary);
   cursor: default;
 }
 
@@ -418,7 +418,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #91a0b4;
+  color: var(--text-secondary);
   font-size: 0.76rem;
 }
 
@@ -446,9 +446,9 @@
 
 .emptyState {
   padding: 28px 16px;
-  border: 1px dashed rgba(255, 255, 255, 0.12);
+  border: 1px dashed var(--border-color);
   border-radius: 11px;
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--card-bg);
   text-align: center;
 }
 
@@ -459,20 +459,20 @@
   margin: 0 auto 0.85rem;
   place-items: center;
   border-radius: 16px;
-  color: #fb7185;
+  color: var(--accent-brand-text);
   background: rgba(201, 37, 58, 0.13);
 }
 
 .emptyStateTitle {
   margin: 0;
-  color: #f8fafc;
+  color: var(--text-primary);
   font-size: 1rem;
 }
 
 .emptyStateDesc {
   max-width: 300px;
   margin: 0.5rem auto 0;
-  color: #8795a9;
+  color: var(--text-secondary);
   font-size: 0.85rem;
   line-height: 1.5;
 }
@@ -480,7 +480,7 @@
 .emptyHistoryLink {
   display: inline-flex;
   margin-top: 1rem;
-  color: #fda4af;
+  color: var(--status-danger-text);
   font-size: 0.8rem;
   font-weight: 600;
   text-decoration: none;

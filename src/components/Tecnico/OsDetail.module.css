@@ -10,7 +10,7 @@
 .header {
   padding: 1rem;
   background: rgba(30, 41, 59, 0.5);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -19,7 +19,7 @@
 .btnBack {
   background: none;
   border: none;
-  color: #00d2ff;
+  color: var(--accent-cyan);
   padding: 0.5rem;
   cursor: pointer;
 }
@@ -27,7 +27,7 @@
 .headerTitle {
   font-size: 1.2rem;
   margin: 0;
-  color: #f8fafc;
+  color: var(--text-primary);
 }
 
 .contentWrapper {
@@ -40,27 +40,27 @@
 
 .clientTitle {
   font-size: 1.5rem;
-  color: #00d2ff;
+  color: var(--accent-cyan);
   margin-bottom: 0.5rem;
 }
 
 .ticketTitle {
-  color: #cbd5e1;
+  color: var(--text-secondary);
   font-size: 1rem;
   line-height: 1.5;
 }
 
 .cardSection {
-  background: rgba(15, 23, 42, 0.6);
+  background: var(--card-bg);
   border-radius: 12px;
   padding: 1rem;
   margin-bottom: 2rem;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
 }
 
 .sectionHeading {
   font-size: 0.9rem;
-  color: #94a3b8;
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 1px;
   margin-bottom: 1rem;
@@ -88,20 +88,20 @@
 .detailLabel {
   display: block;
   font-size: 0.9rem;
-  color: #e2e8f0;
+  color: var(--text-primary);
 }
 
 .detailValue {
   display: block;
   font-size: 0.85rem;
-  color: #94a3b8;
+  color: var(--text-secondary);
   line-height: 1.5;
   overflow-wrap: anywhere;
 }
 
 .descText {
   margin: 0;
-  color: #cbd5e1;
+  color: var(--text-secondary);
   font-size: 0.95rem;
   line-height: 1.6;
   white-space: pre-wrap;
@@ -109,8 +109,8 @@
 }
 
 .resolutionSection {
-  border-color: rgba(52, 211, 153, 0.2);
-  background: linear-gradient(145deg, rgba(16, 45, 43, 0.55), rgba(15, 23, 42, 0.7));
+  border-color: color-mix(in srgb, var(--status-success-text) 25%, var(--border-color));
+  background: linear-gradient(145deg, color-mix(in srgb, var(--status-success-text) 10%, var(--bg-secondary)), var(--card-bg));
 }
 
 .resolutionHeader {
@@ -126,14 +126,14 @@
   align-items: center;
   gap: 0.4rem;
   margin-bottom: 0.55rem;
-  color: #6ee7b7;
+  color: var(--status-success-text);
   font-size: 0.75rem;
   font-weight: 700;
 }
 
 .resolutionHeader .sectionHeading {
   margin: 0;
-  color: #e2e8f0;
+  color: var(--text-primary);
   letter-spacing: 0;
   text-transform: none;
   font-size: 1.05rem;
@@ -144,7 +144,7 @@
   padding: 0.35rem 0.6rem;
   border: 1px solid rgba(52, 211, 153, 0.25);
   border-radius: 999px;
-  color: #a7f3d0;
+  color: var(--status-success-text);
   background: rgba(16, 185, 129, 0.1);
   font-size: 0.72rem;
   font-weight: 700;
@@ -152,7 +152,7 @@
 
 .resolutionText {
   margin: 0;
-  color: #e2e8f0;
+  color: var(--text-primary);
   font-size: 0.95rem;
   line-height: 1.65;
   white-space: pre-wrap;
@@ -165,8 +165,8 @@
   gap: 0.75rem 2rem;
   margin-top: 1rem;
   padding-top: 0.85rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.07);
-  color: #cbd5e1;
+  border-top: 1px solid var(--border-color);
+  color: var(--text-secondary);
   font-size: 0.82rem;
 }
 
@@ -177,7 +177,7 @@
 
 .resolutionTimes strong,
 .materialsBlock .detailLabel {
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-size: 0.75rem;
 }
 
@@ -198,7 +198,7 @@
   min-width: 0;
   margin: 0;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-color);
   border-radius: 9px;
   background: rgba(0, 0, 0, 0.15);
 }
@@ -213,7 +213,7 @@
 
 .evidenceItem figcaption {
   padding: 0.55rem 0.65rem;
-  color: #cbd5e1;
+  color: var(--text-secondary);
   font-size: 0.75rem;
 }
 
@@ -234,7 +234,7 @@
   margin-top: 0.6rem;
   padding: 0;
   border: 0;
-  color: #38bdf8;
+  color: var(--accent-cyan);
   background: transparent;
   font: inherit;
   font-size: 0.82rem;
@@ -243,7 +243,7 @@
 }
 
 .addressButton:hover {
-  color: #7dd3fc;
+  color: var(--accent-cyan);
 }
 
 .bottomBar {
@@ -252,22 +252,22 @@
   left: 0;
   width: 100%;
   padding: 1rem;
-  background: rgba(11, 17, 32, 0.95);
+  background: var(--header-bg);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid var(--border-color);
   z-index: 50;
 }
 
 .geoError {
-  color: #ef4444;
+  color: var(--status-danger-text);
   font-size: 0.8rem;
   margin-bottom: 0.5rem;
   text-align: center;
 }
 
 .checkInMessage {
-  color: #7dd3fc;
+  color: var(--accent-cyan);
   font-size: 0.85rem;
   margin: 0 0 0.75rem;
   text-align: center;
@@ -302,7 +302,7 @@
 
 .distanceInfo {
   font-size: 0.8rem;
-  color: #94a3b8;
+  color: var(--text-secondary);
   text-align: center;
   display: flex;
   align-items: center;
@@ -333,7 +333,7 @@
   padding: 0.8rem 1rem;
   border: 1px solid rgba(16, 185, 129, 0.25);
   border-radius: 12px;
-  color: #a7f3d0;
+  color: var(--status-success-text);
   background: rgba(16, 185, 129, 0.1);
   display: flex;
   align-items: center;

@@ -52,7 +52,11 @@ export async function POST(request: Request) {
       .eq('user_id', user.id)
       .maybeSingle();
 
-    const cargo = perfil?.cargo?.trim().toUpperCase().replace('É', 'E');
+    const cargo = perfil?.cargo
+      ?.normalize('NFD')
+      .replace(/\p{Diacritic}/gu, '')
+      .trim()
+      .toUpperCase();
     if (perfilError || !perfil || cargo !== 'TECNICO' || perfil.status !== 'ATIVO') {
       return NextResponse.json({ error: 'Apenas técnicos ativos podem registrar o check-in.' }, { status: 403 });
     }

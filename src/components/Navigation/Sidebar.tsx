@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import type { LucideIcon } from 'lucide-react';
 import {
   Home, MessageSquare, Users, Settings,
-  ChevronDown, ChevronLeft, ChevronRight, LogOut, Plus
+  ChevronDown, ChevronLeft, ChevronRight, LogOut, Plus, Activity
 } from 'lucide-react';
 import { createClient } from '../../utils/supabase/client';
 import styles from './Sidebar.module.css';
@@ -122,6 +122,10 @@ export default function Sidebar({ lang }: { lang: string }) {
     {
       name: 'Base de Clientes', icon: Users, href: `/${lang}/clientes/lista`, section: 'main',
       roles: ['SUPER_ADMIN', 'ADMIN', 'ANALISTA', 'COMERCIAL']
+    },
+    {
+      name: 'Monitoramento Bacio', icon: Activity, href: `/${lang}/monitoramento/bacio`, section: 'main',
+      roles: ['SUPER_ADMIN', 'ADMIN', 'ANALISTA']
     },
     {
       name: 'Administração', icon: Settings, hasSubmenu: true, section: 'admin',

@@ -15,11 +15,11 @@
   font-size: 1.8rem;
   font-weight: bold;
   margin: 0;
-  color: #f8fafc;
+  color: var(--text-primary);
 }
 
 .subtitle {
-  color: #94a3b8;
+  color: var(--text-secondary);
   margin: 4px 0 0 0;
 }
 
@@ -37,8 +37,8 @@
 }
 
 .tableContainer {
-  background: #1e293b;
-  border: 1px solid #334155;
+  background: var(--bg-secondary);
+  border: 1px solid var(--text-secondary);
   border-radius: 12px;
   overflow: hidden;
 }
@@ -49,13 +49,13 @@
 }
 
 .tableHeaderRow {
-  background: #0f172a;
+  background: var(--bg-primary);
 }
 
 .th {
   padding: 14px 20px;
   text-align: left;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.8rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -84,24 +84,24 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: #334155;
+  background: var(--text-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  color: #e2e8f0;
+  color: var(--text-primary);
   font-size: 0.85rem;
   flex-shrink: 0;
 }
 
 .userName {
-  color: #f1f5f9;
+  color: var(--text-primary);
   font-weight: 600;
   font-size: 0.9rem;
 }
 
 .userEmail {
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.78rem;
 }
 
@@ -133,7 +133,7 @@
 }
 
 .selectOption {
-  background: #0f172a;
+  background: var(--bg-primary);
 }
 
 .statusBadge {
@@ -143,7 +143,7 @@
   background: rgba(0, 0, 0, 0.2);
   padding: 4px 8px;
   border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
 }
 
 .statusDot {
@@ -182,8 +182,8 @@
 }
 
 .modalContent {
-  background: #1e293b;
-  border: 1px solid #334155;
+  background: var(--bg-secondary);
+  border: 1px solid var(--text-secondary);
   border-radius: 12px;
   width: 100%;
   max-width: 400px;
@@ -197,7 +197,7 @@
   right: 16px;
   background: transparent;
   border: none;
-  color: #94a3b8;
+  color: var(--text-secondary);
   cursor: pointer;
 }
 
@@ -205,7 +205,7 @@
   font-size: 1.3rem;
   font-weight: bold;
   margin: 0 0 20px 0;
-  color: #f8fafc;
+  color: var(--text-primary);
 }
 
 .formGroup {
@@ -217,7 +217,7 @@
 .formLabel {
   display: block;
   margin-bottom: 6px;
-  color: #cbd5e1;
+  color: var(--text-secondary);
   font-size: 0.9rem;
 }
 
@@ -225,9 +225,9 @@
   width: 100%;
   padding: 10px;
   border-radius: 6px;
-  border: 1px solid #334155;
-  background: #0f172a;
-  color: #f8fafc;
+  border: 1px solid var(--text-secondary);
+  background: var(--bg-primary);
+  color: var(--text-primary);
   outline: none;
 }
 
@@ -249,19 +249,19 @@
 
 /* Color overrides */
 .colorSlate {
-  color: #94a3b8;
+  color: var(--text-secondary);
 }
 
 .colorBlue {
-  color: #60a5fa;
+  color: var(--status-info-text);
 }
 
 .colorAmber {
-  color: #fbbf24;
+  color: var(--status-warning-text);
 }
 
 .colorEmerald {
-  color: #34d399;
+  color: var(--status-success-text);
 }
 
 .colorPurple {
@@ -273,30 +273,30 @@
 }
 
 .colorGreen {
-  color: #10b981;
+  color: var(--status-success-text);
 }
 
 .colorRed {
-  color: #ef4444;
+  color: var(--status-danger-text);
 }
 
 .colorOrange {
-  color: #f59e0b;
+  color: var(--status-warning-text);
 }
 
 .bgAdmin {
   background: rgba(59, 130, 246, 0.15);
-  color: #60a5fa;
+  color: var(--status-info-text);
 }
 
 .bgSuperAdmin {
   background: rgba(245, 158, 11, 0.15);
-  color: #fbbf24;
+  color: var(--status-warning-text);
 }
 
 .bgComercial {
   background: rgba(16, 185, 129, 0.15);
-  color: #34d399;
+  color: var(--status-success-text);
 }
 
 .bgFinanceiro {
@@ -311,7 +311,7 @@
 
 .bgTecnico {
   background: rgba(100, 116, 139, 0.15);
-  color: #94a3b8;
+  color: var(--text-secondary);
 }
 
 .dotAtivo {

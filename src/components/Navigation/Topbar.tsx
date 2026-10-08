@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { createClient } from '../../utils/supabase/client';
 import NotificacoesBell from './NotificacoesBell';
+import ThemeToggle from '../ThemeToggle/ThemeToggle';
 import styles from './Topbar.module.css';
 
 type UserData = { nome: string; email: string };
@@ -90,6 +91,7 @@ export default function Topbar() {
       </div>
 
       <div className={styles.rightSection}>
+        <ThemeToggle />
         <NotificacoesBell />
 
         <div ref={dropdownRef} className={styles.profileContainer}>

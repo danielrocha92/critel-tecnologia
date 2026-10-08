@@ -6,17 +6,17 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#0b1120',
+  themeColor: '#f4f6fa',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
 };
 
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { createClient } from '@/utils/supabase/server';
 import BottomNav from '@/components/Tecnico/BottomNav';
+import ThemeToggle from '@/components/ThemeToggle/ThemeToggle';
 import { Suspense } from 'react';
 import styles from './layout.module.css';
 
@@ -28,18 +28,7 @@ export default async function TecnicoLayout({
   params: Promise<{ lang: string }>;
 }) {
   const { lang } = await params;
-  const cookieStore = await cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
-        },
-      },
-    }
-  );
+  const supabase = await createClient();
 
   const { data: userData } = await supabase.auth.getUser();
 
@@ -53,12 +42,17 @@ export default async function TecnicoLayout({
     .eq('user_id', userData.user.id)
     .single();
 
-  const normalizedCargo = perfilData?.cargo?.trim().toUpperCase().replace('É', 'E');
+  const normalizedCargo = perfilData?.cargo
+    ?.normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .trim()
+    .toUpperCase();
   const isAdmin = normalizedCargo === 'ADMIN' || normalizedCargo === 'SUPER_ADMIN';
   const isTecnico = normalizedCargo === 'TECNICO';
 
-  if (!perfilData || (!isTecnico && !isAdmin) || perfilData.status !== 'ATIVO') {
-    if (perfilData?.status === 'PENDENTE') {
+  const normalizedStatus = perfilData?.status?.trim().toUpperCase();
+  if (!perfilData || (!isTecnico && !isAdmin) || normalizedStatus !== 'ATIVO') {
+    if (normalizedStatus === 'PENDENTE') {
       redirect(`/${lang || 'pt'}/pendente`);
     } else {
       redirect(`/${lang || 'pt'}/login`);
@@ -76,6 +70,7 @@ export default async function TecnicoLayout({
         <h1 className={styles.title}>Critel Mobile</h1>
         <div className={styles.userInfo}>
           <span className={styles.userName}>{primeiroNome}</span>
+          <ThemeToggle />
         </div>
       </header>
 

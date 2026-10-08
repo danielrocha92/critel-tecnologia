@@ -15,8 +15,8 @@
   width: min(760px, 100%);
   max-height: min(88vh, 820px);
   border-radius: 12px;
-  background: #111827;
-  border: 1px solid #334155;
+  background: var(--bg-secondary);
+  border: 1px solid var(--text-secondary);
   box-shadow: 0 24px 64px rgba(2, 6, 23, 0.55);
   display: flex;
   flex-direction: column;
@@ -38,7 +38,7 @@
 }
 
 .formLabel {
-  color: #cbd5e1;
+  color: var(--text-secondary);
   font-size: 0.82rem;
   font-weight: 600;
   text-align: right;
@@ -54,20 +54,20 @@
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid #263244;
-  background: #0f172a;
+  background: var(--bg-primary);
 }
 
 .headerTitle {
   margin: 0;
   font-size: 1.08rem;
-  color: #f1f5f9;
+  color: var(--text-primary);
   font-weight: 700;
 }
 
 .closeButton {
   background: transparent;
   border: none;
-  color: #a8b5c7;
+  color: var(--text-secondary);
   cursor: pointer;
   width: 36px;
   height: 36px;
@@ -77,8 +77,8 @@
 }
 
 .closeButton:hover:not(:disabled) {
-  color: #f8fafc;
-  background: #1e293b;
+  color: var(--text-primary);
+  background: var(--bg-secondary);
 }
 
 .closeButton:focus-visible,
@@ -86,7 +86,7 @@
 .btnCancel:focus-visible,
 .btnAttach:focus-within,
 .btnRemoveAttachment:focus-visible {
-  outline: 2px solid #7dd3fc;
+  outline: 2px solid var(--accent-cyan);
   outline-offset: 2px;
 }
 
@@ -106,7 +106,7 @@
 
 .fieldHint {
   margin: 6px 0 0;
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-size: 0.72rem;
   line-height: 1.4;
 }
@@ -114,9 +114,9 @@
 .inputField {
   box-sizing: border-box;
   min-height: 42px;
-  background: #1e293b;
-  border: 1px solid #334155;
-  color: #f8fafc;
+  background: var(--bg-secondary);
+  border: 1px solid var(--text-secondary);
+  color: var(--text-primary);
   padding: 9px 12px;
   border-radius: 6px;
   font: inherit;
@@ -128,9 +128,9 @@
 .selectField {
   box-sizing: border-box;
   min-height: 42px;
-  background: #1e293b;
-  border: 1px solid #334155;
-  color: #e2e8f0;
+  background: var(--bg-secondary);
+  border: 1px solid var(--text-secondary);
+  color: var(--text-primary);
   padding: 9px 12px;
   border-radius: 6px;
   font: inherit;
@@ -143,13 +143,13 @@
 .inputField:focus,
 .selectField:focus,
 .msgEditor:focus {
-  border-color: #38bdf8;
+  border-color: var(--accent-cyan);
   box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.12);
 }
 
 .inputField:focus,
 .selectField:focus {
-  border-color: #38bdf8;
+  border-color: var(--accent-cyan);
   box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.12);
 }
 
@@ -159,8 +159,8 @@
 
 .msgContainer {
   grid-column: 2 / 3;
-  background: #1e293b;
-  border: 1px solid #334155;
+  background: var(--bg-secondary);
+  border: 1px solid var(--text-secondary);
   border-radius: 6px;
   display: flex;
   flex-direction: column;
@@ -171,7 +171,7 @@
   box-sizing: border-box;
   background: transparent;
   border: none;
-  color: #f8fafc;
+  color: var(--text-primary);
   padding: 14px;
   font: inherit;
   font-size: 0.88rem;
@@ -183,13 +183,13 @@
 
 .toolbar {
   padding: 9px 12px;
-  border-top: 1px solid #334155;
+  border-top: 1px solid var(--text-secondary);
   display: flex;
   gap: 10px;
-  color: #a8b5c7;
+  color: var(--text-secondary);
   align-items: center;
   flex-wrap: wrap;
-  background: #172235;
+  background: var(--bg-tertiary);
 }
 
 .toolbarIcon {
@@ -202,7 +202,7 @@
 }
 
 .toolbarIcon:hover {
-  color: #f8fafc;
+  color: var(--text-primary);
   background: #26364b;
 }
 
@@ -224,7 +224,7 @@
   align-items: center;
   gap: 14px;
   border-top: 1px solid #263244;
-  background: #0f172a;
+  background: var(--bg-primary);
 }
 
 .footerLeft {
@@ -264,9 +264,9 @@
 }
 
 .attachmentBadge {
-  background: #1e293b;
-  color: #f8fafc;
-  border: 1px solid #334155;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--text-secondary);
   padding: 6px 10px;
   border-radius: 6px;
   font-weight: 500;
@@ -286,7 +286,7 @@
 .btnRemoveAttachment {
   background: transparent;
   border: none;
-  color: #ef4444;
+  color: var(--status-danger-text);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -297,9 +297,9 @@
 .btnAttach {
   min-height: 40px;
   box-sizing: border-box;
-  background: #1e293b;
-  color: #cbd5e1;
-  border: 1px solid #334155;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 1px solid var(--text-secondary);
   padding: 0 12px;
   border-radius: 6px;
   font-size: 0.82rem;
@@ -312,9 +312,9 @@
 
 .btnCancel {
   min-height: 40px;
-  background: #1e293b;
-  color: #cbd5e1;
-  border: 1px solid #334155;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 1px solid var(--text-secondary);
   padding: 0 16px;
   border-radius: 6px;
   font: inherit;
@@ -324,8 +324,8 @@
 }
 
 .btnCancel:hover:not(:disabled) {
-  color: #f8fafc;
-  border-color: #64748b;
+  color: var(--text-primary);
+  border-color: var(--text-muted);
   background: #263449;
 }
 

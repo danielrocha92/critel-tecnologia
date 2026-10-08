@@ -57,7 +57,7 @@ export async function updateSession(request: NextRequest) {
     // Fetch cargo and status directly from DB to avoid stale cookies leading to redirect loops
     const { data: perfil } = await supabase.from('perfis').select('cargo, status').eq('user_id', user.id).single();
     const cargo = perfil?.cargo || null;
-    const status = perfil?.status || null;
+    const status = perfil?.status?.trim().toUpperCase() || null;
 
     // Se estiver bloqueado ou pendente e não for rota pública, desloga ou deixa no login
     if (status && status !== 'ATIVO' && !isPublicPath) {
@@ -67,7 +67,11 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
-    const cargoNormalizado = (cargo || 'VISITANTE').trim().toUpperCase().replace('É', 'E');
+    const cargoNormalizado = (cargo || 'VISITANTE')
+      .normalize('NFD')
+      .replace(/\p{Diacritic}/gu, '')
+      .trim()
+      .toUpperCase();
 
     const roleBasePaths: Record<string, string> = {
       'TECNICO': '/tecnico/os',
@@ -105,16 +109,21 @@ export async function updateSession(request: NextRequest) {
     if (!isPublicPath) {
       if (cargoNormalizado !== 'ADMIN' && cargoNormalizado !== 'SUPER_ADMIN') {
         const isOwnBasePath = pathWithoutLang === basePath || pathWithoutLang.startsWith(`${basePath}/`);
+        const isOwnTechnicianRoute = cargoNormalizado === 'TECNICO' && [
+          '/tecnico/os',
+          '/tecnico/historico',
+          '/tecnico/perfil',
+        ].some((route) => pathWithoutLang === route || pathWithoutLang.startsWith(`${route}/`));
 
         let isShared = false;
         // Técnicos ficam isolados no portal operacional (/tecnico/os).
         if (cargoNormalizado !== 'TECNICO') {
-          const sharedRoutes = ['/conta', '/all-tickets', '/my-tickets', '/atendimentos', '/atendimento', '/analista', '/os', '/clientes', '/relatorios', '/base-conhecimento', '/ajuda', '/tecnicos-parceiros'];
+          const sharedRoutes = ['/conta', '/all-tickets', '/my-tickets', '/atendimentos', '/atendimento', '/analista', '/os', '/clientes', '/relatorios', '/base-conhecimento', '/ajuda', '/tecnicos-parceiros', '/monitoramento'];
           isShared = pathWithoutLang === '/tecnico'
             || sharedRoutes.some(route => pathWithoutLang === route || pathWithoutLang.startsWith(`${route}/`));
         }
 
-        if (!isOwnBasePath && !isShared) {
+        if (!isOwnBasePath && !isOwnTechnicianRoute && !isShared) {
           const url = request.nextUrl.clone();
           const lang = url.pathname.split('/')[1] || 'pt';
           url.pathname = `/${lang}${basePath}`;
