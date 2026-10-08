@@ -33,7 +33,7 @@ export default function PendentePage() {
           
         if (perfilData?.status === 'ATIVO') {
           if (perfilData.cargo === 'TECNICO') {
-            router.push(`/${lang}/tecnico`);
+            router.push(`/${lang}/tecnico/os`);
           } else {
             router.push(`/${lang}/dashboard`);
           }

@@ -77,7 +77,7 @@ export async function POST(request: Request) {
 
     const { data: ticket, error: ticketLookupError } = await supabaseAdmin
       .from('tickets')
-      .select('id, tecnico_id, analista_id, check_in_at')
+      .select('id, tecnico_id, check_in_at, check_in_lat, check_in_lng, status')
       .eq('id', ticket_id)
       .like('protocolo_origem', 'OS-%')
       .maybeSingle();
@@ -86,11 +86,17 @@ export async function POST(request: Request) {
     if (!ticket) {
       return NextResponse.json({ error: 'Ordem de serviço não encontrada.' }, { status: 404 });
     }
-    if (ticket.tecnico_id !== user.id && ticket.analista_id !== user.id) {
+    if (ticket.tecnico_id !== user.id) {
       return NextResponse.json({ error: 'Esta ordem de serviço não está atribuída a você.' }, { status: 403 });
     }
     if (ticket.check_in_at) {
-      return NextResponse.json({ success: true, check_in_at: ticket.check_in_at });
+      return NextResponse.json({
+        success: true,
+        check_in_at: ticket.check_in_at,
+        latitude: ticket.check_in_lat,
+        longitude: ticket.check_in_lng,
+        status: ticket.status,
+      });
     }
 
     const checkInAt = new Date().toISOString();
@@ -111,9 +117,25 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Não foi possível atualizar a ordem de serviço.' }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, check_in_at: checkInAt });
-  } catch (error: any) {
+    const { error: transitionError } = await supabaseAdmin.from('ticket_transitions').insert({
+      ticket_id,
+      from_status: ticket.status,
+      to_status: 'EM_ANDAMENTO',
+      changed_by: user.id,
+      reason: 'Check-in no local',
+    });
+    if (transitionError) console.error('Falha ao registrar transição do check-in:', transitionError);
+
+    return NextResponse.json({
+      success: true,
+      check_in_at: checkInAt,
+      latitude,
+      longitude,
+      status: 'EM_ANDAMENTO',
+    });
+  } catch (error) {
     console.error('Erro no check-in:', error);
-    return NextResponse.json({ error: error.message || 'Erro interno' }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'Erro interno';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

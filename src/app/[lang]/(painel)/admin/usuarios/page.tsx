@@ -17,8 +17,16 @@ export default function UsuariosPage() {
   const supabase = createClient();
 
   const carregarUsuarios = () => {
-    supabase.from('perfis').select('id,nome,email,cargo,status').order('nome').then(({ data }: any) => {
-      if (data) setUsuarios(data);
+    Promise.all([
+      supabase.from('perfis').select('id,nome,email,cargo,status').not('user_id', 'is', null).order('nome'),
+      supabase.from('tecnicos_detalhes').select('perfil_id,email_contato'),
+    ]).then(([profilesResult, detailsResult]: any) => {
+      if (!profilesResult.data) return;
+      const technicianEmails = new Map((detailsResult.data || []).map((detail: any) => [detail.perfil_id, detail.email_contato]));
+      setUsuarios(profilesResult.data.map((profile: PerfilRow) => ({
+        ...profile,
+        email: profile.email || technicianEmails.get(profile.id) || '',
+      })));
     });
   };
 

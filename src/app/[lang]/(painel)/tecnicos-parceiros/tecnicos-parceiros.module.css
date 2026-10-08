@@ -1,0 +1,88 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: clamp(1rem, 2.5vw, 2rem);
+  color: var(--text-primary);
+}
+
+.pageHeader,
+.modalHeader,
+.toolbar,
+.formActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.pageHeader { align-items: flex-end; }
+.eyebrow { display: inline-flex; align-items: center; gap: .45rem; color: var(--accent-brand-text); font-size: .78rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.title { margin: .4rem 0; font-size: clamp(1.6rem, 3vw, 2.2rem); line-height: 1.15; }
+.subtitle { margin: 0; color: var(--text-secondary); }
+.primaryButton,
+.secondaryButton { display: inline-flex; align-items: center; justify-content: center; gap: .55rem; min-height: 42px; padding: .65rem 1rem; border: 1px solid transparent; border-radius: 9px; font: inherit; font-weight: 700; cursor: pointer; text-decoration: none; }
+.primaryButton { background: var(--accent-brand); color: #fff; }
+.primaryButton:hover { filter: brightness(1.08); }
+.primaryButton:disabled { opacity: .65; cursor: wait; }
+.secondaryButton { background: transparent; color: var(--text-primary); border-color: var(--border-color); }
+.directory { overflow: hidden; border: 1px solid var(--border-color); border-radius: 14px; background: var(--card-bg); }
+.toolbar { padding: 1rem 1.1rem; border-bottom: 1px solid var(--border-color); }
+.searchBox { display: flex; align-items: center; gap: .6rem; width: min(100%, 440px); color: var(--text-secondary); }
+.searchBox input { width: 100%; min-height: 38px; padding: .5rem .65rem; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-primary); color: var(--text-primary); font: inherit; }
+.count { color: var(--text-secondary); font-size: .875rem; white-space: nowrap; }
+.tableScroller { overflow-x: auto; }
+.table { width: 100%; border-collapse: collapse; text-align: left; }
+.table th { padding: .8rem 1rem; color: var(--text-secondary); font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; }
+.table td { padding: .9rem 1rem; border-top: 1px solid var(--border-color); color: var(--text-secondary); font-size: .9rem; vertical-align: middle; }
+.name,
+.email { display: block; }
+.name { color: var(--text-primary); font-weight: 650; }
+.email { margin-top: .2rem; font-size: .8rem; }
+.status,
+.accessPending,
+.accessLinked { display: inline-flex; border-radius: 999px; padding: .3rem .6rem; background: rgba(148, 163, 184, .12); color: var(--text-secondary); font-size: .76rem; line-height: 1.2; }
+.accessPending { color: #b45309; background: rgba(245, 158, 11, .12); }
+.accessLinked { color: #047857; background: rgba(16, 185, 129, .12); }
+.actionsCell { white-space: nowrap; text-align: right; }
+.textButton { padding: .3rem .4rem; border: 0; background: transparent; color: var(--accent-brand-text); font: inherit; font-size: .85rem; font-weight: 700; cursor: pointer; }
+.textButton:hover { text-decoration: underline; }
+.emptyState { margin: 0; padding: 2rem 1rem; color: var(--text-secondary); text-align: center; }
+.successNotice,
+.errorNotice { margin: 0; padding: .8rem 1rem; border-radius: 9px; }
+.successNotice { color: #047857; background: rgba(16, 185, 129, .12); }
+.errorNotice { color: #b91c1c; background: rgba(239, 68, 68, .1); }
+.modalBackdrop { position: fixed; inset: 0; z-index: 1200; display: flex; align-items: center; justify-content: center; padding: 1rem; background: rgba(2, 6, 23, .72); }
+.modal { width: min(100%, 760px); max-height: min(92dvh, 900px); overflow-y: auto; padding: clamp(1rem, 3vw, 1.5rem); border: 1px solid var(--border-color); border-radius: 16px; background: var(--card-bg); box-shadow: 0 25px 80px rgba(0, 0, 0, .35); }
+.detailsModal { width: min(100%, 820px); }
+.formModal { width: min(100%, 880px); }
+.modalHeader { align-items: flex-start; margin-bottom: 1rem; }
+.modalHeader h2 { margin: .35rem 0 0; font-size: 1.4rem; }
+.iconButton { display: grid; width: 38px; height: 38px; place-items: center; border: 1px solid var(--border-color); border-radius: 9px; background: transparent; color: var(--text-primary); cursor: pointer; }
+.profileSummary { display: flex; flex-wrap: wrap; gap: .7rem 1.2rem; padding: 1rem 0; border-block: 1px solid var(--border-color); color: var(--text-secondary); font-size: .88rem; }
+.profileSummary span { display: inline-flex; align-items: center; gap: .4rem; }
+.detailGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; margin: .4rem 0 1.25rem; }
+.detailItem { min-width: 0; padding: .8rem .7rem .8rem 0; border-bottom: 1px solid var(--border-color); }
+.detailItem dt { margin-bottom: .25rem; color: var(--text-secondary); font-size: .75rem; font-weight: 700; text-transform: uppercase; }
+.detailItem dd { margin: 0; overflow-wrap: anywhere; color: var(--text-primary); }
+.formHint { margin: 0 0 1rem; color: var(--text-secondary); font-size: .9rem; line-height: 1.5; }
+.form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .9rem; }
+.field { display: flex; min-width: 0; flex-direction: column; gap: .35rem; color: var(--text-secondary); font-size: .82rem; font-weight: 650; }
+.field input,
+.field textarea { width: 100%; min-height: 42px; padding: .6rem .7rem; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-primary); color: var(--text-primary); font: inherit; font-weight: 400; }
+.field textarea { resize: vertical; }
+.fieldWide { grid-column: 1 / -1; }
+.formActions { grid-column: 1 / -1; justify-content: flex-end; padding-top: .5rem; }
+.visuallyHidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; clip-path: inset(50%); }
+
+@media (max-width: 700px) {
+  .pageHeader { align-items: flex-start; flex-direction: column; }
+  .toolbar { align-items: flex-start; flex-direction: column; }
+  .searchBox { width: 100%; }
+  .form { grid-template-columns: minmax(0, 1fr); }
+  .fieldWide,
+  .formActions { grid-column: auto; }
+  .detailGrid { grid-template-columns: minmax(0, 1fr); }
+  .table th,
+  .table td { padding: .75rem; }
+}

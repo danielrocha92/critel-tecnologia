@@ -1,5 +1,5 @@
 import TicketList from '@/components/Tickets/TicketList';
 
 export default function OrdensDeServicoPage() {
-  return <TicketList filterTitle="Ordens de Serviço" filterType="all" detailPath="/os" />;
+  return <TicketList filterTitle="Ordens de Serviço" filterType="all" detailPath="/os" displayMode="list" />;
 }

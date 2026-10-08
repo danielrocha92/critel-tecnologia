@@ -1,17 +1,18 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Search, Bookmark, Tag, User, Activity } from 'lucide-react';
+import { Search, Bookmark, Tag, User, Activity, CalendarDays, ChevronRight, Building2 } from 'lucide-react';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { createClient } from '@/utils/supabase/client';
 import { ITicket } from '@/types/ticket';
 import { useRouter, usePathname } from 'next/navigation';
+import Link from 'next/link';
 import styles from './TicketList.module.css';
 
 export type TicketFilter = 'all' | 'my-all' | 'my-opened' | 'my-closed';
 type TicketProfile = { nome: string; user_id: string };
 
-export default function TicketList({ filterTitle, filterType, detailPath }: { filterTitle: string, filterType: TicketFilter, detailPath?: string }) {
+export default function TicketList({ filterTitle, filterType, detailPath, displayMode = 'kanban' }: { filterTitle: string, filterType: TicketFilter, detailPath?: string, displayMode?: 'kanban' | 'list' }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [serverStatusFilter, setServerStatusFilter] = useState<'open' | 'closed' | 'all'>(
     filterType === 'my-closed' ? 'closed' : (filterType === 'all' || filterType === 'my-all') ? 'all' : 'open'
@@ -105,7 +106,7 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
     }
   };
 
-  const filteredTickets = tickets.filter(t => {
+  const scopedTickets = tickets.filter(t => {
     // Filtros por usuário
     if (filterType === 'my-opened' || filterType === 'my-all' || filterType === 'my-closed') {
       if (currentUser && t.tecnico_id !== currentUser.id && t.analista_id !== currentUser.id) {
@@ -113,25 +114,56 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
       }
     }
 
-    const closedStatuses = ['FECHADO', 'RESOLVIDO'];
-
-    if (serverStatusFilter === 'open' || filterType === 'my-opened') {
-      if (closedStatuses.includes(t.status)) return false;
-    } else if (serverStatusFilter === 'closed' || filterType === 'my-closed') {
-      if (!closedStatuses.includes(t.status)) return false;
-    }
-
     if (searchTerm) {
-      const term = searchTerm.toLowerCase();
+      const term = searchTerm.trim().toLocaleLowerCase('pt-BR');
       const matchTerm = (
-        (t.titulo && t.titulo.toLowerCase().includes(term)) ||
-        (t.id && t.id.toLowerCase().includes(term))
+        (t.titulo && t.titulo.toLocaleLowerCase('pt-BR').includes(term)) ||
+        (t.id && t.id.toLocaleLowerCase('pt-BR').includes(term)) ||
+        (t.cliente && t.cliente.toLocaleLowerCase('pt-BR').includes(term))
       );
       if (!matchTerm) return false;
     }
 
     return true;
   });
+
+  const closedStatuses = ['FECHADO', 'RESOLVIDO'];
+  const isClosed = (status: string) => closedStatuses.includes(status);
+  const statusFilter = filterType === 'my-opened' ? 'open' : filterType === 'my-closed' ? 'closed' : serverStatusFilter;
+  const filteredTickets = scopedTickets.filter(ticket => {
+    if (statusFilter === 'open') return !isClosed(ticket.status);
+    if (statusFilter === 'closed') return isClosed(ticket.status);
+    return true;
+  });
+  const openCount = scopedTickets.filter(ticket => !isClosed(ticket.status)).length;
+  const closedCount = scopedTickets.filter(ticket => isClosed(ticket.status)).length;
+
+  const getTicketHref = (ticketId: string) => detailPath
+    ? `/${lang}${detailPath}/${ticketId}`
+    : `/${lang}/os/${ticketId}`;
+
+  const getStatusLabel = (status: string) => ({
+    FILA: 'Na fila',
+    NOVO: 'Novo',
+    ABERTO: 'Em andamento',
+    EM_ANDAMENTO: 'Em andamento',
+    PENDENTE: 'Pendente',
+    RESOLVIDO: 'Resolvido',
+    FECHADO: 'Fechado',
+  }[status] || status.replaceAll('_', ' '));
+
+  const getStatusClass = (status: string) => isClosed(status)
+    ? styles.statusBadgeDone
+    : ['FILA', 'NOVO', 'PENDENTE'].includes(status)
+      ? styles.statusBadgePending
+      : styles.statusBadgeActive;
+
+  const formatCreatedDate = (value: ITicket['criado_em']) => {
+    if (!value) return 'Data não informada';
+    const date = value instanceof Date ? value : new Date(typeof value === 'number' && value < 1_000_000_000_000 ? value * 1000 : value);
+    if (Number.isNaN(date.getTime())) return 'Data não informada';
+    return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }).format(date);
+  };
 
   const getAtendenteNome = (userId: string | null | undefined) => {
     if (!userId) return 'Fila';
@@ -153,7 +185,7 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
         <div className={styles.headerCopy}>
           <span className={styles.eyebrow}>GESTÃO OPERACIONAL</span>
           <h1 className={styles.title}>{filterTitle}</h1>
-          <p className={styles.subtitle}>Quadro Kanban nativo atualizado em tempo real.</p>
+          <p className={styles.subtitle}>{displayMode === 'list' ? 'Acompanhe prioridades, responsáveis e andamento em uma lista clara.' : 'Quadro Kanban nativo atualizado em tempo real.'}</p>
         </div>
       </div>
 
@@ -169,7 +201,19 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
           />
         </div>
 
-        {(filterType === 'all' || filterType === 'my-all') && (
+        {displayMode === 'list' && (filterType === 'all' || filterType === 'my-all') ? (
+          <div className={styles.listFilters} role="group" aria-label="Filtrar ordens de serviço por status">
+            <button type="button" className={serverStatusFilter === 'all' ? styles.listFilterActive : styles.listFilter} onClick={() => setServerStatusFilter('all')} aria-pressed={serverStatusFilter === 'all'}>
+              Todas <span>{scopedTickets.length}</span>
+            </button>
+            <button type="button" className={serverStatusFilter === 'open' ? styles.listFilterActive : styles.listFilter} onClick={() => setServerStatusFilter('open')} aria-pressed={serverStatusFilter === 'open'}>
+              Em aberto <span>{openCount}</span>
+            </button>
+            <button type="button" className={serverStatusFilter === 'closed' ? styles.listFilterActive : styles.listFilter} onClick={() => setServerStatusFilter('closed')} aria-pressed={serverStatusFilter === 'closed'}>
+              Concluídas <span>{closedCount}</span>
+            </button>
+          </div>
+        ) : (filterType === 'all' || filterType === 'my-all') && (
           <div className={styles.selectContainer}>
             <select
               value={serverStatusFilter}
@@ -190,8 +234,52 @@ export default function TicketList({ filterTitle, filterType, detailPath }: { fi
         <div className={styles.emptyState} role="alert">{firebaseError}</div>
       ) : filteredTickets.length === 0 ? (
         <div className={styles.emptyState}>
-          Nenhum chamado encontrado.
+          {searchTerm ? 'Nenhuma ordem corresponde à busca.' : 'Nenhuma ordem de serviço encontrada.'}
         </div>
+      ) : displayMode === 'list' ? (
+        <section className={styles.listPanel} aria-label="Ordens de serviço">
+          <div className={styles.listPanelHeader}>
+            <div><h2>Ordens de serviço</h2><p>{filteredTickets.length} {filteredTickets.length === 1 ? 'registro' : 'registros'} nesta visualização</p></div>
+            <span className={styles.liveIndicator}><span /> Atualizado em tempo real</span>
+          </div>
+          <div className={styles.ticketList}>
+            {filteredTickets.map(ticket => {
+              const priority = String(ticket.prioridade || '').toLocaleLowerCase('pt-BR');
+              const priorityClass = ['alta', '1', 'urgente'].includes(priority)
+                ? styles.priorityHigh
+                : ['media', 'média', '2'].includes(priority)
+                  ? styles.priorityMedium
+                  : ['baixa', '3', 'low'].includes(priority)
+                    ? styles.priorityLow
+                    : styles.priorityNormal;
+              const ticketStatusClass = ticket.status === 'FILA' ? styles.rowStatusQueue : isClosed(ticket.status) ? styles.rowStatusClosed : styles.rowStatusOpen;
+              return (
+                <article className={styles.ticketRow} key={ticket.id}>
+                  <Link className={styles.ticketRowMain} href={getTicketHref(ticket.id)}>
+                    <div className={`${styles.rowStatusMark} ${ticketStatusClass}`} aria-hidden="true" />
+                    <div className={styles.ticketPrimary}>
+                      <div className={styles.ticketKicker}><span>{ticket.protocolo_origem || `OS-${String(ticket.id).slice(0, 8)}`}</span><span className={`${styles.statusBadge} ${getStatusClass(ticket.status)}`}>{getStatusLabel(ticket.status)}</span></div>
+                      <h3>{ticket.titulo || 'Ordem de serviço sem título'}</h3>
+                      <div className={styles.ticketMeta}>
+                        <span><Building2 size={14} /> {ticket.cliente || ticket.departamento || 'Cliente não informado'}</span>
+                        <span><Bookmark size={14} /> {ticket.categoria || ticket.departamento || 'Sem categoria'}</span>
+                        <span><CalendarDays size={14} /> {formatCreatedDate(ticket.criado_em)}</span>
+                      </div>
+                    </div>
+                    <div className={styles.ticketSecondary}>
+                      <div className={styles.rowPriority}><span>Prioridade</span><strong className={priorityClass}>{renderBadge(ticket.prioridade)}</strong></div>
+                      <div className={styles.rowAssignee}><User size={15} /><span><small>Responsável</small><strong>{getAtendenteNome(ticket.tecnico_id || '')}</strong></span></div>
+                    </div>
+                    <ChevronRight className={styles.rowArrow} size={19} aria-hidden="true" />
+                  </Link>
+                  {['FILA', 'NOVO'].includes(String(ticket.status)) && !ticket.tecnico_id && (
+                    <button type="button" onClick={(event) => handleAssumir(event, ticket.id)} className={styles.listAssumeButton}>Assumir</button>
+                  )}
+                </article>
+              );
+            })}
+          </div>
+        </section>
       ) : (
         <div className={styles.kanbanBoard}>
           {[

@@ -177,20 +177,26 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
         try {
           setCheckInMessage('Localização obtida. Registrando o check-in nativamente...');
 
-          await supabase.from('tickets').update({
-            check_in_at: new Date().toISOString(),
-            check_in_lat: position.coords.latitude,
-            check_in_lng: position.coords.longitude,
-            status: 'EM_ANDAMENTO'
-          }).eq('id', ticket!.id);
-
-          await supabase.from('ticket_transitions').insert({
-            ticket_id: ticket!.id,
-            from_status: ticket!.status,
-            to_status: 'EM_ANDAMENTO',
-            changed_by: currentUser.id,
-            reason: 'Check-in no local'
+          const response = await fetch('/api/tecnico/check-in', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              ticket_id: ticket.id,
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude,
+            }),
           });
+
+          const result = await response.json();
+          if (!response.ok) throw new Error(result.error || 'Não foi possível registrar o check-in.');
+
+          setTicket((current) => current ? {
+            ...current,
+            check_in_at: result.check_in_at,
+            check_in_lat: result.latitude,
+            check_in_lng: result.longitude,
+            status: result.status || 'EM_ANDAMENTO',
+          } : current);
 
           setCheckInMessage(null);
         } catch (err) {

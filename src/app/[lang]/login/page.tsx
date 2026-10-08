@@ -58,7 +58,7 @@ export default function LoginPage() {
       const isTecnico = normalizedCargo === 'TECNICO';
 
       if (isTecnico) {
-        router.push(`/${lang}/tecnico`);
+        router.push(`/${lang}/tecnico/os`);
       } else {
         router.push(`/${lang}/dashboard`);
       }

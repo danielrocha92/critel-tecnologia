@@ -10,6 +10,7 @@ type TicketPayload = {
   department: string;
   category: string;
   priority: string;
+  technicianId: string | null;
 };
 
 function parseTicketPayload(value: unknown): TicketPayload | null {
@@ -22,6 +23,7 @@ function parseTicketPayload(value: unknown): TicketPayload | null {
   const department = payload.departamento ?? payload.department;
   const category = payload.categoria ?? payload.category;
   const priority = payload.prioridade ?? payload.priority;
+  const technicianId = payload.tecnico_id;
 
   if (typeof customer !== 'string' || !customer.trim()) return null;
   if (typeof title !== 'string' || !title.trim()) return null;
@@ -34,6 +36,7 @@ function parseTicketPayload(value: unknown): TicketPayload | null {
     department: typeof department === 'string' && department.trim() ? department.trim() : 'Suporte',
     category: typeof category === 'string' && category.trim() ? category.trim() : 'Geral',
     priority: typeof priority === 'string' && priority.trim() ? priority.trim() : 'Normal',
+    technicianId: typeof technicianId === 'string' && technicianId.trim() ? technicianId.trim() : null,
   };
 }
 
@@ -145,6 +148,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Campos título e descrição são obrigatórios' }, { status: 400 });
     }
 
+    if (payload.technicianId) {
+      const { data: technician, error: technicianError } = await supabaseAdmin
+        .from('perfis')
+        .select('user_id')
+        .eq('user_id', payload.technicianId)
+        .eq('cargo', 'TECNICO')
+        .eq('status', 'ATIVO')
+        .maybeSingle();
+
+      if (technicianError || !technician) {
+        return NextResponse.json({ error: 'O técnico selecionado não está ativo ou não possui acesso ao portal.' }, { status: 400 });
+      }
+    }
+
     const { data: ticketData, error: ticketError } = await supabaseAdmin
       .from('tickets')
       .insert({
@@ -154,7 +171,7 @@ export async function POST(req: NextRequest) {
         categoria: payload.category,
         prioridade: payload.priority,
         status: 'FILA',
-        tecnico_id: null,
+        tecnico_id: payload.technicianId,
         cliente: payload.customer,
         analista_id: profile.id,
         protocolo_origem: `OS-${Date.now()}`

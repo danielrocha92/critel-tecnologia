@@ -70,7 +70,7 @@ export async function updateSession(request: NextRequest) {
     const cargoNormalizado = (cargo || 'VISITANTE').trim().toUpperCase().replace('É', 'E');
 
     const roleBasePaths: Record<string, string> = {
-      'TECNICO': '/tecnico',
+      'TECNICO': '/tecnico/os',
       'FINANCEIRO': '/financeiro',
       'COMERCIAL': '/comercial',
       'ANALISTA': '/analista',
@@ -78,6 +78,17 @@ export async function updateSession(request: NextRequest) {
       'SUPER_ADMIN': '/dashboard'
     };
     const basePath = roleBasePaths[cargoNormalizado] || '/dashboard';
+    const canViewTechnicianDashboard = ['ANALISTA', 'FINANCEIRO', 'ADMIN', 'SUPER_ADMIN'].includes(cargoNormalizado);
+    const isTechnicianDashboardRoute = pathWithoutLang === '/tecnico'
+      || pathWithoutLang === '/tecnicos-parceiros'
+      || pathWithoutLang.startsWith('/tecnicos-parceiros/');
+
+    if (isTechnicianDashboardRoute && !canViewTechnicianDashboard) {
+      const url = request.nextUrl.clone();
+      const lang = url.pathname.split('/')[1] || 'pt';
+      url.pathname = `/${lang}${basePath}`;
+      return NextResponse.redirect(url);
+    }
 
     // 2.a Redireciona da página de login para o painel correto
     if (isLoginPath) {
@@ -96,10 +107,11 @@ export async function updateSession(request: NextRequest) {
         const isOwnBasePath = pathWithoutLang === basePath || pathWithoutLang.startsWith(`${basePath}/`);
 
         let isShared = false;
-        // Técnicos ficam isolados apenas na sua rota mobile (/tecnico)
+        // Técnicos ficam isolados no portal operacional (/tecnico/os).
         if (cargoNormalizado !== 'TECNICO') {
-          const sharedRoutes = ['/conta', '/all-tickets', '/my-tickets', '/atendimentos', '/atendimento', '/analista', '/os', '/clientes', '/relatorios', '/base-conhecimento', '/ajuda'];
-          isShared = sharedRoutes.some(route => pathWithoutLang === route || pathWithoutLang.startsWith(`${route}/`));
+          const sharedRoutes = ['/conta', '/all-tickets', '/my-tickets', '/atendimentos', '/atendimento', '/analista', '/os', '/clientes', '/relatorios', '/base-conhecimento', '/ajuda', '/tecnicos-parceiros'];
+          isShared = pathWithoutLang === '/tecnico'
+            || sharedRoutes.some(route => pathWithoutLang === route || pathWithoutLang.startsWith(`${route}/`));
         }
 
         if (!isOwnBasePath && !isShared) {

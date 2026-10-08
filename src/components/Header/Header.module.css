@@ -48,6 +48,17 @@
   flex-shrink: 0;
 }
 
+@media (min-width: 901px) {
+  .container {
+    max-width: none;
+    padding-left: 1.5rem;
+  }
+
+  .logo {
+    margin-right: 1rem;
+  }
+}
+
 .logoLink {
   display: flex;
   align-items: center;
@@ -60,7 +71,7 @@
 }
 
 .logoImage {
-  height: 68px;
+  height: 62px;
   width: auto;
   object-fit: contain;
   filter: drop-shadow(0 2px 4px rgba(255, 255, 255, 0.15));

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { X, Paperclip, Bold, Italic, Underline, Type, AlignLeft, List, ListOrdered, Quote, Link2, Image as ImageIcon, BookTemplate } from 'lucide-react';
 import styles from './NovoChamadoModal.module.css';
 
@@ -9,18 +9,49 @@ interface NovoChamadoModalProps {
   onSuccess?: () => void;
 }
 
+interface TechnicianOption {
+  id: string;
+  nome: string;
+}
+
 export default function NovoChamadoModal({ onClose, onSuccess }: NovoChamadoModalProps) {
   const [loading, setLoading] = useState(false);
   const isSubmitting = useRef(false);
   const [files, setFiles] = useState<File[]>([]);
+  const [technicians, setTechnicians] = useState<TechnicianOption[]>([]);
+  const [techniciansLoading, setTechniciansLoading] = useState(true);
+  const [techniciansError, setTechniciansError] = useState<string | null>(null);
   const messageRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState({
     cliente: '',
     endereco_loja: '',
     departamento: '',
+    tecnico_id: '',
     assunto: '',
     prioridade: ''
   });
+
+  useEffect(() => {
+    let active = true;
+
+    const loadTechnicians = async () => {
+      setTechniciansLoading(true);
+      setTechniciansError(null);
+      try {
+        const response = await fetch('/api/tickets/tecnicos', { cache: 'no-store' });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Não foi possível carregar os técnicos.');
+        if (active) setTechnicians(result.tecnicos || []);
+      } catch (error) {
+        if (active) setTechniciansError(error instanceof Error ? error.message : 'Não foi possível carregar os técnicos.');
+      } finally {
+        if (active) setTechniciansLoading(false);
+      }
+    };
+
+    void loadTechnicians();
+    return () => { active = false; };
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -51,6 +82,7 @@ export default function NovoChamadoModal({ onClose, onSuccess }: NovoChamadoModa
       titulo: formData.assunto,
       descricao: finalHtml,
       departamento: formData.departamento,
+      tecnico_id: formData.tecnico_id || null,
       prioridade: formData.prioridade
     };
 
@@ -156,6 +188,33 @@ export default function NovoChamadoModal({ onClose, onSuccess }: NovoChamadoModa
                 <option value="suporte">Suporte Técnico</option>
                 <option value="financeiro">Financeiro</option>
               </select>
+            </div>
+          </div>
+
+          {/* Técnico responsável */}
+          <div className={styles.formRow}>
+            <label className={styles.formLabel} htmlFor="ticket-technician">Técnico:</label>
+            <div className={styles.inputWrapper}>
+              <select
+                id="ticket-technician"
+                name="tecnico_id"
+                value={formData.tecnico_id}
+                onChange={handleChange}
+                className={styles.selectField}
+                disabled={techniciansLoading || Boolean(techniciansError)}
+              >
+                <option value="">Deixar na fila de atendimento</option>
+                {technicians.map((technician) => (
+                  <option key={technician.id} value={technician.id}>{technician.nome}</option>
+                ))}
+              </select>
+              {techniciansError ? (
+                <p className={styles.fieldHint} role="alert">{techniciansError}</p>
+              ) : (
+                <p className={styles.fieldHint}>
+                  {techniciansLoading ? 'Carregando técnicos...' : technicians.length ? 'São exibidos técnicos com acesso ativo ao portal.' : 'Nenhum técnico com acesso ativo cadastrado.'}
+                </p>
+              )}
             </div>
           </div>
 

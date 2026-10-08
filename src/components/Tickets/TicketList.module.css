@@ -130,6 +130,313 @@
   border: 1px solid rgba(255, 255, 255, 0.075);
 }
 
+/* Modern list view used by the service order dashboard. */
+.listFilters {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  background: #141a26;
+}
+
+.listFilter,
+.listFilterActive {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 30px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 7px;
+  color: #94a3b8;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.73rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.listFilter span,
+.listFilterActive span {
+  display: grid;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  place-items: center;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.07);
+  color: inherit;
+  font-size: 0.66rem;
+}
+
+.listFilter:hover {
+  color: #e2e8f0;
+}
+
+.listFilterActive {
+  color: #fff;
+  background: #9f2636;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.listFilterActive span {
+  background: rgba(255, 255, 255, 0.17);
+}
+
+.listPanel {
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 15px;
+  background: linear-gradient(145deg, rgba(20, 27, 40, 0.98), rgba(15, 21, 32, 0.98));
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.14);
+}
+
+.listPanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 22px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.listPanelHeader h2 {
+  margin: 0;
+  color: #f1f5f9;
+  font-size: 0.95rem;
+  font-weight: 650;
+}
+
+.listPanelHeader p {
+  margin: 4px 0 0;
+  color: #8190a5;
+  font-size: 0.73rem;
+}
+
+.liveIndicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #91a0b4;
+  font-size: 0.7rem;
+  white-space: nowrap;
+}
+
+.liveIndicator > span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #34d399;
+  box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.1);
+}
+
+.ticketList {
+  display: flex;
+  flex-direction: column;
+}
+
+.ticketRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.055);
+  transition: background-color 150ms ease;
+}
+
+.ticketRow:last-child {
+  border-bottom: 0;
+}
+
+.ticketRow:hover {
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.ticketRowMain {
+  display: grid;
+  grid-template-columns: 3px minmax(220px, 1fr) minmax(190px, 0.36fr) 20px;
+  align-items: center;
+  gap: 18px;
+  flex: 1;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.ticketRowMain:focus-visible,
+.listFilter:focus-visible,
+.listFilterActive:focus-visible,
+.listAssumeButton:focus-visible {
+  outline: 2px solid #fb7185;
+  outline-offset: 3px;
+  border-radius: 7px;
+}
+
+.rowStatusMark {
+  width: 3px;
+  min-height: 48px;
+  border-radius: 99px;
+}
+
+.rowStatusQueue {
+  background: #f59e0b;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.2);
+}
+
+.rowStatusOpen {
+  background: #60a5fa;
+  box-shadow: 0 0 12px rgba(96, 165, 250, 0.18);
+}
+
+.rowStatusClosed {
+  background: #34d399;
+}
+
+.ticketPrimary,
+.ticketSecondary {
+  min-width: 0;
+}
+
+.ticketKicker {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 7px;
+  color: #92a0b4;
+  font-size: 0.69rem;
+  font-weight: 650;
+  letter-spacing: 0.025em;
+}
+
+.ticketKicker > span:first-child {
+  color: #f18a98;
+}
+
+.ticketKicker .statusBadge {
+  padding: 3px 7px;
+  font-size: 0.62rem;
+}
+
+.ticketPrimary h3 {
+  overflow: hidden;
+  margin: 0;
+  color: #e8edf5;
+  font-size: 0.86rem;
+  font-weight: 620;
+  line-height: 1.45;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ticketMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px 14px;
+  margin-top: 8px;
+  color: #8593a7;
+  font-size: 0.68rem;
+}
+
+.ticketMeta > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+
+.ticketMeta svg {
+  flex: 0 0 auto;
+  color: #65758c;
+}
+
+.ticketSecondary {
+  display: grid;
+  grid-template-columns: 85px minmax(90px, 1fr);
+  align-items: center;
+  gap: 12px;
+}
+
+.rowPriority,
+.rowAssignee {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.rowPriority > span,
+.rowAssignee small {
+  color: #718096;
+  font-size: 0.62rem;
+  font-weight: 500;
+}
+
+.rowPriority strong {
+  font-size: 0.7rem;
+}
+
+.rowAssignee {
+  display: grid;
+  grid-template-columns: 15px minmax(0, 1fr);
+  align-items: center;
+  column-gap: 7px;
+}
+
+.rowAssignee > svg {
+  grid-row: span 2;
+  color: #7f8da1;
+}
+
+.rowAssignee > span {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.rowAssignee strong {
+  overflow: hidden;
+  color: #cbd5e1;
+  font-size: 0.69rem;
+  font-weight: 550;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowArrow {
+  color: #64748b;
+  transition: color 150ms ease, transform 150ms ease;
+}
+
+.ticketRow:hover .rowArrow {
+  color: #fb7185;
+  transform: translateX(2px);
+}
+
+.listAssumeButton {
+  flex: 0 0 auto;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid rgba(251, 113, 133, 0.25);
+  border-radius: 8px;
+  background: rgba(201, 37, 58, 0.12);
+  color: #fda4af;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 650;
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
+
+.listAssumeButton:hover {
+  border-color: rgba(251, 113, 133, 0.5);
+  background: rgba(201, 37, 58, 0.22);
+}
+
 /* FEED LAYOUT */
 .feedContainer {
   display: flex;
@@ -637,6 +944,70 @@
   .ticketFooter {
     align-items: stretch;
   }
+
+  .listFilters {
+    justify-content: space-between;
+  }
+
+  .listFilter,
+  .listFilterActive {
+    justify-content: center;
+    flex: 1;
+    padding: 0 6px;
+    font-size: 0.68rem;
+  }
+
+  .listPanelHeader {
+    align-items: flex-start;
+    padding: 15px;
+  }
+
+  .liveIndicator {
+    font-size: 0;
+  }
+
+  .ticketRow {
+    align-items: flex-start;
+    gap: 11px;
+    padding: 14px 12px;
+  }
+
+  .ticketRowMain {
+    grid-template-columns: 3px minmax(0, 1fr) 17px;
+    align-items: start;
+    gap: 10px;
+  }
+
+  .rowStatusMark {
+    min-height: 42px;
+  }
+
+  .ticketPrimary h3 {
+    white-space: normal;
+  }
+
+  .ticketMeta {
+    gap: 6px 10px;
+  }
+
+  .ticketSecondary {
+    grid-column: 2;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 12px;
+  }
+
+  .rowArrow {
+    grid-column: 3;
+    grid-row: 1;
+  }
+
+  .listAssumeButton {
+    align-self: flex-end;
+    margin-top: 10px;
+    padding: 0 9px;
+    font-size: 0.66rem;
+  }
 }
 
 @media (max-width: 420px) {
@@ -665,5 +1036,23 @@
   .assigneeInfo {
     max-width: 100%;
     overflow-wrap: anywhere;
+  }
+
+  .listPanelHeader {
+    gap: 8px;
+  }
+
+  .ticketMeta > span:first-child {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+
+  .ticketMeta > span:nth-child(2) {
+    display: none;
+  }
+
+  .ticketRow {
+    gap: 8px;
+    padding-inline: 10px;
   }
 }

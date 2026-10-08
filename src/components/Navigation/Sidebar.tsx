@@ -112,7 +112,7 @@ export default function Sidebar({ lang }: { lang: string }) {
         { label: 'Painel Financeiro', href: `/${lang}/financeiro`, roles: ['SUPER_ADMIN', 'ADMIN', 'FINANCEIRO'] },
         { label: 'Painel Comercial', href: `/${lang}/comercial`, roles: ['SUPER_ADMIN', 'ADMIN', 'COMERCIAL'] },
         { label: 'Painel Analista', href: `/${lang}/analista`, roles: ['SUPER_ADMIN', 'ADMIN', 'ANALISTA'] },
-        { label: 'Painel Técnico', href: `/${lang}/tecnico`, roles: ['SUPER_ADMIN', 'ADMIN', 'TECNICO'] },
+        { label: 'Painel Técnico', href: `/${lang}/tecnico`, roles: ['SUPER_ADMIN', 'ADMIN', 'ANALISTA', 'FINANCEIRO'] },
       ],
     },
     {
