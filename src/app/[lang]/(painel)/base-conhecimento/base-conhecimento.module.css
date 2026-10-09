@@ -28,7 +28,7 @@
   background: var(--bg-secondary);
   padding: 16px;
   border-radius: 12px;
-  border: 1px solid var(--text-secondary);
+  border: 1px solid var(--border-color);
   display: flex;
   gap: 16px;
   margin-bottom: 2rem;
@@ -44,22 +44,23 @@
   left: 12px;
   top: 50%;
   transform: translateY(-50%);
+  color: var(--text-secondary);
 }
 
 .searchInput {
   width: 100%;
-  background: var(--bg-primary);
-  border: 1px solid var(--text-secondary);
-  color: #fff;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  color: var(--text-primary);
   padding: 10px 10px 10px 40px;
   border-radius: 8px;
   outline: none;
 }
 
 .filterSelect {
-  background: var(--bg-primary);
-  border: 1px solid var(--text-secondary);
-  color: #fff;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  color: var(--text-primary);
   padding: 0 16px;
   border-radius: 8px;
   outline: none;
@@ -73,7 +74,7 @@
 
 .card {
   background: var(--bg-secondary);
-  border: 1px solid var(--text-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 24px;
   display: flex;
@@ -122,7 +123,7 @@
 .cardFooter {
   margin-top: auto;
   padding-top: 16px;
-  border-top: 1px solid var(--text-secondary);
+  border-top: 1px solid var(--border-color);
 }
 
 .btnAccess {
@@ -137,17 +138,21 @@
 
 /* Colors */
 .bgRed {
-  background: rgba(239, 68, 68, 0.2);
+  background: color-mix(in srgb, var(--status-danger-text) 14%, transparent);
+  color: var(--status-danger-text);
 }
 
 .bgBlue {
-  background: rgba(59, 130, 246, 0.2);
+  background: color-mix(in srgb, var(--status-info-text) 14%, transparent);
+  color: var(--status-info-text);
 }
 
 .bgGreen {
-  background: rgba(16, 185, 129, 0.2);
+  background: color-mix(in srgb, var(--status-success-text) 14%, transparent);
+  color: var(--status-success-text);
 }
 
 .bgPurple {
-  background: rgba(139, 92, 246, 0.2);
+  background: color-mix(in srgb, var(--accent-cyan) 14%, transparent);
+  color: var(--accent-cyan);
 }

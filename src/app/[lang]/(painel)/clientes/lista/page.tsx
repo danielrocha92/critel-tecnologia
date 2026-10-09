@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useCallback } from 'react';
 import { Search, Plus, Building2, Phone, Mail, MoreVertical, ChevronDown, Filter } from 'lucide-react';
+import SectionPageHeader from '@/components/Dashboard/SectionPageHeader';
 import styles from './clientes.module.css';
 
 const clientes = [
@@ -24,54 +25,44 @@ const segmentoClasses: Record<string, string> = {
   'Varejo':      styles.segVarejo,
 };
 
-// Larguras iniciais de cada coluna (em px). Mínimo de 60px.
 const COL_MIN = 60;
 const COL_KEYS = ['cliente', 'segmento', 'lojas', 'contato', 'telefone', 'status', 'acoes'] as const;
 type ColKey = typeof COL_KEYS[number];
 const INITIAL_WIDTHS: Record<ColKey, number> = {
-  cliente:  220,
-  segmento: 130,
-  lojas:    100,
-  contato:  230,
-  telefone: 140,
-  status:   140,
-  acoes:    80,
+  cliente: 220, segmento: 130, lojas: 100, contato: 230, telefone: 140, status: 140, acoes: 80,
 };
 
 export default function ClientesPage() {
   const [busca,       setBusca]       = useState('');
   const [filtroSeg,   setFiltroSeg]   = useState('Todos');
   const [filtroStatus,setFiltroStatus]= useState('Todos');
-  const [colWidths,   setColWidths]   = useState<Record<ColKey, number>>(INITIAL_WIDTHS);
+  const [colWidths, setColWidths] = useState<Record<ColKey, number>>(INITIAL_WIDTHS);
+  const dragging = useRef<{ col: ColKey; startX: number; startWidth: number } | null>(null);
 
-  // Ref para guardar estado do drag sem re-render
-  const dragging = useRef<{ col: ColKey; startX: number; startW: number } | null>(null);
+  const onResizeStart = useCallback((col: ColKey, event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    dragging.current = { col, startX: event.clientX, startWidth: colWidths[col] };
+    document.body.classList.add('column-resizing');
 
-  const onMouseDown = useCallback((col: ColKey, e: React.MouseEvent) => {
-    e.preventDefault();
-    dragging.current = { col, startX: e.clientX, startW: colWidths[col] };
-
-    const onMove = (me: MouseEvent) => {
+    const onMove = (moveEvent: MouseEvent) => {
       if (!dragging.current) return;
-      const delta = me.clientX - dragging.current.startX;
-      const newW  = Math.max(COL_MIN, dragging.current.startW + delta);
-      setColWidths(prev => ({ ...prev, [dragging.current!.col]: newW }));
+      const { col: activeCol, startX, startWidth } = dragging.current;
+      setColWidths((current) => ({
+        ...current,
+        [activeCol]: Math.max(COL_MIN, startWidth + moveEvent.clientX - startX),
+      }));
     };
 
     const onUp = () => {
       dragging.current = null;
+      document.body.classList.remove('column-resizing');
       window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseup',   onUp);
-      document.body.style.cursor = '';
-      document.body.style.userSelect = '';
+      window.removeEventListener('mouseup', onUp);
     };
 
-    document.body.style.cursor = 'col-resize';
-    document.body.style.userSelect = 'none';
     window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup',   onUp);
+    window.addEventListener('mouseup', onUp, { once: true });
   }, [colWidths]);
-
   const filtrados = clientes.filter(c => {
     const matchBusca  = !busca || c.nome.toLowerCase().includes(busca.toLowerCase()) || c.contato.toLowerCase().includes(busca.toLowerCase());
     const matchSeg    = filtroSeg    === 'Todos' || c.segmento === filtroSeg;
@@ -79,7 +70,6 @@ export default function ClientesPage() {
     return matchBusca && matchSeg && matchStatus;
   });
 
-  // Cabeçalho com alça de resize
   const Th = ({
     col, children, align
   }: {
@@ -89,21 +79,24 @@ export default function ClientesPage() {
   }) => (
     <th 
       className={`${styles.thContainer} ${align === 'right' ? styles.rightAlign : styles.alignLeft}`}
-      style={{
-        width: colWidths[col],
-        minWidth: COL_MIN,
-        maxWidth: colWidths[col],
-      }}>
+    >
       {children}
-      {/* Alça de resize — aparece como linha vertical na borda direita */}
       {col !== 'acoes' && (
-        <span
-          onMouseDown={e => onMouseDown(col, e)}
+        <button
+          type="button"
           className={styles.resizeHandle}
-          title="Arraste para redimensionar"
+          aria-label={`Redimensionar coluna ${col}`}
+          title="Arraste para redimensionar; use as setas para ajustar"
+          onMouseDown={(event) => onResizeStart(col, event)}
+          onKeyDown={(event) => {
+            if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+            event.preventDefault();
+            const delta = event.key === 'ArrowRight' ? 16 : -16;
+            setColWidths((current) => ({ ...current, [col]: Math.max(COL_MIN, current[col] + delta) }));
+          }}
         >
-          <span className={styles.resizeLine} />
-        </span>
+          <span className={styles.resizeLine} aria-hidden="true" />
+        </button>
       )}
     </th>
   );
@@ -113,57 +106,53 @@ export default function ClientesPage() {
       <div className={styles.pageWrapper}>
 
         {/* Header */}
-        <div className={styles.header}>
-          <div>
-            <h1 className={styles.headerTitle}>
-              Clientes
-            </h1>
-            <p className={styles.headerDesc}>
-              {filtrados.length} empresa{filtrados.length !== 1 ? 's' : ''} cadastrada{filtrados.length !== 1 ? 's' : ''}
-            </p>
-          </div>
-          <button className={styles.btnPrimary}>
-            <Plus size={16} /> Novo Cliente
-          </button>
-        </div>
+        <SectionPageHeader
+          eyebrow="GESTÃO DE CLIENTES"
+          title="Base de clientes"
+          description={`${filtrados.length} empresa${filtrados.length !== 1 ? 's' : ''} cadastrada${filtrados.length !== 1 ? 's' : ''}`}
+          action={(
+            <button type="button" className={styles.btnPrimary}>
+              <Plus size={16} /> Novo Cliente
+            </button>
+          )}
+        />
 
         {/* Filtros */}
         <div className={styles.filtersContainer}>
-          <Filter size={15} color="#64748b" className={styles.filterIcon} />
+          <Filter size={15} className={styles.filterIcon} />
 
           <div className={styles.inputWrapper}>
-            <Search size={15} color="#64748b" className={styles.searchIcon} />
-            <input className={styles.critelInput} type="text" placeholder="Buscar por nome ou e-mail..."
+            <Search size={15} className={styles.searchIcon} />
+            <input className={styles.critelInput} type="search" aria-label="Buscar clientes por nome ou e-mail" placeholder="Buscar por nome ou e-mail..."
               value={busca} onChange={e => setBusca(e.target.value)} />
           </div>
 
           <div className={styles.selectWrapper}>
-            <select className={styles.critelSelect} value={filtroSeg} onChange={e => setFiltroSeg(e.target.value)}>
+            <select className={styles.critelSelect} aria-label="Filtrar por segmento" value={filtroSeg} onChange={e => setFiltroSeg(e.target.value)}>
               <option value="Todos">Todos os Segmentos</option>
               <option value="Alimentação">Alimentação</option>
               <option value="Fast Food">Fast Food</option>
               <option value="Varejo">Varejo</option>
             </select>
-            <ChevronDown size={14} color="#64748b" className={styles.selectArrow} />
+            <ChevronDown size={14} className={styles.selectArrow} />
           </div>
 
           <div className={styles.selectWrapper}>
-            <select className={styles.critelSelect} value={filtroStatus} onChange={e => setFiltroStatus(e.target.value)}>
+            <select className={styles.critelSelect} aria-label="Filtrar por status" value={filtroStatus} onChange={e => setFiltroStatus(e.target.value)}>
               <option value="Todos">Todos os Status</option>
               <option value="Ativo">Ativo</option>
               <option value="Em Implantação">Em Implantação</option>
               <option value="Inativo">Inativo</option>
             </select>
-            <ChevronDown size={14} color="#64748b" className={styles.selectArrow} />
+            <ChevronDown size={14} className={styles.selectArrow} />
           </div>
-
-          {/* Botão para resetar larguras */}
           <button
+            type="button"
             onClick={() => setColWidths(INITIAL_WIDTHS)}
             className={styles.btnReset}
-            title="Restaurar larguras padrão"
+            title="Restaurar larguras padrão da tabela"
           >
-            ↺ Resetar
+            Resetar colunas
           </button>
         </div>
 
@@ -171,9 +160,7 @@ export default function ClientesPage() {
         <div className={styles.tableContainer}>
           <table className={styles.clientesTable}>
             <colgroup>
-              {COL_KEYS.map(col => (
-                <col key={col} style={{ width: colWidths[col] }} />
-              ))}
+              {COL_KEYS.map((col) => <col key={col} width={colWidths[col]} />)}
             </colgroup>
             <thead>
               <tr>
@@ -199,30 +186,30 @@ export default function ClientesPage() {
 
                 return (
                   <tr key={c.id} className={styles.clientesRow}>
-                    <td>
+                    <td data-label="Cliente">
                       <div className={styles.clienteCell}>
                         <div className={styles.avatarCircle}>{c.sigla}</div>
                         <span className={styles.clienteName}>{c.nome}</span>
                       </div>
                     </td>
-                    <td>
+                    <td data-label="Segmento">
                       <span className={`${styles.segmentoTag} ${segClass}`}>
                         {c.segmento}
                       </span>
                     </td>
-                    <td>
+                    <td data-label="Lojas">
                       <span className={styles.lojasCount}>{c.lojas.toLocaleString('pt-BR')}</span>
                       <span className={styles.lojasLabel}>lojas</span>
                     </td>
-                    <td className={styles.textCell}>{c.contato}</td>
-                    <td className={styles.textCell}>{c.telefone}</td>
-                    <td>
+                    <td data-label="Contato" className={styles.textCell}>{c.contato}</td>
+                    <td data-label="Telefone" className={styles.textCell}>{c.telefone}</td>
+                    <td data-label="Status">
                       <span className={`${styles.statusWrapper} ${sc.bgClass}`}>
                         <span className={`${styles.statusDot} ${sc.dotClass}`} />
                         {c.status}
                       </span>
                     </td>
-                    <td className={styles.rightAlign}>
+                    <td data-label="Ações" className={styles.rightAlign}>
                       <div className={styles.rowActions}>
                         <button className={styles.btnIcon} title="Ver chamados"><Building2 size={15} /></button>
                         <button className={styles.btnIcon} title="Mais opções"><MoreVertical size={15} /></button>

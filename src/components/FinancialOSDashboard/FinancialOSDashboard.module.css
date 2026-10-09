@@ -1,10 +1,10 @@
 .container {
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  padding: 24px;
-  width: 100%;
-  max-width: 1400px;
+  gap: 18px;
+  box-sizing: border-box;
+  width: min(100%, 1440px);
+  padding: 30px clamp(18px, 4vw, 52px) 48px;
   margin: 0 auto;
 }
 
@@ -15,7 +15,7 @@
 }
 
 .title {
-  font-size: 1.75rem;
+  font-size: clamp(1.65rem, 3vw, 2.15rem);
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
@@ -42,19 +42,22 @@
 /* === SUMMARY CARDS === */
 .summaryGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 13px;
 }
 
 .summaryCard {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  padding: 20px;
   display: flex;
-  flex-direction: column;
-  gap: 12px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  flex-direction: row;
+  align-items: center;
+  gap: 13px;
+  min-width: 0;
+  min-height: 96px;
+  padding: 16px;
+  background: linear-gradient(145deg, var(--bg-secondary), var(--bg-tertiary));
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  transition: border-color 150ms ease, background 150ms ease, box-shadow 150ms ease;
 }
 
 .summaryCardButton {
@@ -63,6 +66,7 @@
   font: inherit;
   text-align: left;
   cursor: pointer;
+  appearance: none;
 }
 
 .summaryCardButton:focus-visible {
@@ -76,37 +80,42 @@
 }
 
 .summaryCard:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-  border-color: color-mix(in srgb, var(--accent-brand) 40%, var(--border-color));
+  border-color: color-mix(in srgb, var(--accent-brand-text) 55%, var(--border-color));
 }
 
-.cardHeader {
+.cardIconWrap {
   display: flex;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
   align-items: center;
-  justify-content: space-between;
-  width: 100%;
+  justify-content: center;
+  border-radius: 11px;
+  background: rgba(201, 37, 58, 0.13);
 }
 
 .cardTitle {
-  font-size: 0.85rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  display: block;
+  overflow: hidden;
   color: var(--text-secondary);
-  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  text-overflow: ellipsis;
 }
 
-.cardIcon {
-  color: var(--accent-brand);
-  opacity: 0.8;
-}
+.cardIcon { color: var(--accent-brand-text); }
+.summaryCopy { display: grid; min-width: 0; gap: 5px; }
 
 .cardValue {
-  font-size: 1.8rem;
+  display: block;
+  overflow: hidden;
+  margin: 0;
+  font-size: clamp(1rem, 1.7vw, 1.25rem);
   font-weight: 700;
   color: var(--text-primary);
-  margin: 0;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Specific Card Colors */
@@ -119,7 +128,7 @@
 .filterSection {
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
+  border-radius: 15px;
   padding: 16px 20px;
   display: flex;
   flex-wrap: wrap;
@@ -290,7 +299,7 @@
 .tableContainer {
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
+  border-radius: 15px;
   overflow-x: auto;
 }
 
@@ -496,4 +505,91 @@
   display: flex;
   justify-content: flex-end;
   gap: 12px;
+}
+
+@media (max-width: 1050px) {
+  .summaryGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 700px) {
+  .container { gap: 14px; padding: 20px 14px 32px; }
+  .title { font-size: clamp(1.45rem, 7vw, 1.85rem); }
+  .description { font-size: 0.88rem; line-height: 1.5; }
+  .summaryGrid { gap: 9px; }
+  .summaryCard { min-height: 85px; gap: 9px; padding: 12px 10px; }
+  .cardIconWrap { width: 35px; height: 35px; flex-basis: 35px; }
+  .cardTitle { font-size: 0.68rem; }
+  .cardValue { font-size: 0.95rem; }
+  .filterSection { padding: 12px; }
+  .filterGroup { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+  .searchControl, .filterGroup .selectInput { grid-column: 1 / -1; }
+  .searchInput, .dateInput, .selectInput { box-sizing: border-box; width: 100%; min-width: 0; min-height: 42px; }
+  .dateRangeSeparator { display: none; }
+  .filterSection > div:last-child, .btnSecondary { width: 100%; }
+  .batchActions { justify-content: stretch; }
+  .batchActions .btnPrimary { width: 100%; min-height: 44px; }
+
+  .tableContainer {
+    overflow: visible;
+    border: 0;
+    background: transparent;
+  }
+
+  .table,
+  .table tbody,
+  .table tbody tr,
+  .table tbody td {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .table tbody tr:not(.emptyTableRow) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 10px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    background: var(--bg-secondary);
+  }
+
+  .table tbody tr:not(.emptyTableRow) td {
+    display: grid;
+    align-content: start;
+    gap: 4px;
+    padding: 10px 12px;
+    border: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .table tbody tr:not(.emptyTableRow) td::before {
+    content: attr(data-label);
+    color: var(--text-secondary);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .table .rowCheckboxCell,
+  .table td[data-label="Ações"] {
+    grid-column: 1 / -1;
+  }
+
+  .table td[data-label="Ações"] { border-top: 1px solid var(--border-color) !important; }
+  .table .actionsCell { min-height: 40px; }
+  .table .emptyTableCell { display: block; padding: 24px 16px; }
 }

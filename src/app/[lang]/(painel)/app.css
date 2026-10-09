@@ -1,0 +1,117 @@
+.layout-root {
+  min-height: 100vh;
+  color: var(--text-primary);
+  background: var(--bg-primary);
+}
+
+.layout-root :where(button, input, select, textarea) {
+  font-family: inherit;
+}
+
+.layout-root :where(input, select, textarea) {
+  color-scheme: inherit;
+}
+
+.layout-root :where(button:disabled, input:disabled, select:disabled, textarea:disabled) {
+  cursor: not-allowed;
+}
+
+body.column-resizing,
+body.column-resizing * {
+  cursor: col-resize !important;
+  user-select: none !important;
+}
+
+.layout-root .btn {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  padding: 0 var(--spacing-4);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.layout-root .btn--primary { color: #fff; background: var(--accent-brand); }
+.layout-root .btn--secondary { color: var(--text-primary); background: var(--bg-tertiary); border-color: var(--border-color); }
+.layout-root .btn--outline { color: var(--text-primary); background: transparent; border-color: var(--border-color); }
+.layout-root .btn--danger { color: #fff; background: var(--status-danger-button); }
+.layout-root .btn--primary:hover:not(:disabled) { background: var(--accent-hover); }
+.layout-root .btn--secondary:hover:not(:disabled),
+.layout-root .btn--outline:hover:not(:disabled) { background: var(--surface-hover); }
+.layout-root .btn--danger:hover:not(:disabled) { filter: brightness(0.92); }
+.layout-root .btn:active:not(:disabled) { transform: translateY(1px); }
+.layout-root .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+.layout-root .btn--sm { min-height: 32px; padding-inline: var(--spacing-3); font-size: var(--font-size-xs); }
+.layout-root .btn--md { min-height: 40px; }
+.layout-root .btn--lg { min-height: 48px; padding-inline: var(--spacing-6); font-size: var(--font-size-md); }
+
+.layout-root .form-control {
+  width: 100%;
+  min-height: 40px;
+  padding: var(--spacing-2) var(--spacing-3);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  background: var(--input-bg);
+  font: inherit;
+}
+
+.layout-root .form-control--invalid,
+.layout-root .form-control[aria-invalid='true'] {
+  border-color: var(--status-danger-text);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--status-danger-text) 18%, transparent);
+}
+
+.layout-root .card__header,
+.layout-root .card__body,
+.layout-root .card__footer { padding: var(--spacing-4); }
+.layout-root .card__header,
+.layout-root .card__footer { border-bottom: 1px solid var(--border-color); }
+.layout-root .card__footer { border-top: 1px solid var(--border-color); border-bottom: 0; }
+
+.layout-root .alert--success,
+.layout-root .alert--warning,
+.layout-root .alert--danger,
+.layout-root .alert--info {
+  padding: var(--spacing-3) var(--spacing-4);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+}
+.layout-root .alert--success { color: var(--status-success-text); background: color-mix(in srgb, var(--status-success-text) 10%, transparent); }
+.layout-root .alert--warning { color: var(--status-warning-text); background: color-mix(in srgb, var(--status-warning-text) 10%, transparent); }
+.layout-root .alert--danger { color: var(--status-danger-text); background: color-mix(in srgb, var(--status-danger-text) 10%, transparent); }
+.layout-root .alert--info { color: var(--status-info-text); background: color-mix(in srgb, var(--status-info-text) 10%, transparent); }
+
+.layout-root .table-responsive { max-width: 100%; overflow-x: auto; }
+.layout-root .table--striped tbody tr:nth-child(odd) { background: var(--surface-subtle); }
+
+@media (max-width: 768px) {
+  .layout-root,
+  .layout-root .main-content,
+  .layout-root main {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .layout-root :where(button, a, input, select) { touch-action: manipulation; }
+  .layout-root :where(button, input, select) { min-height: 44px; }
+  .layout-root :where(img, video, iframe) { max-width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .layout-root *,
+  .layout-root *::before,
+  .layout-root *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

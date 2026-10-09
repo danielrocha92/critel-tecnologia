@@ -9,8 +9,7 @@ export const viewport: Viewport = {
   themeColor: '#f4f6fa',
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  viewportFit: 'cover',
 };
 
 import { redirect } from 'next/navigation';
@@ -67,7 +66,7 @@ export default async function TecnicoLayout({
       <div className={styles.mobileContainer}>
         {/* Topbar minimalista para mobile */}
       <header className={styles.header}>
-        <h1 className={styles.title}>Critel Mobile</h1>
+        <p className={styles.title}>Critel Mobile</p>
         <div className={styles.userInfo}>
           <span className={styles.userName}>{primeiroNome}</span>
           <ThemeToggle />

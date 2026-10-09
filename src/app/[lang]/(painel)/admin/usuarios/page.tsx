@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Users, Shield, Crown, Wrench, Briefcase, DollarSign, LineChart, X } from 'lucide-react';
+import SectionPageHeader from '@/components/Dashboard/SectionPageHeader';
 import { createClient } from '@/utils/supabase/client';
 import styles from './usuarios.module.css';
 
@@ -58,18 +59,16 @@ export default function UsuariosPage() {
 
   return (
     <div className={styles.pageContainer}>
-      <div className={styles.header}>
-        <div>
-          <h1 className={styles.title}>Gerenciar Usuários</h1>
-          <p className={styles.subtitle}>Administre acessos, cargos e status da equipe</p>
-        </div>
-        <button
-          onClick={() => setShowModal(true)}
-          className={styles.btnNew}
-        >
-          + Novo Colaborador
-        </button>
-      </div>
+      <SectionPageHeader
+        eyebrow="ADMINISTRAÇÃO"
+        title="Gerenciar Usuários"
+        description="Administre acessos, cargos e status da equipe."
+        action={(
+          <button type="button" onClick={() => setShowModal(true)} className={styles.btnNew}>
+            + Novo Colaborador
+          </button>
+        )}
+      />
 
       <div className={styles.tableContainer}>
         <table className={styles.table}>

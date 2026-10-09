@@ -208,3 +208,14 @@
   color: var(--text-secondary);
   font-size: 0.9rem;
 }
+
+.loadingState { padding: 40px; color: var(--text-secondary); text-align: center; }
+.columnOptions { display: grid; width: 32px; height: 32px; place-items: center; border: 0; border-radius: 6px; background: transparent; color: var(--text-secondary); cursor: pointer; }
+.columnOptions:hover { background: var(--surface-hover); color: var(--text-primary); }
+.lastContact { display: flex; align-items: center; gap: 4px; }
+.columnHeaderLead { border-top: 4px solid var(--status-info-text); }
+.columnHeaderContact { border-top: 4px solid var(--accent-cyan); }
+.columnHeaderNegotiation { border-top: 4px solid var(--status-warning-text); }
+.columnHeaderProposal { border-top: 4px solid var(--accent-brand-text); }
+.columnHeaderWon { border-top: 4px solid var(--status-success-text); }
+.columnHeaderLost { border-top: 4px solid var(--status-danger-text); }

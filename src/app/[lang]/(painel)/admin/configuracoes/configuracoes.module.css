@@ -88,9 +88,11 @@
 }
 
 .pageContainer {
-  padding: 2rem;
+  box-sizing: border-box;
+  width: min(100%, 1440px);
+  margin: 0 auto;
+  padding: 30px clamp(18px, 4vw, 52px) 48px;
   flex: 1;
-  max-width: 720px;
 }
 
 .pageHeader {
@@ -153,7 +155,7 @@
 }
 
 .btnPerm {
-  background: #3b82f6;
+  background: var(--status-info-button);
   color: #fff;
   border: none;
   padding: 8px 18px;
@@ -195,7 +197,7 @@
 }
 
 .btnSaveNormal {
-  background: #3b82f6;
+  background: var(--status-info-button);
 }
 
 .btnSaveSuccess {

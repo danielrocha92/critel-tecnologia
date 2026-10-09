@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Bell, Volume2, VolumeX, Monitor, Ticket, MessageSquare, CheckCircle2 } from 'lucide-react';
+import SectionPageHeader from '@/components/Dashboard/SectionPageHeader';
 import { useNotificacoes, NotifPrefs } from '@/hooks/useNotificacoes';
 import { createBrowserClient } from '@supabase/ssr';
 import styles from './configuracoes.module.css';
@@ -81,10 +82,11 @@ export default function ConfiguracoesPage() {
 
   return (
     <div className={styles.pageContainer}>
-      <div className={styles.pageHeader}>
-        <h1 className={styles.pageTitle}>Configurações do Sistema</h1>
-        <p className={styles.pageSubtitle}>Personalize alertas, notificações e comportamentos do painel</p>
-      </div>
+      <SectionPageHeader
+        eyebrow="ADMINISTRAÇÃO"
+        title="Configurações do Sistema"
+        description="Personalize alertas, notificações e comportamentos do painel."
+      />
 
       {/* Permissão Desktop */}
       <div className={`${styles.permBox} ${permStatus === 'granted' ? styles.permGranted : permStatus === 'denied' ? styles.permDenied : styles.permDefault}`}>

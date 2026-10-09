@@ -34,11 +34,13 @@ export default function OSSummaryCards({ summary, selectedFilter, onSelectFilter
           aria-pressed={selectedFilter === key}
           aria-label={`${title}: ${formatCurrency(value)}. Clique para ver as ordens correspondentes.`}
         >
-          <span className={styles.cardHeader}>
-            <span className={styles.cardTitle}>{title}</span>
-            <Icon size={24} className={styles.cardIcon} aria-hidden="true" />
+          <span className={styles.cardIconWrap}>
+            <Icon size={19} className={styles.cardIcon} aria-hidden="true" />
           </span>
-          <span className={styles.cardValue}>{formatCurrency(value)}</span>
+          <span className={styles.summaryCopy}>
+            <span className={styles.cardTitle}>{title}</span>
+            <strong className={styles.cardValue}>{formatCurrency(value)}</strong>
+          </span>
         </button>
       ))}
     </section>

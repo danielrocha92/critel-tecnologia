@@ -89,6 +89,19 @@
   gap: 1.25rem;
 }
 
+.problemContext {
+  padding: 0.9rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--accent-brand-text) 25%, var(--border-color));
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--accent-brand) 6%, var(--card-bg));
+  color: var(--text-primary);
+}
+
+.problemContext h3 { margin: 0 0 0.55rem; color: var(--text-primary); font-size: 0.9rem; }
+.problemContext p { margin: 0.25rem 0; color: var(--text-secondary); font-size: 0.82rem; line-height: 1.45; overflow-wrap: anywhere; }
+.problemContext strong { color: var(--text-primary); }
+.problemContext .problemEvidenceHint { margin-top: 0.6rem; color: var(--accent-brand-text); font-weight: 600; }
+
 .grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

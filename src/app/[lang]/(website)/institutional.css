@@ -1,0 +1,9 @@
+.institutional-root {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+.institutional-root > main {
+  flex: 1 0 auto;
+}

@@ -2,13 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { createClient as createSupabaseAdminClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
+import { isTicketTeam, isValidProblemSelection, OTHER_ROOT_CAUSE, type TicketTeam } from '@/lib/tickets/problemCatalog';
 
 type TicketPayload = {
+  team: TicketTeam;
   customer: string;
   title: string;
   description: string;
   department: string;
   category: string;
+  rootCause: string;
+  rootCauseDetail: string;
   priority: string;
   technicianId: string | null;
 };
@@ -18,25 +22,39 @@ function parseTicketPayload(value: unknown): TicketPayload | null {
 
   const payload = value as Record<string, unknown>;
   const customer = payload.cliente ?? payload.customer;
+  const team = payload.equipe_responsavel;
   const title = payload.titulo ?? payload.title;
   const description = payload.descricao ?? payload.description;
   const department = payload.departamento ?? payload.department;
   const category = payload.categoria ?? payload.category;
+  const rootCause = payload.causa_raiz ?? payload.rootCause;
+  const rootCauseDetail = payload.causa_raiz_detalhe ?? payload.rootCauseDetail;
   const priority = payload.prioridade ?? payload.priority;
   const technicianId = payload.tecnico_id;
 
   if (typeof customer !== 'string' || !customer.trim()) return null;
   if (typeof title !== 'string' || !title.trim()) return null;
   if (typeof description !== 'string' || !description.trim()) return null;
+  if (!isTicketTeam(team)) return null;
+  if (team === 'SUPORTE_TECNICO') {
+    if (typeof department !== 'string' || !department.trim()) return null;
+    if (typeof category !== 'string' || !category.trim()) return null;
+    if (typeof rootCause !== 'string' || !rootCause.trim()) return null;
+    if (rootCause === OTHER_ROOT_CAUSE && (typeof rootCauseDetail !== 'string' || !rootCauseDetail.trim())) return null;
+    if (!isValidProblemSelection(department, category, rootCause)) return null;
+  }
 
   return {
+    team,
     customer: customer.trim(),
     title: title.trim(),
     description: description.trim(),
-    department: typeof department === 'string' && department.trim() ? department.trim() : 'Suporte',
-    category: typeof category === 'string' && category.trim() ? category.trim() : 'Geral',
+    department: team === 'SUPORTE_TECNICO' && typeof department === 'string' ? department.trim() : '',
+    category: team === 'SUPORTE_TECNICO' && typeof category === 'string' ? category.trim() : '',
+    rootCause: team === 'SUPORTE_TECNICO' && typeof rootCause === 'string' ? rootCause.trim() : '',
+    rootCauseDetail: team === 'SUPORTE_TECNICO' && typeof rootCauseDetail === 'string' ? rootCauseDetail.trim() : '',
     priority: typeof priority === 'string' && priority.trim() ? priority.trim() : 'Normal',
-    technicianId: typeof technicianId === 'string' && technicianId.trim() ? technicianId.trim() : null,
+    technicianId: team === 'SUPORTE_TECNICO' && typeof technicianId === 'string' && technicianId.trim() ? technicianId.trim() : null,
   };
 }
 
@@ -145,7 +163,7 @@ export async function POST(req: NextRequest) {
 
     const payload = parseTicketPayload(payloadValue);
     if (!payload) {
-      return NextResponse.json({ error: 'Campos título e descrição são obrigatórios' }, { status: 400 });
+      return NextResponse.json({ error: 'Confira cliente, departamento, categoria, causa raiz e descrição da causa não listada.' }, { status: 400 });
     }
 
     if (payload.technicianId) {
@@ -167,8 +185,11 @@ export async function POST(req: NextRequest) {
       .insert({
         titulo: payload.title,
         descricao: payload.description,
-        departamento: payload.department,
-        categoria: payload.category,
+        equipe_responsavel: payload.team,
+        departamento: payload.department || null,
+        categoria: payload.category || null,
+        causa_raiz: payload.rootCause || null,
+        causa_raiz_detalhe: payload.rootCauseDetail || null,
         prioridade: payload.priority,
         status: 'FILA',
         tecnico_id: payload.technicianId,

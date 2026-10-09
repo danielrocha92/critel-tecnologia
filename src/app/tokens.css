@@ -1,0 +1,114 @@
+:root {
+  color-scheme: light;
+
+  /* Superfícies e texto */
+  --bg-primary: #f4f6fa;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #e9edf3;
+  --card-bg: #ffffff;
+  --card-border: #dce2ea;
+  --header-bg: rgba(255, 255, 255, 0.94);
+  --header-border: #dce2ea;
+  --dropdown-bg: #ffffff;
+  --input-bg: #ffffff;
+  --input-border: #7c8da2;
+  --text-primary: #172033;
+  --text-secondary: #526174;
+  --text-muted: #64748b;
+  --border-color: #dce2ea;
+  --surface-hover: rgba(15, 23, 42, 0.045);
+  --surface-subtle: rgba(15, 23, 42, 0.025);
+  --shadow-color: rgba(15, 23, 42, 0.12);
+  --scrollbar-thumb: #b8c2d0;
+  --scrollbar-thumb-hover: #64748b;
+  --selection-bg: rgba(16, 185, 129, 0.3);
+  --selection-text: #ffffff;
+
+  /* Marca e estados */
+  --accent-brand: #b71c1c;
+  --accent-brand-text: #a5161b;
+  --accent-cyan: #087ca7;
+  --accent-hover: #991b1b;
+  --status-success-text: #047857;
+  --status-success-button: #047857;
+  --status-warning-text: #a16207;
+  --status-danger-text: #b91c1c;
+  --status-danger-button: #b91c1c;
+  --status-info-text: #1d4ed8;
+  --status-info-button: #1d4ed8;
+  --focus-ring: #a5161b;
+
+  /* Tokens semânticos de compatibilidade */
+  --color-primary-50: #f0f7ff;
+  --color-primary-500: var(--accent-cyan);
+  --color-primary-700: #075985;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-info: #3b82f6;
+  --color-bg-app: var(--bg-primary);
+  --color-bg-surface: var(--bg-secondary);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-border: var(--border-color);
+
+  /* Tipografia, espaçamento, raios, elevação */
+  --font-family-base: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --spacing-1: 0.25rem;
+  --spacing-2: 0.5rem;
+  --spacing-3: 0.75rem;
+  --spacing-4: 1rem;
+  --spacing-6: 1.5rem;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --border-radius: 10px;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.3s ease;
+  --container-width: 1200px;
+  --header-height: 80px;
+  --hero-overlay-bg: rgba(15, 23, 42, 0.2);
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg-primary: #0b1120;
+  --bg-secondary: #162032;
+  --bg-tertiary: #1f2d42;
+  --card-bg: rgba(22, 32, 50, 0.92);
+  --card-border: rgba(255, 255, 255, 0.08);
+  --header-bg: rgba(11, 17, 32, 0.94);
+  --header-border: rgba(255, 255, 255, 0.08);
+  --dropdown-bg: rgba(15, 23, 42, 0.98);
+  --input-bg: #0b1120;
+  --input-border: #64748b;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #94a3b8;
+  --border-color: rgba(255, 255, 255, 0.08);
+  --surface-hover: rgba(255, 255, 255, 0.045);
+  --surface-subtle: rgba(255, 255, 255, 0.025);
+  --shadow-color: rgba(0, 0, 0, 0.35);
+  --scrollbar-thumb: #333848;
+  --scrollbar-thumb-hover: #64748b;
+  --status-success-text: #6ee7b7;
+  --status-success-button: #047857;
+  --status-warning-text: #fcd34d;
+  --status-danger-text: #fca5a5;
+  --status-danger-button: #991b1b;
+  --status-info-text: #93c5fd;
+  --status-info-button: #1d4ed8;
+  --accent-brand-text: #ff5252;
+  --accent-cyan: #00d2ff;
+  --accent-hover: #d32f2f;
+  --focus-ring: #ff5252;
+  --color-primary-700: #7dd3fc;
+  --hero-overlay-bg: rgba(0, 0, 0, 0.75);
+}

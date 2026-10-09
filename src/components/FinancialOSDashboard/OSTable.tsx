@@ -69,12 +69,12 @@ export default function OSTable({ osList, selectedIds, onSelect, onSelectAll, on
         </thead>
         <tbody>
           {osList.length === 0 ? (
-            <tr>
+            <tr className={styles.emptyTableRow}>
               <td colSpan={10} className={styles.emptyTableCell}>Nenhuma ordem de serviço encontrada.</td>
             </tr>
           ) : osList.map((os) => (
             <tr key={os.id}>
-              <td>
+              <td className={styles.rowCheckboxCell} data-label="Selecionar">
                 <input
                   type="checkbox"
                   checked={selectedIds.includes(os.id)}
@@ -83,18 +83,18 @@ export default function OSTable({ osList, selectedIds, onSelect, onSelectAll, on
                   aria-label={`Selecionar OS ${os.osNumber} para fechamento`}
                 />
               </td>
-              <td>
+              <td data-label="OS e data">
                 <div className={styles.osNumber}>{os.osNumber}</div>
                 <div className={styles.tableSubtext}>{formatDate(os.completionDate)}</div>
               </td>
-              <td>{os.technicianName}</td>
-              <td>{os.clientName}</td>
-              <td className={styles.currency}>{formatCurrency(os.laborValue)}</td>
-              <td className={styles.currency}>{formatCurrency(os.partsValue)}</td>
-              <td className={styles.currency}>{formatCurrency(os.taxValue)}</td>
-              <td className={`${styles.currency} ${styles.currencyTotal}`}>{formatCurrency(os.finalPrice)}</td>
-              <td><span className={`${styles.badge} ${getBadgeClass(os.financialStatus)}`}>{os.financialStatus}</span></td>
-              <td>
+              <td data-label="Técnico">{os.technicianName}</td>
+              <td data-label="Cliente">{os.clientName}</td>
+              <td data-label="Mão de obra" className={styles.currency}>{formatCurrency(os.laborValue)}</td>
+              <td data-label="Outros custos" className={styles.currency}>{formatCurrency(os.partsValue)}</td>
+              <td data-label="Impostos" className={styles.currency}>{formatCurrency(os.taxValue)}</td>
+              <td data-label="Total faturável" className={`${styles.currency} ${styles.currencyTotal}`}>{formatCurrency(os.finalPrice)}</td>
+              <td data-label="Situação financeira"><span className={`${styles.badge} ${getBadgeClass(os.financialStatus)}`}>{os.financialStatus}</span></td>
+              <td data-label="Ações">
                 <div className={styles.actionsCell}>
                   <Link
                     href={`/${lang}/os/${encodeURIComponent(os.ticketId)}`}

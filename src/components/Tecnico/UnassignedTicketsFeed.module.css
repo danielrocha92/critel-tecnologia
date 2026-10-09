@@ -3,7 +3,13 @@
   padding: 17px 19px;
   border: 1px solid var(--border-color);
   border-radius: 15px;
-  background: rgba(17, 23, 34, 0.85);
+  background: var(--card-bg);
+}
+
+:global(html[data-theme='light']) .feed {
+  color: var(--text-primary);
+  border-color: var(--card-border);
+  background: var(--card-bg);
 }
 
 .header {

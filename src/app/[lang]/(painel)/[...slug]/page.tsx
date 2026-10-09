@@ -17,10 +17,10 @@ export default async function GenericPage({ params }: { params: Promise<{ lang: 
           {readableTitle}
         </h1>
         <div className={styles.actions}>
-          <button className={styles.btnFilter}>
+          <button type="button" className={styles.btnFilter}>
             <Filter size={16} /> Filtros
           </button>
-          <button className={styles.btnNew}>
+          <button type="button" className={styles.btnNew}>
             Novo Registro
           </button>
         </div>
@@ -32,6 +32,7 @@ export default async function GenericPage({ params }: { params: Promise<{ lang: 
             <Search size={16} className={styles.searchIcon} />
             <input 
               type="text" 
+              aria-label="Pesquisar registros"
               placeholder="Pesquisar registros..." 
               className={styles.searchInput}
             />

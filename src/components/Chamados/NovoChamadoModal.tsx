@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { X, Paperclip, Bold, Italic, Underline, Type, AlignLeft, List, ListOrdered, Quote, Link2, Image as ImageIcon, BookTemplate } from 'lucide-react';
 import styles from './NovoChamadoModal.module.css';
+import { getCategoriesForDepartment, getRootCauses, OTHER_ROOT_CAUSE, problemDepartments, ticketTeams } from '@/lib/tickets/problemCatalog';
 
 interface NovoChamadoModalProps {
   onClose: () => void;
@@ -24,8 +25,12 @@ export default function NovoChamadoModal({ onClose, onSuccess }: NovoChamadoModa
   const messageRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState({
     cliente: '',
+    equipe_responsavel: '',
     endereco_loja: '',
     departamento: '',
+    categoria: '',
+    causa_raiz: '',
+    causa_raiz_detalhe: '',
     tecnico_id: '',
     assunto: '',
     prioridade: ''
@@ -57,6 +62,21 @@ export default function NovoChamadoModal({ onClose, onSuccess }: NovoChamadoModa
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
+  const categories = getCategoriesForDepartment(formData.departamento);
+  const rootCauses = getRootCauses(formData.categoria);
+
+  const handleDepartmentChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setFormData(prev => ({ ...prev, departamento: e.target.value, categoria: '', causa_raiz: '', causa_raiz_detalhe: '' }));
+  };
+
+  const handleTeamChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setFormData(prev => ({ ...prev, equipe_responsavel: e.target.value, departamento: '', categoria: '', causa_raiz: '', causa_raiz_detalhe: '', tecnico_id: '' }));
+  };
+
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setFormData(prev => ({ ...prev, categoria: e.target.value, causa_raiz: '', causa_raiz_detalhe: '' }));
+  };
+
   const handleFormat = (command: string, value?: string) => {
     document.execCommand(command, false, value);
   };
@@ -65,8 +85,13 @@ export default function NovoChamadoModal({ onClose, onSuccess }: NovoChamadoModa
     if (isSubmitting.current) return;
 
     const descricaoFinal = messageRef.current?.innerHTML || '';
-    if (!formData.cliente || !formData.assunto || !descricaoFinal) {
-      alert('Por favor, preencha o Cliente, Assunto e Mensagem.');
+    const isTechnical = formData.equipe_responsavel === 'SUPORTE_TECNICO';
+    if (!formData.cliente || !formData.equipe_responsavel || !formData.assunto || !descricaoFinal || (isTechnical && (!formData.departamento || !formData.categoria || !formData.causa_raiz))) {
+      alert('Preencha cliente, departamento, categoria, causa raiz, assunto e descrição.');
+      return;
+    }
+    if (formData.causa_raiz === OTHER_ROOT_CAUSE && !formData.causa_raiz_detalhe.trim()) {
+      alert('Descreva a outra causa raiz selecionada.');
       return;
     }
 
@@ -79,10 +104,14 @@ export default function NovoChamadoModal({ onClose, onSuccess }: NovoChamadoModa
 
     const payload = {
       cliente: formData.cliente,
+      equipe_responsavel: formData.equipe_responsavel,
       titulo: formData.assunto,
       descricao: finalHtml,
-      departamento: formData.departamento,
-      tecnico_id: formData.tecnico_id || null,
+      departamento: isTechnical ? formData.departamento : null,
+      categoria: isTechnical ? formData.categoria : null,
+      causa_raiz: isTechnical ? formData.causa_raiz : null,
+      causa_raiz_detalhe: isTechnical && formData.causa_raiz === OTHER_ROOT_CAUSE ? formData.causa_raiz_detalhe.trim() : '',
+      tecnico_id: isTechnical ? formData.tecnico_id || null : null,
       prioridade: formData.prioridade
     };
 
@@ -174,20 +203,81 @@ export default function NovoChamadoModal({ onClose, onSuccess }: NovoChamadoModa
             </div>
           </div>
 
+          <div className={styles.formRow}>
+            <label className={styles.formLabel} htmlFor="ticket-team">Equipe responsável:</label>
+            <div className={styles.inputWrapper}>
+              <select id="ticket-team" name="equipe_responsavel" value={formData.equipe_responsavel} onChange={handleTeamChange} required className={styles.selectField}>
+                <option value="">Escolher equipe...</option>
+                {ticketTeams.map((team) => <option key={team.value} value={team.value}>{team.label}</option>)}
+              </select>
+            </div>
+          </div>
+
+          {formData.equipe_responsavel === 'SUPORTE_TECNICO' && <>
           {/* Departamento */}
           <div className={styles.formRow}>
-            <label className={styles.formLabel}>Departamento:</label>
+            <label className={styles.formLabel} htmlFor="ticket-department">Departamento:</label>
             <div className={styles.inputWrapper}>
               <select
+                id="ticket-department"
                 name="departamento"
                 value={formData.departamento}
-                onChange={handleChange}
+                onChange={handleDepartmentChange}
+                required
                 className={styles.selectField}
               >
                 <option value="">Escolher departamento...</option>
-                <option value="suporte">Suporte Técnico</option>
-                <option value="financeiro">Financeiro</option>
+                {problemDepartments.map((department) => <option key={department} value={department}>{department}</option>)}
               </select>
+            </div>
+          </div>
+
+          <div className={styles.formRow}>
+            <label className={styles.formLabel} htmlFor="ticket-category">Categoria do problema:</label>
+            <div className={styles.inputWrapper}>
+              <select
+                id="ticket-category"
+                name="categoria"
+                value={formData.categoria}
+                onChange={handleCategoryChange}
+                disabled={!formData.departamento}
+                required
+                className={styles.selectField}
+              >
+                <option value="">{formData.departamento ? 'Escolher categoria...' : 'Selecione primeiro o departamento'}</option>
+                {categories.map((category) => <option key={category.label} value={category.label}>{category.label}</option>)}
+              </select>
+            </div>
+          </div>
+
+          <div className={styles.formRow}>
+            <label className={styles.formLabel} htmlFor="ticket-root-cause">Causa raiz:</label>
+            <div className={styles.inputWrapper}>
+              <select
+                id="ticket-root-cause"
+                name="causa_raiz"
+                value={formData.causa_raiz}
+                onChange={handleChange}
+                disabled={!formData.categoria}
+                required
+                className={styles.selectField}
+              >
+                <option value="">{formData.categoria ? 'Escolher causa raiz...' : 'Selecione primeiro a categoria'}</option>
+                {rootCauses.map((cause) => <option key={cause} value={cause}>{cause}</option>)}
+              </select>
+              {formData.causa_raiz === OTHER_ROOT_CAUSE && (
+                <input
+                  type="text"
+                  name="causa_raiz_detalhe"
+                  value={formData.causa_raiz_detalhe}
+                  onChange={handleChange}
+                  placeholder="Descreva a causa raiz"
+                  aria-label="Descreva a outra causa raiz"
+                  required
+                  className={styles.inputField}
+                />
+              )}
+              {formData.categoria && <p className={styles.fieldHint}>A causa raiz e a categoria serão apresentadas ao técnico junto às evidências obrigatórias.</p>}
             </div>
           </div>
 
@@ -217,6 +307,8 @@ export default function NovoChamadoModal({ onClose, onSuccess }: NovoChamadoModa
               )}
             </div>
           </div>
+
+          </>}
 
           {/* Assunto */}
           <div className={styles.formRow}>

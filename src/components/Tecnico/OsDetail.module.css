@@ -9,7 +9,7 @@
 
 .header {
   padding: 1rem;
-  background: rgba(30, 41, 59, 0.5);
+  background: var(--header-bg);
   border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
@@ -200,7 +200,7 @@
   overflow: hidden;
   border: 1px solid var(--border-color);
   border-radius: 9px;
-  background: rgba(0, 0, 0, 0.15);
+  background: var(--surface-subtle);
 }
 
 .evidenceItem img {

@@ -3,6 +3,7 @@ import Footer from "@/components/Footer/Footer";
 import FloatingActions from "@/components/FloatingActions/FloatingActions";
 import { getDictionary } from "@/dictionaries";
 
+import './institutional.css';
 import styles from './layout.module.css';
 
 export default async function WebsiteLayout({
@@ -16,13 +17,13 @@ export default async function WebsiteLayout({
   const dict = await getDictionary(resolvedParams.lang as any);
 
   return (
-    <>
+    <div className="institutional-root">
       <Header lang={resolvedParams.lang} dict={dict.nav} />
       <main className={styles.mainContent}>
         {children}
       </main>
       <Footer dict={dict.footer} lang={resolvedParams.lang} />
       <FloatingActions />
-    </>
+    </div>
   );
 }

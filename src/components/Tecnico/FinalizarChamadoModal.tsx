@@ -51,6 +51,15 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
 
   // Signature
   const sigCanvas = useRef<SignatureCanvasInstance | null>(null);
+  const selectedCause = ticket.causa_raiz || ticket.resolucao?.causaRaiz || '';
+  const selectedCauseDetail = ticket.causa_raiz_detalhe || ticket.resolucao?.causaRaizDetalhe || '';
+  const supportsCameraCapture = /hardware|pinpad|pos|modem|link \/ internet|telefonia/i.test(ticket.categoria || '');
+  const evidenceBeforeLabel = selectedCause
+    ? `Comprovação da causa: ${selectedCauseDetail || selectedCause}`
+    : 'Evidência do problema antes do atendimento';
+  const evidenceAfterLabel = selectedCause
+    ? `Resultado após a correção: ${selectedCauseDetail || selectedCause}`
+    : 'Evidência do resultado após o atendimento';
 
   useEffect(() => {
     let isMounted = true;
@@ -211,7 +220,7 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
     }
 
     if (!evidenciaAntes || !evidenciaDepois) {
-      setError('Sessão Evidências: As fotos de antes e depois da fachada são obrigatórias.');
+      setError('A evidência do problema e o registro após a intervenção são obrigatórios.');
       setLoading(false);
       return;
     }
@@ -235,10 +244,10 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
       setProgressMsg('Upload da assinatura...');
       const assinaturaUrl = await uploadBase64(`resolutions/${ticket.id}/${ts}_assinatura.png`, assinaturaBase64);
 
-      setProgressMsg('Upload da fachada (Antes)...');
+      setProgressMsg('Enviando evidência da causa...');
       const evidenciaAntesUrl = await uploadBase64(`resolutions/${ticket.id}/${ts}_antes.jpg`, evidenciaAntes);
 
-      setProgressMsg('Upload da fachada (Depois)...');
+      setProgressMsg('Enviando evidência após a intervenção...');
       const evidenciaDepoisUrl = await uploadBase64(`resolutions/${ticket.id}/${ts}_depois.jpg`, evidenciaDepois);
 
       const finalDespesas = [];
@@ -268,6 +277,8 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
           assinatura_datahora: new Date().toISOString(),
           despesas_json: finalDespesas,
           resolucao: {
+            causaRaiz: selectedCause || undefined,
+            causaRaizDetalhe: selectedCauseDetail || undefined,
             horaInicio: new Date(horaInicio).getTime(),
             horaTermino: new Date(horaTermino).getTime(),
             descricaoServicos: descricao,
@@ -275,6 +286,7 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
             latitude: location.lat,
             longitude: location.lng,
             assinaturaUrl,
+            assinaturaDataHora: new Date().toISOString(),
             evidenciaAntesUrl,
             evidenciaDepoisUrl,
             despesas: finalDespesas,
@@ -338,6 +350,14 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
           </div>
 
           <form id="finalizarForm" onSubmit={handleSubmit} className={styles.form}>
+            {selectedCause && (
+              <section className={styles.problemContext} aria-labelledby="selected-problem-title">
+                <h3 id="selected-problem-title">Solicitação e causa informadas pelo analista</h3>
+                <p><strong>Categoria:</strong> {ticket.categoria || 'Não informada'}</p>
+                <p><strong>Causa raiz:</strong> {selectedCause}{selectedCauseDetail ? ` — ${selectedCauseDetail}` : ''}</p>
+                <p className={styles.problemEvidenceHint}>Registre as evidências abaixo relacionadas a esta causa, antes e depois da intervenção.</p>
+              </section>
+            )}
             <div className={styles.grid}>
               <div>
                 <label className={styles.label}>Início</label>
@@ -374,16 +394,16 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
             </div>
 
             <div className={styles.section}>
-              <h4 className={styles.sectionTitle}>Sessão Evidências (Obrigatório!)</h4>
+              <h4 className={styles.sectionTitle}>Evidências da causa raiz (obrigatórias)</h4>
               <div className={styles.grid}>
                 <div>
-                  <label className={styles.label}>Fachada da Loja (Antes)</label>
-                  <input type="file" accept="image/*" capture="environment" onChange={e => handleFileConvert(e, setEvidenciaAntes)} className={styles.input} />
+                  <label className={styles.label}>{evidenceBeforeLabel} *</label>
+                  <input type="file" accept="image/*" capture={supportsCameraCapture ? 'environment' : undefined} onChange={e => handleFileConvert(e, setEvidenciaAntes)} required className={styles.input} />
                   {evidenciaAntes && <span className={styles.evidenciaSuccessSpan}>✓ Imagem capturada</span>}
                 </div>
                 <div>
-                  <label className={styles.label}>Fachada da Loja (Depois)</label>
-                  <input type="file" accept="image/*" capture="environment" onChange={e => handleFileConvert(e, setEvidenciaDepois)} className={styles.input} />
+                  <label className={styles.label}>{evidenceAfterLabel} *</label>
+                  <input type="file" accept="image/*" capture={supportsCameraCapture ? 'environment' : undefined} onChange={e => handleFileConvert(e, setEvidenciaDepois)} required className={styles.input} />
                   {evidenciaDepois && <span className={styles.evidenciaSuccessSpan}>✓ Imagem capturada</span>}
                 </div>
               </div>

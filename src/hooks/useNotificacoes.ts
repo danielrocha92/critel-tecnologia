@@ -34,12 +34,11 @@ const defaultPrefs: NotifPrefs = {
 
 const DEPARTAMENTOS_TI = [
   'TI - Hardware',
-  'TI - Software',
   'TI - Lojas',
+  'TI - Pdv Parado',
+  'TI - SmartPOS',
+  'TI - Software',
   'TI - Telecom',
-  'TI - Matriz',
-  'TI - Acessos Protheus',
-  'TI - Compras',
 ];
 
 // ✅ FIX 1: Singleton de módulo — garante UMA única instância do GoTrueClient

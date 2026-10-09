@@ -53,7 +53,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #263244;
+  border-bottom: 1px solid var(--border-color);
   background: var(--bg-primary);
 }
 
@@ -203,13 +203,13 @@
 
 .toolbarIcon:hover {
   color: var(--text-primary);
-  background: #26364b;
+  background: var(--surface-hover);
 }
 
 .toolbarDivider {
   width: 1px;
   height: 16px;
-  background: #3b4a60;
+  background: var(--border-color);
   margin: 0 2px;
 }
 
@@ -223,7 +223,7 @@
   justify-content: space-between;
   align-items: center;
   gap: 14px;
-  border-top: 1px solid #263244;
+  border-top: 1px solid var(--border-color);
   background: var(--bg-primary);
 }
 
@@ -236,8 +236,8 @@
 
 .btnCreate {
   min-height: 40px;
-  background: #059669;
-  color: #ecfdf5;
+  background: var(--status-success-button);
+  color: #fff;
   border: none;
   padding: 0 16px;
   border-radius: 6px;
@@ -248,7 +248,7 @@
 }
 
 .btnCreate:hover:not(:disabled) {
-  background: #047857;
+  background: color-mix(in srgb, var(--status-success-button) 84%, #000);
 }
 
 .btnCreate:disabled {
@@ -326,7 +326,7 @@
 .btnCancel:hover:not(:disabled) {
   color: var(--text-primary);
   border-color: var(--text-muted);
-  background: #263449;
+  background: var(--surface-hover);
 }
 
 @media (max-width: 768px) {

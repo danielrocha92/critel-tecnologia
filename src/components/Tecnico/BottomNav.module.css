@@ -3,7 +3,8 @@
   bottom: 0;
   left: 0;
   right: 0;
-  height: 65px;
+  height: calc(65px + env(safe-area-inset-bottom));
+  box-sizing: border-box;
   background: var(--header-bg);
   backdrop-filter: blur(10px);
   border-top: 1px solid var(--header-border);
@@ -11,7 +12,7 @@
   justify-content: space-around;
   align-items: center;
   z-index: 40;
-  padding-bottom: env(safe-area-inset-bottom);
+  padding: 0 max(8px, env(safe-area-inset-left)) env(safe-area-inset-bottom) max(8px, env(safe-area-inset-right));
 }
 
 .navItem {
@@ -24,7 +25,8 @@
   cursor: pointer;
   color: var(--text-muted);
   width: 100%;
-  padding: 8px 0;
+  min-height: 54px;
+  padding: 6px 0;
   text-decoration: none;
 }
 
@@ -34,7 +36,7 @@
 
 .iconContainer {
   background: transparent;
-  padding: 6px 20px;
+  padding: 5px clamp(12px, 5vw, 20px);
   border-radius: 20px;
   transition: all 0.2s ease;
 }

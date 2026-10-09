@@ -6,10 +6,10 @@ import styles from './relatorios.module.css';
 
 export default function RelatoriosPage() {
   const kpis = [
-    { title: 'Chamados no Mês', value: '1,248', trend: '+12%', colorClass: styles.kpiBgBlue, colorHex: '#3b82f6', icon: Activity },
-    { title: 'Tempo Médio de Resposta', value: '15 min', trend: '-2 min', colorClass: styles.kpiBgGreen, colorHex: '#10b981', icon: Clock },
-    { title: 'Ordens de Serviço (Campo)', value: '142', trend: '+5%', colorClass: styles.kpiBgOrange, colorHex: '#f59e0b', icon: Users },
-    { title: 'Taxa de SLA Cumprido', value: '98.5%', trend: '+0.5%', colorClass: styles.kpiBgPurple, colorHex: '#8b5cf6', icon: TrendingUp },
+    { title: 'Chamados no Mês', value: '1,248', trend: '+12%', colorClass: styles.kpiBgBlue, icon: Activity },
+    { title: 'Tempo Médio de Resposta', value: '15 min', trend: '-2 min', colorClass: styles.kpiBgGreen, icon: Clock },
+    { title: 'Ordens de Serviço (Campo)', value: '142', trend: '+5%', colorClass: styles.kpiBgOrange, icon: Users },
+    { title: 'Taxa de SLA Cumprido', value: '98.5%', trend: '+0.5%', colorClass: styles.kpiBgPurple, icon: TrendingUp },
   ];
 
   return (
@@ -38,7 +38,7 @@ export default function RelatoriosPage() {
               <div 
                 className={`${styles.kpiIconWrapper} ${kpi.colorClass}`} 
               >
-                <kpi.icon size={20} color={kpi.colorHex} />
+                <kpi.icon size={20} />
               </div>
             </div>
             <div className={styles.kpiValues}>
@@ -60,13 +60,13 @@ export default function RelatoriosPage() {
           <div className={styles.barChartArea}>
             {/* Barras Mockadas */}
             {[
-              { label: 'Bacio', height: '80%', colorClass: styles.bgBlue },
-              { label: 'Burger K.', height: '60%', colorClass: styles.bgBlueLight },
-              { label: 'Ofner', height: '40%', colorClass: styles.bgBlueLighter },
-              { label: 'KFC', height: '50%', colorClass: styles.bgBlueLightest },
+              { label: 'Bacio', heightClass: styles.barTall, colorClass: styles.bgBlue },
+              { label: 'Burger K.', heightClass: styles.barHigh, colorClass: styles.bgBlueLight },
+              { label: 'Ofner', heightClass: styles.barLow, colorClass: styles.bgBlueLighter },
+              { label: 'KFC', heightClass: styles.barMedium, colorClass: styles.bgBlueLightest },
             ].map((bar, i) => (
               <div key={i} className={styles.barColumn}>
-                <div className={`${styles.bar} ${bar.colorClass}`} style={{ height: bar.height }} />
+                <div className={`${styles.bar} ${bar.heightClass} ${bar.colorClass}`} />
                 <span className={styles.barLabel}>{bar.label}</span>
               </div>
             ))}

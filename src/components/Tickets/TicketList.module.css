@@ -103,7 +103,6 @@
   font: inherit;
   font-size: 0.77rem;
   outline: none;
-  color-scheme: dark;
 }
 
 .searchInput:focus,
@@ -118,14 +117,14 @@
   text-align: center;
   border: 1px solid var(--border-color);
   border-radius: 15px;
-  background: rgba(17, 23, 34, 0.85);
+  background: var(--card-bg);
 }
 
 .emptyState {
   color: var(--text-secondary);
   padding: 28px 16px;
   text-align: center;
-  background: rgba(17, 23, 34, 0.85);
+  background: var(--card-bg);
   border-radius: 15px;
   border: 1px solid var(--border-color);
 }
@@ -178,7 +177,7 @@
 
 .listFilterActive {
   color: #fff;
-  background: #9f2636;
+  background: var(--accent-brand);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
@@ -190,7 +189,7 @@
   overflow: hidden;
   border: 1px solid var(--border-color);
   border-radius: 15px;
-  background: linear-gradient(145deg, rgba(20, 27, 40, 0.98), rgba(15, 21, 32, 0.98));
+  background: var(--card-bg);
   box-shadow: 0 18px 45px rgba(0, 0, 0, 0.14);
 }
 
@@ -313,7 +312,7 @@
 }
 
 .ticketKicker > span:first-child {
-  color: #f18a98;
+  color: var(--accent-brand-text);
 }
 
 .ticketKicker .statusBadge {
@@ -608,7 +607,7 @@
   overflow: hidden;
   border: 1px solid var(--border-color);
   border-radius: 15px;
-  background: rgba(17, 23, 34, 0.85);
+  background: var(--card-bg);
 }
 
 .kanbanHeader {
@@ -827,7 +826,7 @@
 
 .deptCountInactive {
   background: var(--card-bg);
-  color: #fff;
+  color: var(--text-primary);
   padding: 2px 8px;
   border-radius: 4px;
   font-size: 11px;

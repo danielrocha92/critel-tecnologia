@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Montserrat } from "next/font/google";
+import "../tokens.css";
 import "../globals.css";
 import JsonLd, { getOrganizationSchema } from "@/components/JsonLd/JsonLd";
 import { getDictionary } from "@/dictionaries";

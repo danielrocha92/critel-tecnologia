@@ -102,7 +102,7 @@ export default function ResumoFinanceiro({ userId }: { userId: string }) {
       <div className={styles.header}>
         <h2 className={styles.title}>Balanço Financeiro</h2>
         <div className={styles.selectWrapper}>
-          <Calendar size={14} color="#94a3b8" />
+          <Calendar size={14} className={styles.calendarIcon} />
           <select 
             value={selectedPeriod} 
             onChange={(e) => setSelectedPeriod(e.target.value)}
@@ -120,7 +120,7 @@ export default function ResumoFinanceiro({ userId }: { userId: string }) {
       <div className={styles.card}>
         <div className={styles.totalRow}>
           <div className={styles.iconBox}>
-            <Wallet size={24} color="white" />
+            <Wallet size={24} />
           </div>
           <div>
             <p className={styles.totalLabel}>Total a Receber</p>
@@ -133,7 +133,7 @@ export default function ResumoFinanceiro({ userId }: { userId: string }) {
         <div className={styles.detailsGrid}>
           <div>
             <p className={styles.detailLabel}>
-              <TrendingUp size={12} color="#10b981" /> Serviços (OS)
+              <TrendingUp size={12} className={styles.servicesIcon} /> Serviços (OS)
             </p>
             <strong className={styles.detailValue}>
               {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totais.servicos)}
@@ -141,7 +141,7 @@ export default function ResumoFinanceiro({ userId }: { userId: string }) {
           </div>
           <div>
             <p className={styles.detailLabel}>
-              <Receipt size={12} color="#3b82f6" /> Reembolsos Extras
+              <Receipt size={12} className={styles.expensesIcon} /> Reembolsos Extras
             </p>
             <strong className={styles.detailValue}>
               {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totais.despesas)}

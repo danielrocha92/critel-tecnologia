@@ -6,12 +6,12 @@ import styles from './base-conhecimento.module.css';
 
 export default function BaseConhecimentoPage() {
   const modulos = [
-    { title: 'Treinamento de Onboarding', type: 'Vídeo', duration: '45 min', icon: Video, colorHex: '#ef4444', colorClass: styles.bgRed },
-    { title: 'Manual de Procedimentos PDV', type: 'Documento', duration: '12 pág', icon: FileText, colorHex: '#3b82f6', colorClass: styles.bgBlue },
-    { title: 'Como solicitar Cartão Vexpenses', type: 'Guia Rápido', duration: '5 min', icon: BookOpen, colorHex: '#10b981', colorClass: styles.bgGreen },
-    { title: 'Troubleshooting de Redes', type: 'Vídeo', duration: '1h 20m', icon: Video, colorHex: '#ef4444', colorClass: styles.bgRed },
-    { title: 'Regras de Negócio: Burger King', type: 'Documento', duration: '8 pág', icon: FileText, colorHex: '#3b82f6', colorClass: styles.bgBlue },
-    { title: 'Acesso ao Milvus IT Management', type: 'Tutorial', duration: '15 min', icon: PlayCircle, colorHex: '#8b5cf6', colorClass: styles.bgPurple },
+    { title: 'Treinamento de Onboarding', type: 'Vídeo', duration: '45 min', icon: Video, colorClass: styles.bgRed },
+    { title: 'Manual de Procedimentos PDV', type: 'Documento', duration: '12 pág', icon: FileText, colorClass: styles.bgBlue },
+    { title: 'Como solicitar Cartão Vexpenses', type: 'Guia Rápido', duration: '5 min', icon: BookOpen, colorClass: styles.bgGreen },
+    { title: 'Troubleshooting de Redes', type: 'Vídeo', duration: '1h 20m', icon: Video, colorClass: styles.bgRed },
+    { title: 'Regras de Negócio: Burger King', type: 'Documento', duration: '8 pág', icon: FileText, colorClass: styles.bgBlue },
+    { title: 'Acesso ao Milvus IT Management', type: 'Tutorial', duration: '15 min', icon: PlayCircle, colorClass: styles.bgPurple },
   ];
 
   return (
@@ -25,14 +25,15 @@ export default function BaseConhecimentoPage() {
 
       <div className={styles.searchBarContainer}>
         <div className={styles.searchInputWrapper}>
-          <Search size={18} color="#94a3b8" className={styles.searchIcon} />
+          <Search size={18} className={styles.searchIcon} />
           <input 
             type="text" 
+            aria-label="Buscar artigos, tutoriais ou vídeos"
             placeholder="Buscar por artigos, tutoriais ou vídeos..." 
             className={styles.searchInput}
           />
         </div>
-        <select className={styles.filterSelect}>
+        <select className={styles.filterSelect} aria-label="Filtrar por categoria">
           <option>Todas as Categorias</option>
           <option>Treinamentos em Vídeo</option>
           <option>Manuais de Procedimento</option>
@@ -45,7 +46,7 @@ export default function BaseConhecimentoPage() {
           <div key={i} className={styles.card}>
             <div className={styles.cardHeader}>
               <div className={`${styles.iconWrapper} ${modulo.colorClass}`}>
-                <modulo.icon size={24} color={modulo.colorHex} />
+                <modulo.icon size={24} />
               </div>
               <span className={styles.durationBadge}>
                 {modulo.duration}

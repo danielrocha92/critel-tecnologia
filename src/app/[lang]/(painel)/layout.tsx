@@ -2,6 +2,7 @@ import Sidebar from '@/components/Navigation/Sidebar';
 import Topbar from '@/components/Navigation/Topbar';
 import BackToTop from '@/components/Navigation/BackToTop';
 
+import './app.css';
 import styles from './layout.module.css';
 
 export default async function PainelLayout(

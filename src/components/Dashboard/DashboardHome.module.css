@@ -44,9 +44,9 @@
   flex: 0 0 auto;
   min-height: 44px;
   padding: 0 17px;
-  border: 1px solid #d13a4b;
+  border: 1px solid var(--accent-brand);
   border-radius: 10px;
-  background: #bd293b;
+  background: var(--accent-brand);
   color: #fff;
   font-size: 0.875rem;
   font-weight: 700;
@@ -54,7 +54,7 @@
   transition: background 160ms ease, transform 160ms ease;
 }
 
-.primaryAction:hover { background: #d13a4b; transform: translateY(-1px); }
+.primaryAction:hover { background: var(--accent-hover); transform: translateY(-1px); }
 .primaryAction:focus-visible, .linkCard:focus-visible { outline: 2px solid var(--accent-brand-text); outline-offset: 3px; }
 
 .errorNotice {
@@ -93,10 +93,10 @@
 }
 
 .metricIcon { width: 44px; height: 44px; }
-.iconSupport { background: rgba(59, 130, 246, 0.14); color: #7db3ff; }
-.iconOrders { background: rgba(245, 158, 11, 0.14); color: #f8bd57; }
-.iconDepartments { background: rgba(168, 85, 247, 0.14); color: #c397ff; }
-.iconClients { background: rgba(16, 185, 129, 0.14); color: #61d8b0; }
+.iconSupport { background: color-mix(in srgb, var(--status-info-text) 14%, transparent); color: var(--status-info-text); }
+.iconOrders { background: color-mix(in srgb, var(--status-warning-text) 14%, transparent); color: var(--status-warning-text); }
+.iconDepartments { background: color-mix(in srgb, var(--accent-cyan) 14%, transparent); color: var(--accent-cyan); }
+.iconClients { background: color-mix(in srgb, var(--status-success-text) 14%, transparent); color: var(--status-success-text); }
 
 .metricLabel { margin: 0 0 5px; color: var(--text-secondary); font-size: 0.82rem; }
 .metricValue { color: var(--text-primary); font-size: 1.35rem; font-weight: 700; }

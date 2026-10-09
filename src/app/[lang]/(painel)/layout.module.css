@@ -1,5 +1,7 @@
 .layoutRoot {
   display: flex;
+  min-width: 0;
+  overflow-x: clip;
   min-height: 100vh;
   background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-primary) 100%);
   color: var(--text-primary);
@@ -7,6 +9,7 @@
 }
 
 .mainContent {
+  min-width: 0;
   margin-left: 250px;
   flex: 1;
   display: flex;
@@ -25,14 +28,18 @@
 }
 
 .mainArea {
+  min-width: 0;
   flex: 1;
   display: flex;
   flex-direction: column;
 }
 
 @media (max-width: 768px) {
+  .layoutRoot { width: 100%; }
   .mainContent {
     margin-left: 0 !important;
     width: 100%;
+    min-width: 0;
   }
+  .mainArea { width: 100%; min-width: 0; }
 }

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
 import { ShieldAlert, AlertTriangle, CheckCircle, Ban, Clock } from 'lucide-react';
+import SectionPageHeader from '@/components/Dashboard/SectionPageHeader';
 import styles from './admin.module.css';
 
 type Perfil = {
@@ -221,10 +222,11 @@ export default function AdminPage() {
           </div>
         ) : (
           <>
-            <div className={styles.header}>
-              <h1 className={styles.title}>Governança de Identidade</h1>
-              <p className={styles.subtitle}>Gestão de perfis e controle de acessos à plataforma.</p>
-            </div>
+            <SectionPageHeader
+              eyebrow="ADMINISTRAÇÃO"
+              title="Governança de Identidade"
+              description="Gestão de perfis e controle de acessos à plataforma."
+            />
 
             {errorMsg && (
               <div className={styles.errorBox}>

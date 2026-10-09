@@ -5,7 +5,7 @@
   color: var(--text-primary);
 }
 
-.pageHeader, .panelHeader, .toolbar {
+.pageHeader, .panelHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -67,7 +67,6 @@
 }
 
 .errorNotice svg { flex: 0 0 auto; margin-top: 1px; }
-.toolbar { justify-content: flex-end; margin: -4px 0 15px; }
 .monthFilter, .searchField, .statusFilter {
   display: flex;
   align-items: center;
@@ -80,6 +79,12 @@
   color: var(--text-secondary);
 }
 
+.monthFilter:focus-within, .searchField:focus-within, .statusFilter:focus-within {
+  border-color: var(--accent-brand-text);
+  outline: 2px solid color-mix(in srgb, var(--accent-brand-text) 30%, transparent);
+  outline-offset: 2px;
+}
+
 .monthFilter { font-size: 0.78rem; }
 .monthFilter input, .statusFilter select, .searchField input {
   border: 0;
@@ -89,7 +94,6 @@
   font: inherit;
 }
 
-.monthFilter input { color-scheme: dark; }
 .secondaryLink { min-height: 40px; padding: 0 12px; }
 .metricGrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 13px; margin: 0 0 18px; }
 .metricGridCompact { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -97,13 +101,23 @@
   display: flex;
   align-items: center;
   gap: 13px;
+  width: 100%;
   min-width: 0;
   min-height: 96px;
   padding: 16px;
   border: 1px solid var(--border-color);
   border-radius: 14px;
-  background: linear-gradient(145deg, rgba(25, 33, 48, 0.95), rgba(17, 23, 34, 0.95));
+  background: linear-gradient(145deg, var(--bg-secondary), var(--bg-tertiary));
+  color: var(--text-primary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  appearance: none;
+  transition: border-color 150ms ease, background 150ms ease, box-shadow 150ms ease;
 }
+.metricCard:hover { border-color: color-mix(in srgb, var(--accent-brand-text) 55%, var(--border-color)); }
+.metricCard:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 3px; }
+.metricCardActive { border-color: var(--accent-brand-text); box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent-brand-text) 22%, transparent); }
 
 .metricIcon {
   display: grid;
@@ -124,7 +138,7 @@
   overflow: hidden;
   border: 1px solid var(--border-color);
   border-radius: 15px;
-  background: rgba(17, 23, 34, 0.85);
+  background: var(--card-bg);
 }
 
 .panelHeader { min-height: 82px; padding: 17px 19px; border-bottom: 1px solid var(--border-color); }
@@ -133,16 +147,16 @@
 .resultCount { color: var(--text-secondary); font-size: 0.75rem; white-space: nowrap; }
 .tableScroll { width: 100%; overflow-x: auto; }
 .dataTable { width: 100%; min-width: 680px; border-collapse: collapse; text-align: left; }
-.dataTable th { padding: 12px 16px; background: var(--card-bg); color: #8190a4; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap; }
+.dataTable th { position: sticky; top: 0; z-index: 1; padding: 12px 16px; background: var(--bg-tertiary); color: var(--text-secondary); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap; }
 .dataTable td { padding: 13px 16px; border-top: 1px solid var(--border-color); color: var(--text-primary); font-size: 0.8rem; vertical-align: middle; }
 .dataTable tbody tr:hover { background: var(--card-bg); }
 .tableMessage { height: 76px; color: var(--text-secondary) !important; text-align: center; }
-.tableLink { color: #91baff; text-decoration: none; }
+.tableLink { color: var(--accent-cyan); text-decoration: none; }
 .tableLink:hover { text-decoration: underline; }
 .statusBadge { display: inline-flex; padding: 4px 8px; border: 1px solid transparent; border-radius: 999px; font-size: 0.68rem; font-weight: 700; white-space: nowrap; }
-.statusDone { border-color: rgba(16,185,129,0.2); background: rgba(16,185,129,0.1); color: var(--status-success-text); }
-.statusPending { border-color: rgba(245,158,11,0.2); background: rgba(245,158,11,0.1); color: var(--status-warning-text); }
-.statusActive { border-color: rgba(96,165,250,0.2); background: rgba(96,165,250,0.1); color: var(--status-info-text); }
+.statusDone { border-color: color-mix(in srgb, var(--status-success-text) 25%, transparent); background: color-mix(in srgb, var(--status-success-text) 10%, transparent); color: var(--status-success-text); }
+.statusPending { border-color: color-mix(in srgb, var(--status-warning-text) 25%, transparent); background: color-mix(in srgb, var(--status-warning-text) 10%, transparent); color: var(--status-warning-text); }
+.statusActive { border-color: color-mix(in srgb, var(--status-info-text) 25%, transparent); background: color-mix(in srgb, var(--status-info-text) 10%, transparent); color: var(--status-info-text); }
 
 .searchField { width: min(340px, 42vw); min-height: 38px; }
 .searchField input { width: 100%; min-width: 0; font-size: 0.77rem; }
@@ -157,8 +171,8 @@
 .tableControls { display: flex; align-items: center; justify-content: flex-end; gap: 9px; min-width: 0; }
 .statusFilter { min-height: 38px; padding: 0 9px; }
 .statusFilter select { font-size: 0.75rem; }
-.openTicketLink { min-height: 30px; padding: 0 9px; color: #a9c7ff; font-size: 0.72rem; white-space: nowrap; }
-.openTicketLink:hover { border-color: rgba(125,179,255,0.35); color: #d1e2ff; }
+.openTicketLink { min-height: 30px; padding: 0 9px; color: var(--accent-cyan); font-size: 0.72rem; white-space: nowrap; }
+.openTicketLink:hover { border-color: var(--accent-brand); color: var(--accent-brand-text); }
 .visuallyHidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 
 @media (max-width: 1050px) {
@@ -176,7 +190,6 @@
   .metricIcon { width: 35px; height: 35px; }
   .metricCopy p { font-size: 0.68rem; }
   .metricCopy strong { font-size: 0.95rem; }
-  .toolbar { align-items: stretch; flex-direction: column; margin-top: 0; }
   .monthFilter, .secondaryLink { min-height: 42px; }
   .monthFilter { justify-content: space-between; }
   .monthFilter input { flex: 1; }
@@ -187,6 +200,46 @@
   .statusFilter select { width: 100%; min-height: 36px; }
   .contactCard { flex-wrap: wrap; }
   .contactAction { margin-left: 51px; }
+  .tableScroll { overflow: visible; }
+  .dataTable,
+  .dataTable tbody,
+  .dataTable tr,
+  .dataTable td { display: block; width: 100%; min-width: 0; }
+  .dataTable { border-collapse: separate; }
+  .dataTable thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); clip-path: inset(50%); white-space: nowrap; }
+  .dataTable tbody tr:not(.tableMessageRow) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 12px;
+    margin: 10px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    background: var(--card-bg);
+  }
+  .dataTable td {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+    min-width: 0;
+    padding: 10px 12px;
+    border-top: 0;
+    overflow-wrap: anywhere;
+  }
+  .dataTable td::before {
+    content: attr(data-label);
+    color: var(--text-secondary);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .dataTable td[data-label="Ação"] { grid-column: 1 / -1; border-top: 1px solid var(--border-color); }
+  .dataTable .tableMessageRow,
+  .dataTable .tableMessage { display: block; width: 100%; }
+  .dataTable .tableMessage { height: 76px; text-align: center; }
+  .openTicketLink { width: fit-content; max-width: 100%; min-height: 44px; white-space: normal; }
+  .refreshButton { min-height: 44px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -71,7 +71,7 @@
 
 .btnPrimary {
   margin-top: auto;
-  background: #3b82f6;
+  background: var(--status-info-button);
   color: #fff;
   border: none;
   padding: 10px 24px;

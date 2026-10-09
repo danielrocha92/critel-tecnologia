@@ -44,6 +44,11 @@ export interface ITicket {
   check_in_at?: number | string | null;
   check_in_lat?: number | null;
   check_in_lng?: number | null;
+  check_out_at?: string | null;
+  check_out_lat?: number | null;
+  check_out_lng?: number | null;
+  assinatura_datahora?: string | null;
+  despesas_json?: Array<{ natureza?: string; valor?: number | string; valor_numerico?: number | string; anexoUrl?: string }> | null;
   checkInAt?: number | string | null;
   checkInLat?: number | null;
   checkInLng?: number | null;
@@ -57,20 +62,28 @@ export interface ITicket {
   analista_id?: string | null;
   tecnico_id?: string | null;
   departamento?: string;
+  equipe_responsavel?: 'SUPORTE_TECNICO' | 'FINANCEIRO' | 'ANALISTA' | 'COMERCIAL' | string | null;
   categoria?: string;
+  causa_raiz?: string | null;
+  causa_raiz_detalhe?: string | null;
   prioridade?: string;
   descricao?: string;
   resolucao?: {
+    causaRaiz?: string;
+    causaRaizDetalhe?: string;
     horaInicio?: number;
     horaTermino?: number;
     descricaoServicos?: string;
     materiaisUtilizados?: string;
     assinaturaUrl?: string;
+    assinaturaDataHora?: string;
     evidenciaAntesUrl?: string;
     evidenciaDepoisUrl?: string;
     latitude?: number;
     longitude?: number;
-    despesas?: Array<{ natureza: string; valor: number; anexoUrl?: string }>;
+    despesas?: Array<{ natureza: string; valor?: number | string; valor_numerico?: number | string; anexoUrl?: string }>;
+    assinatura_datahora?: string;
+    assinatura_base64?: string;
   } | null;
 }
 

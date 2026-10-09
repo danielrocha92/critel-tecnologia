@@ -1,7 +1,9 @@
 .pageContainer {
-  padding: 2rem;
+  box-sizing: border-box;
+  width: min(100%, 1440px);
+  margin: 0 auto;
+  padding: 30px clamp(18px, 4vw, 52px) 48px;
   flex: 1;
-  max-width: 1000px;
 }
 
 .header {
@@ -24,7 +26,7 @@
 }
 
 .btnNew {
-  background: #3b82f6;
+  background: var(--status-info-button);
   color: #fff;
   border: none;
   padding: 10px 20px;
@@ -38,13 +40,14 @@
 
 .tableContainer {
   background: var(--bg-secondary);
-  border: 1px solid var(--text-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
-  overflow: hidden;
+  overflow-x: auto;
 }
 
 .table {
   width: 100%;
+  min-width: 720px;
   border-collapse: collapse;
 }
 
@@ -63,7 +66,7 @@
 }
 
 .tr {
-  border-top: 1px solid rgba(51, 65, 85, 0.5);
+  border-top: 1px solid var(--border-color);
 }
 
 .trFirst {
@@ -140,7 +143,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--surface-subtle);
   padding: 4px 8px;
   border-radius: 6px;
   border: 1px solid var(--border-color);
@@ -233,7 +236,7 @@
 
 .btnSubmit {
   margin-top: 10px;
-  background: #3b82f6;
+  background: var(--status-info-button);
   color: #fff;
   border: none;
   padding: 12px;

@@ -12,6 +12,7 @@ const closedStatuses = new Set(['RESOLVIDO', 'FECHADO', 'FINALIZADO', 'CONCLUIDO
 
 function isAvailable(ticket: ITicket) {
   return Boolean(ticket.analista_id)
+    && (!ticket.equipe_responsavel || ticket.equipe_responsavel === 'SUPORTE_TECNICO')
     && ticket.protocolo_origem?.toUpperCase().startsWith('OS-') === true
     && !ticket.tecnico_id
     && !closedStatuses.has(ticket.status.toUpperCase());

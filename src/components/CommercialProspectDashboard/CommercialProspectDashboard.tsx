@@ -1,19 +1,18 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Head from 'next/head';
 import { Plus, Building2, Phone, Mail, Clock, MoreHorizontal } from 'lucide-react';
 import { prospectService } from '../../services/prospectService';
 import type { Prospect, ProspectStatus } from '../../services/prospectService';
 import styles from './CommercialProspectDashboard.module.css';
 
-const COLUMNS: { id: ProspectStatus; title: string; color: string }[] = [
-  { id: 'LEAD', title: 'Leads Novos', color: '#3b82f6' },
-  { id: 'CONTATO', title: 'Em Contato', color: '#8b5cf6' },
-  { id: 'NEGOCIACAO', title: 'Em Negociação', color: '#f59e0b' },
-  { id: 'PROPOSTA', title: 'Proposta Enviada', color: '#ec4899' },
-  { id: 'FECHADO', title: 'Negócio Fechado', color: '#10b981' },
-  { id: 'PERDIDO', title: 'Perdido', color: '#ef4444' },
+const COLUMNS: { id: ProspectStatus; title: string; className: string }[] = [
+  { id: 'LEAD', title: 'Leads Novos', className: 'columnHeaderLead' },
+  { id: 'CONTATO', title: 'Em Contato', className: 'columnHeaderContact' },
+  { id: 'NEGOCIACAO', title: 'Em Negociação', className: 'columnHeaderNegotiation' },
+  { id: 'PROPOSTA', title: 'Proposta Enviada', className: 'columnHeaderProposal' },
+  { id: 'FECHADO', title: 'Negócio Fechado', className: 'columnHeaderWon' },
+  { id: 'PERDIDO', title: 'Perdido', className: 'columnHeaderLost' },
 ];
 
 export default function CommercialProspectDashboard() {
@@ -47,21 +46,8 @@ export default function CommercialProspectDashboard() {
     return `Há ${diffDays} dias`;
   };
 
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'WebPage',
-    name: 'Painel Comercial e CRM',
-    description: 'Gestão de leads e funil de prospecção comercial.',
-  };
-
   return (
     <main className={styles.container}>
-      <Head>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
-      </Head>
 
       <header className={styles.header}>
         <div className={styles.titleGroup}>
@@ -77,7 +63,7 @@ export default function CommercialProspectDashboard() {
       </header>
 
       {isLoading ? (
-        <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
+        <div className={styles.loadingState}>
           Carregando funil comercial...
         </div>
       ) : (
@@ -87,12 +73,12 @@ export default function CommercialProspectDashboard() {
             
             return (
               <div key={col.id} className={styles.column} aria-labelledby={`col-${col.id}`}>
-                <div className={styles.columnHeader} style={{ borderTop: `4px solid ${col.color}` }}>
+                <div className={`${styles.columnHeader} ${styles[col.className]}`}>
                   <h2 id={`col-${col.id}`} className={styles.columnTitle}>
                     {col.title}
                     <span className={styles.columnCount}>{columnProspects.length}</span>
                   </h2>
-                  <button type="button" aria-label="Opções da coluna" style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}>
+                  <button type="button" className={styles.columnOptions} aria-label="Opções da coluna">
                     <MoreHorizontal size={18} />
                   </button>
                 </div>
@@ -125,7 +111,7 @@ export default function CommercialProspectDashboard() {
                         </div>
 
                         <footer className={styles.cardFooter}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <div className={styles.lastContact}>
                             <Clock size={12} /> Último contato: {timeAgo(prospect.lastContact)}
                           </div>
                         </footer>

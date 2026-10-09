@@ -51,6 +51,20 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Confira a descrição, localização e dados da ordem de serviço.' }, { status: 400 });
     }
 
+    const resolutionData = resolucao as Record<string, unknown>;
+    const validStart = typeof hora_inicio === 'string' && Number.isFinite(Date.parse(hora_inicio));
+    const validEnd = typeof hora_termino === 'string' && Number.isFinite(Date.parse(hora_termino))
+      && Number.isFinite(Date.parse(hora_inicio)) && Date.parse(hora_termino) >= Date.parse(hora_inicio);
+    if (
+      !validStart || !validEnd ||
+      typeof assinatura_base64 !== 'string' || !assinatura_base64.startsWith('data:image/') ||
+      typeof resolutionData.assinaturaUrl !== 'string' || !resolutionData.assinaturaUrl.trim() ||
+      typeof resolutionData.evidenciaAntesUrl !== 'string' || !resolutionData.evidenciaAntesUrl.trim() ||
+      typeof resolutionData.evidenciaDepoisUrl !== 'string' || !resolutionData.evidenciaDepoisUrl.trim()
+    ) {
+      return NextResponse.json({ error: 'A execução exige horários, assinatura do responsável e evidências antes e depois.' }, { status: 400 });
+    }
+
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     if (!serviceRoleKey) {
       console.error('SUPABASE_SERVICE_ROLE_KEY não está configurada.');
@@ -65,7 +79,7 @@ export async function POST(request: Request) {
 
     const { data: ticket, error: ticketReadError } = await supabaseAdmin
       .from('tickets')
-      .select('status, tecnico_id')
+      .select('status, tecnico_id, causa_raiz, causa_raiz_detalhe')
       .eq('id', ticket_id)
       .like('protocolo_origem', 'OS-%')
       .single();
@@ -99,7 +113,11 @@ export async function POST(request: Request) {
         checkout_at: finalizedAt,
         despesas_json: despesas_json || [],
         assinatura_datahora: assinatura_datahora || finalizedAt,
-        resolucao,
+        resolucao: {
+          ...resolucao,
+          causaRaiz: resolucao.causaRaiz || ticket.causa_raiz || null,
+          causaRaizDetalhe: resolucao.causaRaizDetalhe || ticket.causa_raiz_detalhe || null,
+        },
       })
       .eq('id', ticket_id)
       .like('protocolo_origem', 'OS-%');

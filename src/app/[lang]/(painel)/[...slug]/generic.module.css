@@ -26,7 +26,7 @@
 
 .btnFilter {
   background: var(--border-color);
-  color: #fff;
+  color: var(--text-primary);
   border: none;
   padding: 8px 16px;
   border-radius: 6px;
@@ -37,7 +37,7 @@
 }
 
 .btnNew {
-  background: #10b981;
+  background: var(--status-success-button);
   color: #fff;
   border: none;
   padding: 8px 16px;
@@ -81,7 +81,7 @@
   width: 100%;
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
-  color: #fff;
+  color: var(--text-primary);
   padding: 8px 12px 8px 36px;
   border-radius: 6px;
   outline: none;
@@ -94,6 +94,7 @@
 
 .table {
   width: 100%;
+  min-width: 720px;
   border-collapse: collapse;
   text-align: left;
 }
@@ -124,7 +125,7 @@
 
 .tdId {
   padding: 16px;
-  color: #fff;
+  color: var(--text-primary);
   font-size: 0.9rem;
 }
 
@@ -182,14 +183,14 @@
 .btnPage {
   background: var(--bg-tertiary);
   border: 1px solid var(--border-color);
-  color: #fff;
+  color: var(--text-primary);
   padding: 6px 12px;
   border-radius: 4px;
   cursor: pointer;
 }
 
 .btnPageActive {
-  background: #3b82f6;
+  background: var(--status-info-button);
   border: none;
   color: #fff;
   padding: 6px 12px;

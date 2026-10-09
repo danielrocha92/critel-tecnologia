@@ -11,6 +11,7 @@ import { DashboardTickets } from '../../../../components/Chamados/DashboardTicke
 import NovoChamadoModal from '../../../../components/Chamados/NovoChamadoModal';
 import { ITicket, ITicketReply } from '../../../../types/ticket';
 import { File, Download } from 'lucide-react';
+import ServiceReportSection from '@/components/Tecnico/ServiceReportSection';
 
 const supabase = createClient();
 
@@ -140,24 +141,20 @@ function CentralAtendimentoContent({
       const tid = routeTicketId ?? searchParams.get('ticket_id');
       if (tid && ticketAtivo?.id !== tid) {
         const found = tickets.find((ticket) => ticket.id === tid);
-        if (found) {
-          toast.success('Chamado encontrado na lista carregada.');
+        if (loading && !found) return;
+        const supabase = createClient();
+        const { data, error } = await supabase
+          .from('tickets')
+          .select('*')
+          .eq('id', tid)
+          .like('protocolo_origem', 'OS-%')
+          .maybeSingle();
+        if (data && !error) {
+          setTicketAtivo(data);
+        } else if (found) {
           setTicketAtivo(found);
-        } else if (!loading) {
-          toast.info('Buscando chamado no banco de dados...');
-          const supabase = createClient();
-          const { data, error } = await supabase
-            .from('tickets')
-            .select('*')
-            .eq('id', tid)
-            .like('protocolo_origem', 'OS-%')
-            .maybeSingle();
-          if (data && !error) {
-            toast.success('Chamado carregado do banco.');
-            setTicketAtivo(data);
-          } else {
-            toast.error(`Falha ao buscar chamado: ${error?.message || 'registro não encontrado'}`);
-          }
+        } else {
+          toast.error(`Falha ao buscar chamado: ${error?.message || 'registro não encontrado'}`);
         }
       }
     };
@@ -374,6 +371,9 @@ function CentralAtendimentoContent({
                   </div>
                 )}
               </div>
+              {['FINALIZADO', 'RESOLVIDO', 'FECHADO', 'CONCLUIDO'].includes((ticketAtivo.status || '').toUpperCase()) && (
+                <ServiceReportSection ticket={ticketAtivo} />
+              )}
             </div>
 
             {/* Coluna Direita: Informações */}
@@ -440,6 +440,10 @@ function CentralAtendimentoContent({
                   <span className={styles.panelValue}>{getAtendenteNome(ticketAtivo.analista_id || ticketAtivo.tecnico_id)}</span>
                 </div>
                 <div className={styles.panelRow}>
+                  <span className={styles.panelLabel}>Equipe responsável:</span>
+                  <span className={styles.panelValue}>{ticketAtivo.equipe_responsavel === 'SUPORTE_TECNICO' ? 'Suporte Técnico' : ticketAtivo.equipe_responsavel === 'FINANCEIRO' ? 'Financeiro' : ticketAtivo.equipe_responsavel === 'ANALISTA' ? 'Analista' : ticketAtivo.equipe_responsavel === 'COMERCIAL' ? 'Comercial' : 'Não informado'}</span>
+                </div>
+                <div className={styles.panelRow}>
                   <span className={styles.panelLabel}>Departamento:</span>
                   <span className={styles.panelValue}>{ticketAtivo.departamento || 'Não Informado'}</span>
                 </div>
@@ -447,6 +451,15 @@ function CentralAtendimentoContent({
                   <span className={styles.panelLabel}>Categoria:</span>
                   <span className={styles.panelValue}>{ticketAtivo.categoria || 'Não Informada'}</span>
                 </div>
+                {(ticketAtivo.causa_raiz || ticketAtivo.resolucao?.causaRaiz) && (
+                  <div className={styles.panelRow}>
+                    <span className={styles.panelLabel}>Causa raiz:</span>
+                    <span className={styles.panelValue}>
+                      {ticketAtivo.causa_raiz || ticketAtivo.resolucao?.causaRaiz}
+                      {(ticketAtivo.causa_raiz_detalhe || ticketAtivo.resolucao?.causaRaizDetalhe) && ` — ${ticketAtivo.causa_raiz_detalhe || ticketAtivo.resolucao?.causaRaizDetalhe}`}
+                    </span>
+                  </div>
+                )}
                 <div className={styles.panelRow}>
                   <span className={styles.panelLabel}>Criado em:</span>
                   <span className={styles.panelValue}>{safeDateValue(ticketAtivo.criado_em)?.toLocaleString([], { hour: '2-digit', minute: '2-digit' }) || '-'}</span>

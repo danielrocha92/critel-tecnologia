@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { MapPin, Clock, FileText, CheckCircle, Search, ClipboardList, Activity, Sparkles } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
+import SectionPageHeader from '@/components/Dashboard/SectionPageHeader';
 import styles from './OsList.module.css';
 
 import ResumoFinanceiro from '@/components/Tecnico/ResumoFinanceiro';
@@ -92,7 +93,7 @@ export default function OsList({ lang }: { lang: string }) {
       if (error) {
         console.error('Erro ao carregar chamados do técnico:', error);
       }
-      setTickets(data || []);
+      setTickets(((data || []) as ITicket[]).filter((ticket) => !ticket.equipe_responsavel || ticket.equipe_responsavel === 'SUPORTE_TECNICO'));
       setLoading(false);
     };
 
@@ -140,17 +141,17 @@ export default function OsList({ lang }: { lang: string }) {
 
   return (
     <div className={styles.pageContainer}>
-      <header className={styles.dashboardHeader}>
-        <div className={styles.headerCopy}>
-          <span className={styles.eyebrow}><Sparkles size={14} /> Área do técnico</span>
-          <h2 className={styles.pageTitle}>Painel de serviços</h2>
-          <p className={styles.pageSubtitle}>Acompanhe e organize suas ordens de serviço.</p>
-        </div>
-        <Link href={`/${lang}/tecnico/historico`} className={styles.historyLink}>
-          <ClipboardList size={17} />
-          Histórico
-        </Link>
-      </header>
+      <SectionPageHeader
+        eyebrow="GESTÃO OPERACIONAL"
+        title="Painel de serviços"
+        description="Acompanhe e organize suas ordens de serviço."
+        action={(
+          <Link href={`/${lang}/tecnico/historico`} className={styles.historyLink}>
+            <ClipboardList size={17} />
+            Histórico
+          </Link>
+        )}
+      />
 
       <section className={styles.metricsGrid} aria-label="Filtrar chamados por situação">
         <button type="button" aria-pressed={selectedGroup === 'ATIVOS'} onClick={() => selectGroup('ATIVOS')} className={`${styles.metricCard} ${selectedGroup === 'ATIVOS' ? styles.metricCardSelected : ''}`}>

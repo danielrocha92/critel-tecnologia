@@ -1,5 +1,8 @@
 .pageWrapper {
-  padding: 2rem;
+  box-sizing: border-box;
+  width: min(100%, 1440px);
+  margin: 0 auto;
+  padding: 30px clamp(18px, 4vw, 52px) 48px;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -28,8 +31,8 @@
 }
 
 .filtersContainer {
-  background: #181b24;
-  border: 1px solid var(--bg-secondary);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 12px 16px;
   display: flex;
@@ -40,6 +43,7 @@
 
 .filterIcon {
   flex-shrink: 0;
+  color: var(--text-secondary);
 }
 
 .inputWrapper {
@@ -52,6 +56,7 @@
   left: 11px;
   top: 50%;
   transform: translateY(-50%);
+  color: var(--text-secondary);
 }
 
 .selectWrapper {
@@ -64,23 +69,26 @@
   top: 50%;
   transform: translateY(-50%);
   pointer-events: none;
+  color: var(--text-secondary);
 }
 
 .btnReset {
-  background: transparent;
-  border: 1px solid var(--bg-secondary);
-  color: var(--text-muted);
-  padding: 8px 12px;
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
-  cursor: pointer;
+  color: var(--text-secondary);
+  background: transparent;
+  font: inherit;
   font-size: 0.75rem;
+  cursor: pointer;
   white-space: nowrap;
-  font-family: inherit;
 }
+.btnReset:hover { color: var(--text-primary); background: var(--surface-hover); }
 
 .tableContainer {
-  background: #181b24;
-  border: 1px solid var(--bg-secondary);
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   overflow: auto;
   flex: 1;
@@ -88,8 +96,9 @@
 
 .clientesTable {
   width: 100%;
+  min-width: 920px;
   border-collapse: collapse;
-  table-layout: fixed;
+  table-layout: auto;
 }
 
 .clientesTable td {
@@ -123,9 +132,11 @@
   gap: 4px;
 }
 
+.rowActions:focus-within { opacity: 1; }
+
 .critelInput {
   background: var(--bg-secondary);
-  border: 1px solid var(--bg-secondary);
+  border: 1px solid var(--input-border);
   color: var(--text-primary);
   padding: 9px 12px 9px 38px;
   border-radius: 6px;
@@ -137,13 +148,13 @@
 }
 
 .critelInput:focus {
-  border-color: #8b2cff;
+  border-color: var(--focus-ring);
 }
 
 .critelSelect {
   background: var(--bg-secondary);
-  border: 1px solid var(--bg-secondary);
-  color: var(--text-secondary);
+  border: 1px solid var(--input-border);
+  color: var(--text-primary);
   padding: 9px 32px 9px 12px;
   border-radius: 6px;
   outline: none;
@@ -154,11 +165,11 @@
 }
 
 .critelSelect:focus {
-  border-color: #8b2cff;
+  border-color: var(--focus-ring);
 }
 
 .btnPrimary {
-  background: #8b2cff;
+  background: var(--accent-brand);
   color: #fff;
   border: none;
   padding: 9px 18px;
@@ -175,7 +186,7 @@
 }
 
 .btnPrimary:hover {
-  background: #7c22e8;
+  background: var(--accent-hover);
 }
 
 .btnIcon {
@@ -205,9 +216,9 @@
   justify-content: center;
   font-weight: 700;
   font-size: 0.8rem;
-  background: linear-gradient(135deg, #8b2cff22, #8b2cff44);
-  color: #c084fc;
-  border: 1px solid #8b2cff33;
+  background: color-mix(in srgb, var(--accent-cyan) 12%, var(--bg-secondary));
+  color: var(--accent-cyan);
+  border: 1px solid color-mix(in srgb, var(--accent-cyan) 25%, transparent);
 }
 
 .footer {
@@ -289,7 +300,9 @@
 }
 
 .thContainer {
-  position: relative;
+  position: sticky;
+  top: 0;
+  z-index: 1;
   padding: 10px 16px;
   font-size: 0.73rem;
   font-weight: 600;
@@ -297,36 +310,29 @@
   letter-spacing: 0.06em;
   color: var(--text-muted);
   background: var(--bg-secondary);
-  border-bottom: 1px solid var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
   white-space: nowrap;
   overflow: hidden;
   user-select: none;
+  padding-right: 24px;
 }
 
 .resizeHandle {
   position: absolute;
   top: 0;
   right: 0;
-  width: 5px;
+  display: grid;
+  width: 12px;
   height: 100%;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
   cursor: col-resize;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
-
-.resizeLine {
-  width: 1px;
-  height: 60%;
-  background: var(--text-secondary);
-  border-radius: 1px;
-  transition: background 0.15s;
-}
-
-.resizeLine:hover {
-  background: #8b2cff;
-}
+.resizeLine { width: 2px; height: 60%; border-radius: 2px; background: var(--border-color); }
+.resizeHandle:hover .resizeLine,
+.resizeHandle:focus-visible .resizeLine { background: var(--accent-brand-text); }
 
 /* Icons and Empty Row */
 .inlineIcon {
@@ -348,7 +354,7 @@
 }
 
 .statusAtivoDot {
-  background: #10b981;
+  background: var(--color-success);
 }
 
 .statusImplantacao {
@@ -357,7 +363,7 @@
 }
 
 .statusImplantacaoDot {
-  background: #f59e0b;
+  background: var(--color-warning);
 }
 
 .statusInativo {
@@ -366,13 +372,13 @@
 }
 
 .statusInativoDot {
-  background: #ef4444;
+  background: var(--color-danger);
 }
 
 /* Segmento Classes */
 .segAlimentacao {
-  background: rgba(167, 139, 250, 0.09);
-  color: #a78bfa;
+  background: color-mix(in srgb, var(--accent-cyan) 10%, transparent);
+  color: var(--accent-cyan);
 }
 
 .segFastFood {
@@ -381,11 +387,113 @@
 }
 
 .segVarejo {
-  background: rgba(251, 146, 60, 0.09);
-  color: #fb923c;
+  background: color-mix(in srgb, var(--status-warning-text) 10%, transparent);
+  color: var(--status-warning-text);
 }
 
 .segDefault {
   background: rgba(148, 163, 184, 0.09);
   color: var(--text-secondary);
+}
+
+@media (max-width: 768px) {
+  .pageWrapper {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 1rem 0.875rem;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.85rem;
+    margin-bottom: 1rem;
+  }
+
+  .btnPrimary {
+    justify-content: center;
+    min-height: 44px;
+  }
+
+  .filtersContainer {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.6rem;
+    padding: 0.75rem;
+  }
+
+  .filterIcon { display: none; }
+  .inputWrapper { grid-column: 1 / -1; min-width: 0; }
+  .selectWrapper { min-width: 0; }
+  .critelSelect { box-sizing: border-box; width: 100%; min-height: 42px; font-size: 0.76rem; }
+  .btnReset { grid-column: 1 / -1; justify-content: center; min-height: 42px; }
+
+  .tableContainer {
+    overflow: visible;
+    border: 0;
+    background: transparent;
+  }
+
+  .clientesTable,
+  .clientesTable tbody,
+  .clientesTable tr,
+  .clientesTable td {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .clientesTable { table-layout: fixed; }
+  .clientesTable colgroup,
+  .clientesTable thead { display: none; }
+
+  .clientesTable tbody {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .clientesRow {
+    overflow: hidden;
+    padding: 0.3rem 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.8rem;
+    background: var(--card-bg);
+  }
+
+  .clientesTable .clientesRow td {
+    display: grid;
+    grid-template-columns: minmax(5.5rem, 0.7fr) minmax(0, 1.3fr);
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.65rem 0;
+    border-bottom: 1px solid var(--border-color);
+    overflow-wrap: anywhere;
+    text-align: left;
+    white-space: normal;
+  }
+
+  .clientesTable .clientesRow td::before {
+    content: attr(data-label);
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    font-weight: 700;
+  }
+
+  .clientesTable .clientesRow td:first-child {
+    display: block;
+    padding-top: 0.55rem;
+  }
+
+  .clientesTable .clientesRow td:first-child::before { display: none; }
+  .clientesTable .clientesRow td:last-child { border-bottom: 0; }
+  .clienteCell { min-width: 0; }
+  .clienteName { min-width: 0; white-space: normal; overflow-wrap: anywhere; }
+  .rowActions { justify-content: flex-start; opacity: 1; }
+  .footer { flex-direction: column; align-items: flex-start; gap: 0.4rem; }
+  .footerHint { display: none; }
+}
+
+@media (max-width: 700px) {
+  .pageWrapper { padding: 20px 14px 32px; }
 }

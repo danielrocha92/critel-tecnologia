@@ -48,10 +48,7 @@
   font-size: 2.8rem;
   font-weight: 800;
   margin: 0;
-  background: linear-gradient(90deg, #ffffff, var(--text-secondary));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--text-primary);
   letter-spacing: -1px;
 }
 
@@ -106,7 +103,7 @@
 }
 
 .warningItem {
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--card-bg);
   padding: 1rem 1.5rem;
   border-radius: 8px;
   border: 1px solid var(--border-color);
@@ -167,7 +164,7 @@
 
 .systemCard:hover {
   transform: translateY(-8px);
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: var(--accent-cyan);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 40px rgba(0, 210, 255, 0.05);
 }
 
@@ -296,7 +293,7 @@
 .kpiCard:hover {
   transform: translateY(-4px);
   background: var(--bg-tertiary);
-  border-color: rgba(255, 255, 255, 0.15);
+  border-color: var(--accent-cyan);
 }
 
 .kpiIconWrapper {

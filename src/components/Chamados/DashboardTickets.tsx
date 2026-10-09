@@ -198,6 +198,7 @@ export function DashboardTickets({ tickets, perfis, operadorAtual, searchTerm, s
           <Search size={16} />
           <input
             type="text"
+            aria-label="Buscar chamados"
             placeholder="Buscar chamado..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}

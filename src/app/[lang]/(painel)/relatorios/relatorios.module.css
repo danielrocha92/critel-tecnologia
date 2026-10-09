@@ -31,8 +31,8 @@
 
 .btnDate {
   background: var(--bg-secondary);
-  color: #fff;
-  border: 1px solid var(--text-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
   padding: 10px 16px;
   border-radius: 8px;
   cursor: pointer;
@@ -42,7 +42,7 @@
 }
 
 .btnExport {
-  background: #3b82f6;
+  background: var(--accent-brand);
   color: #fff;
   border: none;
   padding: 10px 20px;
@@ -60,7 +60,7 @@
 
 .kpiCard {
   background: var(--bg-secondary);
-  border: 1px solid var(--text-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 20px;
   display: flex;
@@ -83,6 +83,7 @@
 .kpiIconWrapper {
   padding: 8px;
   border-radius: 8px;
+  color: var(--text-primary);
 }
 
 .kpiValues {
@@ -111,7 +112,7 @@
 
 .chartCard {
   background: var(--bg-secondary);
-  border: 1px solid var(--text-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 24px;
   display: flex;
@@ -145,6 +146,11 @@
   max-width: 60px;
   border-radius: 6px 6px 0 0;
 }
+
+.barTall { height: 80%; }
+.barHigh { height: 60%; }
+.barMedium { height: 50%; }
+.barLow { height: 40%; }
 
 .barLabel {
   color: var(--text-secondary);
@@ -205,33 +211,31 @@
 }
 
 .trendDown {
-  color: #f43f5e;
+  color: var(--status-danger-text);
 }
 
-.bgBlue {
-  background: #3b82f6;
-}
+.bgBlue { background: var(--status-info-text); }
 
-.bgBlueLight {
-  background: #60a5fa;
-}
+.bgBlueLight { background: color-mix(in srgb, var(--status-info-text) 78%, var(--bg-secondary)); }
 
-.bgBlueLighter {
-  background: #93c5fd;
-}
+.bgBlueLighter { background: color-mix(in srgb, var(--status-info-text) 58%, var(--bg-secondary)); }
 
-.bgBlueLightest {
-  background: #bfdbfe;
-}
+.bgBlueLightest { background: color-mix(in srgb, var(--status-info-text) 38%, var(--bg-secondary)); }
 
-.bgGreen {
-  background: #10b981;
-}
+.bgGreen { background: var(--status-success-text); }
 
-.bgOrange {
-  background: #f59e0b;
-}
+.bgOrange { background: var(--status-warning-text); }
 
-.bgPurple {
-  background: #8b5cf6;
+.bgPurple { background: var(--accent-cyan); }
+
+.kpiBgBlue { color: var(--status-info-text); }
+.kpiBgGreen { color: var(--status-success-text); }
+.kpiBgOrange { color: var(--status-warning-text); }
+.kpiBgPurple { color: var(--accent-cyan); }
+
+@media (max-width: 760px) {
+  .pageContainer { padding: 1.25rem; }
+  .header { align-items: flex-start; flex-direction: column; gap: 1rem; }
+  .actions { flex-wrap: wrap; }
+  .chartsGrid { grid-template-columns: 1fr; }
 }

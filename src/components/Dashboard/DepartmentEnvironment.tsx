@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
@@ -18,9 +18,11 @@ import {
 } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
 import NovoChamadoModal from '@/components/Chamados/NovoChamadoModal';
+import { getTicketTeamLabel } from '@/lib/tickets/problemCatalog';
 import styles from './DepartmentEnvironment.module.css';
 
 type Department = 'financeiro' | 'comercial' | 'analista';
+type FinancialFilter = 'todos' | 'servicos' | 'despesas' | 'pendentes';
 
 type FinancialEntry = {
   id: string;
@@ -44,6 +46,7 @@ type SupportTicket = {
   status: string | null;
   prioridade: string | null;
   departamento: string | null;
+  equipe_responsavel: string | null;
   criado_em: string | null;
 };
 
@@ -109,6 +112,9 @@ export default function DepartmentEnvironment({
   const [ticketTotal, setTicketTotal] = useState<number | null>(null);
   const [search, setSearch] = useState('');
   const [ticketStatus, setTicketStatus] = useState('abertos');
+  const [financialFilter, setFinancialFilter] = useState<FinancialFilter>('todos');
+  const panelRef = useRef<HTMLElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -166,7 +172,7 @@ export default function DepartmentEnvironment({
         } else {
           const { data, error: queryError, count } = await supabase
             .from('tickets')
-            .select('id, protocolo_origem, titulo, cliente, status, prioridade, departamento, criado_em', { count: 'exact' })
+            .select('id, protocolo_origem, titulo, cliente, status, prioridade, departamento, equipe_responsavel, criado_em', { count: 'exact' })
             .like('protocolo_origem', 'OS-%')
             .order('criado_em', { ascending: false })
             .range(0, 299);
@@ -240,8 +246,17 @@ export default function DepartmentEnvironment({
     return { services, expenses, total: services + expenses, pending, settled };
   }, [financialEntries]);
 
+  const filteredFinancialEntries = useMemo(() => financialEntries.filter((entry) => {
+    if (financialFilter === 'servicos') return Number(entry.valor_servico || 0) > 0;
+    if (financialFilter === 'despesas') return Number(entry.valor_despesas || 0) > 0;
+    if (financialFilter === 'pendentes') return ['PENDENTE', 'ABERTO'].includes((entry.status_faturamento || '').toUpperCase());
+    return true;
+  }), [financialEntries, financialFilter]);
+
+  const scrollToPanel = () => panelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
   const analystOpenCount = tickets.filter(
-    (ticket) => !['FINALIZADO', 'RESOLVIDO', 'FECHADO', 'CONCLUIDO'].includes((ticket.status || '').toUpperCase()),
+    (ticket) => !['FINALIZADO', 'RESOLVIDO', 'FECHADO', 'CONCLUIDO', 'CANCELADO'].includes((ticket.status || '').toUpperCase()),
   ).length;
 
   return (
@@ -272,33 +287,34 @@ export default function DepartmentEnvironment({
 
       {department === 'financeiro' && (
         <>
-          <div className={styles.toolbar}>
-            <label className={styles.monthFilter}>
-              <CalendarDays size={17} />
-              <span>Período</span>
-              <input type="month" value={month} onChange={(event) => setMonth(event.target.value)} />
-            </label>
-            <Link href={`/${lang}/os`} className={styles.secondaryLink}>
-              <ClipboardList size={16} />
-              Ver ordens de serviço
-              <ArrowUpRight size={15} />
-            </Link>
-          </div>
+
 
           <section className={styles.metricGrid} aria-label="Resumo financeiro do período">
-            <MetricCard label="Total registrado" value={loading ? '—' : formatCurrency(financialTotals.total)} icon={<Wallet size={19} />} />
-            <MetricCard label="Serviços" value={loading ? '—' : formatCurrency(financialTotals.services)} icon={<ClipboardList size={19} />} />
-            <MetricCard label="Despesas reembolsáveis" value={loading ? '—' : formatCurrency(financialTotals.expenses)} icon={<DollarSign size={19} />} />
-            <MetricCard label="Pendentes de faturamento" value={loading ? '—' : String(financialTotals.pending)} icon={<CircleAlert size={19} />} />
+            <MetricCard label="Total registrado" value={loading ? '—' : formatCurrency(financialTotals.total)} icon={<Wallet size={19} />} onClick={() => { setFinancialFilter('todos'); scrollToPanel(); }} active={financialFilter === 'todos'} />
+            <MetricCard label="Serviços" value={loading ? '—' : formatCurrency(financialTotals.services)} icon={<ClipboardList size={19} />} onClick={() => { setFinancialFilter('servicos'); scrollToPanel(); }} active={financialFilter === 'servicos'} />
+            <MetricCard label="Despesas reembolsáveis" value={loading ? '—' : formatCurrency(financialTotals.expenses)} icon={<DollarSign size={19} />} onClick={() => { setFinancialFilter('despesas'); scrollToPanel(); }} active={financialFilter === 'despesas'} />
+            <MetricCard label="Pendentes de faturamento" value={loading ? '—' : String(financialTotals.pending)} icon={<CircleAlert size={19} />} onClick={() => { setFinancialFilter('pendentes'); scrollToPanel(); }} active={financialFilter === 'pendentes'} />
           </section>
 
-          <section className={styles.panel} aria-labelledby="finance-entries-title">
+          <section className={styles.panel} aria-labelledby="finance-entries-title" ref={panelRef}>
             <div className={styles.panelHeader}>
               <div>
                 <span className={styles.sectionEyebrow}>MOVIMENTAÇÕES</span>
                 <h2 id="finance-entries-title" className={styles.panelTitle}>Lançamentos recentes</h2>
               </div>
-              <span className={styles.resultCount}>{financialEntries.length} registros</span>
+              <div className={styles.tableControls}>
+                <label className={styles.monthFilter}>
+                  <CalendarDays size={17} />
+                  <span>Período</span>
+                  <input type="month" value={month} onChange={(event) => setMonth(event.target.value)} />
+                </label>
+                <Link href={`/${lang}/os`} className={styles.secondaryLink}>
+                  <ClipboardList size={16} />
+                  Ver ordens de serviço
+                  <ArrowUpRight size={15} />
+                </Link>
+                <span className={styles.resultCount}>{filteredFinancialEntries.length} registros</span>
+              </div>
             </div>
             <div className={styles.tableScroll}>
               <table className={styles.dataTable}>
@@ -308,21 +324,21 @@ export default function DepartmentEnvironment({
                 <tbody>
                   {loading ? (
                     <TableMessage columns={5} message="Carregando lançamentos..." />
-                  ) : financialEntries.length === 0 ? (
+                  ) : filteredFinancialEntries.length === 0 ? (
                     <TableMessage columns={5} message="Nenhum lançamento registrado neste período." />
-                  ) : financialEntries.map((entry) => (
+                  ) : filteredFinancialEntries.map((entry) => (
                     <tr key={entry.id}>
-                      <td>
+                      <td data-label="Ordem">
                         {entry.ticket_id ? (
                           <Link href={`/${lang}/os/${entry.ticket_id}`} className={styles.tableLink}>
                             #{entry.ticket_id.slice(0, 8)}
                           </Link>
                         ) : '—'}
                       </td>
-                      <td>{formatDate(entry.criado_em)}</td>
-                      <td>{formatCurrency(entry.valor_servico)}</td>
-                      <td>{formatCurrency(entry.valor_despesas)}</td>
-                      <td><span className={`${styles.statusBadge} ${statusClass(entry.status_faturamento)}`}>{entry.status_faturamento || 'Sem status'}</span></td>
+                      <td data-label="Data">{formatDate(entry.criado_em)}</td>
+                      <td data-label="Serviço">{formatCurrency(entry.valor_servico)}</td>
+                      <td data-label="Despesas">{formatCurrency(entry.valor_despesas)}</td>
+                      <td data-label="Status"><span className={`${styles.statusBadge} ${statusClass(entry.status_faturamento)}`}>{entry.status_faturamento || 'Sem status'}</span></td>
                     </tr>
                   ))}
                 </tbody>
@@ -335,10 +351,10 @@ export default function DepartmentEnvironment({
       {department === 'comercial' && (
         <>
           <section className={styles.metricGrid} aria-label="Resumo comercial">
-            <MetricCard label="Contatos cadastrados" value={loading ? '—' : String(contacts.length)} icon={<Building2 size={19} />} />
-            <MetricCard label="Lojas encontradas" value={loading ? '—' : String(filteredContacts.length)} icon={<Building2 size={19} />} />
+            <MetricCard label="Contatos cadastrados" value={loading ? '—' : String(contacts.length)} icon={<Building2 size={19} />} onClick={() => { setSearch(''); scrollToPanel(); }} />
+            <MetricCard label="Lojas encontradas" value={loading ? '—' : String(filteredContacts.length)} icon={<Building2 size={19} />} onClick={() => { scrollToPanel(); searchInputRef.current?.focus({ preventScroll: true }); }} />
           </section>
-          <section className={styles.panel} aria-labelledby="store-contacts-title">
+          <section className={styles.panel} aria-labelledby="store-contacts-title" ref={panelRef}>
             <div className={styles.panelHeader}>
               <div>
                 <span className={styles.sectionEyebrow}>RELACIONAMENTO</span>
@@ -349,6 +365,7 @@ export default function DepartmentEnvironment({
                 <input
                   type="search"
                   value={search}
+                  ref={searchInputRef}
                   onChange={(event) => setSearch(event.target.value)}
                   placeholder="Buscar loja"
                   aria-label="Buscar loja"
@@ -379,11 +396,11 @@ export default function DepartmentEnvironment({
       {department === 'analista' && (
         <>
           <section className={`${styles.metricGrid} ${styles.metricGridCompact}`} aria-label="Resumo de solicitações">
-            <MetricCard label="Solicitações no sistema" value={loading ? '—' : ticketTotal === null ? 'Indisponível' : String(ticketTotal)} icon={<ClipboardList size={19} />} />
-            <MetricCard label="Em aberto na seleção" value={loading ? '—' : String(analystOpenCount)} icon={<Headset size={19} />} />
-            <MetricCard label="Encerradas na seleção" value={loading ? '—' : String(tickets.length - analystOpenCount)} icon={<CheckCircle2 size={19} />} />
+            <MetricCard label="Solicitações no sistema" value={loading ? '—' : ticketTotal === null ? 'Indisponível' : String(ticketTotal)} icon={<ClipboardList size={19} />} onClick={() => { setTicketStatus('todos'); scrollToPanel(); }} active={ticketStatus === 'todos'} />
+            <MetricCard label="Em aberto na seleção" value={loading ? '—' : String(analystOpenCount)} icon={<Headset size={19} />} onClick={() => { setTicketStatus('abertos'); scrollToPanel(); }} active={ticketStatus === 'abertos'} />
+            <MetricCard label="Encerradas na seleção" value={loading ? '—' : String(tickets.length - analystOpenCount)} icon={<CheckCircle2 size={19} />} onClick={() => { setTicketStatus('finalizados'); scrollToPanel(); }} active={ticketStatus === 'finalizados'} />
           </section>
-          <section className={styles.panel} aria-labelledby="analyst-tickets-title">
+          <section className={styles.panel} aria-labelledby="analyst-tickets-title" ref={panelRef}>
             <div className={styles.panelHeader}>
               <div>
                 <span className={styles.sectionEyebrow}>FILA DE ATENDIMENTO</span>
@@ -414,7 +431,7 @@ export default function DepartmentEnvironment({
             <div className={styles.tableScroll}>
               <table className={styles.dataTable}>
                 <thead>
-                  <tr><th>Protocolo</th><th>Solicitação</th><th>Cliente</th><th>Departamento</th><th>Prioridade</th><th>Status</th><th>Ação</th></tr>
+                  <tr><th>Protocolo</th><th>Solicitação</th><th>Cliente</th><th>Equipe / Departamento</th><th>Prioridade</th><th>Status</th><th>Ação</th></tr>
                 </thead>
                 <tbody>
                   {loading ? (
@@ -423,13 +440,13 @@ export default function DepartmentEnvironment({
                     <TableMessage columns={7} message={tickets.length ? 'Nenhuma solicitação corresponde aos filtros.' : 'Nenhuma solicitação disponível.'} />
                   ) : filteredTickets.map((ticket) => (
                     <tr key={ticket.id}>
-                      <td>{ticket.protocolo_origem || `#${ticket.id.slice(0, 8)}`}</td>
-                      <td>{ticket.titulo || 'Sem título'}</td>
-                      <td>{ticket.cliente || '—'}</td>
-                      <td>{ticket.departamento || '—'}</td>
-                      <td>{ticket.prioridade || '—'}</td>
-                      <td><span className={`${styles.statusBadge} ${statusClass(ticket.status)}`}>{ticket.status || 'Sem status'}</span></td>
-                      <td>
+                      <td data-label="Protocolo">{ticket.protocolo_origem || `#${ticket.id.slice(0, 8)}`}</td>
+                      <td data-label="Solicitação">{ticket.titulo || 'Sem título'}</td>
+                      <td data-label="Cliente">{ticket.cliente || '—'}</td>
+                      <td data-label="Equipe / Departamento">{getTicketTeamLabel(ticket.equipe_responsavel === null ? 'SUPORTE_TECNICO' : ticket.equipe_responsavel)}{ticket.departamento ? ` · ${ticket.departamento}` : ''}</td>
+                      <td data-label="Prioridade">{ticket.prioridade || '—'}</td>
+                      <td data-label="Status"><span className={`${styles.statusBadge} ${statusClass(ticket.status)}`}>{ticket.status || 'Sem status'}</span></td>
+                      <td data-label="Ação">
                         <Link
                           href={`/${lang}/os/${encodeURIComponent(ticket.id)}`}
                           className={styles.openTicketLink}
@@ -463,18 +480,18 @@ export default function DepartmentEnvironment({
   );
 }
 
-function MetricCard({ label, value, icon }: { label: string; value: string; icon: ReactNode }) {
+function MetricCard({ label, value, icon, onClick, active = false }: { label: string; value: string; icon: ReactNode; onClick: () => void; active?: boolean }) {
   return (
-    <article className={styles.metricCard}>
+    <button type="button" className={`${styles.metricCard} ${active ? styles.metricCardActive : ''}`} onClick={onClick} aria-pressed={active}>
       <span className={styles.metricIcon}>{icon}</span>
       <div className={styles.metricCopy}>
         <p>{label}</p>
         <strong>{value}</strong>
       </div>
-    </article>
+    </button>
   );
 }
 
 function TableMessage({ columns, message }: { columns: number; message: string }) {
-  return <tr><td colSpan={columns} className={styles.tableMessage}>{message}</td></tr>;
+  return <tr className={styles.tableMessageRow}><td colSpan={columns} className={styles.tableMessage}>{message}</td></tr>;
 }
