@@ -13,6 +13,15 @@ type IncomingPdv = {
   ultima_verificacao?: string;
 };
 
+type BacioPdvRow = {
+  loja_codigo: string;
+  pdv_codigo: string;
+  pdv_nome: string;
+  status_conexao: 'ONLINE' | 'OFFLINE';
+  ultima_verificacao: string;
+  atualizado_em: string;
+};
+
 function secretsMatch(received: string, expected: string) {
   const receivedBuffer = Buffer.from(received);
   const expectedBuffer = Buffer.from(expected);
@@ -45,7 +54,7 @@ export async function POST(request: Request) {
 
   const knownStoreCodes = new Set((stores as { code: string; name: string }[]).map((store) => store.code));
   const receivedAt = new Date().toISOString();
-  const rows = [];
+  const rows: BacioPdvRow[] = [];
 
   const seen = new Set<string>();
   for (const rawItem of incomingPdvs) {

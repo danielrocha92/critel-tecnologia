@@ -1,6 +1,6 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
-let supabaseAdmin: ReturnType<typeof createClient> | undefined;
+let supabaseAdmin: SupabaseClient | undefined;
 
 // Criado apenas quando uma rota realmente usa o cliente, nunca durante o build.
 export function getSupabaseAdmin() {

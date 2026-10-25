@@ -4,6 +4,14 @@ import { createClient } from '@/utils/supabase/server';
 
 export const dynamic = 'force-dynamic';
 
+type PdvStatus = {
+  loja_codigo: string;
+  pdv_codigo: string;
+  pdv_nome: string;
+  status_conexao: 'ONLINE' | 'OFFLINE';
+  ultima_verificacao: string;
+};
+
 export async function GET() {
   try {
     const supabase = await createClient();
@@ -31,7 +39,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Sem permissão para acessar o monitoramento.' }, { status: 403 });
     }
 
-    const pdvs = [];
+    const pdvs: PdvStatus[] = [];
     const pageSize = 1000;
     for (let offset = 0; ; offset += pageSize) {
       const { data, error } = await getSupabaseAdmin()
