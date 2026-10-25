@@ -1,6 +1,6 @@
 import { timingSafeEqual } from 'node:crypto';
 import { NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/auditoria';
+import { getSupabaseAdmin } from '@/lib/auditoria';
 import stores from '@/data/bacio-stores.json';
 
 export const dynamic = 'force-dynamic';
@@ -82,7 +82,7 @@ export async function POST(request: Request) {
     });
   }
 
-  const { error } = await supabaseAdmin
+  const { error } = await getSupabaseAdmin()
     .from('bacio_pdv_status')
     .upsert(rows, { onConflict: 'loja_codigo,pdv_codigo' });
 

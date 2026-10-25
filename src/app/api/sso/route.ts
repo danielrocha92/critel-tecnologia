@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin, registrarAuditoria } from '@/lib/auditoria';
+import { getSupabaseAdmin, registrarAuditoria } from '@/lib/auditoria';
 import { decrypt } from '@/lib/crypto';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 2. Buscar credenciais no cofre
-    const { data: credencial, error: cofreError } = await supabaseAdmin
+    const { data: credencial, error: cofreError } = await getSupabaseAdmin()
       .from('cofre_credenciais')
       .select('usuario_login, senha_criptografada')
       .eq('sistema', sistema)

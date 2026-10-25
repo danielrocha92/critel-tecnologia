@@ -1,16 +1,30 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-// Para operações seguras (auditoria e cofre), usamos a chave de serviço (Service Role)
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+let supabaseAdmin: ReturnType<typeof createClient> | undefined;
 
-// Cliente admin ignora as políticas RLS para garantir a gravação e leitura pelo backend
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false
+// Criado apenas quando uma rota realmente usa o cliente, nunca durante o build.
+export function getSupabaseAdmin() {
+  if (supabaseAdmin) return supabaseAdmin;
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !supabaseServiceKey) {
+    throw new Error(
+      'Supabase não configurado: defina NEXT_PUBLIC_SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY.'
+    );
   }
-});
+
+  // Chave de serviço ignora RLS; mantenha este cliente somente no servidor.
+  supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
+
+  return supabaseAdmin;
+}
 
 export async function registrarAuditoria(
   usuarioId: string,
@@ -19,7 +33,7 @@ export async function registrarAuditoria(
   userAgent: string = 'unknown'
 ) {
   try {
-    const { error } = await supabaseAdmin.from('auditoria_acessos').insert({
+    const { error } = await getSupabaseAdmin().from('auditoria_acessos').insert({
       usuario_id: usuarioId,
       sistema_destino: sistemaDestino,
       ip_origem: ipOrigem,
@@ -33,5 +47,3 @@ export async function registrarAuditoria(
     console.error('Falha ao inserir auditoria:', err);
   }
 }
-
-export { supabaseAdmin };

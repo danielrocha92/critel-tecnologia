@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/auditoria';
+import { getSupabaseAdmin } from '@/lib/auditoria';
 import { createClient } from '@/utils/supabase/server';
 
 export const dynamic = 'force-dynamic';
@@ -34,7 +34,7 @@ export async function GET() {
     const pdvs = [];
     const pageSize = 1000;
     for (let offset = 0; ; offset += pageSize) {
-      const { data, error } = await supabaseAdmin
+      const { data, error } = await getSupabaseAdmin()
         .from('bacio_pdv_status')
         .select('loja_codigo, pdv_codigo, pdv_nome, status_conexao, ultima_verificacao')
         .order('loja_codigo')
