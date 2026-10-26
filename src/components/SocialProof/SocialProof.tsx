@@ -1,13 +1,13 @@
 "use client";
 
+import Image from 'next/image';
 import styles from './SocialProof.module.css';
 
-export default function SocialProof({ dict }: { dict: any }) {
+export default function SocialProof({ dict }: { dict: { label: string } }) {
   const partners = [
     { name: 'Bradesco', desc: 'Infraestrutura corporativa e suporte.', logoSrc: '/bradesco.svg' },
     { name: 'Bacio di Latte', desc: 'Aberturas de loja, service desk e Field Services.', logoSrc: '/bacio-di-latte.svg', logoLightSrc: '/bacio-di-latte-dark.svg' },
     { name: 'Ofner', desc: 'Suporte especializado em infraestrutura.', logoSrc: '/ofner.png' },
-    { name: 'Engemon', desc: 'Infraestrutura de rede e Field Services nos clientes da Engemon.', logoSrc: '/engemon.svg', logoLightSrc: '/engemon-dark.svg' },
     { name: 'Sonda IT', desc: 'Infraestrutura de rede e Field Services.', logoSrc: '/sonda.svg' },
     { name: 'Connectcom', desc: 'Infraestrutura de rede e Field Services.', logoSrc: '/connectcom.svg' },
     { name: 'Tecnocomp', desc: 'Infraestrutura de rede e Field Services.', logoSrc: '/tecnocomp.svg', logoLightSrc: '/tecnocomp-dark.svg' },
@@ -31,15 +31,19 @@ export default function SocialProof({ dict }: { dict: any }) {
             <div key={`set1-${index}`} className={styles.logoItem} title={partner.desc}>
               {partner.logoSrc ? (
                 <>
-                  <img
+                  <Image
                     src={partner.logoSrc}
                     alt={partner.name}
+                    width={150}
+                    height={46}
                     className={`${styles.logoImage} ${partner.logoLightSrc ? styles.logoForDark : ''}`}
                   />
                   {partner.logoLightSrc && (
-                    <img
+                    <Image
                       src={partner.logoLightSrc}
                       alt={partner.name}
+                      width={150}
+                      height={46}
                       className={`${styles.logoImage} ${styles.logoForLight}`}
                     />
                   )}
@@ -54,15 +58,19 @@ export default function SocialProof({ dict }: { dict: any }) {
             <div key={`set2-${index}`} className={styles.logoItem} aria-hidden="true" title={partner.desc}>
               {partner.logoSrc ? (
                 <>
-                  <img
+                  <Image
                     src={partner.logoSrc}
                     alt={partner.name}
+                    width={150}
+                    height={46}
                     className={`${styles.logoImage} ${partner.logoLightSrc ? styles.logoForDark : ''}`}
                   />
                   {partner.logoLightSrc && (
-                    <img
+                    <Image
                       src={partner.logoLightSrc}
                       alt={partner.name}
+                      width={150}
+                      height={46}
                       className={`${styles.logoImage} ${styles.logoForLight}`}
                     />
                   )}

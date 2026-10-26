@@ -35,7 +35,14 @@ export function getOrganizationSchema() {
     contactPoint: [
       {
         '@type': 'ContactPoint',
-        telephone: '+55-11-3136-2592',
+        telephone: '+55-11-4580-8988',
+        contactType: 'sales',
+        email: 'comercial@criteltecnologia.com.br',
+        availableLanguage: ['Portuguese', 'English', 'Spanish'],
+      },
+      {
+        '@type': 'ContactPoint',
+        telephone: '+55-11-4580-8989',
         contactType: 'sales',
         email: 'comercial@criteltecnologia.com.br',
         availableLanguage: ['Portuguese', 'English', 'Spanish'],

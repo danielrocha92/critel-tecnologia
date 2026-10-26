@@ -157,7 +157,8 @@ export default function Footer({ dict, lang }: { dict: any, lang: string }) {
             </li>
             <li className={styles.contactItem}>
               <Phone size={17} className={styles.contactIcon} />
-              <a href="tel:+551131362592">{dict.contact.phone}</a>
+              <a href="tel:+551145808988">+55 (11) 4580-8988</a>{' / '}
+              <a href="tel:+551145808989">+55 (11) 4580-8989</a>
             </li>
 
             <li className={styles.contactItem}>

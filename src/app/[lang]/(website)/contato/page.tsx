@@ -6,6 +6,7 @@ import ContactForm from '@/components/ContactForm/ContactForm';
 import JsonLd, { getBreadcrumbSchema } from '@/components/JsonLd/JsonLd';
 import { getDictionary } from '@/dictionaries';
 import { MapPin, Phone, Mail, Sparkles } from 'lucide-react';
+import type { Locale } from '@/i18n.config';
 
 export async function generateMetadata({
   params,
@@ -13,7 +14,7 @@ export async function generateMetadata({
   params: Promise<{ lang: string }>;
 }): Promise<Metadata> {
   const resolvedParams = await params;
-  const dict = await getDictionary(resolvedParams.lang as any);
+  const dict = await getDictionary(resolvedParams.lang as Locale);
   const contactSeo = dict.seo?.contact;
 
   const title = contactSeo?.title ?? 'Fale com um Especialista | Contato e Orçamentos';
@@ -47,7 +48,7 @@ export async function generateMetadata({
 
 export default async function ContactPage({ params }: { params: Promise<{ lang: string }> }) {
   const resolvedParams = await params;
-  const dict = await getDictionary(resolvedParams.lang as any);
+  const dict = await getDictionary(resolvedParams.lang as Locale);
   const footerDict = dict.footer;
 
   const breadcrumbs = [
@@ -92,7 +93,8 @@ export default async function ContactPage({ params }: { params: Promise<{ lang: 
               </div>
               <h3>Telefone Central</h3>
               <p>Atendimento comercial e corporativo</p>
-              <a href="tel:+551131362592" className={styles.cardLink}>{footerDict.contact.phone}</a>
+              <a href="tel:+551145808988" className={styles.cardLink}>+55 (11) 4580-8988</a>
+              <a href="tel:+551145808989" className={styles.cardLink}>+55 (11) 4580-8989</a>
             </div>
 
             <div className={styles.infoCard}>

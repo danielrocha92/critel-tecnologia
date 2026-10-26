@@ -6,6 +6,7 @@ import JsonLd, { getBreadcrumbSchema } from '@/components/JsonLd/JsonLd';
 import { getDictionary } from '@/dictionaries';
 import { Sparkles, CheckCircle2, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
+import type { Locale } from '@/i18n.config';
 
 export async function generateMetadata({
   params,
@@ -13,7 +14,7 @@ export async function generateMetadata({
   params: Promise<{ lang: string }>;
 }): Promise<Metadata> {
   const resolvedParams = await params;
-  const dict = await getDictionary(resolvedParams.lang as any);
+  const dict = await getDictionary(resolvedParams.lang as Locale);
   const clientsSeo = dict.seo?.clients;
 
   const title = clientsSeo?.title ?? 'Clientes e Casos de Sucesso | Critel Tecnologia';
@@ -47,7 +48,7 @@ export async function generateMetadata({
 
 export default async function ClientsPage({ params }: { params: Promise<{ lang: string }> }) {
   const resolvedParams = await params;
-  const dict = await getDictionary(resolvedParams.lang as any);
+  const dict = await getDictionary(resolvedParams.lang as Locale);
   const clientsData = dict.clientsPage;
 
   const breadcrumbs = [
@@ -77,14 +78,6 @@ export default async function ClientsPage({ params }: { params: Promise<{ lang: 
       tag: 'Indústria & Varejo Alimentício',
       desc: 'Suporte especializado em infraestrutura e redes para fábricas, centros de distribuição e rede de lojas.',
       scope: ['Infraestrutura de Rede e Wi-Fi', 'Service Desk Corporativo', 'Segurança da Informação']
-    },
-    {
-      name: 'Engemon',
-      logo: '/engemon.svg',
-      logoLight: '/engemon-dark.svg',
-      tag: 'Engenharia & Soluções Integradas',
-      desc: 'Parceria técnica em engenharia de redes, automação e implementação de infraestrutura de telecom.',
-      scope: ['Grandes Obras de Infraestrutura', 'Fusão e Lançamento de Fibra', 'Projetos Críticos']
     },
     {
       name: 'Sonda IT',
@@ -136,15 +129,19 @@ export default async function ClientsPage({ params }: { params: Promise<{ lang: 
               <ScrollReveal key={idx} animation="fadeInUp" className={styles.caseCard}>
                 <div className={styles.cardHeader}>
                   <div className={styles.logoBox}>
-                    <img 
+                    <Image
                       src={c.logo} 
                       alt={`Logo ${c.name}`} 
+                      width={120}
+                      height={44}
                       className={`${styles.logoImg} ${c.logoLight ? styles.logoForDark : ''}`} 
                     />
                     {c.logoLight && (
-                      <img 
+                      <Image
                         src={c.logoLight} 
                         alt={`Logo ${c.name}`} 
+                        width={120}
+                        height={44}
                         className={`${styles.logoImg} ${styles.logoForLight}`} 
                       />
                     )}
