@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import styles from './FloatingActions.module.css';
-import { ArrowUp } from 'lucide-react';
+import { ArrowUp, MessageCircle } from 'lucide-react';
 
 export default function FloatingActions() {
   const [showBackToTop, setShowBackToTop] = useState(false);
@@ -28,10 +28,25 @@ export default function FloatingActions() {
     });
   };
 
+  const whatsappNumber = '5511996839480';
+  const whatsappMessage = encodeURIComponent(
+    'Olá, gostaria de saber mais sobre as soluções da Critel Tecnologia.'
+  );
+  const whatsappLink = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
 
 
   return (
     <>
+      <a
+        href={whatsappLink}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={`${styles.floatingBtn} ${styles.whatsappBtn}`}
+        aria-label="Fale conosco no WhatsApp"
+      >
+        <MessageCircle size={28} aria-hidden="true" />
+      </a>
+
       {/* Back to Top Button - Bottom Right */}
       <button 
         onClick={scrollToTop} 
