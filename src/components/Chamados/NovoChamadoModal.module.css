@@ -310,6 +310,15 @@
   gap: 8px;
 }
 
+.hiddenFileInput {
+  display: none;
+}
+
+.btnAttach:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
 .btnCancel {
   min-height: 40px;
   background: var(--bg-secondary);

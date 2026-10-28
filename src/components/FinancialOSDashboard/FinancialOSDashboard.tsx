@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Download } from 'lucide-react';
 import { osFinanceService } from '../../services/osFinanceService';
 import type { FinancialOS, OSSummary, OSFilterParams, OSPricing } from '../../services/osFinanceService';
@@ -12,11 +13,15 @@ import OSPricingModal from './OSPricingModal';
 import styles from './FinancialOSDashboard.module.css';
 
 export default function FinancialOSDashboard() {
+  const searchParams = useSearchParams();
   const [summary, setSummary] = useState<OSSummary | null>(null);
   const [osList, setOsList] = useState<FinancialOS[]>([]);
   const [filters, setFilters] = useState<OSFilterParams>({});
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [selectedSummaryFilter, setSelectedSummaryFilter] = useState<OSSummaryFilter | null>(null);
+  const initialSummaryFilter = searchParams.get('filter');
+  const [selectedSummaryFilter, setSelectedSummaryFilter] = useState<OSSummaryFilter | null>(
+    initialSummaryFilter === 'pendingValidation' ? 'pendingValidation' : null,
+  );
   const [isLoading, setIsLoading] = useState(true);
   
   // Modal state

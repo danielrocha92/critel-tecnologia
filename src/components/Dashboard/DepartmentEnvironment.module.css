@@ -96,7 +96,7 @@
 
 .secondaryLink { min-height: 40px; padding: 0 12px; }
 .metricGrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 13px; margin: 0 0 18px; }
-.metricGridCompact { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.metricGridCompact { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .metricCard {
   display: flex;
   align-items: center;

@@ -113,7 +113,8 @@ export async function POST(req: NextRequest) {
 
     let payloadValue: unknown;
     let files: File[] = [];
-    const uploadedUrls: string[] = [];
+    const uploadedObjectPaths: string[] = [];
+    const uploadedAttachments: Array<{ url: string; nome_arquivo: string; tipo_arquivo: string; tamanho_bytes: number }> = [];
 
     const contentType = req.headers.get('content-type') || '';
     if (contentType.includes('multipart/form-data')) {
@@ -129,30 +130,10 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Payload do chamado contém JSON inválido' }, { status: 400 });
       }
 
-      files = formData.getAll('files').filter((file): file is File => file instanceof File);
+      files = formData.getAll('files').filter((value): value is File =>
+        typeof value !== 'string' && typeof value.arrayBuffer === 'function' && value.size > 0,
+      );
 
-      for (const file of files) {
-        if (!file.name) continue;
-
-        const arrayBuffer = await file.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-
-        const { error: uploadError } = await supabaseAdmin.storage
-          .from('anexos')
-          .upload(`tickets/${fileName}`, buffer, {
-            contentType: file.type,
-            upsert: false
-          });
-
-        if (uploadError) {
-          console.error('Erro ao fazer upload para o Supabase Storage:', uploadError);
-          continue;
-        }
-
-        const { data: urlData } = supabaseAdmin.storage.from('anexos').getPublicUrl(`tickets/${fileName}`);
-        uploadedUrls.push(urlData.publicUrl);
-      }
     } else {
       try {
         payloadValue = await req.json();
@@ -180,6 +161,41 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    if (files.length > 20) {
+      return NextResponse.json({ error: 'Envie no máximo 20 anexos por chamado.' }, { status: 400 });
+    }
+
+    for (const file of files) {
+      if (file.size > 20 * 1024 * 1024) {
+        return NextResponse.json({ error: `O arquivo ${file.name} excede o limite de 20 MB.` }, { status: 400 });
+      }
+
+      const safeOriginalName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}-${safeOriginalName}`;
+      const objectPath = `tickets/${fileName}`;
+      const { error: uploadError } = await supabaseAdmin.storage
+        .from('anexos')
+        .upload(objectPath, Buffer.from(await file.arrayBuffer()), {
+          contentType: file.type || 'application/octet-stream',
+          upsert: false,
+        });
+
+      if (uploadError) {
+        if (uploadedObjectPaths.length) await supabaseAdmin.storage.from('anexos').remove(uploadedObjectPaths);
+        console.error('Erro ao fazer upload para o Supabase Storage:', uploadError);
+        return NextResponse.json({ error: `Falha ao enviar o anexo ${file.name}.`, details: uploadError.message }, { status: 500 });
+      }
+
+      uploadedObjectPaths.push(objectPath);
+      const { data: urlData } = supabaseAdmin.storage.from('anexos').getPublicUrl(objectPath);
+      uploadedAttachments.push({
+        url: urlData.publicUrl,
+        nome_arquivo: file.name,
+        tipo_arquivo: file.type || 'application/octet-stream',
+        tamanho_bytes: file.size,
+      });
+    }
+
     const { data: ticketData, error: ticketError } = await supabaseAdmin
       .from('tickets')
       .insert({
@@ -201,17 +217,16 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (ticketError) {
+      if (uploadedObjectPaths.length) await supabaseAdmin.storage.from('anexos').remove(uploadedObjectPaths);
       console.error('Erro ao inserir ticket no Supabase:', ticketError);
       throw new Error(ticketError.message);
     }
 
     // Adiciona anexos se houver
-    if (uploadedUrls.length > 0 && ticketData) {
-      const anexosPayload = uploadedUrls.map(url => ({
+    if (uploadedAttachments.length > 0 && ticketData) {
+      const anexosPayload = uploadedAttachments.map(anexo => ({
         ticket_id: ticketData.id,
-        url,
-        nome_arquivo: url.split('/').pop() || 'anexo',
-        tipo_arquivo: 'desconhecido'
+        ...anexo,
       }));
 
       const { error: anexosError } = await supabaseAdmin
@@ -220,6 +235,9 @@ export async function POST(req: NextRequest) {
 
       if (anexosError) {
         console.error('Erro ao inserir anexos:', anexosError);
+        if (uploadedObjectPaths.length) await supabaseAdmin.storage.from('anexos').remove(uploadedObjectPaths);
+        await supabaseAdmin.from('tickets').delete().eq('id', ticketData.id);
+        return NextResponse.json({ error: 'O chamado foi criado, mas não foi possível registrar os anexos.', details: anexosError.message, ticketId: ticketData.id }, { status: 500 });
       }
     }
 

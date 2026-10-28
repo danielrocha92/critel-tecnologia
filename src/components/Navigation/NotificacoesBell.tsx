@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Bell, Check, CheckCheck, Trash2, X, Bell as BellOff } from 'lucide-react';
+import { Bell, CheckCheck, Trash2, X, Bell as BellOff } from 'lucide-react';
 import { useNotificacoes, Notificacao } from '@/hooks/useNotificacoes';
 import Link from 'next/link';
 import styles from './NotificacoesBell.module.css';
@@ -18,6 +18,7 @@ function tempoRelativo(iso: string): string {
 }
 
 const iconePorTipo: Record<Notificacao['tipo'], string> = {
+  evidencia_enviada: '📷',
   novo_chamado: '🎫',
   chamado_respondido: '💬',
   chamado_fechado: '✅',
@@ -98,10 +99,14 @@ export default function NotificacoesBell() {
               </div>
             ) : (
               notificacoes.map(n => (
-                <div
+                <Link
                   key={n.id}
+                  href={n.href || `/${lang}/analista`}
                   className={`${styles.item} ${n.lida ? styles.itemLida : styles.itemNaoLida}`}
-                  onClick={() => marcarLida(n.id)}
+                  onClick={() => {
+                    marcarLida(n.id);
+                    setAberto(false);
+                  }}
                 >
                   <span className={styles.icon}>{iconePorTipo[n.tipo]}</span>
                   <div className={styles.content}>
@@ -120,7 +125,7 @@ export default function NotificacoesBell() {
                       {tempoRelativo(n.criada_em)}
                     </span>
                   </div>
-                </div>
+                </Link>
               ))
             )}
           </div>

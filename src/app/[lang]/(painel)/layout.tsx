@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import Sidebar from '@/components/Navigation/Sidebar';
 import Topbar from '@/components/Navigation/Topbar';
 import BackToTop from '@/components/Navigation/BackToTop';
@@ -17,7 +18,9 @@ export default async function PainelLayout(
       <div className={`main-content ${styles.mainContent}`}>
         <Topbar />
         <main className={styles.mainArea}>
-          {props.children}
+          <Suspense fallback={<div role="status">Carregando painel...</div>}>
+            {props.children}
+          </Suspense>
         </main>
       </div>
       <BackToTop />

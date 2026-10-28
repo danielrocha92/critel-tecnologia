@@ -10,8 +10,9 @@ import {
   CheckCircle2,
   CircleAlert,
   ClipboardList,
+  Clock3,
+  CircleDot,
   DollarSign,
-  Headset,
   RefreshCw,
   Search,
   Wallet,
@@ -48,6 +49,13 @@ type SupportTicket = {
   departamento: string | null;
   equipe_responsavel: string | null;
   criado_em: string | null;
+};
+
+type AnalystStatusCounts = {
+  open: number | null;
+  inProgress: number | null;
+  finalized: number | null;
+  pendingValidation: number | null;
 };
 
 const departmentLabels: Record<Department, { title: string; description: string; eyebrow: string }> = {
@@ -109,7 +117,9 @@ export default function DepartmentEnvironment({
   const [financialEntries, setFinancialEntries] = useState<FinancialEntry[]>([]);
   const [contacts, setContacts] = useState<StoreContact[]>([]);
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
-  const [ticketTotal, setTicketTotal] = useState<number | null>(null);
+  const [analystStatusCounts, setAnalystStatusCounts] = useState<AnalystStatusCounts>({
+    open: null, inProgress: null, finalized: null, pendingValidation: null,
+  });
   const [search, setSearch] = useState('');
   const [ticketStatus, setTicketStatus] = useState('abertos');
   const [financialFilter, setFinancialFilter] = useState<FinancialFilter>('todos');
@@ -170,17 +180,30 @@ export default function DepartmentEnvironment({
           }
           if (isMounted) setContacts(entries);
         } else {
-          const { data, error: queryError, count } = await supabase
-            .from('tickets')
-            .select('id, protocolo_origem, titulo, cliente, status, prioridade, departamento, equipe_responsavel, criado_em', { count: 'exact' })
-            .like('protocolo_origem', 'OS-%')
-            .order('criado_em', { ascending: false })
-            .range(0, 299);
+          const [ticketsResult, openResult, progressResult, finalizedResult, validationResult] = await Promise.all([
+            supabase
+              .from('tickets')
+              .select('id, protocolo_origem, titulo, cliente, status, prioridade, departamento, equipe_responsavel, criado_em')
+              .like('protocolo_origem', 'OS-%')
+              .order('criado_em', { ascending: false })
+              .range(0, 299),
+            supabase.from('tickets').select('id', { count: 'exact', head: true }).like('protocolo_origem', 'OS-%').in('status', ['FILA', 'NOVO']),
+            supabase.from('tickets').select('id', { count: 'exact', head: true }).like('protocolo_origem', 'OS-%').in('status', ['ABERTO', 'EM_ANDAMENTO']),
+            supabase.from('tickets').select('id', { count: 'exact', head: true }).like('protocolo_origem', 'OS-%').in('status', ['RESOLVIDO', 'FECHADO', 'FINALIZADO', 'CONCLUIDO']),
+            supabase.from('financeiro').select('id', { count: 'exact', head: true }).or('status_conciliacao.eq.PENDENTE,status_conciliacao.eq.ABERTO'),
+          ]);
 
-          if (queryError) throw queryError;
+          if (ticketsResult.error) throw ticketsResult.error;
           if (isMounted) {
-            setTickets((data || []) as SupportTicket[]);
-            setTicketTotal(count);
+            setTickets((ticketsResult.data || []) as SupportTicket[]);
+            setAnalystStatusCounts({
+              open: openResult.error ? null : openResult.count,
+              inProgress: progressResult.error ? null : progressResult.count,
+              finalized: finalizedResult.error ? null : finalizedResult.count,
+              pendingValidation: validationResult.error ? null : validationResult.count,
+            });
+            const countErrors = [openResult.error, progressResult.error, finalizedResult.error, validationResult.error].filter(Boolean);
+            if (countErrors.length) setError(`Alguns totais não puderam ser carregados: ${countErrors.map((item) => item?.message).join('; ')}`);
           }
         }
       } catch (loadError) {
@@ -198,7 +221,7 @@ export default function DepartmentEnvironment({
         if (department === 'comercial') setContacts([]);
         if (department === 'analista') {
           setTickets([]);
-          setTicketTotal(null);
+          setAnalystStatusCounts({ open: null, inProgress: null, finalized: null, pendingValidation: null });
         }
       } finally {
         if (isMounted) setLoading(false);
@@ -225,7 +248,9 @@ export default function DepartmentEnvironment({
       const closed = ['FINALIZADO', 'RESOLVIDO', 'FECHADO', 'CONCLUIDO', 'CANCELADO'].includes(
         (ticket.status || '').trim().toUpperCase(),
       );
-      if (ticketStatus === 'abertos' && closed) return false;
+      const status = (ticket.status || '').trim().toUpperCase();
+      if (ticketStatus === 'abertos' && !['FILA', 'NOVO'].includes(status)) return false;
+      if (ticketStatus === 'andamento' && !['ABERTO', 'EM_ANDAMENTO'].includes(status)) return false;
       if (ticketStatus === 'finalizados' && !closed) return false;
       if (!term) return true;
       return `${ticket.protocolo_origem || ''} ${ticket.titulo || ''} ${ticket.cliente || ''}`
@@ -254,10 +279,6 @@ export default function DepartmentEnvironment({
   }), [financialEntries, financialFilter]);
 
   const scrollToPanel = () => panelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-  const analystOpenCount = tickets.filter(
-    (ticket) => !['FINALIZADO', 'RESOLVIDO', 'FECHADO', 'CONCLUIDO', 'CANCELADO'].includes((ticket.status || '').toUpperCase()),
-  ).length;
 
   return (
     <div className={styles.page}>
@@ -396,9 +417,10 @@ export default function DepartmentEnvironment({
       {department === 'analista' && (
         <>
           <section className={`${styles.metricGrid} ${styles.metricGridCompact}`} aria-label="Resumo de solicitações">
-            <MetricCard label="Solicitações no sistema" value={loading ? '—' : ticketTotal === null ? 'Indisponível' : String(ticketTotal)} icon={<ClipboardList size={19} />} onClick={() => { setTicketStatus('todos'); scrollToPanel(); }} active={ticketStatus === 'todos'} />
-            <MetricCard label="Em aberto na seleção" value={loading ? '—' : String(analystOpenCount)} icon={<Headset size={19} />} onClick={() => { setTicketStatus('abertos'); scrollToPanel(); }} active={ticketStatus === 'abertos'} />
-            <MetricCard label="Encerradas na seleção" value={loading ? '—' : String(tickets.length - analystOpenCount)} icon={<CheckCircle2 size={19} />} onClick={() => { setTicketStatus('finalizados'); scrollToPanel(); }} active={ticketStatus === 'finalizados'} />
+            <MetricCard label="Chamados em Aberto" value={loading ? '—' : String(analystStatusCounts.open ?? '—')} icon={<CircleDot size={19} />} onClick={() => { setTicketStatus('abertos'); scrollToPanel(); }} active={ticketStatus === 'abertos'} />
+            <MetricCard label="Em Andamento" value={loading ? '—' : String(analystStatusCounts.inProgress ?? '—')} icon={<Clock3 size={19} />} onClick={() => { setTicketStatus('andamento'); scrollToPanel(); }} active={ticketStatus === 'andamento'} />
+            <MetricCard label="Finalizados" value={loading ? '—' : String(analystStatusCounts.finalized ?? '—')} icon={<CheckCircle2 size={19} />} onClick={() => { setTicketStatus('finalizados'); scrollToPanel(); }} active={ticketStatus === 'finalizados'} />
+            <MetricCard label="Pendente de Validação (Financeiro)" value={loading ? '—' : String(analystStatusCounts.pendingValidation ?? '—')} icon={<DollarSign size={19} />} onClick={() => router.push(`/${lang}/financeiro?filter=pendingValidation`)} />
           </section>
           <section className={styles.panel} aria-labelledby="analyst-tickets-title" ref={panelRef}>
             <div className={styles.panelHeader}>
@@ -411,8 +433,9 @@ export default function DepartmentEnvironment({
                 <label className={styles.statusFilter}>
                   <span className={styles.visuallyHidden}>Filtrar solicitações</span>
                   <select value={ticketStatus} onChange={(event) => setTicketStatus(event.target.value)}>
-                    <option value="abertos">Em aberto</option>
-                    <option value="finalizados">Encerrados</option>
+                    <option value="abertos">Chamados em aberto</option>
+                    <option value="andamento">Em andamento</option>
+                    <option value="finalizados">Finalizados</option>
                     <option value="todos">Todos os status</option>
                   </select>
                 </label>

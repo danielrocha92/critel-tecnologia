@@ -5,9 +5,12 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   ArrowRight,
+  CheckCircle2,
+  Clock3,
   ClipboardList,
   DollarSign,
   Headset,
+  CircleDot,
   Users,
 } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
@@ -16,13 +19,19 @@ import styles from './DashboardHome.module.css';
 type DashboardStats = {
   tickets: number | null;
   contacts: number | null;
+  open: number | null;
+  inProgress: number | null;
+  finalized: number | null;
+  pendingValidation: number | null;
 };
 
 export default function DashboardHome() {
   const pathname = usePathname();
   const lang = pathname.split('/')[1] || 'pt';
   const [name, setName] = useState('');
-  const [stats, setStats] = useState<DashboardStats>({ tickets: null, contacts: null });
+  const [stats, setStats] = useState<DashboardStats>({
+    tickets: null, contacts: null, open: null, inProgress: null, finalized: null, pendingValidation: null,
+  });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -62,17 +71,21 @@ export default function DashboardHome() {
         if (isMounted) setName(profile?.nome || user.email?.split('@')[0] || '');
       }
 
-      const [ticketsResult, contactsResult] = await Promise.all([
+      const [ticketsResult, contactsResult, openResult, inProgressResult, finalizedResult, validationResult] = await Promise.all([
         supabase
           .from('tickets')
           .select('id', { count: 'exact', head: true })
           .like('protocolo_origem', 'OS-%'),
         supabase.from('lojas_contatos').select('nome_loja', { count: 'exact', head: true }),
+        supabase.from('tickets').select('id', { count: 'exact', head: true }).like('protocolo_origem', 'OS-%').in('status', ['FILA', 'NOVO']),
+        supabase.from('tickets').select('id', { count: 'exact', head: true }).like('protocolo_origem', 'OS-%').in('status', ['ABERTO', 'EM_ANDAMENTO']),
+        supabase.from('tickets').select('id', { count: 'exact', head: true }).like('protocolo_origem', 'OS-%').in('status', ['RESOLVIDO', 'FECHADO', 'FINALIZADO', 'CONCLUIDO']),
+        supabase.from('financeiro').select('id', { count: 'exact', head: true }).or('status_conciliacao.eq.PENDENTE,status_conciliacao.eq.ABERTO'),
       ]);
 
       if (!isMounted) return;
 
-      const errors = [ticketsResult.error, contactsResult.error].filter(Boolean);
+      const errors = [ticketsResult.error, contactsResult.error, openResult.error, inProgressResult.error, finalizedResult.error, validationResult.error].filter(Boolean);
       if (errors.length > 0) {
         setError(`Alguns indicadores não puderam ser carregados: ${errors.map((item) => item?.message).join('; ')}`);
       }
@@ -80,6 +93,10 @@ export default function DashboardHome() {
       setStats({
         tickets: ticketsResult.error ? null : ticketsResult.count,
         contacts: contactsResult.error ? null : contactsResult.count,
+        open: openResult.error ? null : openResult.count,
+        inProgress: inProgressResult.error ? null : inProgressResult.count,
+        finalized: finalizedResult.error ? null : finalizedResult.count,
+        pendingValidation: validationResult.error ? null : validationResult.count,
       });
       setLoading(false);
     };
@@ -142,6 +159,29 @@ export default function DashboardHome() {
           {error}
         </div>
       )}
+
+      <section className={styles.ticketStatusGrid} aria-label="Resumo dos chamados">
+        <Link href={`/${lang}/os?statusGroup=open`} className={styles.statusCard}>
+          <span className={`${styles.statusIcon} ${styles.statusOpen}`}><CircleDot size={19} /></span>
+          <span className={styles.statusCopy}><span>Chamados em Aberto</span><strong>{loading ? '—' : stats.open ?? '—'}</strong></span>
+          <ArrowRight size={17} className={styles.statusArrow} />
+        </Link>
+        <Link href={`/${lang}/os?statusGroup=in-progress`} className={styles.statusCard}>
+          <span className={`${styles.statusIcon} ${styles.statusProgress}`}><Clock3 size={19} /></span>
+          <span className={styles.statusCopy}><span>Em Andamento</span><strong>{loading ? '—' : stats.inProgress ?? '—'}</strong></span>
+          <ArrowRight size={17} className={styles.statusArrow} />
+        </Link>
+        <Link href={`/${lang}/os?statusGroup=finalized`} className={styles.statusCard}>
+          <span className={`${styles.statusIcon} ${styles.statusFinalized}`}><CheckCircle2 size={19} /></span>
+          <span className={styles.statusCopy}><span>Finalizados</span><strong>{loading ? '—' : stats.finalized ?? '—'}</strong></span>
+          <ArrowRight size={17} className={styles.statusArrow} />
+        </Link>
+        <Link href={`/${lang}/financeiro?filter=pendingValidation`} className={styles.statusCard}>
+          <span className={`${styles.statusIcon} ${styles.statusValidation}`}><DollarSign size={19} /></span>
+          <span className={styles.statusCopy}><span>Pendente de Validação (Financeiro)</span><strong>{loading ? '—' : stats.pendingValidation ?? '—'}</strong></span>
+          <ArrowRight size={17} className={styles.statusArrow} />
+        </Link>
+      </section>
 
       <section className={styles.metrics} aria-label="Indicadores operacionais">
         <article className={styles.metricCard}>

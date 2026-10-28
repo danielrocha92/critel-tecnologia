@@ -5,7 +5,7 @@ import { Search, Bookmark, Tag, User, Activity, CalendarDays, ChevronRight, Buil
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { createClient } from '@/utils/supabase/client';
 import { ITicket } from '@/types/ticket';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import styles from './TicketList.module.css';
 
@@ -23,6 +23,8 @@ export default function TicketList({ filterTitle, filterType, detailPath, displa
   const [firebaseError, setFirebaseError] = useState<string | null>(null);
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const statusGroup = searchParams.get('statusGroup');
   const lang = pathname.split('/')[1] || 'pt';
 
   const [currentUser, setCurrentUser] = useState<SupabaseUser | null>(null);
@@ -131,6 +133,9 @@ export default function TicketList({ filterTitle, filterType, detailPath, displa
   const isClosed = (status: string) => closedStatuses.includes(status);
   const statusFilter = filterType === 'my-opened' ? 'open' : filterType === 'my-closed' ? 'closed' : serverStatusFilter;
   const filteredTickets = scopedTickets.filter(ticket => {
+    if (statusGroup === 'open') return ['FILA', 'NOVO'].includes(String(ticket.status).toUpperCase());
+    if (statusGroup === 'in-progress') return ['ABERTO', 'EM_ANDAMENTO'].includes(String(ticket.status).toUpperCase());
+    if (statusGroup === 'finalized') return ['RESOLVIDO', 'FECHADO', 'FINALIZADO', 'CONCLUIDO'].includes(String(ticket.status).toUpperCase());
     if (statusFilter === 'open') return !isClosed(ticket.status);
     if (statusFilter === 'closed') return isClosed(ticket.status);
     return true;
@@ -201,7 +206,7 @@ export default function TicketList({ filterTitle, filterType, detailPath, displa
           />
         </div>
 
-        {displayMode === 'list' && (filterType === 'all' || filterType === 'my-all') ? (
+        {!statusGroup && displayMode === 'list' && (filterType === 'all' || filterType === 'my-all') ? (
           <div className={styles.listFilters} role="group" aria-label="Filtrar ordens de serviço por status">
             <button type="button" className={serverStatusFilter === 'all' ? styles.listFilterActive : styles.listFilter} onClick={() => setServerStatusFilter('all')} aria-pressed={serverStatusFilter === 'all'}>
               Todas <span>{scopedTickets.length}</span>
@@ -213,7 +218,7 @@ export default function TicketList({ filterTitle, filterType, detailPath, displa
               Concluídas <span>{closedCount}</span>
             </button>
           </div>
-        ) : (filterType === 'all' || filterType === 'my-all') && (
+        ) : !statusGroup && (filterType === 'all' || filterType === 'my-all') && (
           <div className={styles.selectContainer}>
             <select
               value={serverStatusFilter}

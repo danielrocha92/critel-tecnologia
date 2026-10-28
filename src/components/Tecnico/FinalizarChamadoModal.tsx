@@ -5,7 +5,7 @@ import { X, MapPin, MapPinOff, AlertTriangle, Send, Clock, Plus, Trash } from 'l
 import SignatureCanvas, { type SignatureCanvas as SignatureCanvasInstance } from 'react-signature-canvas';
 import { createClient } from '@/utils/supabase/client';
 import type { User } from '@supabase/supabase-js';
-import { ITicket } from '@/types/ticket';
+import { ITicket, TicketEvidence } from '@/types/ticket';
 import styles from './FinalizarChamadoModal.module.css';
 
 const supabase = createClient();
@@ -36,15 +36,16 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
 
   // Form Fields
   const [horaInicio, setHoraInicio] = useState(() => toLocalDateTimeInput(
-    ticket.check_in_at ? new Date(ticket.check_in_at) : new Date(Date.now() - 60 * 60 * 1000),
+    ticket.check_in_at ? new Date(ticket.check_in_at) : ticket.criado_em ? new Date(ticket.criado_em) : new Date(Date.now() - 60 * 60 * 1000),
   ));
   const [horaTermino, setHoraTermino] = useState(() => toLocalDateTimeInput(new Date()));
   const [descricao, setDescricao] = useState('');
   const [materiais, setMateriais] = useState('');
 
   // Evidências
-  const [evidenciaAntes, setEvidenciaAntes] = useState<string | null>(null);
-  const [evidenciaDepois, setEvidenciaDepois] = useState<string | null>(null);
+  const [evidenciasAntes, setEvidenciasAntes] = useState<TicketEvidence[]>([]);
+  const [evidenciasDepois, setEvidenciasDepois] = useState<TicketEvidence[]>([]);
+  const [uploadingEvidence, setUploadingEvidence] = useState(false);
 
   // Despesas
   const [despesas, setDespesas] = useState<ExpenseDraft[]>([{ natureza: '', valor: '', anexo: '' }]);
@@ -117,39 +118,15 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
   }, []);
 
   useEffect(() => {
-    const now = new Date();
-    const tzOffset = now.getTimezoneOffset() * 60000;
-    const localISOTime = (new Date(now.getTime() - tzOffset)).toISOString().slice(0, 16);
-
-    setHoraTermino(localISOTime);
-
-    let localISOTimeAgo: string;
-    if (ticket.criado_em) {
-      const checkInDate = new Date(ticket.criado_em);
-      localISOTimeAgo = (new Date(checkInDate.getTime() - tzOffset)).toISOString().slice(0, 16);
-    } else {
-      const oneHourAgo = new Date(now.getTime() - (60 * 60 * 1000));
-      localISOTimeAgo = (new Date(oneHourAgo.getTime() - tzOffset)).toISOString().slice(0, 16);
-    }
-    setHoraInicio(localISOTimeAgo);
-
+    // Geolocation is a browser API; its callbacks update React state asynchronously.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     captureLocation();
-  }, [captureLocation, ticket.criado_em]);
+  }, [captureLocation]);
 
   const clearSignature = () => {
     if (sigCanvas.current) {
       sigCanvas.current.clear();
     }
-  };
-
-  const handleFileConvert = (e: ChangeEvent<HTMLInputElement>, setter: (val: string) => void) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      setter(event.target?.result as string);
-    };
-    reader.readAsDataURL(file);
   };
 
   const addDespesa = () => setDespesas([...despesas, { natureza: '', valor: '', anexo: '' }]);
@@ -186,7 +163,7 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
     const res = await fetch(base64);
     const blob = await res.blob();
 
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from('anexos')
       .upload(path, blob, { contentType: blob.type, upsert: true });
 
@@ -194,6 +171,53 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
 
     const { data: urlData } = supabase.storage.from('anexos').getPublicUrl(path);
     return urlData.publicUrl;
+  };
+
+  const uploadEvidenceFile = async (file: File, type: 'BEFORE' | 'AFTER') => {
+      const extension = file.name.split('.').pop()?.replace(/[^a-zA-Z0-9]/g, '') || 'jpg';
+      const path = `evidences/${ticket.id}/${type.toLowerCase()}_${Date.now()}_${crypto.randomUUID()}.${extension}`;
+      const { error: uploadError } = await supabase.storage.from('anexos').upload(path, file, { contentType: file.type, upsert: false });
+      if (uploadError) throw uploadError;
+      const { data } = supabase.storage.from('anexos').getPublicUrl(path);
+      const { data: inserted, error: insertError } = await supabase.from('ticket_evidences').insert({
+        ticket_id: ticket.id,
+        type,
+        media_url: data.publicUrl,
+        created_by: currentUser!.id,
+      }).select('id, ticket_id, type, media_url, created_by, created_at').single();
+      if (insertError) {
+        await supabase.storage.from('anexos').remove([path]);
+        throw insertError;
+      }
+      return inserted;
+  };
+
+  const handleEvidenceSelection = async (
+    event: ChangeEvent<HTMLInputElement>,
+    type: 'BEFORE' | 'AFTER',
+  ) => {
+    const input = event.currentTarget;
+    const selectedFiles = Array.from(input.files || []);
+    if (selectedFiles.length === 0) return;
+    if (!currentUser) {
+      setError('Usuário não autenticado.');
+      input.value = '';
+      return;
+    }
+    setError(null);
+    input.value = '';
+    setUploadingEvidence(true);
+    try {
+      for (const file of selectedFiles) {
+        const evidence = await uploadEvidenceFile(file, type);
+        const setter = type === 'BEFORE' ? setEvidenciasAntes : setEvidenciasDepois;
+        setter((previous) => previous.some((item) => item.id === evidence.id) ? previous : [...previous, evidence]);
+      }
+    } catch (uploadError) {
+      setError(uploadError instanceof Error ? uploadError.message : 'Não foi possível enviar a evidência.');
+    } finally {
+      setUploadingEvidence(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -219,7 +243,7 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
       return;
     }
 
-    if (!evidenciaAntes || !evidenciaDepois) {
+    if (evidenciasAntes.length === 0 || evidenciasDepois.length === 0) {
       setError('A evidência do problema e o registro após a intervenção são obrigatórios.');
       setLoading(false);
       return;
@@ -244,11 +268,9 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
       setProgressMsg('Upload da assinatura...');
       const assinaturaUrl = await uploadBase64(`resolutions/${ticket.id}/${ts}_assinatura.png`, assinaturaBase64);
 
-      setProgressMsg('Enviando evidência da causa...');
-      const evidenciaAntesUrl = await uploadBase64(`resolutions/${ticket.id}/${ts}_antes.jpg`, evidenciaAntes);
+      const evidenciaAntesUrl = evidenciasAntes[0].media_url;
 
-      setProgressMsg('Enviando evidência após a intervenção...');
-      const evidenciaDepoisUrl = await uploadBase64(`resolutions/${ticket.id}/${ts}_depois.jpg`, evidenciaDepois);
+      const evidenciaDepoisUrl = evidenciasDepois[0].media_url;
 
       const finalDespesas = [];
       for (const d of parsedDespesas) {
@@ -398,13 +420,13 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
               <div className={styles.grid}>
                 <div>
                   <label className={styles.label}>{evidenceBeforeLabel} *</label>
-                  <input type="file" accept="image/*" capture={supportsCameraCapture ? 'environment' : undefined} onChange={e => handleFileConvert(e, setEvidenciaAntes)} required className={styles.input} />
-                  {evidenciaAntes && <span className={styles.evidenciaSuccessSpan}>✓ Imagem capturada</span>}
+                  <input type="file" accept="image/*" multiple capture={supportsCameraCapture ? 'environment' : undefined} onChange={e => void handleEvidenceSelection(e, 'BEFORE')} required={!evidenciasAntes.length} className={styles.input} disabled={uploadingEvidence || loading} />
+                  {evidenciasAntes.length > 0 && <span className={styles.evidenciaSuccessSpan}>{evidenciasAntes.length} imagem(ns) selecionada(s)</span>}
                 </div>
                 <div>
                   <label className={styles.label}>{evidenceAfterLabel} *</label>
-                  <input type="file" accept="image/*" capture={supportsCameraCapture ? 'environment' : undefined} onChange={e => handleFileConvert(e, setEvidenciaDepois)} required className={styles.input} />
-                  {evidenciaDepois && <span className={styles.evidenciaSuccessSpan}>✓ Imagem capturada</span>}
+                  <input type="file" accept="image/*" multiple capture={supportsCameraCapture ? 'environment' : undefined} onChange={e => void handleEvidenceSelection(e, 'AFTER')} required={!evidenciasDepois.length} className={styles.input} disabled={uploadingEvidence || loading} />
+                  {evidenciasDepois.length > 0 && <span className={styles.evidenciaSuccessSpan}>{evidenciasDepois.length} imagem(ns) selecionada(s)</span>}
                 </div>
               </div>
             </div>
@@ -489,8 +511,8 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
           <button
             type="submit"
             form="finalizarForm"
-            disabled={loading || !location}
-            className={`${styles.submitBtn} ${(!location || loading) ? styles.submitBtnDisabled : styles.submitBtnActive}`}
+            disabled={loading || uploadingEvidence || !location}
+            className={`${styles.submitBtn} ${(!location || loading || uploadingEvidence) ? styles.submitBtnDisabled : styles.submitBtnActive}`}
           >
             <Send size={20} />
             {loading ? progressMsg || 'Sincronizando...' : 'Confirmar e Enviar Baixa'}

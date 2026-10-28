@@ -87,6 +87,15 @@ export interface ITicket {
   } | null;
 }
 
+export interface TicketEvidence {
+  id: string;
+  ticket_id: string;
+  type: 'BEFORE' | 'AFTER';
+  media_url: string;
+  created_by: string;
+  created_at: string;
+}
+
 export interface TicketTransition {
   id: string;
   ticketId: string;

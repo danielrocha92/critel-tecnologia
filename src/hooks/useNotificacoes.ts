@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
+import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 
 export type Notificacao = {
   id: string;
@@ -9,7 +10,7 @@ export type Notificacao = {
   mensagem: string;
   lida: boolean;
   criada_em: string;
-  tipo: 'novo_chamado' | 'chamado_respondido' | 'chamado_fechado' | 'sistema';
+  tipo: 'novo_chamado' | 'chamado_respondido' | 'chamado_fechado' | 'evidencia_enviada' | 'sistema';
   href?: string;
 };
 
@@ -41,165 +42,220 @@ const DEPARTAMENTOS_TI = [
   'TI - Telecom',
 ];
 
-// ✅ FIX 1: Singleton de módulo — garante UMA única instância do GoTrueClient
-// por toda a aplicação, independente de quantas vezes o hook for chamado.
-let _supabase: ReturnType<typeof createBrowserClient> | null = null;
+type TicketNotificationRow = Record<string, unknown> & {
+  id: string;
+  departamento?: string | null;
+  protocolo_origem?: string | null;
+  cliente?: string | null;
+  titulo?: string | null;
+  status?: string | null;
+  analista_id?: string | null;
+};
+
+type EvidenceNotificationRow = Record<string, unknown> & {
+  ticket_id: string;
+  type: 'BEFORE' | 'AFTER';
+};
+
+let supabaseClient: ReturnType<typeof createBrowserClient> | null = null;
+
 function getSupabase() {
-  if (!_supabase) {
-    _supabase = createBrowserClient(
+  if (!supabaseClient) {
+    supabaseClient = createBrowserClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     );
   }
-  return _supabase;
+  return supabaseClient;
 }
 
-function isEscopoTI(ticket: any): boolean {
-  const depto: string = ticket.departamento || '';
-  return DEPARTAMENTOS_TI.some(d => depto.toLowerCase().includes(d.toLowerCase()));
+function isEscopoTI(ticket: TicketNotificationRow) {
+  const department = ticket.departamento || '';
+  return DEPARTAMENTOS_TI.some((item) => department.toLowerCase().includes(item.toLowerCase()));
 }
 
 function tocarSom() {
   try {
-    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(880, ctx.currentTime);
-    gain.gain.setValueAtTime(0.3, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
-    osc.start(ctx.currentTime);
-    osc.stop(ctx.currentTime + 0.5);
+    const AudioContextConstructor = window.AudioContext;
+    const context = new AudioContextConstructor();
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+    oscillator.connect(gain);
+    gain.connect(context.destination);
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(880, context.currentTime);
+    gain.gain.setValueAtTime(0.3, context.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + 0.5);
+    oscillator.start(context.currentTime);
+    oscillator.stop(context.currentTime + 0.5);
   } catch {
-    // Ignora se o navegador não suportar
+    // O navegador pode não oferecer suporte a áudio.
+  }
+}
+
+function readStoredNotifications(): Notificacao[] {
+  try {
+    const value: unknown = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    return Array.isArray(value) ? value as Notificacao[] : [];
+  } catch {
+    return [];
+  }
+}
+
+function readStoredPrefs(): NotifPrefs {
+  try {
+    const value: unknown = JSON.parse(localStorage.getItem(PREFS_KEY) || 'null');
+    return value && typeof value === 'object' ? { ...defaultPrefs, ...value } : defaultPrefs;
+  } catch {
+    return defaultPrefs;
   }
 }
 
 export function useNotificacoes() {
   const [notificacoes, setNotificacoes] = useState<Notificacao[]>([]);
   const [prefs, setPrefs] = useState<NotifPrefs>(defaultPrefs);
-  const naoLidas = notificacoes.filter(n => !n.lida).length;
+  const [storageReady, setStorageReady] = useState(false);
+  const prefsRef = useRef(prefs);
+  const naoLidas = notificacoes.filter((notification) => !notification.lida).length;
 
-  // ✅ FIX 2: Nome de canal único por instância do hook.
-  // Mesmo em React Strict Mode (dupla montagem), cada ciclo cria um canal diferente,
-  // Eliminando o erro "cannot add postgres_changes after subscribe()".
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const channelName = useRef(`critel_ti_${Date.now()}`);
-
-  // Carrega notificações e preferências do localStorage
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    const savedPrefs = localStorage.getItem(PREFS_KEY);
-    if (saved) setNotificacoes(JSON.parse(saved));
-    if (savedPrefs) setPrefs(JSON.parse(savedPrefs));
+    const storedNotifications = readStoredNotifications();
+    const storedPrefs = readStoredPrefs();
+    // Local storage is read after hydration to keep server and first client render aligned.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setNotificacoes(storedNotifications);
+    setPrefs(storedPrefs);
+    prefsRef.current = storedPrefs;
+    setStorageReady(true);
   }, []);
 
-  // Salva notificações no localStorage sempre que mudar
   useEffect(() => {
+    if (!storageReady) return;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(notificacoes));
-  }, [notificacoes]);
+  }, [notificacoes, storageReady]);
 
-  const adicionarNotificacao = useCallback((
-    notif: Omit<Notificacao, 'id' | 'lida' | 'criada_em'>,
-    prefsAtual: NotifPrefs
-  ) => {
-    const nova: Notificacao = {
-      ...notif,
+  const adicionarNotificacao = useCallback((notification: Omit<Notificacao, 'id' | 'lida' | 'criada_em'>) => {
+    const newNotification: Notificacao = {
+      ...notification,
       id: crypto.randomUUID(),
       lida: false,
       criada_em: new Date().toISOString(),
     };
 
-    setNotificacoes(prev => [nova, ...prev].slice(0, 50));
-
-    if (prefsAtual.desktop && 'Notification' in window && Notification.permission === 'granted') {
-      new Notification(nova.titulo, {
-        body: nova.mensagem,
+    setNotificacoes((current) => [newNotification, ...current].slice(0, 50));
+    const currentPrefs = prefsRef.current;
+    if (currentPrefs.desktop && 'Notification' in window && Notification.permission === 'granted') {
+      new Notification(newNotification.titulo, {
+        body: newNotification.mensagem,
         icon: '/400PngdpiLogoCropped.png',
       });
     }
-
-    if (prefsAtual.som) tocarSom();
+    if (currentPrefs.som) tocarSom();
   }, []);
 
-  // ✅ FIX 3: useRef para acessar o callback atualizado sem recriar o canal
-  const adicionarRef = useRef(adicionarNotificacao);
-  useEffect(() => { adicionarRef.current = adicionarNotificacao; }, [adicionarNotificacao]);
-
-  // Subscrição Supabase Realtime — executa apenas 1x por instância
   useEffect(() => {
+    let active = true;
+    let channel: ReturnType<ReturnType<typeof getSupabase>['channel']> | null = null;
     const supabase = getSupabase();
-    const prefsAtual = JSON.parse(
-      localStorage.getItem(PREFS_KEY) || JSON.stringify(defaultPrefs)
-    ) as NotifPrefs;
 
-    const channel = supabase
-      .channel(channelName.current)   // nome único por instância
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'tickets' },
-        (payload: any) => {
-          if (!prefsAtual.novoChamado) return;
-          const ticket = payload.new as any;
-          if (!isEscopoTI(ticket)) return;
+    const subscribe = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (!active) return;
+      if (error) {
+        console.error('Não foi possível iniciar as notificações em tempo real:', error.message);
+        return;
+      }
+      const currentUserId = data.user?.id;
+      const language = window.location.pathname.split('/')[1] || 'pt';
 
-          adicionarRef.current({
-            tipo: 'novo_chamado',
-            titulo: '🎫 Novo Chamado — TI',
-            mensagem: `#${ticket.protocolo_origem} · ${ticket.departamento || 'TI'} · ${ticket.cliente}: ${ticket.titulo || 'Sem assunto'}`,
-            href: '/analista',
-          }, prefsAtual);
-        }
-      )
-      .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'tickets' },
-        (payload: any) => {
-          const ticket = payload.new as any;
-          const old = payload.old as any;
-          if (!isEscopoTI(ticket)) return;
+      channel = supabase
+        .channel(`critel_notifications_${crypto.randomUUID()}`)
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'tickets' },
+          (payload: RealtimePostgresChangesPayload<TicketNotificationRow>) => {
+            const ticket = payload.new as TicketNotificationRow;
+            if (!prefsRef.current.novoChamado || !isEscopoTI(ticket)) return;
+            adicionarNotificacao({
+              tipo: 'novo_chamado',
+              titulo: 'Novo chamado — TI',
+              mensagem: `#${ticket.protocolo_origem || ticket.id} · ${ticket.departamento || 'TI'} · ${ticket.cliente || 'Cliente'}: ${ticket.titulo || 'Sem assunto'}`,
+              href: `/${language}/analista`,
+            });
+          })
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'tickets' },
+          (payload: RealtimePostgresChangesPayload<TicketNotificationRow>) => {
+            const ticket = payload.new as TicketNotificationRow;
+            const oldTicket = payload.old as Partial<TicketNotificationRow>;
+            if (!isEscopoTI(ticket)) return;
 
-          if (prefsAtual.chamadoRespondido && ticket.status === 'RESPONDIDO' && old.status !== 'RESPONDIDO') {
-            adicionarRef.current({
-              tipo: 'chamado_respondido',
-              titulo: '💬 Chamado Respondido — TI',
-              mensagem: `#${ticket.protocolo_origem} · ${ticket.departamento || 'TI'} · ${ticket.cliente} respondeu`,
-              href: '/analista',
-            }, prefsAtual);
+            if (prefsRef.current.chamadoRespondido && ticket.status === 'RESPONDIDO' && oldTicket.status !== 'RESPONDIDO') {
+              adicionarNotificacao({
+                tipo: 'chamado_respondido',
+                titulo: 'Chamado respondido — TI',
+                mensagem: `#${ticket.protocolo_origem || ticket.id} · ${ticket.departamento || 'TI'} · ${ticket.cliente || 'Cliente'} respondeu`,
+                href: `/${language}/analista`,
+              });
+            }
+            if (prefsRef.current.chamadoFechado && ticket.status === 'FECHADO' && oldTicket.status !== 'FECHADO') {
+              adicionarNotificacao({
+                tipo: 'chamado_fechado',
+                titulo: 'Chamado encerrado — TI',
+                mensagem: `#${ticket.protocolo_origem || ticket.id} · ${ticket.departamento || 'TI'} · ${ticket.cliente || 'Cliente'} foi encerrado`,
+                href: `/${language}/analista`,
+              });
+            }
+          })
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'ticket_evidences' },
+          async (payload: RealtimePostgresChangesPayload<EvidenceNotificationRow>) => {
+            const evidence = payload.new as EvidenceNotificationRow;
+            const { data: ticket, error: ticketError } = await supabase
+              .from('tickets')
+              .select('id, analista_id, protocolo_origem, cliente')
+              .eq('id', evidence.ticket_id)
+              .maybeSingle();
+            if (ticketError || !ticket || !currentUserId) return;
+
+            const { data: profile } = await supabase
+              .from('perfis')
+              .select('user_id')
+              .eq('id', ticket.analista_id)
+              .maybeSingle();
+            if (ticket.analista_id !== currentUserId && profile?.user_id !== currentUserId) return;
+
+            adicionarNotificacao({
+              tipo: 'evidencia_enviada',
+              titulo: 'Imagem recebida do técnico',
+              mensagem: `O técnico enviou uma imagem ${evidence.type === 'BEFORE' ? 'do antes' : 'do depois'} para #${ticket.protocolo_origem || ticket.id.slice(0, 8)} · ${ticket.cliente || 'Cliente'}`,
+              href: `/${language}/os?ticket_id=${ticket.id}`,
+            });
+          })
+        .subscribe((status: string, subscriptionError?: Error) => {
+          if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+            console.error('Realtime de notificações desconectado:', status, subscriptionError);
           }
-
-          if (prefsAtual.chamadoFechado && ticket.status === 'FECHADO' && old.status !== 'FECHADO') {
-            adicionarRef.current({
-              tipo: 'chamado_fechado',
-              titulo: '✅ Chamado Encerrado — TI',
-              mensagem: `#${ticket.protocolo_origem} · ${ticket.departamento || 'TI'} · ${ticket.cliente} foi encerrado`,
-              href: '/analista',
-            }, prefsAtual);
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
+        });
     };
-  }, []); // sem dependências — roda exatamente 1x no mount
+
+    void subscribe();
+    return () => {
+      active = false;
+      if (channel) void supabase.removeChannel(channel);
+    };
+  }, [adicionarNotificacao]);
 
   const marcarLida = useCallback((id: string) => {
-    setNotificacoes(prev => prev.map(n => n.id === id ? { ...n, lida: true } : n));
+    setNotificacoes((current) => current.map((item) => item.id === id ? { ...item, lida: true } : item));
   }, []);
 
   const marcarTodasLidas = useCallback(() => {
-    setNotificacoes(prev => prev.map(n => ({ ...n, lida: true })));
+    setNotificacoes((current) => current.map((item) => ({ ...item, lida: true })));
   }, []);
 
   const limparTodas = useCallback(() => setNotificacoes([]), []);
 
-  const salvarPrefs = useCallback((novasPrefs: NotifPrefs) => {
-    setPrefs(novasPrefs);
-    localStorage.setItem(PREFS_KEY, JSON.stringify(novasPrefs));
+  const salvarPrefs = useCallback((newPrefs: NotifPrefs) => {
+    prefsRef.current = newPrefs;
+    setPrefs(newPrefs);
+    localStorage.setItem(PREFS_KEY, JSON.stringify(newPrefs));
   }, []);
 
   const solicitarPermissaoDesktop = useCallback(async () => {

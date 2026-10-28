@@ -19,6 +19,7 @@ export default function NovoChamadoModal({ onClose, onSuccess }: NovoChamadoModa
   const [loading, setLoading] = useState(false);
   const isSubmitting = useRef(false);
   const [files, setFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [technicians, setTechnicians] = useState<TechnicianOption[]>([]);
   const [techniciansLoading, setTechniciansLoading] = useState(true);
   const [techniciansError, setTechniciansError] = useState<string | null>(null);
@@ -411,20 +412,21 @@ export default function NovoChamadoModal({ onClose, onSuccess }: NovoChamadoModa
                 ))}
               </div>
             )}
-            <label className={styles.btnAttach}>
-              <input
-                type="file"
-                multiple
-                hidden
-                onChange={(e) => {
-                  if (e.target.files) {
-                    setFiles(prev => [...prev, ...Array.from(e.target.files!)]);
-                  }
-                  e.target.value = '';
-                }}
-              />
-              <Paperclip size={16} /> Anexar
-            </label>
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
+              className={styles.hiddenFileInput}
+              onChange={(event) => {
+                const selected = Array.from(event.currentTarget.files || []);
+                if (selected.length) setFiles((current) => [...current, ...selected]);
+                event.currentTarget.value = '';
+              }}
+            />
+            <button type="button" onClick={() => fileInputRef.current?.click()} className={styles.btnAttach} disabled={loading}>
+              <Paperclip size={16} /> Anexar imagem ou arquivo
+            </button>
           </div>
 
           <button

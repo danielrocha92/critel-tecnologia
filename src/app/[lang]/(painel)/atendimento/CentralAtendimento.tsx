@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, Suspense, useRef } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { createClient } from '../../../../utils/supabase/client';
@@ -9,7 +9,8 @@ import styles from './atendimento.module.css';
 import { User, Trash2, Printer, Pencil, History, X, ArrowLeft, ChevronDown } from 'lucide-react';
 import { DashboardTickets } from '../../../../components/Chamados/DashboardTickets';
 import NovoChamadoModal from '../../../../components/Chamados/NovoChamadoModal';
-import { ITicket, ITicketReply } from '../../../../types/ticket';
+import { ITicket, ITicketReply, TicketEvidence } from '../../../../types/ticket';
+import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 import { File, Download } from 'lucide-react';
 import ServiceReportSection from '@/components/Tecnico/ServiceReportSection';
 
@@ -19,6 +20,14 @@ type TicketAttachment = {
   url: string;
   nome_arquivo: string;
   tamanho_bytes?: number | null;
+};
+
+type TicketReplyRealtimeRow = Record<string, unknown> & {
+  id: string;
+  sender_type: 'customer' | 'agent' | 'system';
+  sender: string;
+  message: string;
+  criado_em: string;
 };
 
 export default function CentralAtendimento({
@@ -63,13 +72,11 @@ function CentralAtendimentoContent({
     return Number.isNaN(date.getTime()) ? null : date;
   };
   const [anexos, setAnexos] = useState<TicketAttachment[]>([]);
+  const [evidences, setEvidences] = useState<TicketEvidence[]>([]);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState('novos');
-  const scrollRef = useRef<HTMLDivElement>(null);
   const [ticketHistory, setTicketHistory] = useState<ITicketReply[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [errorHistory, setErrorHistory] = useState<string | null>(null);
-  const [ticketExtraInfo, setTicketExtraInfo] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
@@ -109,6 +116,8 @@ function CentralAtendimentoContent({
       router.push(`/${lang}/os`);
       return;
     }
+    setAnexos([]);
+    setEvidences([]);
     setTicketAtivo(null);
   };
 
@@ -176,11 +185,7 @@ function CentralAtendimentoContent({
 
   // Fetch anexos when ticketAtivo changes
   useEffect(() => {
-    if (!ticketAtivo) {
-      setAnexos([]);
-      setTicketHistory([]);
-      return;
-    }
+    if (!ticketAtivo) return;
 
     const fetchAnexos = async () => {
       const { data, error } = await supabase
@@ -189,10 +194,24 @@ function CentralAtendimentoContent({
         .eq('ticket_id', ticketAtivo.id);
 
       if (data && !error) {
-        setAnexos(data as TicketAttachment[]);
+        setAnexos((data as TicketAttachment[]).filter((anexo) => Boolean(anexo.url)));
+      } else if (error) {
+        console.error('Erro ao carregar anexos do chamado:', error.message);
+        toast.error('Não foi possível carregar os anexos deste chamado.');
       }
     };
     fetchAnexos();
+
+    const fetchEvidences = async () => {
+      const { data, error } = await supabase
+        .from('ticket_evidences')
+        .select('*')
+        .eq('ticket_id', ticketAtivo.id)
+        .order('created_at', { ascending: false });
+      if (!error && data) setEvidences(data as TicketEvidence[]);
+      if (error) console.error('Erro ao carregar evidências do chamado:', error.message);
+    };
+    void fetchEvidences();
 
     const fetchHistory = async () => {
       setIsLoadingHistory(true);
@@ -206,7 +225,7 @@ function CentralAtendimentoContent({
       if (error) {
         setErrorHistory('Falha ao carregar o histórico de mensagens.');
       } else if (data) {
-        const formattedHistory: ITicketReply[] = data.map((row: any) => ({
+        const formattedHistory: ITicketReply[] = (data as TicketReplyRealtimeRow[]).map((row) => ({
           id: row.id,
           sender_type: row.sender_type,
           sender: row.sender,
@@ -221,8 +240,8 @@ function CentralAtendimentoContent({
     fetchHistory();
 
     const channel = supabase.channel(`ticket_${ticketAtivo.id}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'ticket_replies', filter: `ticket_id=eq.${ticketAtivo.id}` }, (payload: any) => {
-        const row = payload.new;
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'ticket_replies', filter: `ticket_id=eq.${ticketAtivo.id}` }, (payload: RealtimePostgresChangesPayload<TicketReplyRealtimeRow>) => {
+        const row = payload.new as TicketReplyRealtimeRow;
         const newReply: ITicketReply = {
           id: row.id,
           sender_type: row.sender_type,
@@ -232,7 +251,15 @@ function CentralAtendimentoContent({
         };
         setTicketHistory(prev => [newReply, ...prev]);
       })
-      .subscribe();
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'ticket_evidences', filter: `ticket_id=eq.${ticketAtivo.id}` }, (payload: RealtimePostgresChangesPayload<TicketEvidence & Record<string, unknown>>) => {
+        const evidence = payload.new as TicketEvidence;
+        setEvidences((previous) => previous.some((item) => item.id === evidence.id) ? previous : [evidence, ...previous]);
+      })
+      .subscribe((status: string, error?: Error) => {
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.error('Falha na conexão Realtime das evidências:', status, error);
+        }
+      });
 
     return () => {
       supabase.removeChannel(channel);
@@ -355,7 +382,7 @@ function CentralAtendimentoContent({
                           key={idx}
                           href={anexo.url}
                           target="_blank"
-                          rel="noreferrer"
+                          rel="noopener noreferrer"
                           onClick={(e) => {
                             if (anexo.url.match(/\.(jpeg|jpg|gif|png|webp)$/i)) {
                               e.preventDefault();
@@ -368,6 +395,26 @@ function CentralAtendimentoContent({
                         </a>
                       ))}
                     </div>
+                  </div>
+                )}
+                {evidences.length > 0 && (
+                  <div className={styles.evidenceList} aria-label="Evidências enviadas durante o atendimento">
+                    {evidences.map((evidence) => (
+                      <a
+                        key={evidence.id}
+                        href={evidence.media_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.evidenceItem}
+                        onClick={(event) => {
+                          event.preventDefault();
+                          setSelectedImage(evidence.media_url);
+                        }}
+                      >
+                        <img src={evidence.media_url} alt={evidence.type === 'BEFORE' ? 'Evidência antes do serviço' : 'Evidência depois do serviço'} width={96} height={96} loading="lazy" />
+                        <span>{evidence.type === 'BEFORE' ? 'Antes' : 'Depois'}</span>
+                      </a>
+                    ))}
                   </div>
                 )}
               </div>
@@ -392,7 +439,7 @@ function CentralAtendimentoContent({
                           <a
                             href={anexo.url}
                             target="_blank"
-                            rel="noreferrer"
+                            rel="noopener noreferrer"
                             className={styles.attachmentFileName}
                           >
                             {anexo.nome_arquivo}
@@ -403,10 +450,20 @@ function CentralAtendimentoContent({
                             </span>
                           )}
                         </div>
-                        <a href={anexo.url} download target="_blank" rel="noreferrer" className={styles.attachmentDownload}>
+                        <a href={anexo.url} download target="_blank" rel="noopener noreferrer" className={styles.attachmentDownload}>
                           <Download size={16} />
                         </a>
                       </div>
+                    ))}
+                  </div>
+                )}
+                {evidences.length > 0 && (
+                  <div className={styles.evidenceList} aria-label="Evidências do atendimento">
+                    {evidences.map((evidence) => (
+                      <a key={evidence.id} href={evidence.media_url} target="_blank" rel="noopener noreferrer" className={styles.evidenceItem}>
+                        <img src={evidence.media_url} alt={evidence.type === 'BEFORE' ? 'Evidência antes do serviço' : 'Evidência depois do serviço'} width={72} height={72} loading="lazy" />
+                        <span>{evidence.type === 'BEFORE' ? 'Antes' : 'Depois'}</span>
+                      </a>
                     ))}
                   </div>
                 )}
@@ -422,15 +479,6 @@ function CentralAtendimentoContent({
                   <span className={styles.panelLabel}>Email:</span>
                   <span className={styles.panelValue}>{ticketAtivo.email_cliente || 'Não Informado'}</span>
                 </div>
-                <button className={styles.btnShowDetails}>Mostrar Detalhes</button>
-
-              </div>
-
-              <div className={styles.panelCard}>
-                <h4 className={styles.panelTitle}>Rótulos</h4>
-                <select className={styles.selectInputLabel}>
-                  <option>Adicionar rótulos</option>
-                </select>
               </div>
 
               <div className={styles.panelCard}>
