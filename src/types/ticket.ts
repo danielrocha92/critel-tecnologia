@@ -92,6 +92,7 @@ export interface TicketEvidence {
   ticket_id: string;
   type: 'BEFORE' | 'AFTER';
   media_url: string;
+  caption: string | null;
   created_by: string;
   created_at: string;
 }

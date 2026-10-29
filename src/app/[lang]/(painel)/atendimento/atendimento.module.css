@@ -1257,6 +1257,13 @@
   margin-top: 1rem;
 }
 
+.evidenceCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+}
+
 .evidenceItem {
   display: grid;
   gap: 0.25rem;
@@ -1271,6 +1278,31 @@
   height: 72px;
   object-fit: cover;
   border-radius: 8px;
+}
+
+.evidenceCaption {
+  max-width: 120px;
+  overflow-wrap: anywhere;
+  text-align: center;
+  color: var(--text-primary);
+}
+
+.evidenceDeleteButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border: 0;
+  padding: 0.25rem;
+  background: transparent;
+  color: var(--status-danger-text);
+  font: inherit;
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+
+.evidenceDeleteButton:disabled {
+  opacity: 0.55;
+  cursor: wait;
 }
 
 .panelCard:hover {

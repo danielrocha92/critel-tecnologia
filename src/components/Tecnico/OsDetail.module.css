@@ -217,6 +217,32 @@
   font-size: 0.75rem;
 }
 
+.evidenceDeleteButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 36px;
+  margin: 0 0.6rem 0.6rem;
+  border: 1px solid color-mix(in srgb, var(--status-danger-text) 35%, transparent);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--status-danger-text);
+  font: inherit;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.evidenceDeleteButton:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.evidenceError {
+  color: var(--status-danger-text);
+  font-size: 0.82rem;
+}
+
 @media (max-width: 480px) {
   .evidenceGrid {
     grid-template-columns: 1fr;

@@ -79,6 +79,27 @@ function CentralAtendimentoContent({
   const [errorHistory, setErrorHistory] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [deletingEvidenceId, setDeletingEvidenceId] = useState<string | null>(null);
+
+  const deleteEvidence = async (evidence: TicketEvidence) => {
+    if (!window.confirm('Excluir esta foto permanentemente?')) return;
+    setDeletingEvidenceId(evidence.id);
+    try {
+      const response = await fetch('/api/tecnico/excluir-evidencia', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ evidence_id: evidence.id }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Não foi possível excluir a foto.');
+      setEvidences((previous) => previous.filter((item) => item.id !== evidence.id));
+      toast.success('Foto excluída.');
+    } catch (deleteError) {
+      toast.error(deleteError instanceof Error ? deleteError.message : 'Não foi possível excluir a foto.');
+    } finally {
+      setDeletingEvidenceId(null);
+    }
+  };
 
   const getAtendenteNome = (id: string | null | undefined) => {
     if (!id) return 'Sem Atendente Vinculado';
@@ -255,6 +276,10 @@ function CentralAtendimentoContent({
         const evidence = payload.new as TicketEvidence;
         setEvidences((previous) => previous.some((item) => item.id === evidence.id) ? previous : [evidence, ...previous]);
       })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'ticket_evidences', filter: `ticket_id=eq.${ticketAtivo.id}` }, (payload) => {
+        const removedId = String((payload.old as { id?: string }).id || '');
+        setEvidences((previous) => previous.filter((item) => item.id !== removedId));
+      })
       .subscribe((status: string, error?: Error) => {
         if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
           console.error('Falha na conexão Realtime das evidências:', status, error);
@@ -400,20 +425,25 @@ function CentralAtendimentoContent({
                 {evidences.length > 0 && (
                   <div className={styles.evidenceList} aria-label="Evidências enviadas durante o atendimento">
                     {evidences.map((evidence) => (
-                      <a
-                        key={evidence.id}
-                        href={evidence.media_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles.evidenceItem}
-                        onClick={(event) => {
-                          event.preventDefault();
-                          setSelectedImage(evidence.media_url);
-                        }}
-                      >
-                        <img src={evidence.media_url} alt={evidence.type === 'BEFORE' ? 'Evidência antes do serviço' : 'Evidência depois do serviço'} width={96} height={96} loading="lazy" />
-                        <span>{evidence.type === 'BEFORE' ? 'Antes' : 'Depois'}</span>
-                      </a>
+                      <div key={evidence.id} className={styles.evidenceCard}>
+                        <a
+                          href={evidence.media_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={styles.evidenceItem}
+                          onClick={(event) => {
+                            event.preventDefault();
+                            setSelectedImage(evidence.media_url);
+                          }}
+                        >
+                          <img src={evidence.media_url} alt={evidence.caption || (evidence.type === 'BEFORE' ? 'Evidência antes do serviço' : 'Evidência depois do serviço')} width={96} height={96} loading="lazy" />
+                          <span>{evidence.type === 'BEFORE' ? 'Antes' : 'Depois'}</span>
+                          {evidence.caption && <span className={styles.evidenceCaption}>{evidence.caption}</span>}
+                        </a>
+                        <button type="button" className={styles.evidenceDeleteButton} onClick={() => void deleteEvidence(evidence)} disabled={Boolean(deletingEvidenceId)}>
+                          <Trash2 size={14} /> Excluir
+                        </button>
+                      </div>
                     ))}
                   </div>
                 )}
@@ -460,10 +490,16 @@ function CentralAtendimentoContent({
                 {evidences.length > 0 && (
                   <div className={styles.evidenceList} aria-label="Evidências do atendimento">
                     {evidences.map((evidence) => (
-                      <a key={evidence.id} href={evidence.media_url} target="_blank" rel="noopener noreferrer" className={styles.evidenceItem}>
-                        <img src={evidence.media_url} alt={evidence.type === 'BEFORE' ? 'Evidência antes do serviço' : 'Evidência depois do serviço'} width={72} height={72} loading="lazy" />
-                        <span>{evidence.type === 'BEFORE' ? 'Antes' : 'Depois'}</span>
-                      </a>
+                      <div key={evidence.id} className={styles.evidenceCard}>
+                        <a href={evidence.media_url} target="_blank" rel="noopener noreferrer" className={styles.evidenceItem}>
+                          <img src={evidence.media_url} alt={evidence.caption || (evidence.type === 'BEFORE' ? 'Evidência antes do serviço' : 'Evidência depois do serviço')} width={72} height={72} loading="lazy" />
+                          <span>{evidence.type === 'BEFORE' ? 'Antes' : 'Depois'}</span>
+                          {evidence.caption && <span className={styles.evidenceCaption}>{evidence.caption}</span>}
+                        </a>
+                        <button type="button" className={styles.evidenceDeleteButton} onClick={() => void deleteEvidence(evidence)} disabled={Boolean(deletingEvidenceId)}>
+                          <Trash2 size={14} /> Excluir
+                        </button>
+                      </div>
                     ))}
                   </div>
                 )}

@@ -68,6 +68,7 @@ npm install
 NEXT_PUBLIC_SUPABASE_URL=sua_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=sua_chave_anonima
 SUPABASE_SERVICE_ROLE_KEY=sua_chave_admin
+GEMINI_API_KEY=sua_chave_do_google_ai_studio
 NEXT_PUBLIC_FIREBASE_API_KEY=sua_api_key
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=seu_projeto.firebaseapp.com
 NEXT_PUBLIC_FIREBASE_PROJECT_ID=seu_project_id
@@ -75,6 +76,8 @@ NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=seu_projeto.firebasestorage.app
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=seu_sender_id
 NEXT_PUBLIC_FIREBASE_APP_ID=seu_app_id
 ```
+
+`GEMINI_API_KEY` habilita a geração automática de legendas para as fotos das ordens de serviço. A chave é usada somente pela API do servidor; aplique também as migrations do diretório `supabase/migrations` para armazenar as legendas.
 
 4. No Windows com nvm-windows, ative a versão do projeto:
 ```powershell

@@ -5,10 +5,10 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createBrowserClient } from '@supabase/ssr';
 import type { User } from '@supabase/supabase-js';
-import { ChevronLeft, MapPin, Clock, CheckCircle, Navigation, AlertTriangle } from 'lucide-react';
+import { ChevronLeft, MapPin, Clock, CheckCircle, Navigation, AlertTriangle, Trash2 } from 'lucide-react';
 import FinalizarChamadoModal from '@/components/Tecnico/FinalizarChamadoModal';
 import ServiceReportSection from '@/components/Tecnico/ServiceReportSection';
-import { ITicket } from '@/types/ticket';
+import { ITicket, TicketEvidence } from '@/types/ticket';
 import styles from './OsDetail.module.css';
 
 const supabase = createBrowserClient(
@@ -41,8 +41,69 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
   const [geoError, setGeoError] = useState<string | null>(null);
   const [checkInMessage, setCheckInMessage] = useState<string | null>(null);
   const [distanciaAtual, setDistanciaAtual] = useState<number | null>(null);
+  const [evidences, setEvidences] = useState<TicketEvidence[]>([]);
+  const [loadingEvidences, setLoadingEvidences] = useState(true);
+  const [deletingEvidenceId, setDeletingEvidenceId] = useState<string | null>(null);
+  const [evidenceError, setEvidenceError] = useState<string | null>(null);
 
   const watchId = useRef<number | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    const loadEvidences = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('ticket_evidences')
+          .select('*')
+          .eq('ticket_id', ticketId)
+          .order('created_at', { ascending: false });
+        if (error) {
+          console.error('Erro ao carregar evidências da OS:', error.message);
+          if (isMounted) setEvidenceError('Não foi possível carregar as fotos desta ordem de serviço.');
+          return;
+        }
+        if (isMounted) setEvidences(data as TicketEvidence[]);
+      } finally {
+        if (isMounted) setLoadingEvidences(false);
+      }
+    };
+    void loadEvidences();
+    const channel = supabase
+      .channel(`tecnico_evidencias_${ticketId}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'ticket_evidences', filter: `ticket_id=eq.${ticketId}` }, (payload) => {
+        const evidence = payload.new as TicketEvidence;
+        setEvidences((previous) => previous.some((item) => item.id === evidence.id) ? previous : [evidence, ...previous]);
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'ticket_evidences', filter: `ticket_id=eq.${ticketId}` }, (payload) => {
+        const removedId = String((payload.old as { id?: string }).id || '');
+        setEvidences((previous) => previous.filter((item) => item.id !== removedId));
+      })
+      .subscribe();
+    return () => {
+      isMounted = false;
+      void supabase.removeChannel(channel);
+    };
+  }, [ticketId]);
+
+  const deleteEvidence = async (evidence: TicketEvidence) => {
+    if (!window.confirm('Excluir esta foto permanentemente?')) return;
+    setDeletingEvidenceId(evidence.id);
+    try {
+      const response = await fetch('/api/tecnico/excluir-evidencia', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ evidence_id: evidence.id }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Não foi possível excluir a foto.');
+      setEvidences((previous) => previous.filter((item) => item.id !== evidence.id));
+      setEvidenceError(null);
+    } catch (deleteError) {
+      setEvidenceError(deleteError instanceof Error ? deleteError.message : 'Não foi possível excluir a foto.');
+    } finally {
+      setDeletingEvidenceId(null);
+    }
+  };
 
   // Fetch Auth User
   useEffect(() => {
@@ -273,6 +334,30 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
             </div>
           </div>
         </div>
+
+        <section className={styles.cardSection} aria-labelledby="ticket-evidence-heading">
+          <h3 id="ticket-evidence-heading" className={styles.sectionHeading}>Fotos do atendimento</h3>
+          {evidenceError && <p className={styles.evidenceError} role="alert">{evidenceError}</p>}
+          {loadingEvidences ? (
+            <p className={styles.detailValue} role="status">Carregando fotos da OS...</p>
+          ) : evidences.length === 0 ? (
+            <p className={styles.detailValue}>Nenhuma foto enviada para esta OS.</p>
+          ) : (
+            <div className={styles.evidenceGrid}>
+              {evidences.map((evidence) => (
+                <figure key={evidence.id} className={styles.evidenceItem}>
+                  <a href={evidence.media_url} target="_blank" rel="noopener noreferrer">
+                    <img src={evidence.media_url} alt={evidence.caption || (evidence.type === 'BEFORE' ? 'Foto antes do atendimento' : 'Foto após o atendimento')} width={320} height={200} loading="lazy" />
+                  </a>
+                  <figcaption>{evidence.caption || (evidence.type === 'BEFORE' ? 'Antes do atendimento' : 'Após o atendimento')}</figcaption>
+                  <button type="button" className={styles.evidenceDeleteButton} onClick={() => void deleteEvidence(evidence)} disabled={Boolean(deletingEvidenceId)}>
+                    <Trash2 size={14} /> Excluir foto
+                  </button>
+                </figure>
+              ))}
+            </div>
+          )}
+        </section>
 
         {(ticket.categoria || ticket.causa_raiz || ticket.resolucao?.causaRaiz) && (
           <section className={styles.cardSection} aria-labelledby="problem-cause-heading">

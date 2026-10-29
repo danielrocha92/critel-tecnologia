@@ -46,7 +46,9 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
   // Evidências
   const [evidenciasAntes, setEvidenciasAntes] = useState<TicketEvidence[]>([]);
   const [evidenciasDepois, setEvidenciasDepois] = useState<TicketEvidence[]>([]);
+  const [loadingEvidence, setLoadingEvidence] = useState(true);
   const [uploadingEvidence, setUploadingEvidence] = useState(false);
+  const [deletingEvidenceId, setDeletingEvidenceId] = useState<string | null>(null);
 
   // Despesas
   const [despesas, setDespesas] = useState<ExpenseDraft[]>([{ natureza: '', valor: '', anexo: '' }]);
@@ -82,6 +84,69 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
       isMounted = false;
     };
   }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+    const loadEvidence = async () => {
+      try {
+        const { data, error: loadError } = await supabase
+          .from('ticket_evidences')
+          .select('*')
+          .eq('ticket_id', ticket.id)
+          .order('created_at', { ascending: true });
+        if (loadError) {
+          setError('Não foi possível carregar as fotos já enviadas para esta OS.');
+          console.error('Erro ao carregar evidências no modal:', loadError.message);
+          return;
+        }
+        if (!isMounted || !data) return;
+        setEvidenciasAntes(data.filter((item) => item.type === 'BEFORE') as TicketEvidence[]);
+        setEvidenciasDepois(data.filter((item) => item.type === 'AFTER') as TicketEvidence[]);
+      } finally {
+        if (isMounted) setLoadingEvidence(false);
+      }
+    };
+
+    void loadEvidence();
+    const channel = supabase
+      .channel(`modal_evidencias_${ticket.id}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'ticket_evidences', filter: `ticket_id=eq.${ticket.id}` }, (payload) => {
+        const evidence = payload.new as TicketEvidence;
+        const setter = evidence.type === 'BEFORE' ? setEvidenciasAntes : setEvidenciasDepois;
+        setter((previous) => previous.some((item) => item.id === evidence.id) ? previous : [...previous, evidence]);
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'ticket_evidences', filter: `ticket_id=eq.${ticket.id}` }, (payload) => {
+        const removedId = String((payload.old as { id?: string }).id || '');
+        setEvidenciasAntes((previous) => previous.filter((item) => item.id !== removedId));
+        setEvidenciasDepois((previous) => previous.filter((item) => item.id !== removedId));
+      })
+      .subscribe();
+
+    return () => {
+      isMounted = false;
+      void supabase.removeChannel(channel);
+    };
+  }, [ticket.id]);
+
+  const deleteEvidence = async (evidence: TicketEvidence) => {
+    if (!window.confirm('Excluir esta foto permanentemente?')) return;
+    setDeletingEvidenceId(evidence.id);
+    try {
+      const response = await fetch('/api/tecnico/excluir-evidencia', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ evidence_id: evidence.id }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Não foi possível excluir a foto.');
+      setEvidenciasAntes((previous) => previous.filter((item) => item.id !== evidence.id));
+      setEvidenciasDepois((previous) => previous.filter((item) => item.id !== evidence.id));
+    } catch (deleteError) {
+      setError(deleteError instanceof Error ? deleteError.message : 'Não foi possível excluir a foto.');
+    } finally {
+      setDeletingEvidenceId(null);
+    }
+  };
 
   const captureLocation = useCallback(() => {
     setLocation(null);
@@ -183,12 +248,27 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
       const { error: uploadError } = await supabase.storage.from('anexos').upload(path, file, { contentType: file.type, upsert: false });
       if (uploadError) throw uploadError;
       const { data } = supabase.storage.from('anexos').getPublicUrl(path);
+      let caption = '';
+      try {
+        const captionResponse = await fetch('/api/tecnico/legendar-evidencia', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ticket_id: ticket.id, image_url: data.publicUrl }),
+        });
+        const captionResult = await captionResponse.json();
+        if (!captionResponse.ok) throw new Error(captionResult.error || 'Não foi possível gerar a legenda da foto.');
+        caption = captionResult.caption;
+      } catch (captionError) {
+        await supabase.storage.from('anexos').remove([path]);
+        throw captionError;
+      }
       const { data: inserted, error: insertError } = await supabase.from('ticket_evidences').insert({
         ticket_id: ticket.id,
         type,
         media_url: data.publicUrl,
+        caption,
         created_by: currentUser!.id,
-      }).select('id, ticket_id, type, media_url, created_by, created_at').single();
+      }).select('id, ticket_id, type, media_url, caption, created_by, created_at').single();
       if (insertError) {
         await supabase.storage.from('anexos').remove([path]);
         throw insertError;
@@ -243,6 +323,12 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
 
     if (!descricao.trim()) {
       setError('A descrição dos serviços executados é obrigatória.');
+      setLoading(false);
+      return;
+    }
+
+    if (loadingEvidence) {
+      setError('Aguarde o carregamento das fotos desta OS.');
       setLoading(false);
       return;
     }
@@ -432,20 +518,25 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
                       <Camera size={17} /> Tirar foto
                     </button>
                   </div>
-                  <input ref={beforeGalleryInput} type="file" accept="image/*" multiple onChange={e => void handleEvidenceSelection(e, 'BEFORE')} className={styles.hiddenEvidenceInput} disabled={uploadingEvidence || loading} />
-                  <input ref={beforeCameraInput} type="file" accept="image/*" capture="environment" onChange={e => void handleEvidenceSelection(e, 'BEFORE')} className={styles.hiddenEvidenceInput} disabled={uploadingEvidence || loading} />
+                  <input ref={beforeGalleryInput} type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={e => void handleEvidenceSelection(e, 'BEFORE')} className={styles.hiddenEvidenceInput} disabled={uploadingEvidence || loading} />
+                  <input ref={beforeCameraInput} type="file" accept="image/jpeg,image/png,image/webp" capture="environment" onChange={e => void handleEvidenceSelection(e, 'BEFORE')} className={styles.hiddenEvidenceInput} disabled={uploadingEvidence || loading} />
                   {evidenciasAntes.length > 0 && (
                     <div className={styles.evidencePreviewGrid} aria-label="Fotos do antes já enviadas">
                       {evidenciasAntes.map((evidence, index) => (
-                        <a key={evidence.id} href={evidence.media_url} target="_blank" rel="noopener noreferrer" className={styles.evidencePreview}>
-                          <Image src={evidence.media_url} alt={`Evidência antes do atendimento ${index + 1}`} width={112} height={84} loading="lazy" unoptimized />
-                          <span>Foto {index + 1}</span>
-                        </a>
+                        <div key={evidence.id} className={styles.evidencePreviewCard}>
+                          <a href={evidence.media_url} target="_blank" rel="noopener noreferrer" className={styles.evidencePreview}>
+                            <Image src={evidence.media_url} alt={evidence.caption || `Evidência antes do atendimento ${index + 1}`} width={112} height={84} loading="lazy" unoptimized />
+                            <span>{evidence.caption || `Foto ${index + 1}`}</span>
+                          </a>
+                          <button type="button" className={styles.evidenceDeleteButton} onClick={() => void deleteEvidence(evidence)} disabled={Boolean(deletingEvidenceId) || uploadingEvidence} aria-label={`Excluir foto ${index + 1} do antes`}>
+                            <Trash size={14} /> Excluir
+                          </button>
+                        </div>
                       ))}
                     </div>
                   )}
                   <span className={styles.evidenceUploadStatus} role="status">
-                    {uploadingEvidence ? 'Enviando foto(s)...' : evidenciasAntes.length > 0 ? `${evidenciasAntes.length} foto(s) enviada(s) — disponível(is) para o analista` : 'Nenhuma foto enviada ainda'}
+                    {loadingEvidence ? 'Carregando fotos já enviadas...' : uploadingEvidence ? 'Enviando e analisando foto(s)...' : evidenciasAntes.length > 0 ? `${evidenciasAntes.length} foto(s) enviada(s) — disponível(is) para o analista` : 'Nenhuma foto enviada ainda'}
                   </span>
                 </div>
                 <div>
@@ -458,20 +549,25 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
                       <Camera size={17} /> Tirar foto
                     </button>
                   </div>
-                  <input ref={afterGalleryInput} type="file" accept="image/*" multiple onChange={e => void handleEvidenceSelection(e, 'AFTER')} className={styles.hiddenEvidenceInput} disabled={uploadingEvidence || loading} />
-                  <input ref={afterCameraInput} type="file" accept="image/*" capture="environment" onChange={e => void handleEvidenceSelection(e, 'AFTER')} className={styles.hiddenEvidenceInput} disabled={uploadingEvidence || loading} />
+                  <input ref={afterGalleryInput} type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={e => void handleEvidenceSelection(e, 'AFTER')} className={styles.hiddenEvidenceInput} disabled={uploadingEvidence || loading} />
+                  <input ref={afterCameraInput} type="file" accept="image/jpeg,image/png,image/webp" capture="environment" onChange={e => void handleEvidenceSelection(e, 'AFTER')} className={styles.hiddenEvidenceInput} disabled={uploadingEvidence || loading} />
                   {evidenciasDepois.length > 0 && (
                     <div className={styles.evidencePreviewGrid} aria-label="Fotos do depois já enviadas">
                       {evidenciasDepois.map((evidence, index) => (
-                        <a key={evidence.id} href={evidence.media_url} target="_blank" rel="noopener noreferrer" className={styles.evidencePreview}>
-                          <Image src={evidence.media_url} alt={`Evidência depois do atendimento ${index + 1}`} width={112} height={84} loading="lazy" unoptimized />
-                          <span>Foto {index + 1}</span>
-                        </a>
+                        <div key={evidence.id} className={styles.evidencePreviewCard}>
+                          <a href={evidence.media_url} target="_blank" rel="noopener noreferrer" className={styles.evidencePreview}>
+                            <Image src={evidence.media_url} alt={evidence.caption || `Evidência depois do atendimento ${index + 1}`} width={112} height={84} loading="lazy" unoptimized />
+                            <span>{evidence.caption || `Foto ${index + 1}`}</span>
+                          </a>
+                          <button type="button" className={styles.evidenceDeleteButton} onClick={() => void deleteEvidence(evidence)} disabled={Boolean(deletingEvidenceId) || uploadingEvidence} aria-label={`Excluir foto ${index + 1} do depois`}>
+                            <Trash size={14} /> Excluir
+                          </button>
+                        </div>
                       ))}
                     </div>
                   )}
                   <span className={styles.evidenceUploadStatus} role="status">
-                    {uploadingEvidence ? 'Enviando foto(s)...' : evidenciasDepois.length > 0 ? `${evidenciasDepois.length} foto(s) enviada(s) — disponível(is) para o analista` : 'Nenhuma foto enviada ainda'}
+                    {loadingEvidence ? 'Carregando fotos já enviadas...' : uploadingEvidence ? 'Enviando e analisando foto(s)...' : evidenciasDepois.length > 0 ? `${evidenciasDepois.length} foto(s) enviada(s) — disponível(is) para o analista` : 'Nenhuma foto enviada ainda'}
                   </span>
                 </div>
               </div>
@@ -557,8 +653,8 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
           <button
             type="submit"
             form="finalizarForm"
-            disabled={loading || uploadingEvidence || !location}
-            className={`${styles.submitBtn} ${(!location || loading || uploadingEvidence) ? styles.submitBtnDisabled : styles.submitBtnActive}`}
+            disabled={loading || uploadingEvidence || loadingEvidence || !location}
+            className={`${styles.submitBtn} ${(!location || loading || uploadingEvidence || loadingEvidence) ? styles.submitBtnDisabled : styles.submitBtnActive}`}
           >
             <Send size={20} />
             {loading ? progressMsg || 'Sincronizando...' : 'Confirmar e Enviar Baixa'}
