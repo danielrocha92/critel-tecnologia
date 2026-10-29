@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback, ChangeEvent } from 'react';
 import { X, MapPin, MapPinOff, AlertTriangle, Send, Clock, Plus, Trash, Camera, Images } from 'lucide-react';
 import SignatureCanvas, { type SignatureCanvas as SignatureCanvasInstance } from 'react-signature-canvas';
+import Image from 'next/image';
 import { createClient } from '@/utils/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import { ITicket, TicketEvidence } from '@/types/ticket';
@@ -437,7 +438,7 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
                     <div className={styles.evidencePreviewGrid} aria-label="Fotos do antes já enviadas">
                       {evidenciasAntes.map((evidence, index) => (
                         <a key={evidence.id} href={evidence.media_url} target="_blank" rel="noopener noreferrer" className={styles.evidencePreview}>
-                          <img src={evidence.media_url} alt={`Evidência antes do atendimento ${index + 1}`} width={112} height={84} loading="lazy" />
+                          <Image src={evidence.media_url} alt={`Evidência antes do atendimento ${index + 1}`} width={112} height={84} loading="lazy" unoptimized />
                           <span>Foto {index + 1}</span>
                         </a>
                       ))}
@@ -463,7 +464,7 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
                     <div className={styles.evidencePreviewGrid} aria-label="Fotos do depois já enviadas">
                       {evidenciasDepois.map((evidence, index) => (
                         <a key={evidence.id} href={evidence.media_url} target="_blank" rel="noopener noreferrer" className={styles.evidencePreview}>
-                          <img src={evidence.media_url} alt={`Evidência depois do atendimento ${index + 1}`} width={112} height={84} loading="lazy" />
+                          <Image src={evidence.media_url} alt={`Evidência depois do atendimento ${index + 1}`} width={112} height={84} loading="lazy" unoptimized />
                           <span>Foto {index + 1}</span>
                         </a>
                       ))}
