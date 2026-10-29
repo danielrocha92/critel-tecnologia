@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback, ChangeEvent } from 'react';
-import { X, MapPin, MapPinOff, AlertTriangle, Send, Clock, Plus, Trash } from 'lucide-react';
+import { X, MapPin, MapPinOff, AlertTriangle, Send, Clock, Plus, Trash, Camera, Images } from 'lucide-react';
 import SignatureCanvas, { type SignatureCanvas as SignatureCanvasInstance } from 'react-signature-canvas';
 import { createClient } from '@/utils/supabase/client';
 import type { User } from '@supabase/supabase-js';
@@ -52,9 +52,12 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
 
   // Signature
   const sigCanvas = useRef<SignatureCanvasInstance | null>(null);
+  const beforeGalleryInput = useRef<HTMLInputElement>(null);
+  const beforeCameraInput = useRef<HTMLInputElement>(null);
+  const afterGalleryInput = useRef<HTMLInputElement>(null);
+  const afterCameraInput = useRef<HTMLInputElement>(null);
   const selectedCause = ticket.causa_raiz || ticket.resolucao?.causaRaiz || '';
   const selectedCauseDetail = ticket.causa_raiz_detalhe || ticket.resolucao?.causaRaizDetalhe || '';
-  const supportsCameraCapture = /hardware|pinpad|pos|modem|link \/ internet|telefonia/i.test(ticket.categoria || '');
   const evidenceBeforeLabel = selectedCause
     ? `Comprovação da causa: ${selectedCauseDetail || selectedCause}`
     : 'Evidência do problema antes do atendimento';
@@ -420,13 +423,55 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
               <div className={styles.grid}>
                 <div>
                   <label className={styles.label}>{evidenceBeforeLabel} *</label>
-                  <input type="file" accept="image/*" multiple capture={supportsCameraCapture ? 'environment' : undefined} onChange={e => void handleEvidenceSelection(e, 'BEFORE')} required={!evidenciasAntes.length} className={styles.input} disabled={uploadingEvidence || loading} />
-                  {evidenciasAntes.length > 0 && <span className={styles.evidenciaSuccessSpan}>{evidenciasAntes.length} imagem(ns) selecionada(s)</span>}
+                  <div className={styles.evidenceActions}>
+                    <button type="button" className={styles.evidenceActionButton} onClick={() => beforeGalleryInput.current?.click()} disabled={uploadingEvidence || loading}>
+                      <Images size={17} /> Escolher fotos
+                    </button>
+                    <button type="button" className={styles.evidenceActionButton} onClick={() => beforeCameraInput.current?.click()} disabled={uploadingEvidence || loading}>
+                      <Camera size={17} /> Tirar foto
+                    </button>
+                  </div>
+                  <input ref={beforeGalleryInput} type="file" accept="image/*" multiple onChange={e => void handleEvidenceSelection(e, 'BEFORE')} className={styles.hiddenEvidenceInput} disabled={uploadingEvidence || loading} />
+                  <input ref={beforeCameraInput} type="file" accept="image/*" capture="environment" onChange={e => void handleEvidenceSelection(e, 'BEFORE')} className={styles.hiddenEvidenceInput} disabled={uploadingEvidence || loading} />
+                  {evidenciasAntes.length > 0 && (
+                    <div className={styles.evidencePreviewGrid} aria-label="Fotos do antes já enviadas">
+                      {evidenciasAntes.map((evidence, index) => (
+                        <a key={evidence.id} href={evidence.media_url} target="_blank" rel="noopener noreferrer" className={styles.evidencePreview}>
+                          <img src={evidence.media_url} alt={`Evidência antes do atendimento ${index + 1}`} width={112} height={84} loading="lazy" />
+                          <span>Foto {index + 1}</span>
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                  <span className={styles.evidenceUploadStatus} role="status">
+                    {uploadingEvidence ? 'Enviando foto(s)...' : evidenciasAntes.length > 0 ? `${evidenciasAntes.length} foto(s) enviada(s) — disponível(is) para o analista` : 'Nenhuma foto enviada ainda'}
+                  </span>
                 </div>
                 <div>
                   <label className={styles.label}>{evidenceAfterLabel} *</label>
-                  <input type="file" accept="image/*" multiple capture={supportsCameraCapture ? 'environment' : undefined} onChange={e => void handleEvidenceSelection(e, 'AFTER')} required={!evidenciasDepois.length} className={styles.input} disabled={uploadingEvidence || loading} />
-                  {evidenciasDepois.length > 0 && <span className={styles.evidenciaSuccessSpan}>{evidenciasDepois.length} imagem(ns) selecionada(s)</span>}
+                  <div className={styles.evidenceActions}>
+                    <button type="button" className={styles.evidenceActionButton} onClick={() => afterGalleryInput.current?.click()} disabled={uploadingEvidence || loading}>
+                      <Images size={17} /> Escolher fotos
+                    </button>
+                    <button type="button" className={styles.evidenceActionButton} onClick={() => afterCameraInput.current?.click()} disabled={uploadingEvidence || loading}>
+                      <Camera size={17} /> Tirar foto
+                    </button>
+                  </div>
+                  <input ref={afterGalleryInput} type="file" accept="image/*" multiple onChange={e => void handleEvidenceSelection(e, 'AFTER')} className={styles.hiddenEvidenceInput} disabled={uploadingEvidence || loading} />
+                  <input ref={afterCameraInput} type="file" accept="image/*" capture="environment" onChange={e => void handleEvidenceSelection(e, 'AFTER')} className={styles.hiddenEvidenceInput} disabled={uploadingEvidence || loading} />
+                  {evidenciasDepois.length > 0 && (
+                    <div className={styles.evidencePreviewGrid} aria-label="Fotos do depois já enviadas">
+                      {evidenciasDepois.map((evidence, index) => (
+                        <a key={evidence.id} href={evidence.media_url} target="_blank" rel="noopener noreferrer" className={styles.evidencePreview}>
+                          <img src={evidence.media_url} alt={`Evidência depois do atendimento ${index + 1}`} width={112} height={84} loading="lazy" />
+                          <span>Foto {index + 1}</span>
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                  <span className={styles.evidenceUploadStatus} role="status">
+                    {uploadingEvidence ? 'Enviando foto(s)...' : evidenciasDepois.length > 0 ? `${evidenciasDepois.length} foto(s) enviada(s) — disponível(is) para o analista` : 'Nenhuma foto enviada ainda'}
+                  </span>
                 </div>
               </div>
             </div>
