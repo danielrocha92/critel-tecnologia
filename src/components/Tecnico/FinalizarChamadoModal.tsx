@@ -5,7 +5,7 @@ import { X, MapPin, MapPinOff, AlertTriangle, Send, Clock, Plus, Trash, Camera, 
 import SignatureCanvas, { type SignatureCanvas as SignatureCanvasInstance } from 'react-signature-canvas';
 import Image from 'next/image';
 import { createClient } from '@/utils/supabase/client';
-import type { User } from '@supabase/supabase-js';
+import type { User, RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 import { ITicket, TicketEvidence } from '@/types/ticket';
 import styles from './FinalizarChamadoModal.module.css';
 
@@ -100,8 +100,8 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
           return;
         }
         if (!isMounted || !data) return;
-        setEvidenciasAntes(data.filter((item) => item.type === 'BEFORE') as TicketEvidence[]);
-        setEvidenciasDepois(data.filter((item) => item.type === 'AFTER') as TicketEvidence[]);
+        setEvidenciasAntes((data as TicketEvidence[]).filter((item: TicketEvidence) => item.type === 'BEFORE'));
+        setEvidenciasDepois((data as TicketEvidence[]).filter((item: TicketEvidence) => item.type === 'AFTER'));
       } finally {
         if (isMounted) setLoadingEvidence(false);
       }
@@ -110,12 +110,12 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
     void loadEvidence();
     const channel = supabase
       .channel(`modal_evidencias_${ticket.id}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'ticket_evidences', filter: `ticket_id=eq.${ticket.id}` }, (payload) => {
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'ticket_evidences', filter: `ticket_id=eq.${ticket.id}` }, (payload: RealtimePostgresChangesPayload<TicketEvidence & Record<string, unknown>>) => {
         const evidence = payload.new as TicketEvidence;
         const setter = evidence.type === 'BEFORE' ? setEvidenciasAntes : setEvidenciasDepois;
         setter((previous) => previous.some((item) => item.id === evidence.id) ? previous : [...previous, evidence]);
       })
-      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'ticket_evidences', filter: `ticket_id=eq.${ticket.id}` }, (payload) => {
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'ticket_evidences', filter: `ticket_id=eq.${ticket.id}` }, (payload: RealtimePostgresChangesPayload<Record<string, unknown>>) => {
         const removedId = String((payload.old as { id?: string }).id || '');
         setEvidenciasAntes((previous) => previous.filter((item) => item.id !== removedId));
         setEvidenciasDepois((previous) => previous.filter((item) => item.id !== removedId));

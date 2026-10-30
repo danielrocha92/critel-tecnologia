@@ -276,7 +276,7 @@ function CentralAtendimentoContent({
         const evidence = payload.new as TicketEvidence;
         setEvidences((previous) => previous.some((item) => item.id === evidence.id) ? previous : [evidence, ...previous]);
       })
-      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'ticket_evidences', filter: `ticket_id=eq.${ticketAtivo.id}` }, (payload) => {
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'ticket_evidences', filter: `ticket_id=eq.${ticketAtivo.id}` }, (payload: RealtimePostgresChangesPayload<Record<string, unknown>>) => {
         const removedId = String((payload.old as { id?: string }).id || '');
         setEvidences((previous) => previous.filter((item) => item.id !== removedId));
       })
