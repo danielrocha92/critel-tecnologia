@@ -39,11 +39,14 @@ export async function POST(request: Request) {
 
     const { data: ticket, error: ticketError } = await admin
       .from('tickets')
-      .select('id, tecnico_id, protocolo_origem')
+      .select('id, status, tecnico_id, protocolo_origem')
       .eq('id', evidence.ticket_id)
       .like('protocolo_origem', 'OS-%')
       .maybeSingle();
     if (ticketError) throw ticketError;
+    if (ticket?.status !== 'EM_ANDAMENTO') {
+      return NextResponse.json({ error: 'SÃ³ Ã© possÃ­vel remover mÃ­dia enquanto o chamado estÃ¡ em andamento.' }, { status: 409 });
+    }
     if (!ticket) return NextResponse.json({ error: 'Ordem de serviço não encontrada.' }, { status: 404 });
 
     const { data: profile, error: profileError } = await admin

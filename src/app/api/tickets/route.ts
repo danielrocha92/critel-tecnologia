@@ -224,6 +224,8 @@ export async function POST(req: NextRequest) {
         prioridade: payload.priority,
         status: 'FILA',
         tecnico_id: payload.technicianId,
+        modalidade_pagamento: payload.paymentType,
+        valor_pagamento: payload.paymentValue,
         cliente: payload.customer,
         analista_id: profile.id,
         protocolo_origem: `OS-${Date.now()}`

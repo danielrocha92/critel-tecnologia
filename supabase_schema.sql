@@ -219,6 +219,10 @@ ON public.comunicados FOR ALL USING (
 
 ALTER TABLE public.tickets
 ADD COLUMN IF NOT EXISTS tecnico_id UUID REFERENCES public.perfis(id),
+ADD COLUMN IF NOT EXISTS modalidade_pagamento VARCHAR(20)
+  CHECK (modalidade_pagamento IS NULL OR modalidade_pagamento IN ('diaria', 'chamado')),
+ADD COLUMN IF NOT EXISTS valor_pagamento NUMERIC(12, 2)
+  CHECK (valor_pagamento IS NULL OR valor_pagamento > 0),
 ADD COLUMN IF NOT EXISTS endereco VARCHAR(255),
 ADD COLUMN IF NOT EXISTS check_in_lat DOUBLE PRECISION,
 ADD COLUMN IF NOT EXISTS check_in_lng DOUBLE PRECISION,

@@ -191,20 +191,16 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
     if (!currentUser) return;
     setIsAccepting(true);
     try {
-      await supabase.from('tickets').update({
-        tecnico_id: currentUser.id,
-        status: 'ABERTO' // Assuming accepting it puts it in ABERTO state before check-in
-      }).eq('id', ticket!.id);
-
-      await supabase.from('ticket_transitions').insert({
-        ticket_id: ticket!.id,
-        from_status: ticket!.status,
-        to_status: 'ABERTO',
-        changed_by: currentUser.id,
-        reason: 'Chamado aceito pela Fila'
+      const response = await fetch('/api/tecnico/aceitar-chamado', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ticket_id: ticket!.id }),
       });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Não foi possível aceitar o chamado.');
+      setTicket(result.ticket as ITicket);
     } catch (err) {
-      alert('Erro ao aceitar chamado.');
+      alert(err instanceof Error ? err.message : 'Erro ao aceitar chamado.');
     } finally {
       setIsAccepting(false);
     }
@@ -293,6 +289,7 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
 
   const isCheckedIn = !!ticket.check_in_at;
   const isFinalized = ['FECHADO', 'RESOLVIDO', 'FINALIZADO', 'CONCLUIDO'].includes(ticket.status);
+  const canEditMedia = ticket.status === 'EM_ANDAMENTO';
 
   return (
     <div className={styles.pageContainer}>
@@ -335,6 +332,18 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
           </div>
         </div>
 
+        <section className={styles.cardSection} aria-labelledby="ticket-compensation-heading">
+          <h3 id="ticket-compensation-heading" className={styles.sectionHeading}>Valor deste chamado</h3>
+          {ticket.valor_pagamento != null ? (
+            <p className={styles.detailValue}>
+              <strong>{ticket.modalidade_pagamento === 'diaria' ? 'Diária' : 'Por chamado'}:</strong>{' '}
+              {Number(ticket.valor_pagamento).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+            </p>
+          ) : (
+            <p className={styles.detailValue}>Valor ainda não informado para este chamado.</p>
+          )}
+        </section>
+
         <section className={styles.cardSection} aria-labelledby="ticket-evidence-heading">
           <h3 id="ticket-evidence-heading" className={styles.sectionHeading}>Fotos do atendimento</h3>
           {evidenceError && <p className={styles.evidenceError} role="alert">{evidenceError}</p>}
@@ -347,12 +356,12 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
               {evidences.map((evidence) => (
                 <figure key={evidence.id} className={styles.evidenceItem}>
                   <a href={evidence.media_url} target="_blank" rel="noopener noreferrer">
-                    <img src={evidence.media_url} alt={evidence.caption || (evidence.type === 'BEFORE' ? 'Foto antes do atendimento' : 'Foto após o atendimento')} width={320} height={200} loading="lazy" />
+                    {/\.(mp4|webm)(?:[?#]|$)/i.test(evidence.media_url) ? <video src={evidence.media_url} aria-label="Vídeo antes do atendimento" width={112} height={84} controls preload="metadata" /> : <img src={evidence.media_url} alt={evidence.caption || (evidence.type === 'BEFORE' ? 'Foto antes do atendimento' : 'Foto após o atendimento')} width={320} height={200} loading="lazy" />}
                   </a>
                   <figcaption>{evidence.caption || (evidence.type === 'BEFORE' ? 'Antes do atendimento' : 'Após o atendimento')}</figcaption>
-                  <button type="button" className={styles.evidenceDeleteButton} onClick={() => void deleteEvidence(evidence)} disabled={Boolean(deletingEvidenceId)}>
-                    <Trash2 size={14} /> Excluir foto
-                  </button>
+                  {canEditMedia && <button type="button" className={styles.evidenceDeleteButton} onClick={() => void deleteEvidence(evidence)} disabled={Boolean(deletingEvidenceId)}>
+                    <Trash2 size={14} /> Excluir mídia
+                  </button>}
                 </figure>
               ))}
             </div>

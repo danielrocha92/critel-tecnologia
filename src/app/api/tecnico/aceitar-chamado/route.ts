@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     });
     const { data: profile, error: profileError } = await supabaseAdmin
       .from('perfis')
-      .select('cargo, status')
+      .select('cargo, status, modalidade_pagamento, valor_pagamento')
       .eq('user_id', user.id)
       .maybeSingle();
 
@@ -53,6 +53,8 @@ export async function POST(request: Request) {
       .update({
         tecnico_id: user.id,
         status: 'ABERTO',
+        modalidade_pagamento: profile.modalidade_pagamento,
+        valor_pagamento: profile.valor_pagamento,
         atualizado_em: new Date().toISOString(),
       })
       .eq('id', ticketId)
@@ -70,6 +72,15 @@ export async function POST(request: Request) {
         { status: 409 },
       );
     }
+
+    const { error: transitionError } = await supabaseAdmin.from('ticket_transitions').insert({
+      ticket_id: ticket.id,
+      from_status: 'FILA',
+      to_status: 'ABERTO',
+      changed_by: user.id,
+      reason: 'Chamado aceito pela fila de atendimento',
+    });
+    if (transitionError) console.error('Não foi possível registrar a transição do chamado aceito:', transitionError);
 
     return NextResponse.json({ ticket });
   } catch (error) {

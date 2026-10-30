@@ -61,6 +61,8 @@ export interface ITicket {
   email_cliente?: string;
   analista_id?: string | null;
   tecnico_id?: string | null;
+  modalidade_pagamento?: 'diaria' | 'chamado' | null;
+  valor_pagamento?: number | string | null;
   departamento?: string;
   equipe_responsavel?: 'SUPORTE_TECNICO' | 'FINANCEIRO' | 'ANALISTA' | 'COMERCIAL' | string | null;
   categoria?: string;

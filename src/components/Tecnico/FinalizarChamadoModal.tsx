@@ -67,6 +67,7 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
   const evidenceAfterLabel = selectedCause
     ? `Resultado após a correção: ${selectedCauseDetail || selectedCause}`
     : 'Evidência do resultado após o atendimento';
+  const canEditMedia = ticket.status === 'EM_ANDAMENTO';
 
   useEffect(() => {
     let isMounted = true;
@@ -243,23 +244,14 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
   };
 
   const uploadEvidenceFile = async (file: File, type: 'BEFORE' | 'AFTER') => {
-      const extension = file.name.split('.').pop()?.replace(/[^a-zA-Z0-9]/g, '') || 'jpg';
-      const path = `evidences/${ticket.id}/${type.toLowerCase()}_${Date.now()}_${crypto.randomUUID()}.${extension}`;
-      const { error: uploadError } = await supabase.storage.from('anexos').upload(path, file, { contentType: file.type, upsert: false });
-      if (uploadError) throw uploadError;
-      const { data } = supabase.storage.from('anexos').getPublicUrl(path);
-      const { data: inserted, error: insertError } = await supabase.from('ticket_evidences').insert({
-        ticket_id: ticket.id,
-        type,
-        media_url: data.publicUrl,
-        caption: '',
-        created_by: currentUser!.id,
-      }).select('id, ticket_id, type, media_url, caption, created_by, created_at').single();
-      if (insertError) {
-        await supabase.storage.from('anexos').remove([path]);
-        throw insertError;
-      }
-      return inserted;
+      const formData = new FormData();
+      formData.append('ticket_id', ticket.id);
+      formData.append('type', type);
+      formData.append('file', file);
+      const response = await fetch('/api/tecnico/evidencias', { method: 'POST', body: formData });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Não foi possível enviar a evidência.');
+      return result.evidence as TicketEvidence;
   };
 
   const handleEvidenceSelection = async (
@@ -269,6 +261,11 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
     const input = event.currentTarget;
     const selectedFiles = Array.from(input.files || []);
     if (selectedFiles.length === 0) return;
+    if (ticket.status !== 'EM_ANDAMENTO') {
+      setError('Só é possível adicionar mídia enquanto o chamado está em andamento.');
+      input.value = '';
+      return;
+    }
     if (!currentUser) {
       setError('Usuário não autenticado.');
       input.value = '';
@@ -497,24 +494,24 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
                 <div>
                   <label className={styles.label}>{evidenceBeforeLabel} *</label>
                   <div className={styles.evidenceActions}>
-                    <button type="button" className={styles.evidenceActionButton} onClick={() => beforeGalleryInput.current?.click()} disabled={uploadingEvidence || loading}>
+                    <button type="button" className={styles.evidenceActionButton} onClick={() => beforeGalleryInput.current?.click()} disabled={!canEditMedia || uploadingEvidence || loading}>
                       <Images size={17} /> Escolher fotos
                     </button>
-                    <button type="button" className={styles.evidenceActionButton} onClick={() => beforeCameraInput.current?.click()} disabled={uploadingEvidence || loading}>
+                    <button type="button" className={styles.evidenceActionButton} onClick={() => beforeCameraInput.current?.click()} disabled={!canEditMedia || uploadingEvidence || loading}>
                       <Camera size={17} /> Tirar foto
                     </button>
                   </div>
-                  <input ref={beforeGalleryInput} type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={e => void handleEvidenceSelection(e, 'BEFORE')} className={styles.hiddenEvidenceInput} disabled={uploadingEvidence || loading} />
-                  <input ref={beforeCameraInput} type="file" accept="image/jpeg,image/png,image/webp" capture="environment" onChange={e => void handleEvidenceSelection(e, 'BEFORE')} className={styles.hiddenEvidenceInput} disabled={uploadingEvidence || loading} />
+                  <input ref={beforeGalleryInput} type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" multiple onChange={e => void handleEvidenceSelection(e, 'BEFORE')} className={styles.hiddenEvidenceInput} disabled={!canEditMedia || uploadingEvidence || loading} />
+                  <input ref={beforeCameraInput} type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" capture="environment" onChange={e => void handleEvidenceSelection(e, 'BEFORE')} className={styles.hiddenEvidenceInput} disabled={!canEditMedia || uploadingEvidence || loading} />
                   {evidenciasAntes.length > 0 && (
                     <div className={styles.evidencePreviewGrid} aria-label="Fotos do antes já enviadas">
                       {evidenciasAntes.map((evidence, index) => (
                         <div key={evidence.id} className={styles.evidencePreviewCard}>
                           <a href={evidence.media_url} target="_blank" rel="noopener noreferrer" className={styles.evidencePreview}>
-                            <Image src={evidence.media_url} alt={evidence.caption || `Evidência antes do atendimento ${index + 1}`} width={112} height={84} loading="lazy" unoptimized />
+                            {/\.(mp4|webm)(?:[?#]|$)/i.test(evidence.media_url) ? <video src={evidence.media_url} aria-label="Vídeo antes do atendimento" width={112} height={84} controls preload="metadata" /> : <Image src={evidence.media_url} alt={evidence.caption || `Evidência antes do atendimento ${index + 1}`} width={112} height={84} loading="lazy" unoptimized />}
                             <span>{evidence.caption || `Foto ${index + 1}`}</span>
                           </a>
-                          <button type="button" className={styles.evidenceDeleteButton} onClick={() => void deleteEvidence(evidence)} disabled={Boolean(deletingEvidenceId) || uploadingEvidence} aria-label={`Excluir foto ${index + 1} do antes`}>
+                          <button type="button" className={styles.evidenceDeleteButton} onClick={() => void deleteEvidence(evidence)} disabled={!canEditMedia || Boolean(deletingEvidenceId) || uploadingEvidence} aria-label={`Excluir mídia ${index + 1} do antes`}>
                             <Trash size={14} /> Excluir
                           </button>
                         </div>
@@ -528,24 +525,24 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
                 <div>
                   <label className={styles.label}>{evidenceAfterLabel} *</label>
                   <div className={styles.evidenceActions}>
-                    <button type="button" className={styles.evidenceActionButton} onClick={() => afterGalleryInput.current?.click()} disabled={uploadingEvidence || loading}>
+                    <button type="button" className={styles.evidenceActionButton} onClick={() => afterGalleryInput.current?.click()} disabled={!canEditMedia || uploadingEvidence || loading}>
                       <Images size={17} /> Escolher fotos
                     </button>
-                    <button type="button" className={styles.evidenceActionButton} onClick={() => afterCameraInput.current?.click()} disabled={uploadingEvidence || loading}>
+                    <button type="button" className={styles.evidenceActionButton} onClick={() => afterCameraInput.current?.click()} disabled={!canEditMedia || uploadingEvidence || loading}>
                       <Camera size={17} /> Tirar foto
                     </button>
                   </div>
-                  <input ref={afterGalleryInput} type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={e => void handleEvidenceSelection(e, 'AFTER')} className={styles.hiddenEvidenceInput} disabled={uploadingEvidence || loading} />
-                  <input ref={afterCameraInput} type="file" accept="image/jpeg,image/png,image/webp" capture="environment" onChange={e => void handleEvidenceSelection(e, 'AFTER')} className={styles.hiddenEvidenceInput} disabled={uploadingEvidence || loading} />
+                  <input ref={afterGalleryInput} type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" multiple onChange={e => void handleEvidenceSelection(e, 'AFTER')} className={styles.hiddenEvidenceInput} disabled={!canEditMedia || uploadingEvidence || loading} />
+                  <input ref={afterCameraInput} type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" capture="environment" onChange={e => void handleEvidenceSelection(e, 'AFTER')} className={styles.hiddenEvidenceInput} disabled={!canEditMedia || uploadingEvidence || loading} />
                   {evidenciasDepois.length > 0 && (
                     <div className={styles.evidencePreviewGrid} aria-label="Fotos do depois já enviadas">
                       {evidenciasDepois.map((evidence, index) => (
                         <div key={evidence.id} className={styles.evidencePreviewCard}>
                           <a href={evidence.media_url} target="_blank" rel="noopener noreferrer" className={styles.evidencePreview}>
-                            <Image src={evidence.media_url} alt={evidence.caption || `Evidência depois do atendimento ${index + 1}`} width={112} height={84} loading="lazy" unoptimized />
+                            {/\.(mp4|webm)(?:[?#]|$)/i.test(evidence.media_url) ? <video src={evidence.media_url} aria-label="Vídeo depois do atendimento" width={112} height={84} controls preload="metadata" /> : <Image src={evidence.media_url} alt={evidence.caption || `Evidência depois do atendimento ${index + 1}`} width={112} height={84} loading="lazy" unoptimized />}
                             <span>{evidence.caption || `Foto ${index + 1}`}</span>
                           </a>
-                          <button type="button" className={styles.evidenceDeleteButton} onClick={() => void deleteEvidence(evidence)} disabled={Boolean(deletingEvidenceId) || uploadingEvidence} aria-label={`Excluir foto ${index + 1} do depois`}>
+                          <button type="button" className={styles.evidenceDeleteButton} onClick={() => void deleteEvidence(evidence)} disabled={!canEditMedia || Boolean(deletingEvidenceId) || uploadingEvidence} aria-label={`Excluir mídia ${index + 1} do depois`}>
                             <Trash size={14} /> Excluir
                           </button>
                         </div>
