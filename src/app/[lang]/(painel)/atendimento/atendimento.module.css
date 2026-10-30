@@ -1199,6 +1199,19 @@
   box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
 }
 
+.timelineClientLogo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.timelineAvatarWithLogo {
+  padding: 5px;
+  background: #fff;
+  box-shadow: 0 4px 15px rgba(15, 23, 42, 0.18);
+}
+
 .timelineUser {
   display: flex;
   align-items: center;

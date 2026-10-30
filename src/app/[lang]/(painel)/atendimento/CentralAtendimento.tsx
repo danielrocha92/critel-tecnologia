@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, Suspense } from 'react';
+import Image from 'next/image';
 import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { createClient } from '../../../../utils/supabase/client';
@@ -13,8 +14,24 @@ import { ITicket, ITicketReply, TicketEvidence } from '../../../../types/ticket'
 import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 import { File, Download } from 'lucide-react';
 import ServiceReportSection from '@/components/Tecnico/ServiceReportSection';
+import HistoricoPausasOS from '@/components/Tecnico/HistoricoPausasOS';
 
 const supabase = createClient();
+
+const clientLogoByName: Record<string, string> = {
+  'bacio di latte': '/bacio-di-latte-dark.svg',
+  ofner: '/ofner.svg',
+  kfc: '/kfc.svg',
+  'kfc brasil': '/kfc.svg',
+  'pizza hut': '/pizza-hut-dark.svg',
+  bradesco: '/bradesco.svg',
+  'sonda it': '/sonda.svg',
+};
+
+function getClientLogo(clientName?: string | null) {
+  const normalizedName = clientName?.normalize('NFD').replace(/\p{Diacritic}/gu, '').trim().toLowerCase();
+  return normalizedName ? clientLogoByName[normalizedName] : undefined;
+}
 
 type TicketAttachment = {
   url: string;
@@ -132,6 +149,7 @@ function CentralAtendimentoContent({
       : searchParams.get('meus') === 'true';
   const cargoAtual = operadorAtual?.cargo?.trim().toUpperCase().replace('É', 'E');
   const canCreateTicket = cargoAtual === 'ADMIN' || cargoAtual === 'SUPER_ADMIN' || cargoAtual === 'ANALISTA';
+  const canViewPauseRoute = ['ANALISTA', 'ADMIN', 'SUPER_ADMIN'].includes(cargoAtual || '');
   const handleBackToTickets = () => {
     if (routeTicketId) {
       router.push(`/${lang}/os`);
@@ -291,6 +309,8 @@ function CentralAtendimentoContent({
     };
   }, [ticketAtivo]);
 
+  const clientLogo = getClientLogo(ticketAtivo?.cliente);
+
   return (
     <div className={styles.container}>
       {ticketsError && <div className={styles.errorMessage} role="alert">{ticketsError}</div>}
@@ -380,8 +400,18 @@ function CentralAtendimentoContent({
               <div className={styles.timelineCard}>
                 <div className={styles.timelineHeader}>
                   <div className={styles.timelineUser}>
-                    <div className={styles.timelineAvatar}>
-                      <User size={20} color="#64748b" />
+                    <div className={`${styles.timelineAvatar} ${clientLogo ? styles.timelineAvatarWithLogo : ''}`}>
+                      {clientLogo ? (
+                        <Image
+                          src={clientLogo}
+                          alt={`Logo de ${ticketAtivo.cliente || 'cliente'}`}
+                          width={44}
+                          height={44}
+                          className={styles.timelineClientLogo}
+                        />
+                      ) : (
+                        <User size={20} color="#64748b" aria-hidden="true" />
+                      )}
                     </div>
                     <div>
                       <span className={styles.timelineName}>{ticketAtivo.cliente}</span>
@@ -448,6 +478,7 @@ function CentralAtendimentoContent({
                   </div>
                 )}
               </div>
+              <HistoricoPausasOS ticketId={ticketAtivo.id} canViewRoute={canViewPauseRoute} />
               {['FINALIZADO', 'RESOLVIDO', 'FECHADO', 'CONCLUIDO'].includes((ticketAtivo.status || '').toUpperCase()) && (
                 <ServiceReportSection ticket={ticketAtivo} />
               )}

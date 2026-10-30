@@ -27,7 +27,27 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+  if (authError?.code === 'refresh_token_not_found') {
+    const pathname = request.nextUrl.pathname;
+    const lang = pathname.match(/^\/(pt|en|es)(?:\/|$)/)?.[1] || 'pt';
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = `/${lang}/login`;
+    loginUrl.search = '';
+    if (pathname !== loginUrl.pathname) loginUrl.searchParams.set('error', 'session_expired');
+
+    const response = pathname === loginUrl.pathname
+      ? NextResponse.next({ request })
+      : NextResponse.redirect(loginUrl);
+    for (const cookie of request.cookies.getAll()) {
+      if (cookie.name.startsWith('sb-') && /auth-token(?:\.\d+)?$/.test(cookie.name)) {
+        response.cookies.set(cookie.name, '', { path: '/', maxAge: 0, expires: new Date(0) });
+      }
+    }
+    response.cookies.set('user_cargo', '', { path: '/', maxAge: 0, expires: new Date(0) });
+    return response;
+  }
 
   const pathname = request.nextUrl.pathname;
   const pathWithoutLang = pathname.replace(/^\/(pt|en)/, '') || '/';

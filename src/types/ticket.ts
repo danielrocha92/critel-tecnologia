@@ -3,6 +3,7 @@ export type TicketStatus =
   | 'ABERTO'
   | 'FILA'
   | 'EM_ANDAMENTO'
+  | 'PAUSADO'
   | 'PENDENTE'
   | 'RESOLVIDO'
   | 'FECHADO'
@@ -61,6 +62,8 @@ export interface ITicket {
   email_cliente?: string;
   analista_id?: string | null;
   tecnico_id?: string | null;
+  pausa_atual_id?: string | null;
+  sla_pausado_segundos?: number | string | null;
   modalidade_pagamento?: 'diaria' | 'chamado' | null;
   valor_pagamento?: number | string | null;
   departamento?: string;

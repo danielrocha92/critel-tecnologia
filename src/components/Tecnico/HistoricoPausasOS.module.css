@@ -1,0 +1,145 @@
+.section {
+  margin: 0 0 1.25rem;
+  padding: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: var(--card-bg);
+}
+
+.heading {
+  margin: 0 0 0.9rem;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.list {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.pauseCard {
+  min-width: 0;
+  padding: 0.9rem;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--bg-secondary);
+}
+
+.cardHeading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.cardHeading h4 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+
+.activeBadge,
+.resumedBadge {
+  flex: 0 0 auto;
+  padding: 0.22rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.67rem;
+  font-weight: 700;
+}
+
+.activeBadge {
+  background: rgba(245, 158, 11, 0.12);
+  color: var(--status-warning-text);
+}
+
+.resumedBadge {
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--status-success-text);
+}
+
+.duration {
+  margin: 0.4rem 0 0;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+
+.details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin: 0.85rem 0 0;
+}
+
+.details > div {
+  min-width: 0;
+}
+
+.details dt {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+}
+
+.details dd {
+  margin: 0.15rem 0 0;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  overflow-wrap: anywhere;
+}
+
+.description {
+  margin: 0.8rem 0 0;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.evidenceLink {
+  display: grid;
+  width: fit-content;
+  max-width: 100%;
+  gap: 0.35rem;
+  margin-top: 0.85rem;
+  color: var(--accent-brand-text);
+  font-size: 0.75rem;
+  text-decoration: none;
+}
+
+.evidenceLink img {
+  width: min(100%, 300px);
+  height: auto;
+  max-height: 190px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.routeSection {
+  margin-top: 1rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.routeSection h5 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 0.82rem;
+}
+
+.privacyNote,
+.error {
+  margin: 0.45rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+}
+
+.error {
+  color: var(--status-danger-text);
+}
+
+@media (max-width: 540px) {
+  .details {
+    grid-template-columns: 1fr;
+  }
+}

@@ -9,10 +9,6 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
   
-  // if "next" is in param, use it as the redirect URL
-  // Default to /pt/login but immediately redirecting to dashboard or tecnico
-  const next = searchParams.get('next') ?? '/pt/login'
-
   if (code) {
     const cookieStore = await cookies()
     const supabase = createServerClient(
@@ -37,16 +33,11 @@ export async function GET(request: Request) {
     
     if (!error && authData.user) {
       // Verificar qual é o cargo do usuário para redirecionar corretamente
-      const { data: perfilData, error: perfilError } = await supabase
+      const { data: perfilData } = await supabase
         .from('perfis')
         .select('cargo, status')
         .eq('user_id', authData.user.id)
         .single()
-        
-      console.log('--- CALLBACK DEBUG ---');
-      console.log('User ID from auth:', authData.user.id);
-      console.log('Perfil Data:', perfilData);
-      console.log('Perfil Error:', perfilError);
         
       if (perfilData?.status === 'PENDENTE') {
         return NextResponse.redirect(`${origin}/pt/pendente`)

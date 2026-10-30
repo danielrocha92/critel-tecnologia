@@ -1,0 +1,73 @@
+.figure {
+  margin: 0.8rem 0 0;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--bg-tertiary);
+}
+
+.map {
+  display: block;
+  width: 100%;
+  aspect-ratio: 2 / 1;
+  background: #e5e7eb;
+}
+
+.routeOutline,
+.routeLine {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.routeOutline {
+  stroke: #fff;
+  stroke-width: 9;
+}
+
+.routeLine {
+  stroke: #2563eb;
+  stroke-width: 5;
+}
+
+.startPoint,
+.endPoint {
+  stroke: #fff;
+  stroke-width: 3;
+}
+
+.startPoint {
+  fill: #16a34a;
+}
+
+.endPoint {
+  fill: #dc2626;
+}
+
+.caption {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding: 0.55rem 0.7rem;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  line-height: 1.4;
+}
+
+.caption a {
+  flex-shrink: 0;
+  color: var(--text-secondary);
+}
+
+.empty {
+  margin: 0.6rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+@media (max-width: 520px) {
+  .caption {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+}

@@ -99,6 +99,72 @@
   overflow-wrap: anywhere;
 }
 
+.pauseCard {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 12px;
+  background: rgba(245, 158, 11, 0.08);
+}
+
+.pauseCardHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  color: var(--status-warning-text);
+}
+
+.pauseCardHeading h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.pauseCardHeading strong {
+  font-size: 0.82rem;
+}
+
+.pauseReason {
+  margin: 0.65rem 0 0;
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+
+.pauseDetail {
+  margin: 0.4rem 0 0;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.pauseDetails {
+  display: grid;
+  gap: 0.65rem;
+  margin: 0.8rem 0 0;
+}
+
+.pauseDetails dt {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+}
+
+.pauseDetails dd {
+  margin: 0.15rem 0 0;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+}
+
+.routeTrackingStatus {
+  margin: 0.8rem 0 0;
+  color: var(--status-info-text);
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
+
 .descText {
   margin: 0;
   color: var(--text-secondary);
@@ -351,6 +417,35 @@
   gap: 8px;
   box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
   cursor: pointer;
+}
+
+.btnPause,
+.btnResume {
+  display: flex;
+  width: 100%;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btnResume {
+  border-color: transparent;
+  color: #fff;
+  background: #0284c7;
+}
+
+.btnResume:disabled {
+  cursor: wait;
+  opacity: 0.65;
 }
 
 .btnHistory {

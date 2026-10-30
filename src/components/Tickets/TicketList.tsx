@@ -134,7 +134,7 @@ export default function TicketList({ filterTitle, filterType, detailPath, displa
   const statusFilter = filterType === 'my-opened' ? 'open' : filterType === 'my-closed' ? 'closed' : serverStatusFilter;
   const filteredTickets = scopedTickets.filter(ticket => {
     if (statusGroup === 'open') return ['FILA', 'NOVO'].includes(String(ticket.status).toUpperCase());
-    if (statusGroup === 'in-progress') return ['ABERTO', 'EM_ANDAMENTO'].includes(String(ticket.status).toUpperCase());
+    if (statusGroup === 'in-progress') return ['ABERTO', 'EM_ANDAMENTO', 'PAUSADO'].includes(String(ticket.status).toUpperCase());
     if (statusGroup === 'finalized') return ['RESOLVIDO', 'FECHADO', 'FINALIZADO', 'CONCLUIDO'].includes(String(ticket.status).toUpperCase());
     if (statusFilter === 'open') return !isClosed(ticket.status);
     if (statusFilter === 'closed') return isClosed(ticket.status);
@@ -152,6 +152,7 @@ export default function TicketList({ filterTitle, filterType, detailPath, displa
     NOVO: 'Novo',
     ABERTO: 'Em andamento',
     EM_ANDAMENTO: 'Em andamento',
+    PAUSADO: 'Pausado',
     PENDENTE: 'Pendente',
     RESOLVIDO: 'Resolvido',
     FECHADO: 'Fechado',
@@ -289,7 +290,7 @@ export default function TicketList({ filterTitle, filterType, detailPath, displa
         <div className={styles.kanbanBoard}>
           {[
             { id: 'fila', title: 'Fila (Novos)', statuses: ['FILA'] },
-            { id: 'andamento', title: 'Em Andamento', statuses: ['ABERTO', 'EM_ANDAMENTO'] },
+            { id: 'andamento', title: 'Em Andamento', statuses: ['ABERTO', 'EM_ANDAMENTO', 'PAUSADO'] },
             { id: 'pendente', title: 'Pendentes', statuses: ['PENDENTE'] },
             ...(serverStatusFilter === 'closed' || serverStatusFilter === 'all' ? [{ id: 'finalizado', title: 'Finalizados', statuses: ['RESOLVIDO', 'FECHADO'] }] : [])
           ].map(col => {

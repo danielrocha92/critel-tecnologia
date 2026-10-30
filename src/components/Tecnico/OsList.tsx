@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { MapPin, Clock, FileText, CheckCircle, Search, ClipboardList, Activity, Sparkles } from 'lucide-react';
+import { MapPin, Clock, FileText, CheckCircle, Search, ClipboardList, Activity, Sparkles, Pause } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
 import SectionPageHeader from '@/components/Dashboard/SectionPageHeader';
 import styles from './OsList.module.css';
@@ -15,7 +15,7 @@ import type { ITicket } from '@/types/ticket';
 
 const supabase = createClient();
 const finalizedStatuses = ['RESOLVIDO', 'FECHADO', 'FINALIZADO', 'CONCLUIDO'];
-type TicketGroup = 'ATIVOS' | 'NOVO' | 'EM_ANDAMENTO' | 'FINALIZADOS';
+type TicketGroup = 'ATIVOS' | 'NOVO' | 'EM_ANDAMENTO' | 'PAUSADO' | 'FINALIZADOS';
 
 export default function OsList({ lang }: { lang: string }) {
   const [userId, setUserId] = useState<string | null>(null);
@@ -107,6 +107,7 @@ export default function OsList({ lang }: { lang: string }) {
   const activeTickets = tickets.filter((ticket) => !finalizedStatuses.includes(ticket.status));
   const newTicketsCount = tickets.filter((ticket) => ticket.status === 'NOVO').length;
   const inProgressCount = tickets.filter((ticket) => ticket.status === 'EM_ANDAMENTO').length;
+  const pausedCount = tickets.filter((ticket) => ticket.status === 'PAUSADO').length;
   const finalizedCount = tickets.filter((ticket) => finalizedStatuses.includes(ticket.status)).length;
 
   const filteredTickets = tickets.filter(t => {
@@ -136,6 +137,7 @@ export default function OsList({ lang }: { lang: string }) {
     ATIVOS: { title: 'Chamados ativos', subtitle: 'Serviços que ainda precisam de atendimento.' },
     NOVO: { title: 'Chamados novos', subtitle: 'Serviços aguardando início do atendimento.' },
     EM_ANDAMENTO: { title: 'Chamados em andamento', subtitle: 'Serviços que já estão sendo executados.' },
+    PAUSADO: { title: 'Chamados pausados', subtitle: 'Serviços aguardando a remoção de um impedimento.' },
     FINALIZADOS: { title: 'Chamados finalizados', subtitle: 'Serviços concluídos. Abra uma OS para ver o laudo e as evidências.' },
   };
 
@@ -173,6 +175,13 @@ export default function OsList({ lang }: { lang: string }) {
           <div>
             <span className={styles.metricLabel}>Em andamento</span>
             <strong className={styles.metricValue}>{inProgressCount}</strong>
+          </div>
+        </button>
+        <button type="button" aria-pressed={selectedGroup === 'PAUSADO'} onClick={() => selectGroup('PAUSADO')} className={`${styles.metricCard} ${selectedGroup === 'PAUSADO' ? styles.metricCardSelected : ''}`}>
+          <span className={`${styles.metricIcon} ${styles.metricIconAmber}`}><Pause size={18} /></span>
+          <div>
+            <span className={styles.metricLabel}>Pausados</span>
+            <strong className={styles.metricValue}>{pausedCount}</strong>
           </div>
         </button>
         <button type="button" aria-pressed={selectedGroup === 'FINALIZADOS'} onClick={() => selectGroup('FINALIZADOS')} className={`${styles.metricCard} ${selectedGroup === 'FINALIZADOS' ? styles.metricCardSelected : ''}`}>
@@ -268,7 +277,7 @@ export default function OsList({ lang }: { lang: string }) {
                     <span className={styles.ticketProtocol}>OS #{ticket.protocolo_origem}</span>
                   </div>
                   <span className={`${styles.statusBadge} ${finalizedStatuses.includes(ticket.status) ? styles.statusDone : ticket.status === 'EM_ANDAMENTO' ? styles.statusInProgress : styles.statusNew}`}>
-                    {ticket.status === 'EM_ANDAMENTO' ? 'Em andamento' : ticket.status === 'NOVO' ? 'Novo' : ticket.status === 'FECHADO' ? 'Encerrado' : finalizedStatuses.includes(ticket.status) ? 'Finalizado' : ticket.status}
+                    {ticket.status === 'PAUSADO' ? 'Pausado' : ticket.status === 'EM_ANDAMENTO' ? 'Em andamento' : ticket.status === 'NOVO' ? 'Novo' : ticket.status === 'FECHADO' ? 'Encerrado' : finalizedStatuses.includes(ticket.status) ? 'Finalizado' : ticket.status}
                   </span>
                 </div>
                 <h3 className={styles.ticketTitle}>

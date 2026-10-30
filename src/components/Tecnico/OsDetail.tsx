@@ -5,16 +5,30 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createBrowserClient } from '@supabase/ssr';
 import type { User } from '@supabase/supabase-js';
-import { ChevronLeft, MapPin, Clock, CheckCircle, Navigation, AlertTriangle, Trash2 } from 'lucide-react';
+import { ChevronLeft, MapPin, Clock, CheckCircle, Navigation, AlertTriangle, Trash2, Pause, Play } from 'lucide-react';
 import FinalizarChamadoModal from '@/components/Tecnico/FinalizarChamadoModal';
+import PausarChamadoModal from '@/components/Tecnico/PausarChamadoModal';
 import ServiceReportSection from '@/components/Tecnico/ServiceReportSection';
 import { ITicket, TicketEvidence } from '@/types/ticket';
+import { getPauseReasonLabel } from '@/lib/tickets/pauseReasons';
 import styles from './OsDetail.module.css';
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
 );
+
+type ActivePause = {
+  id: string;
+  reason_code: string;
+  description: string | null;
+  contact_name: string;
+  contact_role: string;
+  expected_return_at: string;
+  evidence_url: string;
+  started_at: string;
+  resumed_at: string | null;
+};
 
 // Helper: Haversine distance em metros
 function getDistanceFromLatLonInMeters(lat1: number, lon1: number, lat2: number, lon2: number) {
@@ -36,6 +50,10 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [showPauseModal, setShowPauseModal] = useState(false);
+  const [activePause, setActivePause] = useState<ActivePause | null>(null);
+  const [isResuming, setIsResuming] = useState(false);
+  const [pauseNow, setPauseNow] = useState(0);
   const [isAccepting, setIsAccepting] = useState(false);
   const [isCheckingIn, setIsCheckingIn] = useState(false);
   const [geoError, setGeoError] = useState<string | null>(null);
@@ -47,6 +65,8 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
   const [evidenceError, setEvidenceError] = useState<string | null>(null);
 
   const watchId = useRef<number | null>(null);
+  const routeWatchId = useRef<number | null>(null);
+  const lastRoutePointSentAt = useRef(0);
 
   useEffect(() => {
     let isMounted = true;
@@ -144,9 +164,57 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
     };
   }, [ticketId, supabase]);
 
+  useEffect(() => {
+    const pauseId = ticket?.pausa_atual_id;
+    if (!pauseId) return;
+    let active = true;
+    void supabase.from('ticket_pauses').select('*').eq('id', pauseId).maybeSingle().then(({ data, error }) => {
+      if (!active) return;
+      if (error) {
+        setGeoError('Não foi possível carregar os dados da pausa.');
+        return;
+      }
+      setActivePause(data as ActivePause | null);
+    });
+    return () => { active = false; };
+  }, [ticket?.pausa_atual_id]);
+
+  useEffect(() => {
+    if (ticket?.status !== 'PAUSADO' || !activePause) return;
+    const interval = window.setInterval(() => setPauseNow(Date.now()), 1000);
+    return () => window.clearInterval(interval);
+  }, [ticket?.status, activePause]);
+
+  useEffect(() => {
+    if (ticket?.status !== 'PAUSADO' || activePause?.id !== ticket.pausa_atual_id || activePause?.reason_code !== 'COMPRA_MATERIAL') return;
+    if (!navigator.geolocation) return;
+    lastRoutePointSentAt.current = 0;
+    routeWatchId.current = navigator.geolocation.watchPosition(async (position) => {
+      if (Date.now() - lastRoutePointSentAt.current < 15000) return;
+      lastRoutePointSentAt.current = Date.now();
+      try {
+        await fetch('/api/tecnico/pausas/localizacao', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ticket_id: ticket.id, pause_id: activePause.id,
+            latitude: position.coords.latitude, longitude: position.coords.longitude,
+          }),
+        });
+      } catch (routeError) {
+        console.error('Não foi possível enviar a posição do trajeto:', routeError);
+      }
+    }, (error) => {
+      if (error.code === error.PERMISSION_DENIED) setGeoError('A permissão de GPS foi removida; o trajeto não será atualizado até reativá-la.');
+    }, { enableHighAccuracy: true, maximumAge: 10000, timeout: 15000 });
+    return () => {
+      if (routeWatchId.current !== null) navigator.geolocation.clearWatch(routeWatchId.current);
+      routeWatchId.current = null;
+    };
+  }, [ticket?.id, ticket?.status, ticket?.pausa_atual_id, activePause]);
+
   // Watch position para check-out automático
   useEffect(() => {
-    if (ticket?.check_in_at && ticket?.status !== 'RESOLVIDO' && ticket?.status !== 'FECHADO') {
+    if (ticket?.check_in_at && ticket?.status === 'EM_ANDAMENTO') {
       if ('geolocation' in navigator && ticket.check_in_lat && ticket.check_in_lng) {
         watchId.current = navigator.geolocation.watchPosition(
           async (position) => {
@@ -284,12 +352,55 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
     );
   };
 
+  const handlePauseCreated = (pause: ActivePause) => {
+    setActivePause(pause);
+    setTicket((current) => current ? { ...current, status: 'PAUSADO', pausa_atual_id: pause.id } : current);
+    setShowPauseModal(false);
+  };
+
+  const handleResumeTicket = async () => {
+    if (!ticket || isResuming) return;
+    setIsResuming(true);
+    setGeoError(null);
+    try {
+      let position: GeolocationPosition | null = null;
+      if (activePause?.reason_code === 'COMPRA_MATERIAL' && navigator.geolocation) {
+        position = await new Promise<GeolocationPosition | null>((resolve) => {
+          navigator.geolocation.getCurrentPosition(resolve, () => resolve(null), { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 });
+        });
+      }
+      const response = await fetch('/api/tecnico/retomar-chamado', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ticket_id: ticket.id,
+          latitude: position?.coords.latitude,
+          longitude: position?.coords.longitude,
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Não foi possível retomar o chamado.');
+      setTicket(result.ticket as ITicket);
+      setActivePause(null);
+    } catch (resumeError) {
+      setGeoError(resumeError instanceof Error ? resumeError.message : 'Não foi possível retomar o chamado.');
+    } finally {
+      setIsResuming(false);
+    }
+  };
+
   if (loading) return <div className={styles.loadingContainer}>Sincronizando OS com Supabase...</div>;
   if (!ticket) return <div className={styles.loadingContainer}>OS não encontrada.</div>;
 
   const isCheckedIn = !!ticket.check_in_at;
   const isFinalized = ['FECHADO', 'RESOLVIDO', 'FINALIZADO', 'CONCLUIDO'].includes(ticket.status);
   const canEditMedia = ticket.status === 'EM_ANDAMENTO';
+  const isPaused = ticket.status === 'PAUSADO';
+  const currentPauseSeconds = isPaused && activePause
+    ? Math.max(0, Math.floor((pauseNow - new Date(activePause.started_at).getTime()) / 1000))
+    : 0;
+  const totalSlaPausedSeconds = Number(ticket.sla_pausado_segundos || 0) + currentPauseSeconds;
+  const pausedHours = Math.floor(totalSlaPausedSeconds / 3600);
+  const pausedMinutes = Math.floor((totalSlaPausedSeconds % 3600) / 60);
 
   return (
     <div className={styles.pageContainer}>
@@ -344,6 +455,21 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
           )}
         </section>
 
+        {isPaused && activePause && <section className={styles.pauseCard} aria-labelledby="pause-status-heading">
+          <div className={styles.pauseCardHeading}>
+            <h3 id="pause-status-heading"><Pause size={17} /> SLA pausado</h3>
+            <strong>{pausedHours}h {pausedMinutes}min</strong>
+          </div>
+          <p className={styles.pauseReason}>{getPauseReasonLabel(activePause.reason_code)}</p>
+          <p className={styles.pauseDetail}>O cronômetro ficará suspenso até a retomada do atendimento.</p>
+          <dl className={styles.pauseDetails}>
+            <div><dt>Responsável local</dt><dd>{activePause.contact_name} · {activePause.contact_role}</dd></div>
+            <div><dt>Previsão de retorno</dt><dd>{new Date(activePause.expected_return_at).toLocaleString('pt-BR')}</dd></div>
+          </dl>
+          {activePause.description && <p className={styles.pauseDetail}>{activePause.description}</p>}
+          {activePause.reason_code === 'COMPRA_MATERIAL' && <p className={styles.routeTrackingStatus} role="status">Rastreamento do trajeto ativo. Mantenha esta tela aberta e o GPS ligado.</p>}
+        </section>}
+
         <section className={styles.cardSection} aria-labelledby="ticket-evidence-heading">
           <h3 id="ticket-evidence-heading" className={styles.sectionHeading}>Fotos do atendimento</h3>
           {evidenceError && <p className={styles.evidenceError} role="alert">{evidenceError}</p>}
@@ -394,6 +520,13 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
             <CheckCircle size={20} />
             Chamado finalizado · Voltar ao histórico
           </Link>
+        ) : isPaused ? (
+          <div className={styles.actionsContainer}>
+            {geoError && <p className={styles.geoError} role="alert">{geoError}</p>}
+            <button type="button" onClick={() => void handleResumeTicket()} disabled={isResuming} className={styles.btnResume}>
+              <Play size={20} /> {isResuming ? 'Retomando...' : 'Retomar atendimento'}
+            </button>
+          </div>
         ) : (
           <>
             {checkInMessage && <p className={styles.checkInMessage} role="status">{checkInMessage}</p>}
@@ -429,6 +562,9 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
                   <CheckCircle size={22} />
                   Finalizar Chamado na Loja
                 </button>
+                <button type="button" onClick={() => setShowPauseModal(true)} className={styles.btnPause}>
+                  <Pause size={19} /> Pausar chamado
+                </button>
               </div>
             )}
           </>
@@ -443,6 +579,14 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
             setShowModal(false);
             router.replace(`/${lang}/tecnico/historico`);
           }}
+        />
+      )}
+      {showPauseModal && ticket.status === 'EM_ANDAMENTO' && (
+        <PausarChamadoModal
+          ticketId={ticket.id}
+          lang={lang}
+          onClose={() => setShowPauseModal(false)}
+          onSuccess={handlePauseCreated}
         />
       )}
     </div>
