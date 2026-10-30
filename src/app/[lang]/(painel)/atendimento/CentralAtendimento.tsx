@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import { createClient } from '../../../../utils/supabase/client';
 import { useCentralAtendimento } from '../../../../hooks/useCentralAtendimento';
 import styles from './atendimento.module.css';
-import { User, Trash2, Printer, Pencil, History, X, ArrowLeft, ChevronDown } from 'lucide-react';
+import { User, Trash2, Printer, Pencil, History, X, ArrowLeft, ChevronDown, Pause, Play } from 'lucide-react';
 import { DashboardTickets } from '../../../../components/Chamados/DashboardTickets';
 import NovoChamadoModal from '../../../../components/Chamados/NovoChamadoModal';
 import { ITicket, ITicketReply, TicketEvidence } from '../../../../types/ticket';
@@ -15,6 +15,8 @@ import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 import { File, Download } from 'lucide-react';
 import ServiceReportSection from '@/components/Tecnico/ServiceReportSection';
 import HistoricoPausasOS from '@/components/Tecnico/HistoricoPausasOS';
+import PausarChamadoModal from '@/components/Tecnico/PausarChamadoModal';
+import FinalizarChamadoModal from '@/components/Tecnico/FinalizarChamadoModal';
 
 const supabase = createClient();
 
@@ -91,6 +93,13 @@ function CentralAtendimentoContent({
   const [anexos, setAnexos] = useState<TicketAttachment[]>([]);
   const [evidences, setEvidences] = useState<TicketEvidence[]>([]);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isPauseModalOpen, setIsPauseModalOpen] = useState(false);
+  const [isFinishModalOpen, setIsFinishModalOpen] = useState(false);
+  const [isTransitionLogOpen, setIsTransitionLogOpen] = useState(false);
+  const [transitionLog, setTransitionLog] = useState<Array<Record<string, unknown>>>([]);
+  const [isLoadingTransitionLog, setIsLoadingTransitionLog] = useState(false);
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
+  const [activePause, setActivePause] = useState<{ id: string; reason_code: string } | null>(null);
   const [ticketHistory, setTicketHistory] = useState<ITicketReply[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [errorHistory, setErrorHistory] = useState<string | null>(null);
@@ -149,6 +158,11 @@ function CentralAtendimentoContent({
       : searchParams.get('meus') === 'true';
   const cargoAtual = operadorAtual?.cargo?.trim().toUpperCase().replace('É', 'E');
   const canCreateTicket = cargoAtual === 'ADMIN' || cargoAtual === 'SUPER_ADMIN' || cargoAtual === 'ANALISTA';
+  const isTechnician = cargoAtual === 'TECNICO';
+  const canDeleteTicket = cargoAtual === 'ADMIN' || cargoAtual === 'SUPER_ADMIN';
+  const isAssignedTechnician = Boolean(isTechnician && ticketAtivo?.tecnico_id
+    && (ticketAtivo.tecnico_id === operadorAtual?.user_id || ticketAtivo.tecnico_id === operadorAtual?.id));
+  const canCancelTicket = canCreateTicket || isAssignedTechnician;
   const canViewPauseRoute = ['ANALISTA', 'ADMIN', 'SUPER_ADMIN'].includes(cargoAtual || '');
   const handleBackToTickets = () => {
     if (routeTicketId) {
@@ -158,6 +172,93 @@ function CentralAtendimentoContent({
     setAnexos([]);
     setEvidences([]);
     setTicketAtivo(null);
+  };
+
+  useEffect(() => {
+    const pauseId = ticketAtivo?.pausa_atual_id;
+    if (!pauseId) return;
+    let active = true;
+    void supabase.from('ticket_pauses').select('id,reason_code').eq('id', pauseId).maybeSingle().then((result: { data: { id: string; reason_code: string } | null }) => {
+      if (active) setActivePause(result.data);
+    });
+    return () => { active = false; };
+  }, [ticketAtivo?.pausa_atual_id]);
+
+  const handlePauseCreated = (pause: { id: string; reason_code: string }) => {
+    if (!ticketAtivo) return;
+    setActivePause(pause);
+    setTicketAtivo({ ...ticketAtivo, status: 'PAUSADO', pausa_atual_id: pause.id });
+    setIsPauseModalOpen(false);
+    setIsMaisDropdownOpen(false);
+    toast.success('Chamado pausado e SLA suspenso.');
+  };
+
+  const handleResumeTicket = async () => {
+    if (!ticketAtivo) return;
+    let position: GeolocationPosition | null = null;
+    if (activePause?.reason_code === 'COMPRA_MATERIAL' && navigator.geolocation) {
+      position = await new Promise<GeolocationPosition | null>((resolve) => {
+        navigator.geolocation.getCurrentPosition(resolve, () => resolve(null), { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+      });
+    }
+    try {
+      const response = await fetch('/api/tecnico/retomar-chamado', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ticket_id: ticketAtivo.id, latitude: position?.coords.latitude, longitude: position?.coords.longitude }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Não foi possível retomar o chamado.');
+      setTicketAtivo({ ...ticketAtivo, ...result.ticket, status: 'EM_ANDAMENTO', pausa_atual_id: null });
+      setActivePause(null);
+      setIsMaisDropdownOpen(false);
+      toast.success('Atendimento retomado; o SLA voltou a contar.');
+    } catch (resumeError) {
+      toast.error(resumeError instanceof Error ? resumeError.message : 'Não foi possível retomar o chamado.');
+    }
+  };
+
+  const handlePrintTicket = () => {
+    setIsMaisDropdownOpen(false);
+    window.setTimeout(() => window.print(), 0);
+  };
+
+  const handleOpenTransitionLog = async () => {
+    if (!ticketAtivo) return;
+    setIsMaisDropdownOpen(false);
+    setIsTransitionLogOpen(true);
+    setIsLoadingTransitionLog(true);
+    const { data, error } = await supabase.from('ticket_transitions').select('*')
+      .eq('ticket_id', ticketAtivo.id).order('created_at', { ascending: false });
+    if (error) toast.error('Não foi possível carregar o log de alterações.');
+    setTransitionLog((data || []) as Array<Record<string, unknown>>);
+    setIsLoadingTransitionLog(false);
+  };
+
+  const handleTicketAction = async (action: 'cancelar' | 'excluir') => {
+    if (!ticketAtivo) return;
+    const message = action === 'excluir'
+      ? 'Excluir permanentemente esta ordem de serviço? Esta ação não pode ser desfeita.'
+      : 'Cancelar esta ordem de serviço?';
+    if (!window.confirm(message)) return;
+    try {
+      const response = await fetch('/api/tickets/gerenciar', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, ticket_id: ticketAtivo.id }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Não foi possível concluir a ação.');
+      if (action === 'excluir') {
+        toast.success('Ordem de serviço excluída.');
+        handleBackToTickets();
+      } else {
+        setTicketAtivo({ ...ticketAtivo, status: 'CANCELADO', pausa_atual_id: null });
+        setActivePause(null);
+        toast.success('Ordem de serviço cancelada.');
+      }
+      setIsMaisDropdownOpen(false);
+    } catch (actionError) {
+      toast.error(actionError instanceof Error ? actionError.message : 'Não foi possível concluir a ação.');
+    }
   };
 
   const handleSendReply = async () => {
@@ -367,10 +468,22 @@ function CentralAtendimentoContent({
                 </button>
                 {isMaisDropdownOpen && (
                   <div className={styles.maisDropdown}>
-                    <button className={styles.dropdownItem}><Trash2 size={16} /> Excluir</button>
-                    <button className={styles.dropdownItem}><Printer size={16} /> Imprimir</button>
+                    {isAssignedTechnician && ticketAtivo.status === 'EM_ANDAMENTO' && (
+                      <button type="button" className={styles.dropdownItem} onClick={() => { setIsPauseModalOpen(true); setIsMaisDropdownOpen(false); }}>
+                        <Pause size={16} /> Pausar chamado
+                      </button>
+                    )}
+                    {isAssignedTechnician && ticketAtivo.status === 'PAUSADO' && (
+                      <button type="button" className={styles.dropdownItem} onClick={() => void handleResumeTicket()}>
+                        <Play size={16} /> Retomar atendimento
+                      </button>
+                    )}
+                    {canDeleteTicket && <button type="button" className={styles.dropdownItem} onClick={() => void handleTicketAction('excluir')}><Trash2 size={16} /> Excluir</button>}
+                    <button type="button" className={styles.dropdownItem} onClick={handlePrintTicket}><Printer size={16} /> Imprimir</button>
                     <button
+                      type="button"
                       className={styles.dropdownItem}
+                      disabled={!canCreateTicket && !isAssignedTechnician}
                       onClick={() => {
                         setEditForm({
                           titulo: ticketAtivo?.titulo || '',
@@ -385,12 +498,23 @@ function CentralAtendimentoContent({
                     >
                       <Pencil size={16} /> Editar
                     </button>
-                    <button className={styles.dropdownItem}><History size={16} /> Log de Alterações</button>
+                    <button type="button" className={styles.dropdownItem} onClick={() => void handleOpenTransitionLog()}><History size={16} /> Log de Alterações</button>
                   </div>
                 )}
               </div>
-              <button className={styles.btnFinalizar}>Finalizar</button>
-              <button className={styles.btnCancelar}>Cancelar</button>
+              <button
+                type="button"
+                className={styles.btnFinalizar}
+                disabled={!isAssignedTechnician || ticketAtivo.status !== 'EM_ANDAMENTO'}
+                title={!isAssignedTechnician ? 'A finalização técnica deve ser feita pelo técnico responsável.' : undefined}
+                onClick={() => setIsFinishModalOpen(true)}
+              >Finalizar</button>
+              <button
+                type="button"
+                className={styles.btnCancelar}
+                disabled={!canCancelTicket || ['RESOLVIDO', 'FECHADO', 'FINALIZADO', 'CONCLUIDO', 'CANCELADO'].includes(ticketAtivo.status)}
+                onClick={() => void handleTicketAction('cancelar')}
+              >Cancelar</button>
             </div>
           </div>
 
@@ -590,6 +714,50 @@ function CentralAtendimentoContent({
         </div>
       )}
 
+      {ticketAtivo && isPauseModalOpen && isAssignedTechnician && ticketAtivo.status === 'EM_ANDAMENTO' && (
+        <PausarChamadoModal
+          ticketId={ticketAtivo.id}
+          lang={lang}
+          onClose={() => setIsPauseModalOpen(false)}
+          onSuccess={handlePauseCreated}
+        />
+      )}
+
+      {ticketAtivo && isFinishModalOpen && isAssignedTechnician && ticketAtivo.status === 'EM_ANDAMENTO' && (
+        <FinalizarChamadoModal
+          ticket={ticketAtivo}
+          onClose={() => setIsFinishModalOpen(false)}
+          onSuccess={() => {
+            setIsFinishModalOpen(false);
+            setTicketAtivo({ ...ticketAtivo, status: 'FINALIZADO' });
+            toast.success('Ordem de serviço finalizada.');
+          }}
+        />
+      )}
+
+      {isTransitionLogOpen && (
+        <div className={styles.modalEditOverlay} role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setIsTransitionLogOpen(false); }}>
+          <section className={styles.modalEditContent} role="dialog" aria-modal="true" aria-labelledby="ticket-transition-log-title">
+            <header className={styles.modalEditHeader}>
+              <h2 className={styles.modalEditTitle} id="ticket-transition-log-title">Log de alterações</h2>
+              <button type="button" onClick={() => setIsTransitionLogOpen(false)} className={styles.modalEditClose} aria-label="Fechar">×</button>
+            </header>
+            <div className={styles.modalEditBody}>
+              {isLoadingTransitionLog ? <p role="status">Carregando histórico...</p> : transitionLog.length ? transitionLog.map((entry, index) => (
+                <article className={styles.transitionLogEntry} key={String(entry.id || index)}>
+                  <strong>{String(entry.from_status || 'Criação')} → {String(entry.to_status || 'Atualização')}</strong>
+                  <time>{safeDateValue(entry.created_at as string)?.toLocaleString('pt-BR') || 'Data não informada'}</time>
+                  {entry.reason != null && <p>{String(entry.reason)}</p>}
+                </article>
+              )) : <p>Nenhuma alteração registrada para esta OS.</p>}
+            </div>
+            <footer className={styles.modalEditFooter}>
+              <button type="button" onClick={() => setIsTransitionLogOpen(false)} className={styles.btnCancelEdit}>Fechar</button>
+            </footer>
+          </section>
+        </div>
+      )}
+
       {/* Modal Editar Chamado */}
       {isEditModalOpen && (
         <div className={styles.modalEditOverlay}>
@@ -621,32 +789,12 @@ function CentralAtendimentoContent({
 
               <div className={styles.modalEditRow}>
                 <label className={styles.modalEditLabel}>Departamento:</label>
-                <select
-                  value={editForm.departamento}
-                  onChange={(e) => setEditForm({...editForm, departamento: e.target.value})}
-                  className={styles.modalEditSelect}
-                >
-                  <option value="">Selecione...</option>
-                  <option value="FIN - Contas a Pagar">FIN - Contas a Pagar</option>
-                  <option value="FIN - Contas a Receber">FIN - Contas a Receber</option>
-                  <option value="TI - Lojas">TI - Lojas</option>
-                  <option value="RH - Pessoal">RH - Pessoal</option>
-                  <option value="Operações">Operações</option>
-                </select>
+                <input type="text" value={editForm.departamento} onChange={(e) => setEditForm({...editForm, departamento: e.target.value})} className={styles.modalEditInput} maxLength={150} />
               </div>
 
               <div className={styles.modalEditRow}>
                 <label className={styles.modalEditLabel}>Categoria:</label>
-                <select
-                  value={editForm.categoria}
-                  onChange={(e) => setEditForm({...editForm, categoria: e.target.value})}
-                  className={styles.modalEditSelect}
-                >
-                  <option value="">Selecione...</option>
-                  <option value="Solicitação Cartão Vexpenses (Lojas)">Solicitação Cartão Vexpenses (Lojas)</option>
-                  <option value="Hardware - PDV">Hardware - PDV</option>
-                  <option value="Dúvida de Sistema">Dúvida de Sistema</option>
-                </select>
+                <input type="text" value={editForm.categoria} onChange={(e) => setEditForm({...editForm, categoria: e.target.value})} className={styles.modalEditInput} maxLength={150} />
               </div>
 
               <div className={styles.modalEditRow}>
@@ -667,32 +815,47 @@ function CentralAtendimentoContent({
             <div className={styles.modalEditFooter}>
               <button
                 className={styles.btnSave}
+                disabled={isSavingEdit}
                 onClick={async () => {
                   if (!ticketAtivo) return;
-                  const { error } = await supabase.from('tickets').update({
-                    titulo: editForm.titulo,
-                    descricao: editForm.descricao,
-                    departamento: editForm.departamento,
-                    categoria: editForm.categoria,
-                    prioridade: editForm.prioridade
-                  }).eq('id', ticketAtivo.id);
-
-                  if (!error) {
+                  if (!editForm.titulo.trim()) {
+                    toast.error('O assunto é obrigatório.');
+                    return;
+                  }
+                  setIsSavingEdit(true);
+                  try {
+                    const response = await fetch('/api/tickets/gerenciar', {
+                      method: 'POST', headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        action: 'editar', ticket_id: ticketAtivo.id,
+                        changes: {
+                          titulo: editForm.titulo.trim(), descricao: editForm.descricao,
+                          departamento: editForm.departamento, categoria: editForm.categoria,
+                          prioridade: editForm.prioridade,
+                        },
+                      }),
+                    });
+                    const result = await response.json();
+                    if (!response.ok) throw new Error(result.error || 'Não foi possível salvar as alterações.');
                     setTicketAtivo({
                       ...(ticketAtivo as ITicket),
-                      titulo: editForm.titulo,
+                      titulo: editForm.titulo.trim(),
                       descricao: editForm.descricao,
                       departamento: editForm.departamento,
                       categoria: editForm.categoria,
-                      prioridade: editForm.prioridade
+                      prioridade: editForm.prioridade,
+                      atualizado_em: result.ticket?.atualizado_em || new Date().toISOString(),
                     });
                     setIsEditModalOpen(false);
-                  } else {
-                    alert('Erro ao salvar: ' + error.message);
+                    toast.success('Chamado atualizado.');
+                  } catch (saveError) {
+                    toast.error(saveError instanceof Error ? saveError.message : 'Não foi possível salvar as alterações.');
+                  } finally {
+                    setIsSavingEdit(false);
                   }
                 }}
               >
-                Salvar
+                {isSavingEdit ? 'Salvando...' : 'Salvar'}
               </button>
               <button onClick={() => setIsEditModalOpen(false)} className={styles.btnCancelEdit}>Fechar</button>
             </div>

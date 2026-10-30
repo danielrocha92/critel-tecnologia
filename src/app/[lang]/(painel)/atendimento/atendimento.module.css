@@ -587,6 +587,11 @@
   color: var(--text-primary);
 }
 
+.dropdownItem:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
 .noAttachment {
   color: var(--text-secondary);
   font-size: 0.85rem;
@@ -765,6 +770,25 @@
   background: var(--bg-secondary);
   border-bottom-left-radius: 8px;
   border-bottom-right-radius: 8px;
+}
+
+.transitionLogEntry {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0 0 0.9rem;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+.transitionLogEntry time {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.transitionLogEntry p {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.45;
 }
 
 .btnSave {
@@ -1509,5 +1533,52 @@
 
   .detailEyebrow {
     font-size: 0.62rem;
+  }
+}
+
+@media print {
+  :global(body *) {
+    visibility: hidden;
+  }
+
+  .innerViewContainer,
+  .innerViewContainer * {
+    visibility: visible;
+  }
+
+  .innerViewContainer {
+    position: absolute;
+    inset: 0;
+    display: block;
+    overflow: visible;
+    color: #111;
+    background: #fff;
+  }
+
+  .innerHeader {
+    padding: 0 0 1rem;
+    color: #111;
+    background: #fff;
+    box-shadow: none;
+  }
+
+  .btnBack,
+  .headerActionsGroup,
+  .evidenceDeleteButton {
+    display: none !important;
+  }
+
+  .innerBody {
+    display: block;
+    overflow: visible;
+    padding: 0;
+    background: #fff;
+  }
+
+  .innerTimeline,
+  .innerSidebar {
+    overflow: visible;
+    color: #111;
+    background: #fff;
   }
 }
