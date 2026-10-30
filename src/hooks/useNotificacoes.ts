@@ -167,6 +167,14 @@ export function useNotificacoes() {
       }
       const currentUserId = data.user?.id;
       const language = window.location.pathname.split('/')[1] || 'pt';
+      const { data: viewerProfile, error: viewerProfileError } = currentUserId
+        ? await supabase.from('perfis').select('cargo,status').eq('user_id', currentUserId).maybeSingle()
+        : { data: null, error: null };
+      if (!active) return;
+      if (viewerProfileError) console.error('Nao foi possivel verificar o perfil para notificacoes:', viewerProfileError.message);
+      const viewerRole = viewerProfile?.cargo?.normalize('NFD').replace(/\p{Diacritic}/gu, '').trim().toUpperCase();
+      const canReceiveEvidenceNotifications = viewerProfile?.status === 'ATIVO'
+        && ['ANALISTA', 'ADMIN', 'SUPER_ADMIN'].includes(viewerRole || '');
 
       channel = supabase
         .channel(`critel_notifications_${crypto.randomUUID()}`)
@@ -207,25 +215,19 @@ export function useNotificacoes() {
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'ticket_evidences' },
           async (payload: RealtimePostgresChangesPayload<EvidenceNotificationRow>) => {
             const evidence = payload.new as EvidenceNotificationRow;
+            if (!canReceiveEvidenceNotifications || !currentUserId) return;
             const { data: ticket, error: ticketError } = await supabase
               .from('tickets')
-              .select('id, analista_id, protocolo_origem, cliente')
+              .select('id, protocolo_origem, cliente, titulo')
               .eq('id', evidence.ticket_id)
               .maybeSingle();
-            if (ticketError || !ticket || !currentUserId) return;
-
-            const { data: profile } = await supabase
-              .from('perfis')
-              .select('user_id')
-              .eq('id', ticket.analista_id)
-              .maybeSingle();
-            if (ticket.analista_id !== currentUserId && profile?.user_id !== currentUserId) return;
+            if (ticketError || !ticket) return;
 
             adicionarNotificacao({
               tipo: 'evidencia_enviada',
-              titulo: 'Imagem recebida do técnico',
-              mensagem: `O técnico enviou uma imagem ${evidence.type === 'BEFORE' ? 'do antes' : 'do depois'} para #${ticket.protocolo_origem || ticket.id.slice(0, 8)} · ${ticket.cliente || 'Cliente'}`,
-              href: `/${language}/os?ticket_id=${ticket.id}`,
+              titulo: 'Nova evidencia do tecnico',
+              mensagem: `O tecnico enviou ${evidence.type === 'BEFORE' ? 'uma evidencia do antes' : 'uma evidencia do depois'} para #${ticket.protocolo_origem || ticket.id.slice(0, 8)} · ${ticket.cliente || 'Cliente'}${ticket.titulo ? ` · ${ticket.titulo}` : ''}`,
+              href: `/${language}/os/${ticket.id}`,
             });
           })
         .subscribe((status: string, subscriptionError?: Error) => {
