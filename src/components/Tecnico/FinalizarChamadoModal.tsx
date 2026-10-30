@@ -248,25 +248,11 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
       const { error: uploadError } = await supabase.storage.from('anexos').upload(path, file, { contentType: file.type, upsert: false });
       if (uploadError) throw uploadError;
       const { data } = supabase.storage.from('anexos').getPublicUrl(path);
-      let caption = '';
-      try {
-        const captionResponse = await fetch('/api/tecnico/legendar-evidencia', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ticket_id: ticket.id, image_url: data.publicUrl }),
-        });
-        const captionResult = await captionResponse.json();
-        if (!captionResponse.ok) throw new Error(captionResult.error || 'Não foi possível gerar a legenda da foto.');
-        caption = captionResult.caption;
-      } catch (captionError) {
-        await supabase.storage.from('anexos').remove([path]);
-        throw captionError;
-      }
       const { data: inserted, error: insertError } = await supabase.from('ticket_evidences').insert({
         ticket_id: ticket.id,
         type,
         media_url: data.publicUrl,
-        caption,
+        caption: '',
         created_by: currentUser!.id,
       }).select('id, ticket_id, type, media_url, caption, created_by, created_at').single();
       if (insertError) {
@@ -536,7 +522,7 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
                     </div>
                   )}
                   <span className={styles.evidenceUploadStatus} role="status">
-                    {loadingEvidence ? 'Carregando fotos já enviadas...' : uploadingEvidence ? 'Enviando e analisando foto(s)...' : evidenciasAntes.length > 0 ? `${evidenciasAntes.length} foto(s) enviada(s) — disponível(is) para o analista` : 'Nenhuma foto enviada ainda'}
+                    {loadingEvidence ? 'Carregando fotos já enviadas...' : uploadingEvidence ? 'Enviando foto(s)...' : evidenciasAntes.length > 0 ? `${evidenciasAntes.length} foto(s) enviada(s) — disponível(is) para o analista` : 'Nenhuma foto enviada ainda'}
                   </span>
                 </div>
                 <div>
@@ -567,7 +553,7 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
                     </div>
                   )}
                   <span className={styles.evidenceUploadStatus} role="status">
-                    {loadingEvidence ? 'Carregando fotos já enviadas...' : uploadingEvidence ? 'Enviando e analisando foto(s)...' : evidenciasDepois.length > 0 ? `${evidenciasDepois.length} foto(s) enviada(s) — disponível(is) para o analista` : 'Nenhuma foto enviada ainda'}
+                    {loadingEvidence ? 'Carregando fotos já enviadas...' : uploadingEvidence ? 'Enviando foto(s)...' : evidenciasDepois.length > 0 ? `${evidenciasDepois.length} foto(s) enviada(s) — disponível(is) para o analista` : 'Nenhuma foto enviada ainda'}
                   </span>
                 </div>
               </div>
