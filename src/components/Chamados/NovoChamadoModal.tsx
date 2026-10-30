@@ -33,6 +33,8 @@ export default function NovoChamadoModal({ onClose, onSuccess }: NovoChamadoModa
     causa_raiz: '',
     causa_raiz_detalhe: '',
     tecnico_id: '',
+    modalidade_pagamento: 'chamado',
+    valor_pagamento: '',
     assunto: '',
     prioridade: ''
   });
@@ -95,6 +97,11 @@ export default function NovoChamadoModal({ onClose, onSuccess }: NovoChamadoModa
       alert('Descreva a outra causa raiz selecionada.');
       return;
     }
+    const valorPagamento = Number(formData.valor_pagamento.replace(',', '.'));
+    if (isTechnical && formData.tecnico_id && (!formData.valor_pagamento || !Number.isFinite(valorPagamento) || valorPagamento <= 0)) {
+      alert('Informe um valor válido para o técnico selecionado.');
+      return;
+    }
 
     isSubmitting.current = true;
     setLoading(true);
@@ -113,6 +120,8 @@ export default function NovoChamadoModal({ onClose, onSuccess }: NovoChamadoModa
       causa_raiz: isTechnical ? formData.causa_raiz : null,
       causa_raiz_detalhe: isTechnical && formData.causa_raiz === OTHER_ROOT_CAUSE ? formData.causa_raiz_detalhe.trim() : '',
       tecnico_id: isTechnical ? formData.tecnico_id || null : null,
+      modalidade_pagamento: isTechnical ? formData.modalidade_pagamento : null,
+      valor_pagamento: isTechnical && formData.tecnico_id ? valorPagamento : null,
       prioridade: formData.prioridade
     };
 
@@ -308,6 +317,25 @@ export default function NovoChamadoModal({ onClose, onSuccess }: NovoChamadoModa
               )}
             </div>
           </div>
+
+          {formData.tecnico_id && <>
+            <div className={styles.formRow}>
+              <label className={styles.formLabel} htmlFor="ticket-payment-type">Pagamento:</label>
+              <div className={styles.inputWrapper}>
+                <select id="ticket-payment-type" name="modalidade_pagamento" value={formData.modalidade_pagamento} onChange={handleChange} className={styles.selectField}>
+                  <option value="chamado">Por chamado</option>
+                  <option value="diaria">Por diária</option>
+                </select>
+              </div>
+            </div>
+            <div className={styles.formRow}>
+              <label className={styles.formLabel} htmlFor="ticket-payment-value">Valor (R$):</label>
+              <div className={styles.inputWrapper}>
+                <input id="ticket-payment-value" name="valor_pagamento" type="number" min="0.01" step="0.01" value={formData.valor_pagamento} onChange={handleChange} required className={styles.inputField} placeholder="Ex: 250,00" />
+                <p className={styles.fieldHint}>Este valor será salvo como preferência do técnico e poderá ser reajustado depois.</p>
+              </div>
+            </div>
+          </>}
 
           </>}
 

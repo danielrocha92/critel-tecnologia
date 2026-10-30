@@ -11,6 +11,11 @@ const supabase = createClient();
 export default function PerfilPage() {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [savingCompensation, setSavingCompensation] = useState(false);
+  const [compensationError, setCompensationError] = useState('');
+  const [compensationMessage, setCompensationMessage] = useState('');
+  const [paymentType, setPaymentType] = useState<'diaria' | 'chamado'>('chamado');
+  const [paymentValue, setPaymentValue] = useState('');
   const router = useRouter();
   const params = useParams();
   const lang = params.lang as string;
@@ -41,6 +46,8 @@ export default function PerfilPage() {
 
       if (error) console.error('Erro ao carregar perfil do técnico:', error);
       setProfile(data);
+      if (data?.modalidade_pagamento === 'diaria' || data?.modalidade_pagamento === 'chamado') setPaymentType(data.modalidade_pagamento);
+      if (typeof data?.valor_pagamento === 'number') setPaymentValue(String(data.valor_pagamento));
       setLoading(false);
     };
 
@@ -51,6 +58,26 @@ export default function PerfilPage() {
     await supabase.auth.signOut();
     document.cookie = "user_cargo=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     router.push(`/${lang}/login`);
+  };
+
+  const saveCompensation = async () => {
+    setSavingCompensation(true);
+    setCompensationError('');
+    setCompensationMessage('');
+    try {
+      const response = await fetch('/api/tecnico/remuneracao', {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: profile?.user_id, modalidade_pagamento: paymentType, valor_pagamento: Number(paymentValue.replace(',', '.')) }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Não foi possível salvar o valor.');
+      setProfile((current: any) => ({ ...current, modalidade_pagamento: paymentType, valor_pagamento: Number(paymentValue.replace(',', '.')) }));
+      setCompensationMessage('Valor atualizado com sucesso.');
+    } catch (error) {
+      setCompensationError(error instanceof Error ? error.message : 'Não foi possível salvar o valor.');
+    } finally {
+      setSavingCompensation(false);
+    }
   };
 
   if (loading) {
@@ -70,6 +97,28 @@ export default function PerfilPage() {
           <Shield size={14} /> {profile?.cargo} - {profile?.status}
         </p>
       </div>
+
+      <section className={styles.compensationCard} aria-labelledby="compensation-title">
+        <h3 id="compensation-title" className={styles.compensationTitle}>Remuneração</h3>
+        <p className={styles.compensationValue}>
+          {profile?.valor_pagamento != null
+            ? `${profile.modalidade_pagamento === 'diaria' ? 'Diária' : 'Por chamado'}: ${Number(profile.valor_pagamento).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`
+            : 'Valor ainda não cadastrado.'}
+        </p>
+        {['ANALISTA', 'ADMIN', 'SUPER_ADMIN'].includes(profile?.cargo?.trim().toUpperCase().replace('É', 'E')) && <div className={styles.compensationForm}>
+          <label htmlFor="profile-payment-type">Modalidade de pagamento</label>
+          <select id="profile-payment-type" value={paymentType} onChange={(event) => setPaymentType(event.target.value as 'diaria' | 'chamado')}>
+            <option value="chamado">Por chamado</option><option value="diaria">Por diária</option>
+          </select>
+          <label htmlFor="profile-payment-value">Valor (R$)</label>
+          <input id="profile-payment-value" type="number" min="0.01" step="0.01" value={paymentValue} onChange={(event) => setPaymentValue(event.target.value)} />
+          <button type="button" onClick={saveCompensation} disabled={savingCompensation || !paymentValue || Number(paymentValue.replace(',', '.')) <= 0}>
+            {savingCompensation ? 'Salvando...' : 'Salvar reajuste'}
+          </button>
+          {compensationError && <p role="alert">{compensationError}</p>}
+          {compensationMessage && <p role="status">{compensationMessage}</p>}
+        </div>}
+      </section>
 
       <div className={styles.settingsSection}>
       <div className={styles.settingsGroup}>

@@ -64,6 +64,13 @@ CREATE TABLE IF NOT EXISTS public.perfis (
     criado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Preferência de remuneração do técnico, editável em reajustes futuros.
+ALTER TABLE public.perfis
+ADD COLUMN IF NOT EXISTS modalidade_pagamento VARCHAR(20)
+  CHECK (modalidade_pagamento IS NULL OR modalidade_pagamento IN ('diaria', 'chamado')),
+ADD COLUMN IF NOT EXISTS valor_pagamento NUMERIC(12, 2)
+  CHECK (valor_pagamento IS NULL OR valor_pagamento > 0);
+
 -- Detalhes pessoais acessíveis a Analista, Financeiro, Admin e Super Admin ativos.
 CREATE TABLE IF NOT EXISTS public.tecnicos_detalhes (
     perfil_id UUID PRIMARY KEY REFERENCES public.perfis(id) ON DELETE CASCADE,

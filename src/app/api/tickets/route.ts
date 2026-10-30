@@ -15,6 +15,8 @@ type TicketPayload = {
   rootCauseDetail: string;
   priority: string;
   technicianId: string | null;
+  paymentType: 'diaria' | 'chamado' | null;
+  paymentValue: number | null;
 };
 
 function parseTicketPayload(value: unknown): TicketPayload | null {
@@ -31,6 +33,8 @@ function parseTicketPayload(value: unknown): TicketPayload | null {
   const rootCauseDetail = payload.causa_raiz_detalhe ?? payload.rootCauseDetail;
   const priority = payload.prioridade ?? payload.priority;
   const technicianId = payload.tecnico_id;
+  const paymentType = payload.modalidade_pagamento;
+  const paymentValue = payload.valor_pagamento;
 
   if (typeof customer !== 'string' || !customer.trim()) return null;
   if (typeof title !== 'string' || !title.trim()) return null;
@@ -42,6 +46,7 @@ function parseTicketPayload(value: unknown): TicketPayload | null {
     if (typeof rootCause !== 'string' || !rootCause.trim()) return null;
     if (rootCause === OTHER_ROOT_CAUSE && (typeof rootCauseDetail !== 'string' || !rootCauseDetail.trim())) return null;
     if (!isValidProblemSelection(department, category, rootCause)) return null;
+    if (technicianId && (paymentType !== 'diaria' && paymentType !== 'chamado' || typeof paymentValue !== 'number' || !Number.isFinite(paymentValue) || paymentValue <= 0)) return null;
   }
 
   return {
@@ -55,6 +60,8 @@ function parseTicketPayload(value: unknown): TicketPayload | null {
     rootCauseDetail: team === 'SUPORTE_TECNICO' && typeof rootCauseDetail === 'string' ? rootCauseDetail.trim() : '',
     priority: typeof priority === 'string' && priority.trim() ? priority.trim() : 'Normal',
     technicianId: team === 'SUPORTE_TECNICO' && typeof technicianId === 'string' && technicianId.trim() ? technicianId.trim() : null,
+    paymentType: team === 'SUPORTE_TECNICO' && (paymentType === 'diaria' || paymentType === 'chamado') ? paymentType : null,
+    paymentValue: team === 'SUPORTE_TECNICO' && typeof paymentValue === 'number' && Number.isFinite(paymentValue) ? paymentValue : null,
   };
 }
 
@@ -158,6 +165,14 @@ export async function POST(req: NextRequest) {
 
       if (technicianError || !technician) {
         return NextResponse.json({ error: 'O técnico selecionado não está ativo ou não possui acesso ao portal.' }, { status: 400 });
+      }
+
+      const { error: compensationError } = await supabaseAdmin.from('perfis').update({
+        modalidade_pagamento: payload.paymentType,
+        valor_pagamento: payload.paymentValue,
+      }).eq('user_id', payload.technicianId).eq('cargo', 'TECNICO');
+      if (compensationError) {
+        return NextResponse.json({ error: 'Não foi possível salvar a modalidade e o valor do técnico. Aplique a migração de remuneração e tente novamente.', details: compensationError.message }, { status: 500 });
       }
     }
 
