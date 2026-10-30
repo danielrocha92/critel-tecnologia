@@ -27,6 +27,8 @@ export async function POST(request: Request) {
     const ticketId = formData.get('ticket_id');
     const type = formData.get('type');
     const file = formData.get('file');
+    const requestedLanguage = formData.get('lang');
+    const language = requestedLanguage === 'es' ? 'es' : 'pt';
     if (typeof ticketId !== 'string' || !ticketId || (type !== 'BEFORE' && type !== 'AFTER') || !(file instanceof File)) {
       return NextResponse.json({ error: 'Dados da evidência inválidos.' }, { status: 400 });
     }
@@ -40,7 +42,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Apenas técnicos ativos podem enviar evidências.' }, { status: 403 });
     }
 
-    const { data: ticket, error: ticketError } = await admin.from('tickets').select('id,status,tecnico_id,protocolo_origem').eq('id', ticketId).like('protocolo_origem', 'OS-%').maybeSingle();
+    const { data: ticket, error: ticketError } = await admin.from('tickets').select('id,status,tecnico_id,protocolo_origem,cliente,titulo').eq('id', ticketId).like('protocolo_origem', 'OS-%').maybeSingle();
     if (ticketError) throw ticketError;
     if (!ticket) return NextResponse.json({ error: 'Ordem de serviço não encontrada.' }, { status: 404 });
     if (ticket.status !== 'EM_ANDAMENTO') return NextResponse.json({ error: 'Só é possível enviar mídia enquanto o chamado está em andamento.' }, { status: 409 });
@@ -57,6 +59,28 @@ export async function POST(request: Request) {
     if (insertError) {
       await admin.storage.from('anexos').remove([objectPath]);
       throw insertError;
+    }
+
+    const { data: profiles, error: profilesError } = await admin.from('perfis')
+      .select('user_id,cargo').eq('status', 'ATIVO').not('user_id', 'is', null);
+    if (profilesError) {
+      console.error('A evidência foi salva, mas não foi possível buscar os destinatários das notificações:', profilesError.message);
+    } else {
+      const recipients = (profiles || []).filter((item) => {
+        const role = item.cargo?.normalize('NFD').replace(/\p{Diacritic}/gu, '').trim().toUpperCase();
+        return ['ANALISTA', 'ADMIN', 'SUPER_ADMIN'].includes(role || '') && Boolean(item.user_id);
+      });
+      const notifications = recipients.map((recipient) => ({
+        user_id: recipient.user_id,
+        titulo: 'Nova evidência do técnico',
+        mensagem: `O técnico enviou ${type === 'BEFORE' ? 'uma evidência do antes' : 'uma evidência do depois'} para #${ticket.protocolo_origem || ticket.id.slice(0, 8)} · ${ticket.cliente || 'Cliente'}${ticket.titulo ? ` · ${ticket.titulo}` : ''}`,
+        tipo: 'evidencia_enviada',
+        href: `/${language}/os/${ticket.id}`,
+      }));
+      if (notifications.length) {
+        const { error: notificationError } = await admin.from('notificacoes').insert(notifications);
+        if (notificationError) console.error('A evidência foi salva, mas não foi possível persistir as notificações:', notificationError.message);
+      }
     }
     return NextResponse.json({ evidence }, { status: 201 });
   } catch (error) {

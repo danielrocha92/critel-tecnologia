@@ -52,11 +52,6 @@ type TicketNotificationRow = Record<string, unknown> & {
   analista_id?: string | null;
 };
 
-type EvidenceNotificationRow = Record<string, unknown> & {
-  ticket_id: string;
-  type: 'BEFORE' | 'AFTER';
-};
-
 let supabaseClient: ReturnType<typeof createBrowserClient> | null = null;
 
 function getSupabase() {
@@ -166,16 +161,8 @@ export function useNotificacoes() {
         return;
       }
       const currentUserId = data.user?.id;
+      if (!currentUserId) return;
       const language = window.location.pathname.split('/')[1] || 'pt';
-      const { data: viewerProfile, error: viewerProfileError } = currentUserId
-        ? await supabase.from('perfis').select('cargo,status').eq('user_id', currentUserId).maybeSingle()
-        : { data: null, error: null };
-      if (!active) return;
-      if (viewerProfileError) console.error('Nao foi possivel verificar o perfil para notificacoes:', viewerProfileError.message);
-      const viewerRole = viewerProfile?.cargo?.normalize('NFD').replace(/\p{Diacritic}/gu, '').trim().toUpperCase();
-      const canReceiveEvidenceNotifications = viewerProfile?.status === 'ATIVO'
-        && ['ANALISTA', 'ADMIN', 'SUPER_ADMIN'].includes(viewerRole || '');
-
       channel = supabase
         .channel(`critel_notifications_${crypto.randomUUID()}`)
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'tickets' },
@@ -212,29 +199,35 @@ export function useNotificacoes() {
               });
             }
           })
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'ticket_evidences' },
-          async (payload: RealtimePostgresChangesPayload<EvidenceNotificationRow>) => {
-            const evidence = payload.new as EvidenceNotificationRow;
-            if (!canReceiveEvidenceNotifications || !currentUserId) return;
-            const { data: ticket, error: ticketError } = await supabase
-              .from('tickets')
-              .select('id, protocolo_origem, cliente, titulo')
-              .eq('id', evidence.ticket_id)
-              .maybeSingle();
-            if (ticketError || !ticket) return;
-
-            adicionarNotificacao({
-              tipo: 'evidencia_enviada',
-              titulo: 'Nova evidencia do tecnico',
-              mensagem: `O tecnico enviou ${evidence.type === 'BEFORE' ? 'uma evidencia do antes' : 'uma evidencia do depois'} para #${ticket.protocolo_origem || ticket.id.slice(0, 8)} · ${ticket.cliente || 'Cliente'}${ticket.titulo ? ` · ${ticket.titulo}` : ''}`,
-              href: `/${language}/os/${ticket.id}`,
-            });
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notificacoes', filter: `user_id=eq.${currentUserId}` },
+          (payload: RealtimePostgresChangesPayload<Notificacao>) => {
+            const notification = payload.new as Notificacao;
+            setNotificacoes((current) => current.some((item) => item.id === notification.id)
+              ? current
+              : [notification, ...current].slice(0, 50));
+            const currentPrefs = prefsRef.current;
+            if (currentPrefs.desktop && 'Notification' in window && Notification.permission === 'granted') {
+              new Notification(notification.titulo, { body: notification.mensagem, icon: '/400PngdpiLogoCropped.png' });
+            }
+            if (currentPrefs.som) tocarSom();
           })
         .subscribe((status: string, subscriptionError?: Error) => {
           if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
             console.error('Realtime de notificações desconectado:', status, subscriptionError);
           }
         });
+      const { data: savedNotifications, error: savedNotificationsError } = await supabase
+        .from('notificacoes').select('*').order('criada_em', { ascending: false }).limit(50);
+      if (savedNotificationsError) {
+        console.error('Could not load saved notifications:', savedNotificationsError.message);
+      } else if (active && savedNotifications) {
+        setNotificacoes((current) => {
+          const combined = [...savedNotifications as Notificacao[], ...current];
+          return Array.from(new Map(combined.map((item) => [item.id, item])).values())
+            .sort((a, b) => new Date(b.criada_em).getTime() - new Date(a.criada_em).getTime())
+            .slice(0, 50);
+        });
+      }
     };
 
     void subscribe();
@@ -246,13 +239,30 @@ export function useNotificacoes() {
 
   const marcarLida = useCallback((id: string) => {
     setNotificacoes((current) => current.map((item) => item.id === id ? { ...item, lida: true } : item));
+    void (async () => {
+      const supabase = getSupabase();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) await supabase.from('notificacoes').update({ lida: true }).eq('id', id).eq('user_id', user.id);
+    })();
   }, []);
 
   const marcarTodasLidas = useCallback(() => {
     setNotificacoes((current) => current.map((item) => ({ ...item, lida: true })));
+    void (async () => {
+      const supabase = getSupabase();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) await supabase.from('notificacoes').update({ lida: true }).eq('user_id', user.id).eq('lida', false);
+    })();
   }, []);
 
-  const limparTodas = useCallback(() => setNotificacoes([]), []);
+  const limparTodas = useCallback(() => {
+    setNotificacoes([]);
+    void (async () => {
+      const supabase = getSupabase();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) await supabase.from('notificacoes').delete().eq('user_id', user.id);
+    })();
+  }, []);
 
   const salvarPrefs = useCallback((newPrefs: NotifPrefs) => {
     prefsRef.current = newPrefs;

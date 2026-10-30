@@ -248,6 +248,7 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
       formData.append('ticket_id', ticket.id);
       formData.append('type', type);
       formData.append('file', file);
+      formData.append('lang', window.location.pathname.split('/')[1] || 'pt');
       const response = await fetch('/api/tecnico/evidencias', { method: 'POST', body: formData });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'Não foi possível enviar a evidência.');
