@@ -45,6 +45,24 @@ html, body {
   color: var(--selection-text);
 }
 
+input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='file']):not([type='button']):not([type='submit']):not([type='reset']),
+textarea,
+select {
+  color: var(--text-primary);
+  caret-color: var(--text-primary);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+}
+
+select option {
+  color: var(--text-primary);
+  background-color: var(--input-bg);
+}
+
 a {
   color: inherit;
   text-decoration: none;
