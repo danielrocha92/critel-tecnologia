@@ -1,0 +1,172 @@
+.container {
+  display: grid;
+  gap: 1.25rem;
+  width: min(100%, 1440px);
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.eyebrow {
+  color: var(--accent-cyan);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.title {
+  margin: 0.35rem 0;
+  color: var(--text-primary);
+  font-size: clamp(1.35rem, 3vw, 1.8rem);
+}
+
+.description,
+.panelSubtitle {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.refreshButton,
+.detailsLink,
+.approveButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 40px;
+  padding: 0.55rem 0.8rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 0.82rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.refreshButton:disabled,
+.approveButton:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.spinning {
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.panel {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: var(--card-bg);
+}
+
+.panelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.panelTitle {
+  margin: 0 0 0.25rem;
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+.tableScroll {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--text-primary);
+  font-size: 0.85rem;
+}
+
+.table th,
+.table td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.table th {
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.table td:first-child {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.secondaryText {
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+}
+
+.currency {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.approveButton {
+  border-color: transparent;
+  background: var(--status-success-text);
+  color: #fff;
+  font-weight: 700;
+}
+
+.stateMessage {
+  margin: 0;
+  padding: 2rem 1rem;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+@media (max-width: 760px) {
+  .container { padding: 1rem; }
+  .header { flex-direction: column; }
+  .table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+  .table,
+  .table tbody,
+  .table tr,
+  .table td { display: block; width: 100%; }
+  .table tr { padding: 0.5rem 0; border-bottom: 1px solid var(--border-color); }
+  .table tr:last-child { border-bottom: 0; }
+  .table td { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.55rem 1rem; border: 0; text-align: right; }
+  .table td::before { content: attr(data-label); color: var(--text-secondary); font-size: 0.72rem; font-weight: 700; text-align: left; }
+  .table td:first-child { display: flex; }
+  .actions { flex-wrap: wrap; justify-content: flex-end; }
+}

@@ -22,7 +22,7 @@ type DashboardStats = {
   open: number | null;
   inProgress: number | null;
   finalized: number | null;
-  pendingValidation: number | null;
+  pendingApproval: number | null;
 };
 
 export default function DashboardHome() {
@@ -30,7 +30,7 @@ export default function DashboardHome() {
   const lang = pathname.split('/')[1] || 'pt';
   const [name, setName] = useState('');
   const [stats, setStats] = useState<DashboardStats>({
-    tickets: null, contacts: null, open: null, inProgress: null, finalized: null, pendingValidation: null,
+    tickets: null, contacts: null, open: null, inProgress: null, finalized: null, pendingApproval: null,
   });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -71,7 +71,7 @@ export default function DashboardHome() {
         if (isMounted) setName(profile?.nome || user.email?.split('@')[0] || '');
       }
 
-      const [ticketsResult, contactsResult, openResult, inProgressResult, finalizedResult, validationResult] = await Promise.all([
+      const [ticketsResult, contactsResult, openResult, inProgressResult, finalizedResult, approvalResult] = await Promise.all([
         supabase
           .from('tickets')
           .select('id', { count: 'exact', head: true })
@@ -80,12 +80,12 @@ export default function DashboardHome() {
         supabase.from('tickets').select('id', { count: 'exact', head: true }).like('protocolo_origem', 'OS-%').in('status', ['FILA', 'NOVO']),
         supabase.from('tickets').select('id', { count: 'exact', head: true }).like('protocolo_origem', 'OS-%').in('status', ['ABERTO', 'EM_ANDAMENTO']),
         supabase.from('tickets').select('id', { count: 'exact', head: true }).like('protocolo_origem', 'OS-%').in('status', ['RESOLVIDO', 'FECHADO', 'FINALIZADO', 'CONCLUIDO']),
-        supabase.from('financeiro').select('id', { count: 'exact', head: true }).or('status_conciliacao.eq.PENDENTE,status_conciliacao.eq.ABERTO'),
+        supabase.from('tickets').select('id', { count: 'exact', head: true }).like('protocolo_origem', 'OS-%').eq('status', 'FINALIZADO').is('financeiro_aprovado_em', null),
       ]);
 
       if (!isMounted) return;
 
-      const errors = [ticketsResult.error, contactsResult.error, openResult.error, inProgressResult.error, finalizedResult.error, validationResult.error].filter(Boolean);
+      const errors = [ticketsResult.error, contactsResult.error, openResult.error, inProgressResult.error, finalizedResult.error, approvalResult.error].filter(Boolean);
       if (errors.length > 0) {
         setError(`Alguns indicadores não puderam ser carregados: ${errors.map((item) => item?.message).join('; ')}`);
       }
@@ -96,7 +96,7 @@ export default function DashboardHome() {
         open: openResult.error ? null : openResult.count,
         inProgress: inProgressResult.error ? null : inProgressResult.count,
         finalized: finalizedResult.error ? null : finalizedResult.count,
-        pendingValidation: validationResult.error ? null : validationResult.count,
+        pendingApproval: approvalResult.error ? null : approvalResult.count,
       });
       setLoading(false);
     };
@@ -176,9 +176,9 @@ export default function DashboardHome() {
           <span className={styles.statusCopy}><span>Finalizados</span><strong>{loading ? '—' : stats.finalized ?? '—'}</strong></span>
           <ArrowRight size={17} className={styles.statusArrow} />
         </Link>
-        <Link href={`/${lang}/financeiro?filter=pendingValidation`} className={styles.statusCard}>
+        <Link href={`/${lang}/financeiro`} className={styles.statusCard}>
           <span className={`${styles.statusIcon} ${styles.statusValidation}`}><DollarSign size={19} /></span>
-          <span className={styles.statusCopy}><span>Pendente de Validação (Financeiro)</span><strong>{loading ? '—' : stats.pendingValidation ?? '—'}</strong></span>
+          <span className={styles.statusCopy}><span>Aguardando aprovação financeira</span><strong>{loading ? '—' : stats.pendingApproval ?? '—'}</strong></span>
           <ArrowRight size={17} className={styles.statusArrow} />
         </Link>
       </section>

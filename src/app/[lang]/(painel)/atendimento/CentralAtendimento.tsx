@@ -81,6 +81,7 @@ function CentralAtendimentoContent({
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isPauseModalOpen, setIsPauseModalOpen] = useState(false);
   const [isFinishModalOpen, setIsFinishModalOpen] = useState(false);
+  const [isApprovingTicket, setIsApprovingTicket] = useState(false);
   const [isTransitionLogOpen, setIsTransitionLogOpen] = useState(false);
   const [transitionLog, setTransitionLog] = useState<Array<Record<string, unknown>>>([]);
   const [isLoadingTransitionLog, setIsLoadingTransitionLog] = useState(false);
@@ -144,6 +145,7 @@ function CentralAtendimentoContent({
       : searchParams.get('meus') === 'true';
   const cargoAtual = operadorAtual?.cargo?.trim().toUpperCase().replace('É', 'E');
   const canCreateTicket = cargoAtual === 'ADMIN' || cargoAtual === 'SUPER_ADMIN' || cargoAtual === 'ANALISTA';
+  const canApproveTicket = ['FINANCEIRO', 'ANALISTA', 'ADMIN', 'SUPER_ADMIN'].includes(cargoAtual || '');
   const isTechnician = cargoAtual === 'TECNICO';
   const canDeleteTicket = cargoAtual === 'ADMIN' || cargoAtual === 'SUPER_ADMIN';
   const isAssignedTechnician = Boolean(isTechnician && ticketAtivo?.tecnico_id
@@ -244,6 +246,30 @@ function CentralAtendimentoContent({
       setIsMaisDropdownOpen(false);
     } catch (actionError) {
       toast.error(actionError instanceof Error ? actionError.message : 'Não foi possível concluir a ação.');
+    }
+  };
+
+  const handleApproveTicket = async () => {
+    if (!ticketAtivo || isApprovingTicket) return;
+    setIsApprovingTicket(true);
+    try {
+      const response = await fetch('/api/financeiro/aprovar-os', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ticket_id: ticketAtivo.id }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Não foi possível aprovar esta OS.');
+      setTicketAtivo((current) => current ? {
+        ...current,
+        financeiro_aprovado_em: result.ticket.financeiro_aprovado_em,
+        financeiro_aprovado_por: result.ticket.financeiro_aprovado_por,
+      } : current);
+      toast.success('OS aprovada. O valor foi liberado na dashboard do técnico.');
+    } catch (approvalError) {
+      toast.error(approvalError instanceof Error ? approvalError.message : 'Não foi possível aprovar esta OS.');
+    } finally {
+      setIsApprovingTicket(false);
     }
   };
 
@@ -366,6 +392,9 @@ function CentralAtendimentoContent({
     fetchHistory();
 
     const channel = supabase.channel(`ticket_${ticketAtivo.id}`)
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'tickets', filter: `id=eq.${ticketAtivo.id}` }, (payload) => {
+        setTicketAtivo((current) => current ? { ...current, ...(payload.new as ITicket) } : current);
+      })
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'ticket_replies', filter: `ticket_id=eq.${ticketAtivo.id}` }, (payload: RealtimePostgresChangesPayload<TicketReplyRealtimeRow>) => {
         const row = payload.new as TicketReplyRealtimeRow;
         const newReply: ITicketReply = {
@@ -491,10 +520,16 @@ function CentralAtendimentoContent({
               <button
                 type="button"
                 className={styles.btnFinalizar}
-                disabled={!isAssignedTechnician || ticketAtivo.status !== 'EM_ANDAMENTO'}
-                title={!isAssignedTechnician ? 'A finalização técnica deve ser feita pelo técnico responsável.' : undefined}
-                onClick={() => setIsFinishModalOpen(true)}
-              >Finalizar</button>
+                disabled={ticketAtivo.status === 'FINALIZADO'
+                  ? (!canApproveTicket || Boolean(ticketAtivo.financeiro_aprovado_em) || isApprovingTicket)
+                  : (!isAssignedTechnician || ticketAtivo.status !== 'EM_ANDAMENTO')}
+                title={ticketAtivo.status === 'FINALIZADO'
+                  ? (!canApproveTicket ? 'A aprovação deve ser feita pelo departamento financeiro.' : undefined)
+                  : (!isAssignedTechnician ? 'A finalização técnica deve ser feita pelo técnico responsável.' : undefined)}
+                onClick={() => ticketAtivo.status === 'FINALIZADO' ? void handleApproveTicket() : setIsFinishModalOpen(true)}
+              >{ticketAtivo.status === 'FINALIZADO'
+                ? ticketAtivo.financeiro_aprovado_em ? 'Aprovado' : canApproveTicket ? isApprovingTicket ? 'Aprovando...' : 'Aprovar' : 'Aguardando aprovação'
+                : 'Finalizar'}</button>
               <button
                 type="button"
                 className={styles.btnCancelar}

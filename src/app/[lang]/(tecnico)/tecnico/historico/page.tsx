@@ -4,7 +4,9 @@ import { useEffect, useState } from 'react';
 import { CheckCircle, Calendar, ClipboardList } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { createClient } from '@/utils/supabase/client';
+import { getClientLogo } from '@/utils/clientLogo';
 import styles from './historico.module.css';
 
 const supabase = createClient();
@@ -77,6 +79,7 @@ export default function HistoricoPage() {
         <section className={styles.ticketsList} aria-label="Lista de serviços finalizados">
           {tickets.map((ticket) => {
             const dateValue = ticket.checkout_at || ticket.atualizado_em || ticket.criado_em;
+            const clientLogo = getClientLogo(ticket.cliente);
             const date = dateValue ? new Date(dateValue).toLocaleDateString('pt-BR') : 'Data não informada';
 
             return (
@@ -84,6 +87,20 @@ export default function HistoricoPage() {
                 <div className={styles.ticketStatusBorder} aria-hidden="true" />
                 <div className={styles.ticketHeader}>
                   <div className={styles.ticketIdentity}>
+                    {clientLogo ? (
+                      <Image
+                        src={clientLogo}
+                        alt={`Logo de ${ticket.cliente}`}
+                        width={40}
+                        height={40}
+                        loading="lazy"
+                        className={styles.clientLogo}
+                      />
+                    ) : (
+                      <span className={styles.clientLogoFallback} aria-hidden="true">
+                        {(ticket.cliente || 'C').trim().charAt(0).toUpperCase()}
+                      </span>
+                    )}
                     <strong className={styles.ticketClient}>{ticket.cliente || 'Cliente não informado'}</strong>
                     <span className={styles.ticketProtocol}>
                       OS {ticket.protocolo_origem || `#${ticket.id.slice(0, 8).toUpperCase()}`}

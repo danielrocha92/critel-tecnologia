@@ -6,7 +6,6 @@ import { usePathname, useRouter } from 'next/navigation';
 import {
   ArrowUpRight,
   Building2,
-  CalendarDays,
   CheckCircle2,
   CircleAlert,
   ClipboardList,
@@ -15,25 +14,13 @@ import {
   DollarSign,
   RefreshCw,
   Search,
-  Wallet,
 } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
 import NovoChamadoModal from '@/components/Chamados/NovoChamadoModal';
 import { getTicketTeamLabel } from '@/lib/tickets/problemCatalog';
 import styles from './DepartmentEnvironment.module.css';
 
-type Department = 'financeiro' | 'comercial' | 'analista';
-type FinancialFilter = 'todos' | 'servicos' | 'despesas' | 'pendentes';
-
-type FinancialEntry = {
-  id: string;
-  ticket_id: string | null;
-  tecnico_id: string | null;
-  valor_servico: number | string | null;
-  valor_despesas: number | string | null;
-  status_faturamento: string | null;
-  criado_em: string | null;
-};
+type Department = 'comercial' | 'analista';
 
 type StoreContact = {
   nome_loja: string;
@@ -55,15 +42,10 @@ type AnalystStatusCounts = {
   open: number | null;
   inProgress: number | null;
   finalized: number | null;
-  pendingValidation: number | null;
+  pendingApproval: number | null;
 };
 
 const departmentLabels: Record<Department, { title: string; description: string; eyebrow: string }> = {
-  financeiro: {
-    title: 'Painel Financeiro',
-    description: 'Acompanhe faturamento, despesas e pendências registradas nas ordens de serviço.',
-    eyebrow: 'AMBIENTE FINANCEIRO',
-  },
   comercial: {
     title: 'Painel Comercial',
     description: 'Consulte os cadastros das lojas e encontre rapidamente a unidade desejada.',
@@ -75,19 +57,6 @@ const departmentLabels: Record<Department, { title: string; description: string;
     eyebrow: 'AMBIENTE DE ANÁLISE',
   },
 };
-
-function formatCurrency(value: number | string | null | undefined) {
-  const amount = Number(value ?? 0);
-  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
-    Number.isFinite(amount) ? amount : 0,
-  );
-}
-
-function formatDate(value: string | null) {
-  if (!value) return '—';
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? '—' : date.toLocaleDateString('pt-BR');
-}
 
 function statusClass(status: string | null | undefined) {
   const normalized = (status || '').trim().toUpperCase();
@@ -110,19 +79,13 @@ export default function DepartmentEnvironment({
   const pathname = usePathname();
   const router = useRouter();
   const lang = pathname.split('/')[1] || 'pt';
-  const [month, setMonth] = useState(() => {
-    const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-  });
-  const [financialEntries, setFinancialEntries] = useState<FinancialEntry[]>([]);
   const [contacts, setContacts] = useState<StoreContact[]>([]);
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [analystStatusCounts, setAnalystStatusCounts] = useState<AnalystStatusCounts>({
-    open: null, inProgress: null, finalized: null, pendingValidation: null,
+    open: null, inProgress: null, finalized: null, pendingApproval: null,
   });
   const [search, setSearch] = useState('');
   const [ticketStatus, setTicketStatus] = useState('abertos');
-  const [financialFilter, setFinancialFilter] = useState<FinancialFilter>('todos');
   const panelRef = useRef<HTMLElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
@@ -140,31 +103,7 @@ export default function DepartmentEnvironment({
       const supabase = createClient();
 
       try {
-        if (department === 'financeiro') {
-          if (!/^\d{4}-\d{2}$/.test(month)) {
-            throw new Error('Selecione um mês válido para consultar os lançamentos.');
-          }
-
-          const [year, monthNumber] = month.split('-').map(Number);
-          const start = new Date(Date.UTC(year, monthNumber - 1, 1)).toISOString();
-          const end = new Date(Date.UTC(year, monthNumber, 1)).toISOString();
-          const entries: FinancialEntry[] = [];
-          const pageSize = 1000;
-          for (let offset = 0; ; offset += pageSize) {
-            const { data, error: queryError } = await supabase
-              .from('financeiro')
-              .select('id, ticket_id, tecnico_id, valor_servico, valor_despesas, status_faturamento, criado_em')
-              .gte('criado_em', start)
-              .lt('criado_em', end)
-              .order('criado_em', { ascending: false })
-              .range(offset, offset + pageSize - 1);
-
-            if (queryError) throw queryError;
-            entries.push(...((data || []) as FinancialEntry[]));
-            if (!data || data.length < pageSize) break;
-          }
-          if (isMounted) setFinancialEntries(entries);
-        } else if (department === 'comercial') {
+        if (department === 'comercial') {
           const entries: StoreContact[] = [];
           const pageSize = 1000;
           for (let offset = 0; ; offset += pageSize) {
@@ -180,7 +119,7 @@ export default function DepartmentEnvironment({
           }
           if (isMounted) setContacts(entries);
         } else {
-          const [ticketsResult, openResult, progressResult, finalizedResult, validationResult] = await Promise.all([
+          const [ticketsResult, openResult, progressResult, finalizedResult, approvalResult] = await Promise.all([
             supabase
               .from('tickets')
               .select('id, protocolo_origem, titulo, cliente, status, prioridade, departamento, equipe_responsavel, criado_em')
@@ -190,7 +129,7 @@ export default function DepartmentEnvironment({
             supabase.from('tickets').select('id', { count: 'exact', head: true }).like('protocolo_origem', 'OS-%').in('status', ['FILA', 'NOVO']),
             supabase.from('tickets').select('id', { count: 'exact', head: true }).like('protocolo_origem', 'OS-%').in('status', ['ABERTO', 'EM_ANDAMENTO']),
             supabase.from('tickets').select('id', { count: 'exact', head: true }).like('protocolo_origem', 'OS-%').in('status', ['RESOLVIDO', 'FECHADO', 'FINALIZADO', 'CONCLUIDO']),
-            supabase.from('financeiro').select('id', { count: 'exact', head: true }).or('status_conciliacao.eq.PENDENTE,status_conciliacao.eq.ABERTO'),
+            supabase.from('tickets').select('id', { count: 'exact', head: true }).like('protocolo_origem', 'OS-%').eq('status', 'FINALIZADO').is('financeiro_aprovado_em', null),
           ]);
 
           if (ticketsResult.error) throw ticketsResult.error;
@@ -200,9 +139,9 @@ export default function DepartmentEnvironment({
               open: openResult.error ? null : openResult.count,
               inProgress: progressResult.error ? null : progressResult.count,
               finalized: finalizedResult.error ? null : finalizedResult.count,
-              pendingValidation: validationResult.error ? null : validationResult.count,
+              pendingApproval: approvalResult.error ? null : approvalResult.count,
             });
-            const countErrors = [openResult.error, progressResult.error, finalizedResult.error, validationResult.error].filter(Boolean);
+            const countErrors = [openResult.error, progressResult.error, finalizedResult.error, approvalResult.error].filter(Boolean);
             if (countErrors.length) setError(`Alguns totais não puderam ser carregados: ${countErrors.map((item) => item?.message).join('; ')}`);
           }
         }
@@ -210,18 +149,15 @@ export default function DepartmentEnvironment({
         if (!isMounted) return;
 
         const detail = loadError instanceof Error ? loadError.message : 'Erro desconhecido';
-        const message = department === 'financeiro'
-          ? 'Não foi possível carregar os lançamentos financeiros'
-          : department === 'comercial'
+        const message = department === 'comercial'
             ? 'Não foi possível carregar os contatos das lojas'
             : 'Não foi possível carregar as solicitações';
         setError(`${message}: ${detail}`);
 
-        if (department === 'financeiro') setFinancialEntries([]);
         if (department === 'comercial') setContacts([]);
         if (department === 'analista') {
           setTickets([]);
-          setAnalystStatusCounts({ open: null, inProgress: null, finalized: null, pendingValidation: null });
+          setAnalystStatusCounts({ open: null, inProgress: null, finalized: null, pendingApproval: null });
         }
       } finally {
         if (isMounted) setLoading(false);
@@ -232,7 +168,7 @@ export default function DepartmentEnvironment({
     return () => {
       isMounted = false;
     };
-  }, [department, month, refreshKey]);
+  }, [department, refreshKey]);
 
   const filteredContacts = useMemo(() => {
     const term = search.trim().toLocaleLowerCase('pt-BR');
@@ -258,25 +194,6 @@ export default function DepartmentEnvironment({
         .includes(term);
     });
   }, [tickets, search, ticketStatus]);
-
-  const financialTotals = useMemo(() => {
-    const services = financialEntries.reduce((total, item) => total + Number(item.valor_servico || 0), 0);
-    const expenses = financialEntries.reduce((total, item) => total + Number(item.valor_despesas || 0), 0);
-    const pending = financialEntries.filter((item) =>
-      ['PENDENTE', 'ABERTO'].includes((item.status_faturamento || '').toUpperCase()),
-    ).length;
-    const settled = financialEntries.filter((item) =>
-      ['PAGO', 'FATURADO'].includes((item.status_faturamento || '').toUpperCase()),
-    ).length;
-    return { services, expenses, total: services + expenses, pending, settled };
-  }, [financialEntries]);
-
-  const filteredFinancialEntries = useMemo(() => financialEntries.filter((entry) => {
-    if (financialFilter === 'servicos') return Number(entry.valor_servico || 0) > 0;
-    if (financialFilter === 'despesas') return Number(entry.valor_despesas || 0) > 0;
-    if (financialFilter === 'pendentes') return ['PENDENTE', 'ABERTO'].includes((entry.status_faturamento || '').toUpperCase());
-    return true;
-  }), [financialEntries, financialFilter]);
 
   const scrollToPanel = () => panelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
@@ -304,69 +221,6 @@ export default function DepartmentEnvironment({
           <CircleAlert size={18} />
           <span>{error}</span>
         </div>
-      )}
-
-      {department === 'financeiro' && (
-        <>
-
-
-          <section className={styles.metricGrid} aria-label="Resumo financeiro do período">
-            <MetricCard label="Total registrado" value={loading ? '—' : formatCurrency(financialTotals.total)} icon={<Wallet size={19} />} onClick={() => { setFinancialFilter('todos'); scrollToPanel(); }} active={financialFilter === 'todos'} />
-            <MetricCard label="Serviços" value={loading ? '—' : formatCurrency(financialTotals.services)} icon={<ClipboardList size={19} />} onClick={() => { setFinancialFilter('servicos'); scrollToPanel(); }} active={financialFilter === 'servicos'} />
-            <MetricCard label="Despesas reembolsáveis" value={loading ? '—' : formatCurrency(financialTotals.expenses)} icon={<DollarSign size={19} />} onClick={() => { setFinancialFilter('despesas'); scrollToPanel(); }} active={financialFilter === 'despesas'} />
-            <MetricCard label="Pendentes de faturamento" value={loading ? '—' : String(financialTotals.pending)} icon={<CircleAlert size={19} />} onClick={() => { setFinancialFilter('pendentes'); scrollToPanel(); }} active={financialFilter === 'pendentes'} />
-          </section>
-
-          <section className={styles.panel} aria-labelledby="finance-entries-title" ref={panelRef}>
-            <div className={styles.panelHeader}>
-              <div>
-                <span className={styles.sectionEyebrow}>MOVIMENTAÇÕES</span>
-                <h2 id="finance-entries-title" className={styles.panelTitle}>Lançamentos recentes</h2>
-              </div>
-              <div className={styles.tableControls}>
-                <label className={styles.monthFilter}>
-                  <CalendarDays size={17} />
-                  <span>Período</span>
-                  <input type="month" value={month} onChange={(event) => setMonth(event.target.value)} />
-                </label>
-                <Link href={`/${lang}/os`} className={styles.secondaryLink}>
-                  <ClipboardList size={16} />
-                  Ver ordens de serviço
-                  <ArrowUpRight size={15} />
-                </Link>
-                <span className={styles.resultCount}>{filteredFinancialEntries.length} registros</span>
-              </div>
-            </div>
-            <div className={styles.tableScroll}>
-              <table className={styles.dataTable}>
-                <thead>
-                  <tr><th>Ordem</th><th>Data</th><th>Serviço</th><th>Despesas</th><th>Status</th></tr>
-                </thead>
-                <tbody>
-                  {loading ? (
-                    <TableMessage columns={5} message="Carregando lançamentos..." />
-                  ) : filteredFinancialEntries.length === 0 ? (
-                    <TableMessage columns={5} message="Nenhum lançamento registrado neste período." />
-                  ) : filteredFinancialEntries.map((entry) => (
-                    <tr key={entry.id}>
-                      <td data-label="Ordem">
-                        {entry.ticket_id ? (
-                          <Link href={`/${lang}/os/${entry.ticket_id}`} className={styles.tableLink}>
-                            #{entry.ticket_id.slice(0, 8)}
-                          </Link>
-                        ) : '—'}
-                      </td>
-                      <td data-label="Data">{formatDate(entry.criado_em)}</td>
-                      <td data-label="Serviço">{formatCurrency(entry.valor_servico)}</td>
-                      <td data-label="Despesas">{formatCurrency(entry.valor_despesas)}</td>
-                      <td data-label="Status"><span className={`${styles.statusBadge} ${statusClass(entry.status_faturamento)}`}>{entry.status_faturamento || 'Sem status'}</span></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
-        </>
       )}
 
       {department === 'comercial' && (
@@ -420,7 +274,7 @@ export default function DepartmentEnvironment({
             <MetricCard label="Chamados em Aberto" value={loading ? '—' : String(analystStatusCounts.open ?? '—')} icon={<CircleDot size={19} />} onClick={() => { setTicketStatus('abertos'); scrollToPanel(); }} active={ticketStatus === 'abertos'} />
             <MetricCard label="Em Andamento" value={loading ? '—' : String(analystStatusCounts.inProgress ?? '—')} icon={<Clock3 size={19} />} onClick={() => { setTicketStatus('andamento'); scrollToPanel(); }} active={ticketStatus === 'andamento'} />
             <MetricCard label="Finalizados" value={loading ? '—' : String(analystStatusCounts.finalized ?? '—')} icon={<CheckCircle2 size={19} />} onClick={() => { setTicketStatus('finalizados'); scrollToPanel(); }} active={ticketStatus === 'finalizados'} />
-            <MetricCard label="Pendente de Validação (Financeiro)" value={loading ? '—' : String(analystStatusCounts.pendingValidation ?? '—')} icon={<DollarSign size={19} />} onClick={() => router.push(`/${lang}/financeiro?filter=pendingValidation`)} />
+            <MetricCard label="Aguardando aprovação financeira" value={loading ? '—' : String(analystStatusCounts.pendingApproval ?? '—')} icon={<DollarSign size={19} />} onClick={() => router.push(`/${lang}/financeiro`)} />
           </section>
           <section className={styles.panel} aria-labelledby="analyst-tickets-title" ref={panelRef}>
             <div className={styles.panelHeader}>

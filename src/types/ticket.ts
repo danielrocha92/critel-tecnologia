@@ -68,6 +68,8 @@ export interface ITicket {
   sla_pausado_segundos?: number | string | null;
   modalidade_pagamento?: 'diaria' | 'chamado' | null;
   valor_pagamento?: number | string | null;
+  financeiro_aprovado_em?: string | null;
+  financeiro_aprovado_por?: string | null;
   departamento?: string;
   equipe_responsavel?: 'SUPORTE_TECNICO' | 'FINANCEIRO' | 'ANALISTA' | 'COMERCIAL' | string | null;
   categoria?: string;

@@ -59,19 +59,23 @@ export default function ResumoFinanceiro({ userId }: { userId: string }) {
         : new Date(y, m + 1, 0, 23, 59, 59, 999);
 
       const { data, error } = await supabase
-        .from('financeiro')
-        .select('valor_servico, valor_despesas')
+        .from('tickets')
+        .select('valor_pagamento, despesas_json')
         .eq('tecnico_id', userId)
-        .gte('criado_em', dataInicio.toISOString())
-        .lte('criado_em', dataFim.toISOString());
+        .eq('status', 'FINALIZADO')
+        .not('financeiro_aprovado_em', 'is', null)
+        .gte('financeiro_aprovado_em', dataInicio.toISOString())
+        .lte('financeiro_aprovado_em', dataFim.toISOString());
 
       if (data && !error) {
         let sumServicos = 0;
         let sumDespesas = 0;
 
         data.forEach(item => {
-          sumServicos += Number(item.valor_servico || 0);
-          sumDespesas += Number(item.valor_despesas || 0);
+          sumServicos += Number(item.valor_pagamento || 0);
+          const expenses = Array.isArray(item.despesas_json) ? item.despesas_json : [];
+          sumDespesas += expenses.reduce((total, expense) =>
+            total + Number(expense.valor_numerico ?? expense.valor ?? 0), 0);
         });
 
         setTotais({
@@ -79,14 +83,24 @@ export default function ResumoFinanceiro({ userId }: { userId: string }) {
           despesas: sumDespesas,
           geral: sumServicos + sumDespesas
         });
+      } else if (error) {
+        console.error('Não foi possível carregar os valores aprovados do técnico:', error.message);
       }
 
       setLoading(false);
     };
 
-    if (userId) {
-      fetchFinanceiro();
-    }
+    if (!userId) return;
+
+    void fetchFinanceiro();
+    const channel = supabase
+      .channel(`resumo_financeiro_tecnico_${userId}`)
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'tickets', filter: `tecnico_id=eq.${userId}` }, () => {
+        void fetchFinanceiro();
+      })
+      .subscribe();
+
+    return () => { void supabase.removeChannel(channel); };
   }, [userId, selectedPeriod]);
 
   if (loading) {
@@ -105,7 +119,7 @@ export default function ResumoFinanceiro({ userId }: { userId: string }) {
           <Calendar size={14} className={styles.calendarIcon} />
           <select 
             value={selectedPeriod} 
-            onChange={(e) => setSelectedPeriod(e.target.value)}
+            onChange={(e) => { setLoading(true); setSelectedPeriod(e.target.value); }}
             className={styles.periodSelect}
           >
             {periodos.map(p => (

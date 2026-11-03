@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
-import FinancialOSDashboard from '@/components/FinancialOSDashboard/FinancialOSDashboard';
+import FinancialApprovalDashboard from '@/components/FinancialOSDashboard/FinancialApprovalDashboard';
 
 export const metadata: Metadata = {
   title: 'Painel Financeiro | Critel Core',
-  description: 'Acompanhe lançamentos financeiros e despesas de ordens de serviço.',
+  description: 'Revise e aprove os valores de ordens de serviço finalizadas.',
 };
 
 export default function FinanceiroPage() {
-  return <FinancialOSDashboard />;
+  return <FinancialApprovalDashboard />;
 }

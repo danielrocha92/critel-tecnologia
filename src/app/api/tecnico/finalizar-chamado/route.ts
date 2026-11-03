@@ -157,24 +157,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true, warning: 'OS finalizada, mas o relatório complementar não foi registrado.' });
     }
 
-    const totalDespesas = Array.isArray(despesas_json)
-      ? despesas_json.reduce((sum: number, item: { valor?: number; valor_numerico?: number }) =>
-          sum + Number(item.valor_numerico ?? item.valor ?? 0), 0)
-      : 0;
-
-    const { error: financeError } = await supabaseAdmin
-      .from('financeiro')
-      .insert({
-        ticket_id,
-        tecnico_id: user.id,
-        servico_id: servico.id,
-        valor_servico: 0,
-        valor_despesas: totalDespesas,
-        status_faturamento: 'PENDENTE',
-      });
-
-    if (financeError) console.error('Não foi possível registrar o lançamento financeiro:', financeError);
-
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Erro ao finalizar chamado:', error);
