@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { createBrowserClient } from '@supabase/ssr';
 import type { User } from '@supabase/supabase-js';
 import { ChevronLeft, MapPin, Clock, CheckCircle, Navigation, AlertTriangle, Trash2, Pause, Play } from 'lucide-react';
@@ -11,6 +12,7 @@ import PausarChamadoModal from '@/components/Tecnico/PausarChamadoModal';
 import ServiceReportSection from '@/components/Tecnico/ServiceReportSection';
 import { ITicket, TicketEvidence } from '@/types/ticket';
 import { getPauseReasonLabel } from '@/lib/tickets/pauseReasons';
+import { getClientLogo } from '@/utils/clientLogo';
 import styles from './OsDetail.module.css';
 
 const supabase = createBrowserClient(
@@ -60,6 +62,9 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
   const [checkInMessage, setCheckInMessage] = useState<string | null>(null);
   const [distanciaAtual, setDistanciaAtual] = useState<number | null>(null);
   const [evidences, setEvidences] = useState<TicketEvidence[]>([]);
+  const [attachments, setAttachments] = useState<NonNullable<ITicket['anexos']>>([]);
+  const [loadingAttachments, setLoadingAttachments] = useState(true);
+  const [attachmentError, setAttachmentError] = useState<string | null>(null);
   const [loadingEvidences, setLoadingEvidences] = useState(true);
   const [deletingEvidenceId, setDeletingEvidenceId] = useState<string | null>(null);
   const [evidenceError, setEvidenceError] = useState<string | null>(null);
@@ -67,6 +72,33 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
   const watchId = useRef<number | null>(null);
   const routeWatchId = useRef<number | null>(null);
   const lastRoutePointSentAt = useRef(0);
+
+  useEffect(() => {
+    let isMounted = true;
+    setLoadingAttachments(true);
+    setAttachments([]);
+    setAttachmentError(null);
+    const loadAttachments = async () => {
+      const { data, error } = await supabase
+        .from('ticket_anexos')
+        .select('id, url, nome_arquivo, tipo_arquivo, tamanho_bytes, created_at')
+        .eq('ticket_id', ticketId)
+        .order('created_at', { ascending: false });
+      if (error) {
+        console.error('Erro ao carregar anexos da OS:', error.message);
+        if (isMounted) setAttachmentError('Não foi possível carregar os anexos. Atualize a tela para tentar novamente.');
+        return;
+      }
+      if (isMounted) {
+        setAttachments(data || []);
+        setAttachmentError(null);
+      }
+    };
+    void loadAttachments().finally(() => {
+      if (isMounted) setLoadingAttachments(false);
+    });
+    return () => { isMounted = false; };
+  }, [ticketId]);
 
   useEffect(() => {
     let isMounted = true;
@@ -401,6 +433,7 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
   const totalSlaPausedSeconds = Number(ticket.sla_pausado_segundos || 0) + currentPauseSeconds;
   const pausedHours = Math.floor(totalSlaPausedSeconds / 3600);
   const pausedMinutes = Math.floor((totalSlaPausedSeconds % 3600) / 60);
+  const clientLogo = getClientLogo(ticket.cliente);
 
   return (
     <div className={styles.pageContainer}>
@@ -413,6 +446,28 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
 
       <div className={styles.contentWrapper}>
         <div className={styles.titleSection}>
+          {ticket.cliente && (
+            <div className={styles.clientIdentity}>
+              {clientLogo ? (
+                <Image
+                  src={clientLogo}
+                  alt={`Logo de ${ticket.cliente}`}
+                  width={44}
+                  height={44}
+                  loading="lazy"
+                  className={styles.clientLogo}
+                />
+              ) : (
+                <span className={styles.clientLogoFallback} aria-hidden="true">
+                  {ticket.cliente.trim().charAt(0).toUpperCase()}
+                </span>
+              )}
+              <span className={styles.clientIdentityText}>
+                <strong>{ticket.cliente}</strong>
+                <span>Cliente</span>
+              </span>
+            </div>
+          )}
           <h2 className={styles.clientTitle}>{ticket.departamento}</h2>
           <p className={styles.ticketTitle}>
             {ticket.titulo}
@@ -511,6 +566,46 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
             <p className={styles.descText} dangerouslySetInnerHTML={{__html: ticket.descricao}}></p>
           </section>
         )}
+        <section className={styles.cardSection} aria-labelledby="ticket-attachments-heading">
+          <h3 id="ticket-attachments-heading" className={styles.sectionHeading}>Arquivos anexados ao chamado</h3>
+          {loadingAttachments ? (
+            <p className={styles.detailValue} role="status">Carregando arquivos anexados...</p>
+          ) : attachmentError ? (
+            <p className={styles.evidenceError} role="alert">{attachmentError}</p>
+          ) : attachments.length > 0 ? (
+            <ul className={styles.attachmentList}>
+              {attachments.map((attachment) => (
+                <li key={attachment.id} className={styles.attachmentItem}>
+                  <a href={attachment.url} target="_blank" rel="noopener noreferrer" className={styles.attachmentLink}>
+                    <span>{attachment.nome_arquivo}</span>
+                    <span className={styles.attachmentAction}>Abrir arquivo</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          ) : ticket.attachments?.length ? (
+            <ul className={styles.attachmentList}>
+              {ticket.attachments.map((url, index) => {
+                let fileName = `Arquivo ${index + 1}`;
+                try {
+                  fileName = decodeURIComponent(new URL(url).pathname.split('/').pop() || fileName);
+                } catch {
+                  // Mantém o nome genérico quando a URL antiga não puder ser interpretada.
+                }
+                return (
+                  <li key={`${url}-${index}`} className={styles.attachmentItem}>
+                    <a href={url} target="_blank" rel="noopener noreferrer" className={styles.attachmentLink}>
+                      <span>{fileName}</span>
+                      <span className={styles.attachmentAction}>Abrir arquivo</span>
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <p className={styles.detailValue}>Nenhum arquivo anexado a esta OS.</p>
+          )}
+        </section>
         {isFinalized && <ServiceReportSection ticket={ticket} />}
       </div>
 

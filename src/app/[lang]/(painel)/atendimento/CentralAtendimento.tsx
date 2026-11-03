@@ -17,23 +17,9 @@ import ServiceReportSection from '@/components/Tecnico/ServiceReportSection';
 import HistoricoPausasOS from '@/components/Tecnico/HistoricoPausasOS';
 import PausarChamadoModal from '@/components/Tecnico/PausarChamadoModal';
 import FinalizarChamadoModal from '@/components/Tecnico/FinalizarChamadoModal';
+import { getClientLogo } from '@/utils/clientLogo';
 
 const supabase = createClient();
-
-const clientLogoByName: Record<string, string> = {
-  'bacio di latte': '/bacio-di-latte-dark.svg',
-  ofner: '/ofner.svg',
-  kfc: '/kfc.svg',
-  'kfc brasil': '/kfc.svg',
-  'pizza hut': '/pizza-hut-dark.svg',
-  bradesco: '/bradesco.svg',
-  'sonda it': '/sonda.svg',
-};
-
-function getClientLogo(clientName?: string | null) {
-  const normalizedName = clientName?.normalize('NFD').replace(/\p{Diacritic}/gu, '').trim().toLowerCase();
-  return normalizedName ? clientLogoByName[normalizedName] : undefined;
-}
 
 type TicketAttachment = {
   url: string;

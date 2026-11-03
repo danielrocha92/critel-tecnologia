@@ -26,6 +26,10 @@ Focado em branding e marketing corporativo:
 A plataforma interna (acessível via `/atendimento`) automatiza e concentra a operação de suporte técnico:
 
 - **Fila de Atendimento e Chamados Autônomos**: Chamados internos consultados no Supabase, atualizados em tempo real e carregados em páginas para reduzir o tempo inicial de abertura. A gestão nativa de chamados mantém transições de status controladas pelo banco e refletidas imediatamente na operação.
+- **Ordens de Serviço e pausas de SLA**: O técnico responsável pode pausar uma OS em andamento pelo menu **Mais** e retomá-la quando o impedimento for resolvido. A pausa exige motivo, foto do impedimento, responsável local, cargo/função e previsão de retorno. O tempo pausado é acumulado no campo `sla_pausado_segundos` do chamado.
+- **Motivos de pausa**: Compra de material; link da operadora pendente; falta de energia ou acesso ao rack; infraestrutura civil; mobiliário/PDV pendente; restrição de horário ou ruído no shopping; equipamento aguardado; falta de EPI/liberação de altura; e dependência da equipe de TI do cliente.
+- **Rastreamento de compra de material**: Com permissão de GPS, o portal registra posições enquanto a tela da OS estiver aberta e o rastreamento do navegador continuar ativo. O trajeto no mapa fica disponível somente para analistas e administradores. O mapa usa OpenStreetMap por padrão; `NEXT_PUBLIC_OSM_TILE_URL` permite configurar outro endpoint de tiles. Consulte a [política de uso dos tiles do OpenStreetMap](https://operations.osmfoundation.org/policies/tiles/).
+- **Ações da OS**: No menu **Mais**, imprimir abre a impressão do navegador, editar atualiza os dados da OS, log de alterações consulta as transições registradas, e pausar/retomar executa o fluxo de SLA. Cancelamento é permitido a analistas/administradores ou ao técnico responsável; exclusão é restrita a administradores. A finalização técnica abre o formulário com evidências e assinatura.
 - **Gestão de Contatos das Lojas**: Mantém os contatos das unidades em uma base interna, permitindo consultar e atualizar os dados usados pela operação.
 - **Monitoramento de PDVs (Milvus)**: Consulta à plataforma Milvus pela ferramenta administrativa correspondente, com integração *On-Demand* para disponibilizar a disponibilidade (Online/Offline) do terminal da loja na tela do atendente.
 - **Gerador de Salas Jitsi**: Atalho prático no chat (`/video`) que gera links de salas virtuais únicas e seguras para os técnicos e gerentes de loja interagirem sem necessidade de celulares.
@@ -68,7 +72,6 @@ npm install
 NEXT_PUBLIC_SUPABASE_URL=sua_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=sua_chave_anonima
 SUPABASE_SERVICE_ROLE_KEY=sua_chave_admin
-GEMINI_API_KEY=sua_chave_do_google_ai_studio
 NEXT_PUBLIC_FIREBASE_API_KEY=sua_api_key
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=seu_projeto.firebaseapp.com
 NEXT_PUBLIC_FIREBASE_PROJECT_ID=seu_project_id
@@ -76,8 +79,6 @@ NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=seu_projeto.firebasestorage.app
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=seu_sender_id
 NEXT_PUBLIC_FIREBASE_APP_ID=seu_app_id
 ```
-
-`GEMINI_API_KEY` habilita a geração automática de legendas para as fotos das ordens de serviço. A chave é usada somente pela API do servidor; aplique também as migrations do diretório `supabase/migrations` para armazenar as legendas.
 
 4. No Windows com nvm-windows, ative a versão do projeto:
 ```powershell
@@ -92,6 +93,16 @@ npm run dev
 ```
 
 6. Acesse [http://localhost:3000](http://localhost:3000) (Site) ou [http://localhost:3000/pt/atendimento](http://localhost:3000/pt/atendimento) (Critel Core).
+
+### Banco de dados e migrations
+
+Para habilitar pausas, persistência de notificações e as assinaturas Realtime usadas pela OS, aplique no projeto Supabase as migrations correspondentes do diretório `supabase/migrations`:
+
+1. `20261030_add_ticket_pauses.sql` — cria os registros de pausa, os pontos de localização e os campos de SLA na tabela `tickets`.
+2. `20261030_create_user_notifications.sql` — configura notificações persistentes por usuário e sua publicação Realtime.
+3. `20261030_enable_ticket_realtime.sql` — publica `tickets` e, se existir, `ticket_replies` para as assinaturas da aplicação.
+
+Em uma instalação nova, aplique primeiro o schema base e as migrations anteriores necessárias. A API de pausas e ações administrativas também precisa de `SUPABASE_SERVICE_ROLE_KEY` configurada somente no servidor. Para o rastreamento, use HTTPS e permita acesso à localização no navegador; o registro ocorre enquanto a tela da OS permanece aberta.
 
 ---
 

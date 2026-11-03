@@ -38,6 +38,48 @@
   margin-bottom: 2rem;
 }
 
+.clientIdentity {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.clientLogo,
+.clientLogoFallback {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: var(--card-bg);
+  object-fit: contain;
+  padding: 4px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
+}
+
+.clientLogoFallback {
+  display: grid;
+  place-items: center;
+  color: var(--text-secondary);
+  font-weight: 700;
+}
+
+.clientIdentityText {
+  display: grid;
+  gap: 0.15rem;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+
+.clientIdentityText span {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 .clientTitle {
   font-size: 1.5rem;
   color: var(--accent-cyan);
@@ -172,6 +214,41 @@
   line-height: 1.6;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+}
+
+.attachmentList {
+  display: grid;
+  gap: 0.6rem;
+  list-style: none;
+}
+
+.attachmentItem {
+  min-width: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--surface-subtle);
+}
+
+.attachmentLink {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-width: 0;
+  padding: 0.75rem;
+  color: var(--text-primary);
+  font-size: 0.85rem;
+}
+
+.attachmentLink span:first-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.attachmentAction {
+  flex: 0 0 auto;
+  color: var(--accent-brand-text);
+  font-weight: 700;
 }
 
 .resolutionSection {

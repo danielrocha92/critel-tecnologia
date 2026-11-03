@@ -42,6 +42,7 @@ export interface ITicket {
   createdAt?: number;
   updatedAt?: number;
   attachments?: string[];
+  anexos?: { id: string; url: string; nome_arquivo: string; tipo_arquivo?: string; tamanho_bytes?: number | null; created_at?: string }[];
   check_in_at?: number | string | null;
   check_in_lat?: number | null;
   check_in_lng?: number | null;
