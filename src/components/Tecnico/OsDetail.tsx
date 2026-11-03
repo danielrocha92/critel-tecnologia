@@ -12,6 +12,7 @@ import PausarChamadoModal from '@/components/Tecnico/PausarChamadoModal';
 import ServiceReportSection from '@/components/Tecnico/ServiceReportSection';
 import { ITicket, TicketEvidence } from '@/types/ticket';
 import { getPauseReasonLabel } from '@/lib/tickets/pauseReasons';
+import { formatTicketDescription, getTicketAddress } from '@/utils/tickets/description';
 import { getClientLogo } from '@/utils/clientLogo';
 import styles from './OsDetail.module.css';
 
@@ -433,9 +434,8 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
   const pausedHours = Math.floor(totalSlaPausedSeconds / 3600);
   const pausedMinutes = Math.floor((totalSlaPausedSeconds % 3600) / 60);
   const clientLogo = getClientLogo(ticket.cliente);
-  const analystImages = attachments.filter((attachment) =>
-    attachment.tipo_arquivo?.startsWith('image/') || /\.(jpe?g|png|webp|gif|avif)(?:[?#]|$)/i.test(attachment.url),
-  );
+  const reportedDescription = formatTicketDescription(ticket.descricao).text;
+  const ticketAddress = getTicketAddress(ticket);
   const legacyEvidence = (['BEFORE', 'AFTER'] as const).flatMap((type) => {
     const mediaUrl = type === 'BEFORE' ? ticket.resolucao?.evidenciaAntesUrl : ticket.resolucao?.evidenciaDepoisUrl;
     if (!mediaUrl || evidences.some((evidence) => evidence.media_url === mediaUrl)) return [];
@@ -565,24 +565,6 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
           )}
         </section>
 
-        <section className={styles.cardSection} aria-labelledby="analyst-images-heading">
-          <h3 id="analyst-images-heading" className={styles.sectionHeading}>Imagens enviadas pelo analista</h3>
-          {analystImages.length === 0 ? (
-            <p className={styles.detailValue}>Nenhuma imagem anexada pelo analista a esta OS.</p>
-          ) : (
-            <div className={styles.evidenceGrid}>
-              {analystImages.map((image) => (
-                <figure key={image.id} className={styles.evidenceItem}>
-                  <a href={image.url} target="_blank" rel="noopener noreferrer">
-                    <Image src={image.url} alt={image.nome_arquivo || 'Imagem anexada pelo analista'} width={320} height={200} loading="lazy" unoptimized />
-                  </a>
-                  <figcaption>{image.nome_arquivo}</figcaption>
-                </figure>
-              ))}
-            </div>
-          )}
-        </section>
-
         {(ticket.categoria || ticket.causa_raiz || ticket.resolucao?.causaRaiz) && (
           <section className={styles.cardSection} aria-labelledby="problem-cause-heading">
             <h3 id="problem-cause-heading" className={styles.sectionHeading}>Classificação do problema</h3>
@@ -594,12 +576,16 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
           </section>
         )}
 
-        {ticket.descricao && (
+        {reportedDescription && (
           <section className={styles.cardSection}>
             <h3 className={`${styles.sectionHeading} ${styles.sectionHeadingDesc}`}>Descrição Reportada</h3>
-            <p className={styles.descText} dangerouslySetInnerHTML={{__html: ticket.descricao}}></p>
+            <p className={styles.descText}>{reportedDescription}</p>
           </section>
         )}
+        <section className={styles.cardSection} aria-labelledby="ticket-address-heading">
+          <h3 id="ticket-address-heading" className={styles.sectionHeading}>Endereço</h3>
+          <p className={styles.detailValue}>{ticketAddress || 'Endereço não informado.'}</p>
+        </section>
         <section className={styles.cardSection} aria-labelledby="ticket-attachments-heading">
           <h3 id="ticket-attachments-heading" className={styles.sectionHeading}>Arquivos anexados ao chamado</h3>
           {loadingAttachments ? (
@@ -608,14 +594,18 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
             <p className={styles.evidenceError} role="alert">{attachmentError}</p>
           ) : attachments.length > 0 ? (
             <ul className={styles.attachmentList}>
-              {attachments.map((attachment) => (
-                <li key={attachment.id} className={styles.attachmentItem}>
-                  <a href={attachment.url} target="_blank" rel="noopener noreferrer" className={styles.attachmentLink}>
-                    <span>{attachment.nome_arquivo}</span>
-                    <span className={styles.attachmentAction}>Abrir arquivo</span>
-                  </a>
-                </li>
-              ))}
+              {attachments.map((attachment) => {
+                const isImage = attachment.tipo_arquivo?.startsWith('image/') || /\.(jpe?g|png|webp|gif|avif)(?:[?#]|$)/i.test(attachment.url);
+                return (
+                  <li key={attachment.id} className={styles.attachmentItem}>
+                    <a href={attachment.url} target="_blank" rel="noopener noreferrer" className={styles.attachmentLink}>
+                      {isImage && <Image src={attachment.url} alt={attachment.nome_arquivo} width={56} height={56} loading="lazy" unoptimized className={styles.attachmentThumbnail} />}
+                      <span>{attachment.nome_arquivo}</span>
+                      <span className={styles.attachmentAction}>Abrir arquivo</span>
+                    </a>
+                  </li>
+                );
+              })}
             </ul>
           ) : ticket.attachments?.length ? (
             <ul className={styles.attachmentList}>

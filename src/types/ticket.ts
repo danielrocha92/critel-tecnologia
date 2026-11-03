@@ -56,6 +56,7 @@ export interface ITicket {
   checkInLng?: number | null;
 
   cliente?: string;
+  endereco?: string | null;
   titulo?: string;
   protocolo_origem?: string;
   criado_em?: string | number | Date | null;

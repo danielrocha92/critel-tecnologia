@@ -28,7 +28,7 @@ export function formatTicketDescription(description: string | null | undefined) 
 
   let address = '';
   const descriptionLines = text.filter(line => {
-    const match = line.match(/Endereço\s+da\s+Loja\s*:\s*(.*)/i);
+    const match = line.match(/Endere(?:\u00e7o|\u00c3\u00a7o)\s+da\s+Loja\s*:\s*(.*)/i);
     if (!match) return true;
     address = match[1].trim();
     return false;
@@ -42,7 +42,7 @@ export function getTicketAddress(ticket: {
   descricao?: string | null;
 }) {
   const address = ticket.endereco?.trim();
-  if (address && !/^(?:endereço\s+)?não informado$/i.test(address) && address !== '-') {
+  if (address && !/^(?:endere(?:\u00e7o|\u00c3\u00a7o)\s+)?(?:n\u00e3o|n\u00c3\u00a3o) informado$/i.test(address) && address !== '-') {
     return address;
   }
 

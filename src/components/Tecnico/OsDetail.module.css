@@ -245,6 +245,14 @@
   overflow-wrap: anywhere;
 }
 
+.attachmentThumbnail {
+  width: 56px;
+  height: 56px;
+  flex: 0 0 56px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
 .attachmentAction {
   flex: 0 0 auto;
   color: var(--accent-brand-text);
