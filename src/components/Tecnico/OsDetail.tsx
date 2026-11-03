@@ -80,11 +80,11 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
       try {
         const response = await fetch(`/api/tecnico/anexos?ticket_id=${encodeURIComponent(ticketId)}`);
         const result = await response.json();
-        if (!response.ok) throw new Error(result.error || 'Falha ao carregar os anexos.');
+        if (!response.ok) throw new Error([result.error, result.details].filter(Boolean).join(' — ') || 'Falha ao carregar os anexos.');
         if (isMounted) setAttachments(result.attachments || []);
       } catch (error) {
         console.error('Erro ao carregar anexos da OS:', error);
-        if (isMounted) setAttachmentError('Não foi possível carregar os anexos. Atualize a tela para tentar novamente.');
+        if (isMounted && error instanceof Error) setAttachmentError(error.message);
         return;
       }
       if (isMounted) setAttachmentError(null);

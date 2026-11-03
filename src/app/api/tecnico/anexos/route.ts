@@ -46,14 +46,17 @@ export async function GET(request: Request) {
 
     const { data: attachments, error: attachmentsError } = await admin
       .from('ticket_anexos')
-      .select('id, url, nome_arquivo, tipo_arquivo, tamanho_bytes, created_at')
-      .eq('ticket_id', ticketId)
-      .order('created_at', { ascending: false });
+      .select('id, url, nome_arquivo, tamanho_bytes')
+      .eq('ticket_id', ticketId);
     if (attachmentsError) throw attachmentsError;
 
     return NextResponse.json({ attachments: attachments || [] });
   } catch (error) {
     console.error('Erro ao consultar anexos do técnico:', error);
+    const details = error instanceof Error ? error.message : 'Erro inesperado ao consultar o banco de dados.';
+    if (process.env.NODE_ENV !== 'production') {
+      return NextResponse.json({ error: 'Erro ao consultar os anexos.', details }, { status: 500 });
+    }
     return NextResponse.json({ error: 'Não foi possível carregar os anexos do chamado.' }, { status: 500 });
   }
 }
