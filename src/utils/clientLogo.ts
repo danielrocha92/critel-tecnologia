@@ -10,5 +10,11 @@ const clientLogoByName: Record<string, string> = {
 
 export function getClientLogo(clientName?: string | null) {
   const normalizedName = clientName?.normalize('NFD').replace(/\p{Diacritic}/gu, '').trim().toLowerCase();
-  return normalizedName ? clientLogoByName[normalizedName] : undefined;
+  if (!normalizedName) return undefined;
+  if (clientLogoByName[normalizedName]) return clientLogoByName[normalizedName];
+
+  const matchingName = Object.keys(clientLogoByName)
+    .sort((first, second) => second.length - first.length)
+    .find((name) => normalizedName.includes(name));
+  return matchingName ? clientLogoByName[matchingName] : undefined;
 }

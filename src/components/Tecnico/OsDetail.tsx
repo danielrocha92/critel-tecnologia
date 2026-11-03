@@ -75,24 +75,18 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
 
   useEffect(() => {
     let isMounted = true;
-    setLoadingAttachments(true);
-    setAttachments([]);
-    setAttachmentError(null);
     const loadAttachments = async () => {
-      const { data, error } = await supabase
-        .from('ticket_anexos')
-        .select('id, url, nome_arquivo, tipo_arquivo, tamanho_bytes, created_at')
-        .eq('ticket_id', ticketId)
-        .order('created_at', { ascending: false });
-      if (error) {
-        console.error('Erro ao carregar anexos da OS:', error.message);
+      try {
+        const response = await fetch(`/api/tecnico/anexos?ticket_id=${encodeURIComponent(ticketId)}`);
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Falha ao carregar os anexos.');
+        if (isMounted) setAttachments(result.attachments || []);
+      } catch (error) {
+        console.error('Erro ao carregar anexos da OS:', error);
         if (isMounted) setAttachmentError('Não foi possível carregar os anexos. Atualize a tela para tentar novamente.');
         return;
       }
-      if (isMounted) {
-        setAttachments(data || []);
-        setAttachmentError(null);
-      }
+      if (isMounted) setAttachmentError(null);
     };
     void loadAttachments().finally(() => {
       if (isMounted) setLoadingAttachments(false);
@@ -104,17 +98,22 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
     let isMounted = true;
     const loadEvidences = async () => {
       try {
-        const { data, error } = await supabase
-          .from('ticket_evidences')
-          .select('*')
-          .eq('ticket_id', ticketId)
-          .order('created_at', { ascending: false });
+        const response = await fetch(`/api/tecnico/evidencias?ticket_id=${encodeURIComponent(ticketId)}`);
+        const result = await response.json();
+        const data = result.evidences as TicketEvidence[] | null;
+        const error = response.ok ? null : new Error(result.error || 'Falha ao carregar evidências.');
         if (error) {
           console.error('Erro ao carregar evidências da OS:', error.message);
           if (isMounted) setEvidenceError('Não foi possível carregar as fotos desta ordem de serviço.');
           return;
         }
-        if (isMounted) setEvidences(data as TicketEvidence[]);
+        if (isMounted) {
+          setEvidences(data as TicketEvidence[]);
+          setEvidenceError(null);
+        }
+      } catch (loadError) {
+        console.error('Erro ao carregar evidências da OS:', loadError);
+        if (isMounted) setEvidenceError('Não foi possível carregar as fotos desta ordem de serviço. Atualize a tela para tentar novamente.');
       } finally {
         if (isMounted) setLoadingEvidences(false);
       }
@@ -194,7 +193,7 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [ticketId, supabase]);
+  }, [ticketId]);
 
   useEffect(() => {
     const pauseId = ticket?.pausa_atual_id;
@@ -434,6 +433,23 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
   const pausedHours = Math.floor(totalSlaPausedSeconds / 3600);
   const pausedMinutes = Math.floor((totalSlaPausedSeconds % 3600) / 60);
   const clientLogo = getClientLogo(ticket.cliente);
+  const analystImages = attachments.filter((attachment) =>
+    attachment.tipo_arquivo?.startsWith('image/') || /\.(jpe?g|png|webp|gif|avif)(?:[?#]|$)/i.test(attachment.url),
+  );
+  const legacyEvidence = (['BEFORE', 'AFTER'] as const).flatMap((type) => {
+    const mediaUrl = type === 'BEFORE' ? ticket.resolucao?.evidenciaAntesUrl : ticket.resolucao?.evidenciaDepoisUrl;
+    if (!mediaUrl || evidences.some((evidence) => evidence.media_url === mediaUrl)) return [];
+    return [{
+      id: `legacy-${type}-${ticket.id}`,
+      ticket_id: ticket.id,
+      type,
+      media_url: mediaUrl,
+      caption: null,
+      created_by: '',
+      created_at: '',
+    } satisfies TicketEvidence];
+  });
+  const visibleEvidences = [...evidences, ...legacyEvidence];
 
   return (
     <div className={styles.pageContainer}>
@@ -530,19 +546,37 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
           {evidenceError && <p className={styles.evidenceError} role="alert">{evidenceError}</p>}
           {loadingEvidences ? (
             <p className={styles.detailValue} role="status">Carregando fotos da OS...</p>
-          ) : evidences.length === 0 ? (
+          ) : visibleEvidences.length === 0 ? (
             <p className={styles.detailValue}>Nenhuma foto enviada para esta OS.</p>
           ) : (
             <div className={styles.evidenceGrid}>
-              {evidences.map((evidence) => (
+              {visibleEvidences.map((evidence) => (
                 <figure key={evidence.id} className={styles.evidenceItem}>
                   <a href={evidence.media_url} target="_blank" rel="noopener noreferrer">
-                    {/\.(mp4|webm)(?:[?#]|$)/i.test(evidence.media_url) ? <video src={evidence.media_url} aria-label="Vídeo antes do atendimento" width={112} height={84} controls preload="metadata" /> : <img src={evidence.media_url} alt={evidence.caption || (evidence.type === 'BEFORE' ? 'Foto antes do atendimento' : 'Foto após o atendimento')} width={320} height={200} loading="lazy" />}
+                    {/\.(mp4|webm)(?:[?#]|$)/i.test(evidence.media_url) ? <video src={evidence.media_url} aria-label="Vídeo antes do atendimento" width={112} height={84} controls preload="metadata" /> : <Image src={evidence.media_url} alt={evidence.caption || (evidence.type === 'BEFORE' ? 'Foto antes do atendimento' : 'Foto após o atendimento')} width={320} height={200} loading="lazy" unoptimized />}
                   </a>
                   <figcaption>{evidence.caption || (evidence.type === 'BEFORE' ? 'Antes do atendimento' : 'Após o atendimento')}</figcaption>
                   {canEditMedia && <button type="button" className={styles.evidenceDeleteButton} onClick={() => void deleteEvidence(evidence)} disabled={Boolean(deletingEvidenceId)}>
                     <Trash2 size={14} /> Excluir mídia
                   </button>}
+                </figure>
+              ))}
+            </div>
+          )}
+        </section>
+
+        <section className={styles.cardSection} aria-labelledby="analyst-images-heading">
+          <h3 id="analyst-images-heading" className={styles.sectionHeading}>Imagens enviadas pelo analista</h3>
+          {analystImages.length === 0 ? (
+            <p className={styles.detailValue}>Nenhuma imagem anexada pelo analista a esta OS.</p>
+          ) : (
+            <div className={styles.evidenceGrid}>
+              {analystImages.map((image) => (
+                <figure key={image.id} className={styles.evidenceItem}>
+                  <a href={image.url} target="_blank" rel="noopener noreferrer">
+                    <Image src={image.url} alt={image.nome_arquivo || 'Imagem anexada pelo analista'} width={320} height={200} loading="lazy" unoptimized />
+                  </a>
+                  <figcaption>{image.nome_arquivo}</figcaption>
                 </figure>
               ))}
             </div>

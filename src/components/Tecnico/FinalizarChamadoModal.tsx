@@ -90,11 +90,10 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
     let isMounted = true;
     const loadEvidence = async () => {
       try {
-        const { data, error: loadError } = await supabase
-          .from('ticket_evidences')
-          .select('*')
-          .eq('ticket_id', ticket.id)
-          .order('created_at', { ascending: true });
+        const response = await fetch(`/api/tecnico/evidencias?ticket_id=${encodeURIComponent(ticket.id)}`);
+        const result = await response.json();
+        const data = result.evidences as TicketEvidence[] | null;
+        const loadError = response.ok ? null : new Error(result.error || 'Falha ao carregar evidências.');
         if (loadError) {
           setError('Não foi possível carregar as fotos já enviadas para esta OS.');
           console.error('Erro ao carregar evidências no modal:', loadError.message);
@@ -103,6 +102,9 @@ export default function FinalizarChamadoModal({ ticket, onClose, onSuccess }: Fi
         if (!isMounted || !data) return;
         setEvidenciasAntes((data as TicketEvidence[]).filter((item: TicketEvidence) => item.type === 'BEFORE'));
         setEvidenciasDepois((data as TicketEvidence[]).filter((item: TicketEvidence) => item.type === 'AFTER'));
+      } catch (loadError) {
+        console.error('Erro ao carregar evidências no modal:', loadError);
+        if (isMounted) setError('Não foi possível carregar as fotos já enviadas para esta OS.');
       } finally {
         if (isMounted) setLoadingEvidence(false);
       }

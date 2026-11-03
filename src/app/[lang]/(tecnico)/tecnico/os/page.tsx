@@ -14,7 +14,7 @@ export default async function OsIndexPage({
   const ticketId = resolvedSearchParams.ticket_id;
 
   if (ticketId) {
-    return <OsDetail ticketId={ticketId} lang={lang} />;
+    return <OsDetail key={ticketId} ticketId={ticketId} lang={lang} />;
   }
 
   return <OsList lang={lang} />;

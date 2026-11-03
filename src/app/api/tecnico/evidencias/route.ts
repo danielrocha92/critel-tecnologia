@@ -6,6 +6,58 @@ import { cookies } from 'next/headers';
 const MAX_MEDIA_BYTES = 20 * 1024 * 1024;
 const ALLOWED_MEDIA_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'video/mp4', 'video/webm']);
 
+export async function GET(request: Request) {
+  try {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!url || !anonKey || !serviceRoleKey) {
+      return NextResponse.json({ error: 'Configuração do Supabase incompleta.' }, { status: 500 });
+    }
+
+    const cookieStore = await cookies();
+    const session = createServerClient(url, anonKey, {
+      cookies: {
+        getAll: () => cookieStore.getAll(),
+        setAll: (values) => values.forEach(({ name, value, options }) => cookieStore.set({ name, value, ...options })),
+      },
+    });
+    const { data: { user }, error: authError } = await session.auth.getUser();
+    if (authError || !user) return NextResponse.json({ error: 'Sessão expirada. Entre novamente.' }, { status: 401 });
+
+    const ticketId = new URL(request.url).searchParams.get('ticket_id');
+    if (!ticketId) return NextResponse.json({ error: 'Ordem de serviço inválida.' }, { status: 400 });
+
+    const admin = createClient(url, serviceRoleKey, { auth: { autoRefreshToken: false, persistSession: false } });
+    const { data: profile, error: profileError } = await admin
+      .from('perfis').select('id,cargo,status').eq('user_id', user.id).maybeSingle();
+    if (profileError) throw profileError;
+    const cargo = profile?.cargo?.normalize('NFD').replace(/\p{Diacritic}/gu, '').trim().toUpperCase();
+    if (!profile || cargo !== 'TECNICO' || profile.status !== 'ATIVO') {
+      return NextResponse.json({ error: 'Apenas técnicos ativos podem consultar evidências.' }, { status: 403 });
+    }
+
+    const { data: ticket, error: ticketError } = await admin
+      .from('tickets').select('id,tecnico_id').eq('id', ticketId).like('protocolo_origem', 'OS-%').maybeSingle();
+    if (ticketError) throw ticketError;
+    if (!ticket || (ticket.tecnico_id !== user.id && ticket.tecnico_id !== profile.id)) {
+      return NextResponse.json({ error: 'Esta ordem de serviço não está atribuída a você.' }, { status: 403 });
+    }
+
+    const { data: evidences, error: evidencesError } = await admin
+      .from('ticket_evidences')
+      .select('id,ticket_id,type,media_url,caption,created_by,created_at')
+      .eq('ticket_id', ticketId)
+      .order('created_at', { ascending: false });
+    if (evidencesError) throw evidencesError;
+
+    return NextResponse.json({ evidences: evidences || [] });
+  } catch (error) {
+    console.error('Erro ao carregar evidências da OS:', error);
+    return NextResponse.json({ error: 'Não foi possível carregar as fotos desta ordem de serviço.' }, { status: 500 });
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
