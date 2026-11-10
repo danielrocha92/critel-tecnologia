@@ -10,35 +10,81 @@ Este projeto foi desenvolvido com as seguintes ferramentas:
 - [React 19](https://react.dev/) - Biblioteca JavaScript para construção de interfaces de usuário.
 - [TypeScript](https://www.typescriptlang.org/) - Superset tipado do JavaScript para maior segurança do código.
 - [Supabase](https://supabase.com/) - Backend as a Service (BaaS) com PostgreSQL, Realtime WebSockets e RLS.
+- [Firebase](https://firebase.google.com/) - SDK e serviço legado mantidos no repositório, sem participação no fluxo operacional principal atual.
 - **CSS Modules** - Metodologia de estilização modular, com design em *Glassmorphism*.
 
 ---
 
-## ⚙️ Módulos e Funcionalidades
+## ⚙️ Módulos e funcionalidades
 
-### 1. Site Institucional
-Focado em branding e marketing corporativo:
-- **Header/Footer**: Navegação global, seletor de idiomas (PT, EN, ES) e branding.
-- **ScrollReveal**: Animações suaves de fade-in ao longo da rolagem.
-- **Ações Flutuantes**: Navegação rápida para voltar ao topo da página.
+O Critel Tecnologia reúne o site institucional e o Critel Core, uma intranet para operação de chamados, ordens de serviço, equipe de campo e financeiro. A disponibilidade de cada função depende do perfil do usuário, das variáveis de ambiente e das migrations aplicadas no Supabase.
 
-### 2. Critel Core (Intranet / Painel de Atendimento)
-A plataforma interna (acessível via `/atendimento`) automatiza e concentra a operação de suporte técnico:
+### Site institucional
 
-- **Fila de Atendimento e Chamados Autônomos**: Chamados internos consultados no Supabase, atualizados em tempo real e carregados em páginas para reduzir o tempo inicial de abertura. A gestão nativa de chamados mantém transições de status controladas pelo banco e refletidas imediatamente na operação.
-- **Ordens de Serviço e pausas de SLA**: O técnico responsável pode pausar uma OS em andamento pelo menu **Mais** e retomá-la quando o impedimento for resolvido. A pausa exige motivo, foto do impedimento, responsável local, cargo/função e previsão de retorno. O tempo pausado é acumulado no campo `sla_pausado_segundos` do chamado.
-- **Motivos de pausa**: Compra de material; link da operadora pendente; falta de energia ou acesso ao rack; infraestrutura civil; mobiliário/PDV pendente; restrição de horário ou ruído no shopping; equipamento aguardado; falta de EPI/liberação de altura; e dependência da equipe de TI do cliente.
-- **Rastreamento de compra de material**: Com permissão de GPS, o portal registra posições enquanto a tela da OS estiver aberta e o rastreamento do navegador continuar ativo. O trajeto no mapa fica disponível somente para analistas e administradores. O mapa usa OpenStreetMap por padrão; `NEXT_PUBLIC_OSM_TILE_URL` permite configurar outro endpoint de tiles. Consulte a [política de uso dos tiles do OpenStreetMap](https://operations.osmfoundation.org/policies/tiles/).
-- **Ações da OS**: No menu **Mais**, imprimir abre a impressão do navegador, editar atualiza os dados da OS, log de alterações consulta as transições registradas, e pausar/retomar executa o fluxo de SLA. Cancelamento é permitido a analistas/administradores ou ao técnico responsável; exclusão é restrita a administradores. A finalização técnica abre o formulário com evidências e assinatura.
-- **Histórico e relatório do técnico**: O histórico apresenta os dados do atendimento concluído, horários, endereço, coordenadas de check-in e encerramento, laudo, materiais e despesas. É possível selecionar um período e gerar um relatório para impressão ou salvar como PDF. O documento inclui os detalhes textuais e coordenadas, sem fotos, vídeos ou assinatura, para manter o arquivo leve.
-- **Validação de OS e financeiro**: Após o técnico finalizar a OS, ela fica aguardando validação do analista. Ao aprová-la, o sistema fecha a OS e cria atomicamente uma transação de despesa para o técnico, com o valor do serviço e as despesas registradas no atendimento. A ação de devolver reabre a OS para ajustes e não libera o pagamento.
-- **Contas e DRE**: O painel financeiro reúne contas a pagar e a receber, permite cadastrar lançamentos manuais, registrar a liquidação via Pix, boleto ou transferência e consultar o DRE por competência ou caixa. O livro financeiro pode ser filtrado por tipo e técnico. Despesas de OS compõem os reembolsos extras do balanço do técnico somente depois que a OS é aprovada pelo analista.
-- **Ciclo de pagamento do técnico**: O ciclo padrão considera atendimentos do dia 2 ao dia 1 seguinte, com vencimento no dia 15. O gestor financeiro pode aprovar exceções de pagamento imediato para uma OS pendente, registrando o motivo.
-- **Gestão de Contatos das Lojas**: Mantém os contatos das unidades em uma base interna, permitindo consultar e atualizar os dados usados pela operação.
-- **Monitoramento de PDVs (Milvus)**: Consulta à plataforma Milvus pela ferramenta administrativa correspondente, com integração *On-Demand* para disponibilizar a disponibilidade (Online/Offline) do terminal da loja na tela do atendente.
-- **Gerador de Salas Jitsi**: Atalho prático no chat (`/video`) que gera links de salas virtuais únicas e seguras para os técnicos e gerentes de loja interagirem sem necessidade de celulares.
-- **Painel Comercial**: Consulta e pesquisa dos cadastros de lojas, sem canal externo de mensagens integrado.
-- **Cofre Zero Trust (SSO Proxy)**: Sistema de redirecionamento interno e seguro para acesso a sistemas terceiros (Stoq ERP, Milvus) ocultando credenciais do frontend.
+- **Idiomas**: conteúdo em português, inglês e espanhol, com navegação localizada.
+- **Apresentação da empresa**: páginas inicial, institucional, clientes, certificações e prêmios, contato, privacidade e termos.
+- **Portfólio de soluções**: páginas de suporte de TI empresarial, cabeamento estruturado, ativos de rede, segurança da informação, tecnologia predial, field services, Wi-Fi social, outsourcing, automação de estacionamento e segurança eletrônica.
+- **Formulário de contato**: coleta nome, cargo, empresa, e-mail e desafio informado. **No estado atual, o envio é demonstrativo**: mostra uma confirmação na tela e limpa o formulário; não persiste nem encaminha a solicitação a um serviço externo.
+- **SEO e navegação**: metadados por idioma, canonical e alternates, Open Graph, dados estruturados JSON-LD, navegação global e ações para voltar ao topo.
+
+### Critel Core — acesso e navegação
+
+- **Autenticação**: login pelo Supabase Auth. O perfil em `perfis` determina cargo e status; páginas e operações verificam permissões conforme o papel (por exemplo, técnico, analista, financeiro, comercial, administrador e superadministrador).
+- **Painel inicial**: apresenta indicadores de OS e atalhos para os ambientes do analista, financeiro, comercial e OS. Os indicadores dependem das colunas e políticas disponíveis no banco.
+- **Preferências de interface**: alternância entre tema claro e escuro.
+- **Notificações**: sino com notificações persistentes e preferências para novos chamados, respostas e encerramentos; há opções de alerta sonoro e notificação nativa do navegador quando suportada e autorizada pelo usuário.
+- **Compatibilidade de rotas**: `/atendimento` encaminha para o painel do analista ou para a OS indicada pelos parâmetros da URL.
+
+### Chamados e ordens de serviço
+
+- **Abertura pelo analista ou administrador**: registra cliente, assunto, descrição, equipe responsável, prioridade e, para suporte técnico, departamento, categoria e causa raiz. A descrição pode conter formatação e endereço da loja; é possível incluir anexos.
+- **Atribuição e remuneração**: uma OS pode ser encaminhada a técnico ativo. Na atribuição, o fluxo permite indicar modalidade de pagamento (diária ou por chamado) e valor, que também é associado ao perfil do técnico.
+- **Fila e acompanhamento**: listas de OS podem ser pesquisadas e filtradas por grupo de status, cliente e data. As mudanças de tickets no Supabase podem ser refletidas via Realtime nas telas inscritas.
+- **Estados operacionais**: a operação distingue itens na fila/novos, abertos ou em andamento, pausados e concluídos. A OS concluída pelo técnico permanece em `FINALIZADO` aguardando validação; o fechamento financeiro muda para `FECHADO`.
+- **Detalhes da OS**: consulta dados do cliente, assunto, descrição, endereço, classificação do problema, prioridade, valor do chamado, anexos e evidências do atendimento, além do histórico de transições.
+- **Ações administrativas da OS**: analista, administrador ou técnico responsável podem editar campos permitidos e cancelar uma OS não encerrada. A exclusão é restrita a administrador/superadministrador. Ações são registradas no histórico de transições quando aplicável.
+- **Anexos**: arquivos enviados na abertura são armazenados no Supabase Storage; o endpoint aceita até 20 arquivos por chamado e limita cada arquivo a 20 MB.
+
+### Portal do técnico
+
+- **Fila de trabalho**: consulta serviços atribuídos ou disponíveis, pesquisa por cliente/endereço/protocolo, filtra por cliente e data, e permite ao técnico assumir OS ainda não atribuídas quando habilitado.
+- **Check-in**: registra início do atendimento com horário e coordenadas GPS, mediante permissão do navegador.
+- **Execução e evidências**: permite registrar horários de início e término, descrição dos serviços, materiais utilizados, despesas, assinatura do responsável e evidências antes/depois. Mídias podem ser consultadas e removidas enquanto a OS ainda está em andamento, conforme as permissões.
+- **Finalização técnica**: envia o laudo e muda o status para `FINALIZADO`, colocando a OS na fila de validação do analista; isso, por si só, não fecha a OS nem libera pagamento.
+- **Pausas e SLA**: o técnico responsável pode pausar e retomar uma OS. Para pausar, informa motivo, contato e função do responsável no local, previsão de retorno, observações e foto do impedimento. O tempo de pausa é acumulado para controle do SLA.
+- **Motivos de pausa**: compra de material, link da operadora pendente, falta de energia/acesso ao rack, infraestrutura civil, mobiliário/PDV pendente, restrição de horário/ruído, equipamento aguardado, falta de EPI/liberação de altura e dependência da equipe de TI do cliente.
+- **Trajeto para compra de material**: quando aplicável, registra GPS durante a pausa enquanto o navegador mantiver a tela aberta, permissão e localização ativas. O trajeto é exibido para perfis autorizados. O mapa usa OpenStreetMap por padrão; `NEXT_PUBLIC_OSM_TILE_URL` permite definir outro servidor de tiles. Consulte a [política de uso dos tiles do OpenStreetMap](https://operations.osmfoundation.org/policies/tiles/).
+- **Histórico**: lista atendimentos concluídos e mostra resumo, endereço (inclusive extraído de descrições antigas), horários e laudo. Detalhes adicionais, como localizações, causa, materiais e despesas, ficam em seção expansível.
+- **Relatório de atendimentos**: seleciona datas inicial e final e prepara uma página de impressão que pode ser salva como PDF pelo navegador. Inclui dados textuais, endereço, horários, coordenadas, laudo e despesas; não incorpora fotos, vídeos nem assinatura. Há limite de 5.000 atendimentos por solicitação.
+- **Balanço financeiro individual**: consulta os lançamentos do próprio técnico por ciclo, distinguindo total, serviços, reembolsos extras aprovados, pendências e valores pagos.
+
+### Validação de OS e financeiro
+
+- **Fila de validação**: analista/financeiro revisa OSs em `FINALIZADO`, consulta técnico, cliente, valores e abre os detalhes da ordem antes de tomar uma ação.
+- **Aprovar e fechar**: ação atômica no banco valida o status, fecha a OS e cria ou atualiza uma única conta a pagar vinculada ao chamado. O lançamento soma valor do serviço e despesas declaradas; despesas aparecem como reembolsos no balanço do técnico após esta aprovação.
+- **Devolver para ajustes**: reabre uma OS finalizada e a devolve ao técnico, sem liberar o lançamento financeiro.
+- **Livro de transações**: reúne contas a pagar e a receber, lançamentos automáticos de OS e lançamentos manuais. O livro permite filtrar tipo e técnico, registrar pagamento/recebimento com data e método (Pix, boleto ou transferência) e acompanhar estados pendente, liquidado ou atrasado (atraso calculado pelo vencimento).
+- **Exceção de pagamento imediato**: gestor financeiro pode antecipar uma conta de OS pendente, definir vencimento para hoje e registrar justificativa. A exceção não substitui o registro de liquidação.
+- **DRE**: apresenta receitas, despesas e resultado por competência e por caixa liquidado, no mês selecionado.
+- **Ciclo padrão**: competência de 2 de um mês a 1 do mês seguinte, com vencimento dia 15. Exceções imediatas são uma decisão do gestor, não a regra do ciclo.
+
+### Administração, equipe e apoio à operação
+
+- **Governança de identidade**: lista perfis e status; a tela de governança permite aprovar solicitações pendentes e revogar acesso pelo botão de pânico. A área Gerenciar Usuários cria colaboradores e permite alterar cargo e status.
+- **Cadastro de técnicos parceiros**: pesquisa por nome, empresa ou cidade, consulta ficha, endereço, contato e dados de cadastro; perfis autorizados podem incluir ou editar registros. A criação de acesso de usuário é um fluxo separado do cadastro do parceiro.
+- **Configurações de notificações**: define preferências de alertas de chamados, som e notificações de desktop; a permissão do sistema operacional precisa ser concedida no navegador.
+- **Base de contatos das lojas (ambiente comercial)**: consulta e pesquisa registros da tabela `lojas_contatos`.
+- **Monitoramento Bacio di Latte**: consulta status dos PDVs por loja, mostra online, offline ou sem telemetria, pesquisa loja/código/PDV e atualiza automaticamente a cada minuto, além de permitir atualização manual. Um PDV só é considerado online quando há leitura recente; o painel depende de telemetria disponível pela integração Milvus.
+
+### Telas demonstrativas ou ainda não conectadas a dados operacionais
+
+As telas a seguir existem no projeto, mas atualmente usam dados fixos/de exemplo ou não completam o fluxo de persistência. Não devem ser tratadas como fonte oficial de dados:
+
+- **Acompanhamento CRM/Relatórios**: KPIs e gráficos apresentados na página são valores estáticos; o botão de exportação ainda não gera um relatório real.
+- **Funil de Prospecção**: a lista vem de dados em memória de demonstração e não é persistida no Supabase.
+- **Base de Conhecimento**: catálogo de exemplos estático; busca, filtros e acesso ao conteúdo ainda não estão conectados a um repositório de artigos.
+- **Base de clientes** (`/clientes/lista`): registros exibidos são exemplos locais; filtros e redimensionamento de colunas funcionam na interface, mas o cadastro/lista não representam uma integração operacional com a tabela de contatos de lojas.
+- **Cofre/SSO de sistemas externos**: há telas e rotas para credenciais e autenticação. O fluxo de login Milvus possui integração específica, mas outros destinos (como Stoq) contêm respostas simuladas; confirme a implementação, armazenamento e segurança das credenciais antes de usar em produção. A existência da interface não significa que o SSO esteja pronto para todos os sistemas.
 
 ---
 
@@ -46,17 +92,12 @@ A plataforma interna (acessível via `/atendimento`) automatiza e concentra a op
 
 ### Pré-requisitos
 - [Node.js](https://nodejs.org/) (versão 22.13.0 ou superior; versão do projeto: 22.23.3)
-- Configuração do **Supabase** (Projetos: `tickets`, `lojas_contatos`, `status_pdv`)
+- Projeto **Supabase** configurado com o schema e as tabelas necessárias, incluindo `tickets`, `lojas_contatos` e `status_pdv`
 - Configuração de chaves no arquivo `.env.local`
 
-### Serviços Firebase usados
+### Firebase legado
 
-No Firebase Console, habilite:
-
-- **Cloud Firestore**: usado para chamados/ordens de serviço, transições e resoluções. Crie o banco em modo nativo; as coleções são criadas quando o app grava os primeiros documentos.
-- **Cloud Storage for Firebase**: usado para anexos, assinaturas e evidências de atendimento.
-
-O login do app é feito pelo **Supabase Auth**. Firebase Authentication, Analytics, Hosting e Cloud Messaging não são usados atualmente. A identidade do Supabase não autentica automaticamente requisições ao Firebase; antes de liberar Firestore ou Storage em produção, implemente uma ponte de autenticação com Firebase ou mova essas operações para APIs server-side com Firebase Admin SDK. Não publique regras com leitura/escrita abertas.
+O repositório mantém a inicialização do SDK Firebase e um serviço antigo de tickets, mas eles não são necessários para os fluxos ativos do Critel Core. Autenticação, ordens de serviço, transições, notificações, anexos, evidências e dados financeiros usam Supabase Auth, Postgres, Realtime e Storage. Não habilite Firestore ou Firebase Storage para executar a aplicação atual. Se o serviço legado for reativado, revise antes a autenticação e as regras de acesso; a sessão do Supabase não autentica automaticamente no Firebase.
 
 ### Instalação
 
@@ -71,18 +112,13 @@ cd critel-tecnologia
 npm install
 ```
 
-3. Configure o `.env.local` (os valores do Firebase Web já foram preenchidos neste ambiente; não compartilhe o arquivo):
+3. Configure o `.env.local` com as credenciais do Supabase:
 ```env
 NEXT_PUBLIC_SUPABASE_URL=sua_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=sua_chave_anonima
 SUPABASE_SERVICE_ROLE_KEY=sua_chave_admin
-NEXT_PUBLIC_FIREBASE_API_KEY=sua_api_key
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=seu_projeto.firebaseapp.com
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=seu_project_id
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=seu_projeto.firebasestorage.app
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=seu_sender_id
-NEXT_PUBLIC_FIREBASE_APP_ID=seu_app_id
 ```
+`SUPABASE_SERVICE_ROLE_KEY` é usada somente por rotas server-side e nunca deve ser exposta no navegador. As variáveis `NEXT_PUBLIC_FIREBASE_*` são opcionais e não habilitam funcionalidades do fluxo operacional atual.
 
 4. No Windows com nvm-windows, ative a versão do projeto:
 ```powershell
