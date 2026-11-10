@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useRef, useState, Suspense } from 'react';
 import Image from 'next/image';
 import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -61,6 +61,8 @@ function CentralAtendimentoContent({
 
   const searchParams = useSearchParams();
   const [ticketAtivo, setTicketAtivo] = useState<ITicket | null>(null);
+  const [isHeaderCompact, setIsHeaderCompact] = useState(false);
+  const detailBodyRef = useRef<HTMLDivElement>(null);
   const [isNewTicketModalOpen, setIsNewTicketModalOpen] = useState(openCreateTicket);
   const [isMaisDropdownOpen, setIsMaisDropdownOpen] = useState(false);
   const safeDateValue = (value?: string | number | Date | null) => {
@@ -108,6 +110,11 @@ function CentralAtendimentoContent({
     const p = perfis.find(p => String(p.id) === String(id) || String(p.user_id) === String(id));
     return p ? `${p.nome} - Critel Tecnologia` : 'Alocado';
   };
+  const getTechnicianName = (id: string | null | undefined) => {
+    if (!id) return 'Não atribuído';
+    const profile = perfis.find((item) => String(item.user_id) === id || String(item.id) === id);
+    return profile?.nome || 'Carregando...';
+  };
 
   const handleTimelineClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement;
@@ -141,7 +148,30 @@ function CentralAtendimentoContent({
     && (ticketAtivo.tecnico_id === operadorAtual?.user_id || ticketAtivo.tecnico_id === operadorAtual?.id));
   const canCancelTicket = canCreateTicket || isAssignedTechnician;
   const canViewPauseRoute = ['ANALISTA', 'ADMIN', 'SUPER_ADMIN'].includes(cargoAtual || '');
+
+  useEffect(() => {
+    if (!ticketAtivo?.id) return;
+
+    const updateCompactHeader = (scrollTop: number) => {
+      setIsHeaderCompact((current) => {
+        const next = scrollTop > 48;
+        return current === next ? current : next;
+      });
+    };
+    const handleWindowScroll = () => updateCompactHeader(window.scrollY);
+    const handleBodyScroll = () => updateCompactHeader(detailBodyRef.current?.scrollTop || 0);
+    const body = detailBodyRef.current;
+
+    window.addEventListener('scroll', handleWindowScroll, { passive: true });
+    body?.addEventListener('scroll', handleBodyScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleWindowScroll);
+      body?.removeEventListener('scroll', handleBodyScroll);
+    };
+  }, [ticketAtivo?.id]);
+
   const handleBackToTickets = () => {
+    setIsHeaderCompact(false);
     if (routeTicketId) {
       router.push(`/${lang}/os`);
       return;
@@ -388,7 +418,7 @@ function CentralAtendimentoContent({
         </>
       ) : (
         <div className={styles.innerViewContainer}>
-          <div className={styles.innerHeader}>
+          <div className={`${styles.innerHeader} ${isHeaderCompact ? styles.innerHeaderCompact : ''}`}>
             <div className={styles.detailHeading}>
               <button className={styles.btnBack} onClick={handleBackToTickets} title="Voltar" aria-label="Voltar para chamados">
                 <ArrowLeft size={17} aria-hidden="true" />
@@ -401,6 +431,7 @@ function CentralAtendimentoContent({
                 <div className={styles.detailMeta}>
                   <span className={styles.detailStatus}>{ticketAtivo.status || 'Sem status'}</span>
                   <span>{ticketAtivo.cliente || 'Cliente não informado'}</span>
+                  <span className={styles.detailTechnician}>Técnico: {getTechnicianName(ticketAtivo.tecnico_id)}</span>
                 </div>
               </div>
             </div>
@@ -481,7 +512,7 @@ function CentralAtendimentoContent({
             </div>
           </div>
 
-          <div className={styles.innerBody}>
+          <div className={styles.innerBody} ref={detailBodyRef}>
             {/* Coluna Esquerda: Timeline e Resposta */}
             <div className={styles.innerTimeline}>
               <div className={styles.timelineCard}>
