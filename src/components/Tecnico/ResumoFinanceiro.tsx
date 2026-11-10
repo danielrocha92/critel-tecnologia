@@ -1,168 +1,178 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { createBrowserClient } from '@supabase/ssr';
-import { TrendingUp, Wallet, Receipt, Calendar } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Calendar, Receipt, TrendingUp, Wallet } from 'lucide-react';
+import { createClient } from '@/utils/supabase/client';
 import styles from './ResumoFinanceiro.module.css';
+
+type TechnicianTransaction = {
+  id: string;
+  descricao: string;
+  valor: number | string;
+  valor_servico: number | string;
+  valor_despesas: number | string;
+  data_vencimento: string;
+  data_liquidacao: string | null;
+  status: 'PENDENTE' | 'LIQUIDADO';
+  metodo_pagamento: string | null;
+};
+
+function getCycle(paymentMonth: string) {
+  const [year, month] = paymentMonth.split('-').map(Number);
+  const start = new Date(Date.UTC(year, month - 2, 2));
+  const end = new Date(Date.UTC(year, month - 1, 1));
+  return {
+    start: start.toISOString().slice(0, 10),
+    end: end.toISOString().slice(0, 10),
+    payout: `${paymentMonth}-15`,
+    label: `Ciclo ${start.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', timeZone: 'UTC' })}–${end.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' })} · pagamento 15/${String(month).padStart(2, '0')}`,
+  };
+}
+
+function currency(value: number) {
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+}
+
+function currentPaymentMonth() {
+  const parts = new Intl.DateTimeFormat('en', {
+    timeZone: 'America/Sao_Paulo',
+    year: 'numeric',
+    month: '2-digit',
+  }).formatToParts(new Date());
+  return `${parts.find((part) => part.type === 'year')?.value}-${parts.find((part) => part.type === 'month')?.value}`;
+}
+
+const supabase = createClient();
 
 export default function ResumoFinanceiro({ userId }: { userId: string }) {
   const [loading, setLoading] = useState(true);
-  const [totais, setTotais] = useState({
-    servicos: 0,
-    despesas: 0,
-    geral: 0
-  });
+  const [transactions, setTransactions] = useState<TechnicianTransaction[]>([]);
+  const [paymentMonth, setPaymentMonth] = useState(currentPaymentMonth);
 
-  // Gera os últimos 6 meses de quinzenas
-  const [periodos] = useState(() => {
-    const list = [];
-    const curr = new Date();
-    let m = curr.getMonth();
-    let y = curr.getFullYear();
-    for (let i = 0; i < 6; i++) {
-      const monthName = new Date(y, m, 1).toLocaleString('pt-BR', { month: 'long' });
-      const capMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
-      
-      list.push({ label: `2ª Quinzena de ${capMonth}/${y}`, value: `${y}-${m}-2` });
-      list.push({ label: `1ª Quinzena de ${capMonth}/${y}`, value: `${y}-${m}-1` });
+  const periods = useMemo(() => {
+    const [year, month] = paymentMonth.split('-').map(Number);
+    return Array.from({ length: 14 }, (_, index) => {
+      const date = new Date(Date.UTC(year, month - 1 + index - 7, 1));
+      const value = date.toISOString().slice(0, 7);
+      return { value, label: getCycle(value).label };
+    });
+  }, [paymentMonth]);
 
-      m--;
-      if (m < 0) { m = 11; y--; }
-    }
-    return list;
-  });
-
-  const hoje = new Date();
-  const defVal = `${hoje.getFullYear()}-${hoje.getMonth()}-${hoje.getDate() <= 15 ? 1 : 2}`;
-  const [selectedPeriod, setSelectedPeriod] = useState(defVal);
-
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const cycle = useMemo(() => getCycle(paymentMonth), [paymentMonth]);
 
   useEffect(() => {
-    const fetchFinanceiro = async () => {
-      // Extrai ano, mês e quinzena
-      const [yStr, mStr, qStr] = selectedPeriod.split('-');
-      const y = parseInt(yStr);
-      const m = parseInt(mStr);
-      const q = parseInt(qStr);
-      const isPrimeira = q === 1;
-
-      // Definir limites de data para a quinzena atual
-      const dataInicio = new Date(y, m, isPrimeira ? 1 : 16);
-      dataInicio.setHours(0, 0, 0, 0);
-      
-      const dataFim = isPrimeira 
-        ? new Date(y, m, 15, 23, 59, 59, 999)
-        : new Date(y, m + 1, 0, 23, 59, 59, 999);
-
-      const { data, error } = await supabase
-        .from('tickets')
-        .select('valor_pagamento, despesas_json')
-        .eq('tecnico_id', userId)
-        .in('status', ['FINALIZADO', 'FECHADO'])
-        .not('financeiro_aprovado_em', 'is', null)
-        .gte('financeiro_aprovado_em', dataInicio.toISOString())
-        .lte('financeiro_aprovado_em', dataFim.toISOString());
-
-      if (data && !error) {
-        let sumServicos = 0;
-        let sumDespesas = 0;
-
-        data.forEach(item => {
-          sumServicos += Number(item.valor_pagamento || 0);
-          const expenses = Array.isArray(item.despesas_json) ? item.despesas_json : [];
-          sumDespesas += expenses.reduce((total, expense) =>
-            total + Number(expense.valor_numerico ?? expense.valor ?? 0), 0);
-        });
-
-        setTotais({
-          servicos: sumServicos,
-          despesas: sumDespesas,
-          geral: sumServicos + sumDespesas
-        });
-      } else if (error) {
-        console.error('Não foi possível carregar os valores aprovados do técnico:', error.message);
+    let active = true;
+    const fetchTransactions = async () => {
+      try {
+        const response = await fetch(`/api/tecnico/financeiro?inicio=${cycle.start}&fim=${cycle.end}`, { cache: 'no-store' });
+        const result = await response.json() as { error?: string; transacoes?: TechnicianTransaction[] };
+        if (!response.ok) throw new Error(result.error || 'Não foi possível carregar os lançamentos.');
+        if (active) setTransactions(result.transacoes || []);
+      } catch (error) {
+        console.error('Não foi possível carregar os valores do ciclo do técnico:', error);
+      } finally {
+        if (active) setLoading(false);
       }
-
-      setLoading(false);
     };
 
-    if (!userId) return;
-
-    void fetchFinanceiro();
+    void fetchTransactions();
     const channel = supabase
       .channel(`resumo_financeiro_tecnico_${userId}`)
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'tickets', filter: `tecnico_id=eq.${userId}` }, () => {
-        void fetchFinanceiro();
+        void fetchTransactions();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'transacoes_financeiras', filter: `tecnico_id=eq.${userId}` }, () => {
+        void fetchTransactions();
       })
       .subscribe();
 
-    return () => { void supabase.removeChannel(channel); };
-  }, [userId, selectedPeriod]);
+    return () => {
+      active = false;
+      void supabase.removeChannel(channel);
+    };
+  }, [userId, cycle.start, cycle.end]);
+
+  const totals = useMemo(() => transactions.reduce((sum, transaction) => {
+    const amount = Number(transaction.valor || 0);
+    sum.total += amount;
+    sum.servicos += Number(transaction.valor_servico || 0);
+    sum.despesas += Number(transaction.valor_despesas || 0);
+    if (transaction.status === 'LIQUIDADO') sum.pago += amount;
+    else sum.pendente += amount;
+    return sum;
+  }, { total: 0, servicos: 0, despesas: 0, pendente: 0, pago: 0 }), [transactions]);
 
   if (loading) {
-    return (
-      <div className={styles.loadingContainer}>
-        Carregando balanço...
-      </div>
-    );
+    return <div className={styles.loadingContainer}>Carregando balanço...</div>;
   }
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <h2 className={styles.title}>Balanço Financeiro</h2>
+    <section className={styles.container} aria-labelledby="technician-financial-summary-title">
+      <header className={styles.header}>
+        <h2 className={styles.title} id="technician-financial-summary-title">Balanço Financeiro</h2>
         <div className={styles.selectWrapper}>
           <Calendar size={14} className={styles.calendarIcon} />
-          <select 
-            value={selectedPeriod} 
-            onChange={(e) => { setLoading(true); setSelectedPeriod(e.target.value); }}
-            className={styles.periodSelect}
-          >
-            {periodos.map(p => (
-              <option key={p.value} value={p.value} className={styles.periodOption}>
-                {p.label}
-              </option>
-            ))}
+          <select value={paymentMonth} onChange={(event) => setPaymentMonth(event.target.value)} className={styles.periodSelect} aria-label="Ciclo de pagamento">
+            {periods.map((period) => <option key={period.value} value={period.value} className={styles.periodOption}>{period.label}</option>)}
           </select>
         </div>
+      </header>
+
+      <div className={styles.cycleNotice}>
+        <span>{cycle.label}</span>
+        <strong>Vencimento padrão: {new Date(`${cycle.payout}T00:00:00`).toLocaleDateString('pt-BR')}</strong>
       </div>
 
       <div className={styles.card}>
         <div className={styles.totalRow}>
-          <div className={styles.iconBox}>
-            <Wallet size={24} />
-          </div>
+          <div className={styles.iconBox}><Wallet size={24} /></div>
           <div>
-            <p className={styles.totalLabel}>Total a Receber</p>
-            <h3 className={styles.totalValue}>
-              {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totais.geral)}
-            </h3>
+            <p className={styles.totalLabel}>Total do ciclo</p>
+            <h3 className={styles.totalValue}>{currency(totals.total)}</h3>
           </div>
         </div>
 
         <div className={styles.detailsGrid}>
           <div>
-            <p className={styles.detailLabel}>
-              <TrendingUp size={12} className={styles.servicesIcon} /> Serviços (OS)
-            </p>
-            <strong className={styles.detailValue}>
-              {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totais.servicos)}
-            </strong>
+            <p className={styles.detailLabel}><TrendingUp size={12} className={styles.servicesIcon} /> Serviços (OS)</p>
+            <strong className={styles.detailValue}>{currency(totals.servicos)}</strong>
           </div>
           <div>
-            <p className={styles.detailLabel}>
-              <Receipt size={12} className={styles.expensesIcon} /> Reembolsos Extras
+            <p
+              className={styles.detailLabel}
+              title="Soma das despesas das ordens de serviço validadas pelo analista."
+              aria-label="Reembolsos extras aprovados pelo analista"
+            >
+              <Receipt size={12} className={styles.expensesIcon} /> Reembolsos extras
             </p>
-            <strong className={styles.detailValue}>
-              {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totais.despesas)}
-            </strong>
+            <strong className={styles.detailValue}>{currency(totals.despesas)}</strong>
+          </div>
+          <div>
+            <p className={styles.detailLabel}>Pendente de pagamento</p>
+            <strong className={styles.detailValue}>{currency(totals.pendente)}</strong>
+          </div>
+          <div>
+            <p className={styles.detailLabel}>Já pago</p>
+            <strong className={styles.detailValue}>{currency(totals.pago)}</strong>
           </div>
         </div>
       </div>
-    </div>
+
+      {transactions.length > 0 && (
+        <ul className={styles.transactionList} aria-label="Lançamentos deste ciclo">
+          {transactions.map((transaction) => (
+            <li key={transaction.id}>
+              <span>
+                <strong>{transaction.descricao}</strong>
+                <small>{transaction.status === 'LIQUIDADO'
+                  ? `Pago em ${new Date(`${transaction.data_liquidacao}T00:00:00`).toLocaleDateString('pt-BR')} via ${transaction.metodo_pagamento}`
+                  : `Vencimento ${new Date(`${transaction.data_vencimento}T00:00:00`).toLocaleDateString('pt-BR')}`}</small>
+              </span>
+              <strong>{currency(Number(transaction.valor))}</strong>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }

@@ -70,6 +70,19 @@
   background: var(--bg-secondary);
 }
 
+.cycleNotice {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+  color: var(--text-secondary);
+  font-size: 0.76rem;
+}
+
+.cycleNotice strong {
+  color: var(--text-primary);
+}
+
 .card {
   background: linear-gradient(145deg, var(--bg-secondary), var(--bg-tertiary));
   border: 1px solid var(--border-color);
@@ -142,4 +155,47 @@
   color: var(--text-primary);
   font-size: 1.1rem;
   font-weight: bold;
+}
+
+.transactionList {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.transactionList li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--border-color);
+  border-radius: 9px;
+  background: var(--card-bg);
+  color: var(--text-primary);
+  font-size: 0.8rem;
+}
+
+.transactionList li span {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.transactionList li strong {
+  overflow-wrap: anywhere;
+}
+
+.transactionList small {
+  color: var(--text-secondary);
+}
+
+@media (max-width: 540px) {
+  .cycleNotice {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
 }

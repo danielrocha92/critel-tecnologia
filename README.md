@@ -30,6 +30,10 @@ A plataforma interna (acessível via `/atendimento`) automatiza e concentra a op
 - **Motivos de pausa**: Compra de material; link da operadora pendente; falta de energia ou acesso ao rack; infraestrutura civil; mobiliário/PDV pendente; restrição de horário ou ruído no shopping; equipamento aguardado; falta de EPI/liberação de altura; e dependência da equipe de TI do cliente.
 - **Rastreamento de compra de material**: Com permissão de GPS, o portal registra posições enquanto a tela da OS estiver aberta e o rastreamento do navegador continuar ativo. O trajeto no mapa fica disponível somente para analistas e administradores. O mapa usa OpenStreetMap por padrão; `NEXT_PUBLIC_OSM_TILE_URL` permite configurar outro endpoint de tiles. Consulte a [política de uso dos tiles do OpenStreetMap](https://operations.osmfoundation.org/policies/tiles/).
 - **Ações da OS**: No menu **Mais**, imprimir abre a impressão do navegador, editar atualiza os dados da OS, log de alterações consulta as transições registradas, e pausar/retomar executa o fluxo de SLA. Cancelamento é permitido a analistas/administradores ou ao técnico responsável; exclusão é restrita a administradores. A finalização técnica abre o formulário com evidências e assinatura.
+- **Histórico e relatório do técnico**: O histórico apresenta os dados do atendimento concluído, horários, endereço, coordenadas de check-in e encerramento, laudo, materiais e despesas. É possível selecionar um período e gerar um relatório para impressão ou salvar como PDF. O documento inclui os detalhes textuais e coordenadas, sem fotos, vídeos ou assinatura, para manter o arquivo leve.
+- **Validação de OS e financeiro**: Após o técnico finalizar a OS, ela fica aguardando validação do analista. Ao aprová-la, o sistema fecha a OS e cria atomicamente uma transação de despesa para o técnico, com o valor do serviço e as despesas registradas no atendimento. A ação de devolver reabre a OS para ajustes e não libera o pagamento.
+- **Contas e DRE**: O painel financeiro reúne contas a pagar e a receber, permite cadastrar lançamentos manuais, registrar a liquidação via Pix, boleto ou transferência e consultar o DRE por competência ou caixa. O livro financeiro pode ser filtrado por tipo e técnico. Despesas de OS compõem os reembolsos extras do balanço do técnico somente depois que a OS é aprovada pelo analista.
+- **Ciclo de pagamento do técnico**: O ciclo padrão considera atendimentos do dia 2 ao dia 1 seguinte, com vencimento no dia 15. O gestor financeiro pode aprovar exceções de pagamento imediato para uma OS pendente, registrando o motivo.
 - **Gestão de Contatos das Lojas**: Mantém os contatos das unidades em uma base interna, permitindo consultar e atualizar os dados usados pela operação.
 - **Monitoramento de PDVs (Milvus)**: Consulta à plataforma Milvus pela ferramenta administrativa correspondente, com integração *On-Demand* para disponibilizar a disponibilidade (Online/Offline) do terminal da loja na tela do atendente.
 - **Gerador de Salas Jitsi**: Atalho prático no chat (`/video`) que gera links de salas virtuais únicas e seguras para os técnicos e gerentes de loja interagirem sem necessidade de celulares.
@@ -96,13 +100,17 @@ npm run dev
 
 ### Banco de dados e migrations
 
-Para habilitar pausas, persistência de notificações e as assinaturas Realtime usadas pela OS, aplique no projeto Supabase as migrations correspondentes do diretório `supabase/migrations`:
+Para habilitar pausas, validação financeira, persistência de notificações e as assinaturas Realtime usadas pela OS, aplique no projeto Supabase as migrations correspondentes do diretório `supabase/migrations`:
 
 1. `20261030_add_ticket_pauses.sql` — cria os registros de pausa, os pontos de localização e os campos de SLA na tabela `tickets`.
 2. `20261030_create_user_notifications.sql` — configura notificações persistentes por usuário e sua publicação Realtime.
 3. `20261030_enable_ticket_realtime.sql` — publica `tickets` e, se existir, `ticket_replies` para as assinaturas da aplicação.
+4. `20261103_add_financial_ticket_approval.sql` — adiciona os campos de aprovação financeira à OS.
+5. `20261110_create_financial_transactions.sql` — cria o livro financeiro, suas políticas de acesso e a função transacional que fecha a OS e cria o lançamento a pagar ao técnico. A migration também publica as transações financeiras no Realtime.
 
 Em uma instalação nova, aplique primeiro o schema base e as migrations anteriores necessárias. A API de pausas e ações administrativas também precisa de `SUPABASE_SERVICE_ROLE_KEY` configurada somente no servidor. Para o rastreamento, use HTTPS e permita acesso à localização no navegador; o registro ocorre enquanto a tela da OS permanece aberta.
+
+Aplique as migrations na ordem cronológica pelo Supabase CLI ou pelo SQL Editor do projeto. Sem a migration `20261110_create_financial_transactions.sql`, a aprovação de OS não consegue registrar o pagamento e o resumo financeiro do técnico não exibirá os valores. A geração do relatório no Histórico usa a sessão autenticada e não requer dependências adicionais; ao imprimir, escolha **Salvar como PDF** no navegador.
 
 ---
 

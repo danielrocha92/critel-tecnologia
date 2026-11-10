@@ -51,23 +51,37 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Ação inválida para esta OS.' }, { status: 400 });
     }
 
+    if (action === 'finalizar') {
+      const { data: transaction, error: finalizeError } = await admin
+        .rpc('finalizar_os_com_lancamento_financeiro', {
+          p_ticket_id: body.ticket_id,
+          p_actor_id: user.id,
+        })
+        .single();
+
+      if (finalizeError) throw finalizeError;
+      return NextResponse.json({
+        success: true,
+        ticket: {
+          id: body.ticket_id,
+          status: 'FECHADO',
+          financeiro_aprovado_em: new Date().toISOString(),
+          financeiro_aprovado_por: user.id,
+        },
+        transacao: transaction,
+      });
+    }
+
     const changedAt = new Date().toISOString();
-    const nextStatus = action === 'finalizar' ? 'FECHADO' : 'EM_ANDAMENTO';
+    const nextStatus = 'EM_ANDAMENTO';
     const { data: ticket, error: approveError } = await admin
       .from('tickets')
-      .update(action === 'finalizar'
-        ? {
-          status: nextStatus,
-          financeiro_aprovado_em: changedAt,
-          financeiro_aprovado_por: user.id,
-          atualizado_em: changedAt,
-        }
-        : {
-          status: nextStatus,
-          financeiro_aprovado_em: null,
-          financeiro_aprovado_por: null,
-          atualizado_em: changedAt,
-        })
+      .update({
+        status: nextStatus,
+        financeiro_aprovado_em: null,
+        financeiro_aprovado_por: null,
+        atualizado_em: changedAt,
+      })
       .eq('id', body.ticket_id)
       .eq('status', 'FINALIZADO')
       .like('protocolo_origem', 'OS-%')
@@ -85,9 +99,7 @@ export async function POST(request: Request) {
       from_status: 'FINALIZADO',
       to_status: nextStatus,
       changed_by: user.id,
-      reason: action === 'finalizar'
-        ? 'OS validada e encerrada pelo departamento responsável.'
-        : 'OS reaberta e devolvida ao técnico para ajustes.',
+      reason: 'OS reaberta e devolvida ao técnico para ajustes.',
     });
     if (transitionError) console.error('Não foi possível registrar a transição da OS:', transitionError);
 

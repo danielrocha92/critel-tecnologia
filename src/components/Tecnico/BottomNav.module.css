@@ -54,3 +54,9 @@
 .navLabelActive {
   font-weight: 600;
 }
+
+@media print {
+  .bottomNavContainer {
+    display: none;
+  }
+}

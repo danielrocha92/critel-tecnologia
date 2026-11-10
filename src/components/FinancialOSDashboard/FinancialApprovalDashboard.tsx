@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { ExternalLink, RefreshCw, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 import { createClient } from '@/utils/supabase/client';
+import FinancialTransactionsDashboard from './FinancialTransactionsDashboard';
 import styles from './FinancialApprovalDashboard.module.css';
 
 type PendingTicket = {
@@ -172,6 +173,7 @@ export default function FinancialApprovalDashboard() {
           </div>
         )}
       </section>
+      <FinancialTransactionsDashboard />
     </main>
   );
 }
