@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { CheckCircle2, ExternalLink, RefreshCw } from 'lucide-react';
+import { ExternalLink, RefreshCw, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 import { createClient } from '@/utils/supabase/client';
 import styles from './FinancialApprovalDashboard.module.css';
@@ -38,7 +38,7 @@ export default function FinancialApprovalDashboard() {
   const [technicians, setTechnicians] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [approvingId, setApprovingId] = useState<string | null>(null);
+  const [processingTicketId, setProcessingTicketId] = useState<string | null>(null);
 
   const loadTickets = useCallback(async () => {
     const { data, error } = await supabase
@@ -69,12 +69,17 @@ export default function FinancialApprovalDashboard() {
 
   useEffect(() => {
     let active = true;
-    void loadTickets()
-      .catch((error: unknown) => {
-        console.error('Erro ao carregar OSs para aprovação:', error);
-        if (active) toast.error('Não foi possível carregar as OSs pendentes de aprovação.');
-      })
-      .finally(() => { if (active) setLoading(false); });
+    const initializeQueue = async () => {
+      try {
+        await loadTickets();
+      } catch (error) {
+        console.error('Erro ao carregar OSs para validação:', error);
+        if (active) toast.error('Não foi possível carregar as OSs pendentes de validação.');
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+    void initializeQueue();
     return () => { active = false; };
   }, [loadTickets]);
 
@@ -89,24 +94,25 @@ export default function FinancialApprovalDashboard() {
     }
   };
 
-  const approveTicket = async (ticket: PendingTicket) => {
-    const confirmed = window.confirm(`Aprovar a OS ${ticket.protocolo_origem || ticket.id.slice(0, 8)} e liberar ${currency(ticket.valor_pagamento)} para o técnico?`);
+  const returnToTechnician = async (ticket: PendingTicket) => {
+    const protocol = ticket.protocolo_origem || ticket.id.slice(0, 8);
+    const confirmed = window.confirm(`Reabrir a OS ${protocol} e devolvê-la ao técnico para ajustes? O valor não será liberado.`);
     if (!confirmed) return;
-    setApprovingId(ticket.id);
+    setProcessingTicketId(ticket.id);
     try {
       const response = await fetch('/api/financeiro/aprovar-os', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ticket_id: ticket.id }),
+        body: JSON.stringify({ ticket_id: ticket.id, action: 'reabrir' }),
       });
       const result = await response.json();
-      if (!response.ok) throw new Error(result.error || 'Não foi possível aprovar esta OS.');
+      if (!response.ok) throw new Error(result.error || 'Não foi possível atualizar esta OS.');
       setTickets((previous) => previous.filter((item) => item.id !== ticket.id));
-      toast.success('OS aprovada. O valor já está disponível na dashboard do técnico.');
+      toast.success('OS reaberta e devolvida ao técnico para ajustes.');
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Não foi possível aprovar esta OS.');
+      toast.error(error instanceof Error ? error.message : 'Não foi possível atualizar esta OS.');
     } finally {
-      setApprovingId(null);
+      setProcessingTicketId(null);
     }
   };
 
@@ -115,8 +121,8 @@ export default function FinancialApprovalDashboard() {
       <header className={styles.header}>
         <div>
           <span className={styles.eyebrow}>DEPARTAMENTO FINANCEIRO</span>
-          <h1 className={styles.title}>Aprovação de ordens de serviço</h1>
-          <p className={styles.description}>Revise o valor definido na abertura e aprove as OSs finalizadas pelo técnico.</p>
+          <h1 className={styles.title}>Validação de ordens de serviço</h1>
+          <p className={styles.description}>Abra os detalhes para revisar o laudo e os valores antes de fechar e liberar o pagamento.</p>
         </div>
         <button type="button" className={styles.refreshButton} onClick={() => void refresh()} disabled={refreshing || loading}>
           <RefreshCw size={16} className={refreshing ? styles.spinning : undefined} /> Atualizar
@@ -126,14 +132,14 @@ export default function FinancialApprovalDashboard() {
       <section className={styles.panel} aria-labelledby="pending-approvals-title">
         <div className={styles.panelHeader}>
           <div>
-            <h2 className={styles.panelTitle} id="pending-approvals-title">Aguardando aprovação</h2>
+            <h2 className={styles.panelTitle} id="pending-approvals-title">Pendente de validação</h2>
             <p className={styles.panelSubtitle}>{tickets.length} ordem(ns) finalizada(s)</p>
           </div>
         </div>
         {loading ? (
           <p className={styles.stateMessage} role="status">Carregando ordens de serviço...</p>
         ) : tickets.length === 0 ? (
-          <p className={styles.stateMessage}>Não há OSs finalizadas aguardando aprovação.</p>
+          <p className={styles.stateMessage}>Não há OSs encerradas aguardando validação.</p>
         ) : (
           <div className={styles.tableScroll}>
             <table className={styles.table}>
@@ -155,8 +161,8 @@ export default function FinancialApprovalDashboard() {
                       <Link href={`/${lang}/os/${encodeURIComponent(ticket.id)}`} className={styles.detailsLink} aria-label={`Abrir OS ${ticket.protocolo_origem || ticket.id}`}>
                         <ExternalLink size={16} /> Detalhes
                       </Link>
-                      <button type="button" className={styles.approveButton} onClick={() => void approveTicket(ticket)} disabled={approvingId !== null}>
-                        <CheckCircle2 size={16} /> {approvingId === ticket.id ? 'Aprovando...' : 'Aprovar'}
+                      <button type="button" className={styles.returnButton} onClick={() => void returnToTechnician(ticket)} disabled={processingTicketId !== null}>
+                        <RotateCcw size={16} /> {processingTicketId === ticket.id ? 'Devolvendo...' : 'Reabrir e devolver'}
                       </button>
                     </td>
                   </tr>

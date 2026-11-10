@@ -176,9 +176,9 @@ export default function DashboardHome() {
           <span className={styles.statusCopy}><span>Finalizados</span><strong>{loading ? '—' : stats.finalized ?? '—'}</strong></span>
           <ArrowRight size={17} className={styles.statusArrow} />
         </Link>
-        <Link href={`/${lang}/financeiro`} className={styles.statusCard}>
+        <Link href={`/${lang}/financeiro?filter=pendingValidation`} className={styles.statusCard}>
           <span className={`${styles.statusIcon} ${styles.statusValidation}`}><DollarSign size={19} /></span>
-          <span className={styles.statusCopy}><span>Aguardando aprovação financeira</span><strong>{loading ? '—' : stats.pendingApproval ?? '—'}</strong></span>
+          <span className={styles.statusCopy}><span>Pendente de Validação (Financeiro)</span><strong>{loading ? '—' : stats.pendingApproval ?? '—'}</strong></span>
           <ArrowRight size={17} className={styles.statusArrow} />
         </Link>
       </section>

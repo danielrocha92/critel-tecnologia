@@ -332,7 +332,7 @@ export default function NovoChamadoModal({ onClose, onSuccess }: NovoChamadoModa
               <label className={styles.formLabel} htmlFor="ticket-payment-value">Valor (R$):</label>
               <div className={styles.inputWrapper}>
                 <input id="ticket-payment-value" name="valor_pagamento" type="number" min="0.01" step="0.01" value={formData.valor_pagamento} onChange={handleChange} required className={styles.inputField} placeholder="Ex: 250,00" />
-                <p className={styles.fieldHint}>Este valor será salvo como preferência do técnico e poderá ser reajustado depois.</p>
+                <p className={styles.fieldHint}>Este valor será registrado nesta OS e será incluído no balanço do técnico após a aprovação financeira.</p>
               </div>
             </div>
           </>}

@@ -274,7 +274,7 @@ export default function DepartmentEnvironment({
             <MetricCard label="Chamados em Aberto" value={loading ? '—' : String(analystStatusCounts.open ?? '—')} icon={<CircleDot size={19} />} onClick={() => { setTicketStatus('abertos'); scrollToPanel(); }} active={ticketStatus === 'abertos'} />
             <MetricCard label="Em Andamento" value={loading ? '—' : String(analystStatusCounts.inProgress ?? '—')} icon={<Clock3 size={19} />} onClick={() => { setTicketStatus('andamento'); scrollToPanel(); }} active={ticketStatus === 'andamento'} />
             <MetricCard label="Finalizados" value={loading ? '—' : String(analystStatusCounts.finalized ?? '—')} icon={<CheckCircle2 size={19} />} onClick={() => { setTicketStatus('finalizados'); scrollToPanel(); }} active={ticketStatus === 'finalizados'} />
-            <MetricCard label="Aguardando aprovação financeira" value={loading ? '—' : String(analystStatusCounts.pendingApproval ?? '—')} icon={<DollarSign size={19} />} onClick={() => router.push(`/${lang}/financeiro`)} />
+            <MetricCard label="Pendente de Validação (Financeiro)" value={loading ? '—' : String(analystStatusCounts.pendingApproval ?? '—')} icon={<DollarSign size={19} />} onClick={() => router.push(`/${lang}/financeiro?filter=pendingValidation`)} />
           </section>
           <section className={styles.panel} aria-labelledby="analyst-tickets-title" ref={panelRef}>
             <div className={styles.panelHeader}>

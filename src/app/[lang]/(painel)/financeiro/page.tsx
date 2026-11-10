@@ -3,7 +3,7 @@ import FinancialApprovalDashboard from '@/components/FinancialOSDashboard/Financ
 
 export const metadata: Metadata = {
   title: 'Painel Financeiro | Critel Core',
-  description: 'Revise e aprove os valores de ordens de serviço finalizadas.',
+  description: 'Valide ordens de serviço encerradas pelos técnicos antes de fechar e liberar os valores.',
 };
 
 export default function FinanceiroPage() {

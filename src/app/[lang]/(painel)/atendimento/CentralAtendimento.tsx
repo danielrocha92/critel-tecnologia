@@ -10,7 +10,7 @@ import styles from './atendimento.module.css';
 import { User, Trash2, Printer, Pencil, History, X, ArrowLeft, ChevronDown, Pause, Play } from 'lucide-react';
 import { DashboardTickets } from '../../../../components/Chamados/DashboardTickets';
 import NovoChamadoModal from '../../../../components/Chamados/NovoChamadoModal';
-import { ITicket, ITicketReply, TicketEvidence } from '../../../../types/ticket';
+import { ITicket, TicketEvidence } from '../../../../types/ticket';
 import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 import { File, Download } from 'lucide-react';
 import ServiceReportSection from '@/components/Tecnico/ServiceReportSection';
@@ -25,14 +25,6 @@ type TicketAttachment = {
   url: string;
   nome_arquivo: string;
   tamanho_bytes?: number | null;
-};
-
-type TicketReplyRealtimeRow = Record<string, unknown> & {
-  id: string;
-  sender_type: 'customer' | 'agent' | 'system';
-  sender: string;
-  message: string;
-  criado_em: string;
 };
 
 export default function CentralAtendimento({
@@ -81,15 +73,12 @@ function CentralAtendimentoContent({
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isPauseModalOpen, setIsPauseModalOpen] = useState(false);
   const [isFinishModalOpen, setIsFinishModalOpen] = useState(false);
-  const [isApprovingTicket, setIsApprovingTicket] = useState(false);
+  const [isProcessingReview, setIsProcessingReview] = useState(false);
   const [isTransitionLogOpen, setIsTransitionLogOpen] = useState(false);
   const [transitionLog, setTransitionLog] = useState<Array<Record<string, unknown>>>([]);
   const [isLoadingTransitionLog, setIsLoadingTransitionLog] = useState(false);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
   const [activePause, setActivePause] = useState<{ id: string; reason_code: string } | null>(null);
-  const [ticketHistory, setTicketHistory] = useState<ITicketReply[]>([]);
-  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
-  const [errorHistory, setErrorHistory] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [deletingEvidenceId, setDeletingEvidenceId] = useState<string | null>(null);
@@ -249,51 +238,35 @@ function CentralAtendimentoContent({
     }
   };
 
-  const handleApproveTicket = async () => {
-    if (!ticketAtivo || isApprovingTicket) return;
-    setIsApprovingTicket(true);
+  const handleReviewAction = async (action: 'finalizar' | 'reabrir') => {
+    if (!ticketAtivo || isProcessingReview || !canApproveTicket) return;
+    const protocol = ticketAtivo.protocolo_origem || ticketAtivo.id.slice(0, 8);
+    const confirmed = action === 'finalizar'
+      ? window.confirm(`Confirmar o fechamento da OS ${protocol}? O valor de ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(ticketAtivo.valor_pagamento || 0))} será liberado no dashboard do técnico.`)
+      : window.confirm(`Reabrir a OS ${protocol} e devolvê-la ao técnico para ajustes? O valor não será liberado.`);
+    if (!confirmed) return;
+    setIsProcessingReview(true);
     try {
       const response = await fetch('/api/financeiro/aprovar-os', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ticket_id: ticketAtivo.id }),
+        body: JSON.stringify({ ticket_id: ticketAtivo.id, action }),
       });
       const result = await response.json();
-      if (!response.ok) throw new Error(result.error || 'Não foi possível aprovar esta OS.');
+      if (!response.ok) throw new Error(result.error || 'Não foi possível atualizar esta OS.');
       setTicketAtivo((current) => current ? {
         ...current,
+        status: result.ticket.status,
         financeiro_aprovado_em: result.ticket.financeiro_aprovado_em,
         financeiro_aprovado_por: result.ticket.financeiro_aprovado_por,
       } : current);
-      toast.success('OS aprovada. O valor foi liberado na dashboard do técnico.');
-    } catch (approvalError) {
-      toast.error(approvalError instanceof Error ? approvalError.message : 'Não foi possível aprovar esta OS.');
+      toast.success(action === 'finalizar'
+        ? 'OS validada e encerrada. O valor foi liberado no dashboard do técnico.'
+        : 'OS reaberta e devolvida ao técnico para ajustes.');
+    } catch (reviewError) {
+      toast.error(reviewError instanceof Error ? reviewError.message : 'Não foi possível atualizar esta OS.');
     } finally {
-      setIsApprovingTicket(false);
-    }
-  };
-
-  const handleSendReply = async () => {
-    if (!replyText.trim() || !ticketAtivo) return;
-    setIsSendingReply(true);
-
-    try {
-      const { error } = await supabase.from('ticket_replies').insert({
-        ticket_id: ticketAtivo.id,
-        sender_type: 'agent',
-        sender: operadorAtual?.nome || 'Você',
-        message: replyText,
-      });
-
-      if (error) throw error;
-
-      setReplyText('');
-      toast.success('Resposta enviada com sucesso!');
-    } catch (error) {
-      console.error(error);
-      toast.error('Erro ao enviar a resposta.');
-    } finally {
-      setIsSendingReply(false);
+      setIsProcessingReview(false);
     }
   };
 
@@ -331,10 +304,6 @@ function CentralAtendimentoContent({
     prioridade: ''
   });
 
-  const [replyText, setReplyText] = useState('');
-  const [isReplying, setIsReplying] = useState(false);
-  const [isSendingReply, setIsSendingReply] = useState(false);
-
   // Fetch anexos when ticketAtivo changes
   useEffect(() => {
     if (!ticketAtivo) return;
@@ -365,46 +334,9 @@ function CentralAtendimentoContent({
     };
     void fetchEvidences();
 
-    const fetchHistory = async () => {
-      setIsLoadingHistory(true);
-      setErrorHistory(null);
-      const { data, error } = await supabase
-        .from('ticket_replies')
-        .select('*')
-        .eq('ticket_id', ticketAtivo.id)
-        .order('criado_em', { ascending: false });
-
-      if (error) {
-        setErrorHistory('Falha ao carregar o histórico de mensagens.');
-      } else if (data) {
-        const formattedHistory: ITicketReply[] = (data as TicketReplyRealtimeRow[]).map((row) => ({
-          id: row.id,
-          sender_type: row.sender_type,
-          sender: row.sender,
-          message: row.message,
-          date: new Date(row.criado_em).toLocaleString()
-        }));
-        setTicketHistory(formattedHistory);
-      }
-      setIsLoadingHistory(false);
-    };
-
-    fetchHistory();
-
     const channel = supabase.channel(`ticket_${ticketAtivo.id}`)
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'tickets', filter: `id=eq.${ticketAtivo.id}` }, (payload) => {
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'tickets', filter: `id=eq.${ticketAtivo.id}` }, (payload: RealtimePostgresChangesPayload<Record<string, unknown>>) => {
         setTicketAtivo((current) => current ? { ...current, ...(payload.new as ITicket) } : current);
-      })
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'ticket_replies', filter: `ticket_id=eq.${ticketAtivo.id}` }, (payload: RealtimePostgresChangesPayload<TicketReplyRealtimeRow>) => {
-        const row = payload.new as TicketReplyRealtimeRow;
-        const newReply: ITicketReply = {
-          id: row.id,
-          sender_type: row.sender_type,
-          sender: row.sender,
-          message: row.message,
-          date: new Date(row.criado_em).toLocaleString()
-        };
-        setTicketHistory(prev => [newReply, ...prev]);
       })
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'ticket_evidences', filter: `ticket_id=eq.${ticketAtivo.id}` }, (payload: RealtimePostgresChangesPayload<TicketEvidence & Record<string, unknown>>) => {
         const evidence = payload.new as TicketEvidence;
@@ -517,19 +449,29 @@ function CentralAtendimentoContent({
                   </div>
                 )}
               </div>
-              <button
-                type="button"
-                className={styles.btnFinalizar}
-                disabled={ticketAtivo.status === 'FINALIZADO'
-                  ? (!canApproveTicket || Boolean(ticketAtivo.financeiro_aprovado_em) || isApprovingTicket)
-                  : (!isAssignedTechnician || ticketAtivo.status !== 'EM_ANDAMENTO')}
-                title={ticketAtivo.status === 'FINALIZADO'
-                  ? (!canApproveTicket ? 'A aprovação deve ser feita pelo departamento financeiro.' : undefined)
-                  : (!isAssignedTechnician ? 'A finalização técnica deve ser feita pelo técnico responsável.' : undefined)}
-                onClick={() => ticketAtivo.status === 'FINALIZADO' ? void handleApproveTicket() : setIsFinishModalOpen(true)}
-              >{ticketAtivo.status === 'FINALIZADO'
-                ? ticketAtivo.financeiro_aprovado_em ? 'Aprovado' : canApproveTicket ? isApprovingTicket ? 'Aprovando...' : 'Aprovar' : 'Aguardando aprovação'
-                : 'Finalizar'}</button>
+              {ticketAtivo.status === 'FINALIZADO' && canApproveTicket && (
+                <>
+                  <button
+                    type="button"
+                    className={styles.btnFinalizar}
+                    disabled={Boolean(ticketAtivo.financeiro_aprovado_em) || isProcessingReview}
+                    onClick={() => void handleReviewAction('finalizar')}
+                  >{isProcessingReview ? 'Finalizando...' : 'Finalizar'}</button>
+                  <button
+                    type="button"
+                    className={styles.btnDevolver}
+                    disabled={isProcessingReview}
+                    onClick={() => void handleReviewAction('reabrir')}
+                  >Reabrir e devolver ao técnico</button>
+                </>
+              )}
+              {ticketAtivo.status === 'EM_ANDAMENTO' && isAssignedTechnician && (
+                <button
+                  type="button"
+                  className={styles.btnFinalizar}
+                  onClick={() => setIsFinishModalOpen(true)}
+                >Encerrar atendimento</button>
+              )}
               <button
                 type="button"
                 className={styles.btnCancelar}
@@ -611,7 +553,7 @@ function CentralAtendimentoContent({
                             setSelectedImage(evidence.media_url);
                           }}
                         >
-                          <img src={evidence.media_url} alt={evidence.caption || (evidence.type === 'BEFORE' ? 'Evidência antes do serviço' : 'Evidência depois do serviço')} width={96} height={96} loading="lazy" />
+                          <Image src={evidence.media_url} alt={evidence.caption || (evidence.type === 'BEFORE' ? 'Evidência antes do serviço' : 'Evidência depois do serviço')} width={96} height={96} loading="lazy" unoptimized />
                           <span>{evidence.type === 'BEFORE' ? 'Antes' : 'Depois'}</span>
                           {evidence.caption && <span className={styles.evidenceCaption}>{evidence.caption}</span>}
                         </a>
@@ -668,7 +610,7 @@ function CentralAtendimentoContent({
                     {evidences.map((evidence) => (
                       <div key={evidence.id} className={styles.evidenceCard}>
                         <a href={evidence.media_url} target="_blank" rel="noopener noreferrer" className={styles.evidenceItem}>
-                          <img src={evidence.media_url} alt={evidence.caption || (evidence.type === 'BEFORE' ? 'Evidência antes do serviço' : 'Evidência depois do serviço')} width={72} height={72} loading="lazy" />
+                          <Image src={evidence.media_url} alt={evidence.caption || (evidence.type === 'BEFORE' ? 'Evidência antes do serviço' : 'Evidência depois do serviço')} width={72} height={72} loading="lazy" unoptimized />
                           <span>{evidence.type === 'BEFORE' ? 'Antes' : 'Depois'}</span>
                           {evidence.caption && <span className={styles.evidenceCaption}>{evidence.caption}</span>}
                         </a>
@@ -907,9 +849,12 @@ function CentralAtendimentoContent({
               <X size={24} />
             </button>
           </div>
-          <img
+          <Image
             src={selectedImage}
             alt="Anexo ampliado"
+            width={1600}
+            height={1200}
+            unoptimized
             className={styles.modalImage}
             onClick={(e) => e.stopPropagation()}
           />

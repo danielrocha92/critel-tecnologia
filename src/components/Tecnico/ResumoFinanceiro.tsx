@@ -62,7 +62,7 @@ export default function ResumoFinanceiro({ userId }: { userId: string }) {
         .from('tickets')
         .select('valor_pagamento, despesas_json')
         .eq('tecnico_id', userId)
-        .eq('status', 'FINALIZADO')
+        .in('status', ['FINALIZADO', 'FECHADO'])
         .not('financeiro_aprovado_em', 'is', null)
         .gte('financeiro_aprovado_em', dataInicio.toISOString())
         .lte('financeiro_aprovado_em', dataFim.toISOString());

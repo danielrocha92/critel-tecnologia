@@ -1120,6 +1120,7 @@
 
 .btnMais,
 .btnFinalizar,
+.btnDevolver,
 .btnCancelar {
   display: inline-flex;
   min-height: 2.6rem;
@@ -1140,7 +1141,8 @@
 }
 
 .btnMais:hover,
-.btnCancelar:hover {
+.btnCancelar:hover,
+.btnDevolver:hover {
   border-color: var(--accent-cyan);
   background: var(--card-bg);
   transform: translateY(-1px);
@@ -1157,6 +1159,18 @@
   background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
   transform: translateY(-1px);
   box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.btnDevolver {
+  border-color: var(--border-color);
+  color: var(--text-primary);
+  background: var(--card-bg);
+}
+
+.btnFinalizar:disabled,
+.btnDevolver:disabled {
+  opacity: 0.6;
+  cursor: wait;
 }
 
 .innerBody {
@@ -1483,13 +1497,14 @@
   .headerActionsGroup {
     width: 100%;
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.5rem;
   }
 
   .headerActionsGroup > *,
   .headerActionsGroup .btnMais,
   .headerActionsGroup .btnFinalizar,
+  .headerActionsGroup .btnDevolver,
   .headerActionsGroup .btnCancelar {
     width: 100%;
     min-width: 0;
