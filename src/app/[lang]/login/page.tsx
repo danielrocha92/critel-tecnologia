@@ -95,10 +95,7 @@ function LoginForm() {
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/api/auth/callback`,
-          queryParams: {
-            hd: 'criteltecnologia.com.br',
-            prompt: 'select_account',
-          },
+          queryParams: { prompt: 'select_account' },
         }
       });
       if (error) throw error;
