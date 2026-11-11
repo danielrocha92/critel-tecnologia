@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
 import { ShieldAlert, AlertTriangle, CheckCircle, Ban, Clock } from 'lucide-react';
 import SectionPageHeader from '@/components/Dashboard/SectionPageHeader';
@@ -28,17 +28,12 @@ export default function AdminPage() {
   
   const [isApproving, setIsApproving] = useState<string | null>(null);
 
-  useEffect(() => {
-    carregarPerfilLogado();
-    carregarUsuarios();
-  }, []);
-
-  const supabase = createBrowserClient(
+  const supabase = useMemo(() => createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  ), []);
 
-  const carregarPerfilLogado = async () => {
+  const carregarPerfilLogado = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { setLoadingPerfil(false); return; }
@@ -48,14 +43,14 @@ export default function AdminPage() {
         .eq('user_id', user.id)
         .single();
       setPerfilLogado(data || null);
-    } catch {
-      // ignora
+    } catch (err: unknown) {
+      console.error('Erro ao carregar perfil do administrador:', err);
     } finally {
       setLoadingPerfil(false);
     }
-  };
+  }, [supabase]);
 
-  const carregarUsuarios = async () => {
+  const carregarUsuarios = useCallback(async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -66,7 +61,7 @@ export default function AdminPage() {
 
       if (error) throw error;
       setUsuarios(data || []);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
       setErrorMsg('Tabela de usuários não encontrada no banco. Exibindo dados de teste.');
       // Fallback para dados mockados caso a tabela não exista ainda no Supabase
@@ -79,23 +74,31 @@ export default function AdminPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [supabase]);
+
+  useEffect(() => {
+    // As atualizações de estado acontecem após a conclusão das consultas assíncronas.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void carregarPerfilLogado();
+    void carregarUsuarios();
+  }, [carregarPerfilLogado, carregarUsuarios]);
 
   const handleApproveUser = async (user: Perfil) => {
     setIsApproving(user.id);
     try {
-      const { error } = await supabase
-        .from('perfis')
-        .update({ status: 'ATIVO' })
-        .eq('id', user.id);
-        
-      if (error) throw error;
+      const response = await fetch('/api/admin/aprovar-tecnico', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ perfilId: user.id }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Não foi possível aprovar o técnico.');
 
       setUsuarios(current => 
         current.map(u => u.id === user.id ? { ...u, status: 'ATIVO' } : u)
       );
-    } catch (err: any) {
-      alert(`Erro ao aprovar usuário: ${err.message}`);
+    } catch (err: unknown) {
+      alert(`Erro ao aprovar usuário: ${err instanceof Error ? err.message : 'Erro desconhecido.'}`);
     } finally {
       setIsApproving(null);
     }
@@ -124,18 +127,32 @@ export default function AdminPage() {
         current.map(u => u.id === targetBan.id ? { ...u, status: 'BANIDO' } : u)
       );
       
-    } catch (err: any) {
-      alert(`Falha no Desligamento: ${err.message}`);
+    } catch (err: unknown) {
+      alert(`Falha no Desligamento: ${err instanceof Error ? err.message : 'Erro desconhecido.'}`);
     } finally {
       setIsBanning(false);
       setTargetBan(null);
     }
   };
 
-  const pendingUsers = usuarios.filter(u => u.status === 'PENDENTE');
+  const role = perfilLogado?.cargo
+    ?.normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .trim()
+    .toUpperCase();
+  const canApproveUsers = ['ANALISTA', 'ADMIN', 'SUPER_ADMIN'].includes(role || '');
+  const isSuperAdmin = role === 'SUPER_ADMIN';
+  const pendingUsers = usuarios.filter(u => {
+    const cargo = u.cargo
+      .normalize('NFD')
+      .replace(/\p{Diacritic}/gu, '')
+      .trim()
+      .toUpperCase();
+    return u.status === 'PENDENTE' && (role !== 'ANALISTA' || cargo === 'TECNICO');
+  });
   const activeUsers = usuarios.filter(u => u.status !== 'PENDENTE');
 
-  const renderTable = (userList: Perfil[], isPendingTable: boolean) => (
+  const renderTable = (userList: Perfil[], isPendingTable: boolean, canRevoke: boolean) => (
     <table className={styles.userTable}>
       <thead>
         <tr>
@@ -166,7 +183,7 @@ export default function AdminPage() {
             <td>
               {user.status === 'PENDENTE' ? (
                 <div className={styles.actionGroup}>
-                  <button 
+                  <button
                     className={styles.btnApprove}
                     onClick={() => handleApproveUser(user)}
                     disabled={isApproving === user.id}
@@ -174,13 +191,15 @@ export default function AdminPage() {
                     <CheckCircle size={16} />
                     {isApproving === user.id ? 'Aprovando...' : 'Aprovar Acesso'}
                   </button>
-                  <button 
-                    className={styles.btnPanic}
-                    onClick={() => setTargetBan(user)}
-                    title="Rejeitar Solicitação"
-                  >
-                    <Ban size={16} />
-                  </button>
+                  {canRevoke && (
+                    <button
+                      className={styles.btnPanic}
+                      onClick={() => setTargetBan(user)}
+                      title="Rejeitar Solicitação"
+                    >
+                      <Ban size={16} />
+                    </button>
+                  )}
                 </div>
               ) : user.status === 'BANIDO' ? (
                 <span className={`${styles.badge} ${styles.badgeBanned}`}>
@@ -203,8 +222,6 @@ export default function AdminPage() {
     </table>
   );
 
-  const isSuperAdmin = perfilLogado?.cargo === 'SUPER_ADMIN';
-
   return (
     <div className={styles.container}>
       <div className={styles.contentWrapper}>
@@ -214,18 +231,20 @@ export default function AdminPage() {
           <div className={styles.glassCard}>
             <p>Verificando permissões...</p>
           </div>
-        ) : !isSuperAdmin ? (
+        ) : !canApproveUsers ? (
           <div className={`${styles.glassCard} ${styles.centerText} ${styles.pad3}`}>
             <ShieldAlert size={48} className={styles.iconRed} />
             <h2 className={styles.headingWhite}>Acesso Restrito</h2>
-            <p className={styles.textMuted}>A seção de Governança de Identidade é exclusiva para o Super Administrador.</p>
+            <p className={styles.textMuted}>A aprovação de técnicos é restrita a analistas e administradores autorizados.</p>
           </div>
         ) : (
           <>
             <SectionPageHeader
               eyebrow="ADMINISTRAÇÃO"
-              title="Governança de Identidade"
-              description="Gestão de perfis e controle de acessos à plataforma."
+              title={isSuperAdmin ? 'Governança de Identidade' : 'Aprovação de Técnicos'}
+              description={isSuperAdmin
+                ? 'Gestão de perfis e controle de acessos à plataforma.'
+                : 'Revise e aprove solicitações de acesso ao Portal do Técnico.'}
             />
 
             {errorMsg && (
@@ -245,14 +264,16 @@ export default function AdminPage() {
                     <h2 className={styles.headingAmber}>
                       <Clock size={20} /> Aguardando Aprovação ({pendingUsers.length})
                     </h2>
-                    {renderTable(pendingUsers, true)}
+                    {renderTable(pendingUsers, true, isSuperAdmin)}
                   </div>
                 )}
 
-                <div className={styles.glassCard}>
-                  <h2 className={styles.headingWhiteLg}>Diretório de Usuários Ativos</h2>
-                  {renderTable(activeUsers, false)}
-                </div>
+                {isSuperAdmin && (
+                  <div className={styles.glassCard}>
+                    <h2 className={styles.headingWhiteLg}>Diretório de Usuários Ativos</h2>
+                    {renderTable(activeUsers, false, true)}
+                  </div>
+                )}
               </>
             )}
           </>

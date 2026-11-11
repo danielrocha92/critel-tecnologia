@@ -32,11 +32,19 @@ export default function PendentePage() {
           .single();
           
         if (perfilData?.status === 'ATIVO') {
-          if (perfilData.cargo === 'TECNICO') {
+          const normalizedCargo = perfilData.cargo
+            ?.normalize('NFD')
+            .replace(/\p{Diacritic}/gu, '')
+            .trim()
+            .toUpperCase();
+          if (normalizedCargo === 'TECNICO') {
             router.push(`/${lang}/tecnico/os`);
           } else {
             router.push(`/${lang}/dashboard`);
           }
+        } else if (perfilData?.status === 'BANIDO') {
+          await supabase.auth.signOut();
+          router.push(`/${lang}/login`);
         }
       }
     };
@@ -52,7 +60,7 @@ export default function PendentePage() {
           </div>
           <h1 className={styles.title}>Conta em Análise</h1>
           <p className={`${styles.subtitle} ${styles.pendenteSubtitle}`}>
-            Seu cadastro foi realizado com sucesso, mas a sua conta ainda precisa ser aprovada pelo administrador para acessar o Portal do Técnico.
+            Seu cadastro foi recebido e está aguardando a aprovação de um analista. O acesso ao Portal do Técnico será liberado após a aprovação.
           </p>
         </div>
 

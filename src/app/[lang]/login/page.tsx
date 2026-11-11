@@ -50,8 +50,8 @@ export default function LoginPage() {
       }
 
       if (perfilData.status === 'PENDENTE') {
-        await supabase.auth.signOut();
-        throw new Error('Sua conta está em análise. Aguarde a liberação do Administrador.');
+        router.push(`/${lang}/pendente`);
+        return;
       }
 
       // Redirecionamento baseado em cargo
@@ -68,8 +68,8 @@ export default function LoginPage() {
         router.push(`/${lang}/dashboard`);
       }
 
-    } catch (err: any) {
-      setError(err.message || 'Erro ao fazer login. Verifique suas credenciais.');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Erro ao fazer login. Verifique suas credenciais.');
     } finally {
       setLoading(false);
     }
@@ -79,15 +79,16 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
     try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/api/auth/callback`,
+          queryParams: { hd: 'criteltecnologia.com.br' },
         }
       });
       if (error) throw error;
-    } catch (err: any) {
-      setError(err.message || 'Erro ao conectar com o Google.');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Erro ao conectar com o Google.');
       setLoading(false);
     }
   };
@@ -103,7 +104,7 @@ export default function LoginPage() {
             <img src="/400PngdpiLogoCropped.png" alt="Critel Tecnologia" className={styles.logoImage} />
           </div>
           <h1 className={styles.title}>Plataforma de Operações</h1>
-          <p className={styles.subtitle}>Acesso Centralizado Critel</p>
+          <p className={styles.subtitle}>Use uma conta @criteltecnologia.com.br. Novos técnicos aguardam aprovação.</p>
         </div>
 
         {error && (

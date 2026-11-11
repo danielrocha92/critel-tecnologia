@@ -54,7 +54,7 @@ export async function updateSession(request: NextRequest) {
 
   const publicRoutes = [
     '/', '/certificacoes', '/clientes', '/contato',
-    '/privacidade', '/sobre', '/solucoes', '/termos', '/login'
+    '/privacidade', '/sobre', '/solucoes', '/termos', '/login', '/pendente'
   ];
 
   const isPublicPath =
@@ -63,6 +63,7 @@ export async function updateSession(request: NextRequest) {
     pathname.match(/\.(.*)$/);
 
   const isLoginPath = pathWithoutLang === '/login';
+  const isPendingPath = pathWithoutLang === '/pendente';
 
   // 1. Redireciona usuários não logados que tentam acessar rotas privadas
   if (!user && !isPublicPath) {
@@ -79,8 +80,22 @@ export async function updateSession(request: NextRequest) {
     const cargo = perfil?.cargo || null;
     const status = perfil?.status?.trim().toUpperCase() || null;
 
-    // Se estiver bloqueado ou pendente e não for rota pública, desloga ou deixa no login
-    if (status && status !== 'ATIVO' && !isPublicPath) {
+    if (!perfil && !isPublicPath) {
+      const url = request.nextUrl.clone();
+      const lang = url.pathname.split('/')[1] || 'pt';
+      url.pathname = `/${lang}/login`;
+      return NextResponse.redirect(url);
+    }
+
+    if (status === 'PENDENTE' && !isLoginPath && !isPendingPath) {
+      const url = request.nextUrl.clone();
+      const lang = url.pathname.split('/')[1] || 'pt';
+      url.pathname = `/${lang}/pendente`;
+      url.search = '';
+      return NextResponse.redirect(url);
+    }
+
+    if (status && status !== 'ATIVO' && status !== 'PENDENTE' && !isLoginPath) {
       const url = request.nextUrl.clone();
       const lang = url.pathname.split('/')[1] || 'pt';
       url.pathname = `/${lang}/login`;
@@ -134,6 +149,7 @@ export async function updateSession(request: NextRequest) {
           '/tecnico/historico',
           '/tecnico/perfil',
         ].some((route) => pathWithoutLang === route || pathWithoutLang.startsWith(`${route}/`));
+        const isAnalystApprovalRoute = cargoNormalizado === 'ANALISTA' && pathWithoutLang === '/admin';
 
         let isShared = false;
         // Técnicos ficam isolados no portal operacional (/tecnico/os).
@@ -143,7 +159,7 @@ export async function updateSession(request: NextRequest) {
             || sharedRoutes.some(route => pathWithoutLang === route || pathWithoutLang.startsWith(`${route}/`));
         }
 
-        if (!isOwnBasePath && !isOwnTechnicianRoute && !isShared) {
+        if (!isOwnBasePath && !isOwnTechnicianRoute && !isShared && !isAnalystApprovalRoute) {
           const url = request.nextUrl.clone();
           const lang = url.pathname.split('/')[1] || 'pt';
           url.pathname = `/${lang}${basePath}`;

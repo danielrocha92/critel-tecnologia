@@ -129,11 +129,11 @@ export default function Sidebar({ lang }: { lang: string }) {
     },
     {
       name: 'Administração', icon: Settings, hasSubmenu: true, section: 'admin',
-      roles: ['SUPER_ADMIN', 'ADMIN'],
+      roles: ['SUPER_ADMIN', 'ADMIN', 'ANALISTA'],
       subItems: [
         { label: 'Configurações de Sistema', href: `/${lang}/admin/configuracoes`, roles: ['SUPER_ADMIN', 'ADMIN'] },
         { label: 'Gerenciar Usuários', href: `/${lang}/admin/usuarios`, roles: ['SUPER_ADMIN', 'ADMIN'] },
-        { label: 'Governança de Identidade', href: `/${lang}/admin`, roles: ['SUPER_ADMIN', 'ADMIN'] },
+        { label: 'Aprovação de Técnicos', href: `/${lang}/admin`, roles: ['SUPER_ADMIN', 'ADMIN', 'ANALISTA'] },
       ]
     },
   ];
