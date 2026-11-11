@@ -44,8 +44,15 @@ export default function UsuariosPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(novoUsuario)
       });
-      if (!res.ok) throw new Error((await res.json()).error || 'Erro ao criar usuário');
-      alert('Usuário criado com sucesso!');
+      const result = await res.json();
+      if (!res.ok) {
+        if (result.code === 'user_already_registered') {
+          alert(result.error);
+          return;
+        }
+        throw new Error(result.error || 'Erro ao criar usuário');
+      }
+      alert(result.message || 'Usuário criado com sucesso!');
       setShowModal(false);
       setNovoUsuario({ nome: '', email: '', senha: '', cargo: 'TECNICO' });
       carregarUsuarios();

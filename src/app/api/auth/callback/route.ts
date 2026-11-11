@@ -21,7 +21,11 @@ export async function GET(request: Request) {
   const code = searchParams.get('code');
 
   if (!code) {
-    return NextResponse.redirect(`${origin}/pt/login?error=login_google`);
+    const providerError = searchParams.get('error');
+    if (providerError) {
+      console.error('O provedor OAuth retornou erro:', providerError);
+    }
+    return NextResponse.redirect(`${origin}/pt/login?error=${providerError ? 'provider_error' : 'login_google'}`);
   }
 
   const cookieStore = await cookies();
@@ -52,6 +56,13 @@ export async function GET(request: Request) {
 
   if (authError || !authData.user) {
     return loginUrl('login_google');
+  }
+
+  const isGoogleIdentity = authData.user.app_metadata?.provider === 'google'
+    || authData.user.identities?.some((identity) => identity.provider === 'google');
+  if (!isGoogleIdentity) {
+    await clearSession();
+    return loginUrl('google_obrigatorio');
   }
 
   const email = authData.user.email?.trim().toLowerCase();
@@ -86,6 +97,11 @@ export async function GET(request: Request) {
     return loginUrl('erro_perfil');
   }
 
+  if (perfil && normalizeRole(perfil.cargo) !== 'TECNICO') {
+    await clearSession();
+    return loginUrl('google_apenas_tecnicos');
+  }
+
   if (!perfil) {
     const { data: perfilExistente, error: buscaError } = await admin
       .from('perfis')
@@ -99,21 +115,33 @@ export async function GET(request: Request) {
       return loginUrl('erro_perfil');
     }
 
+    if (perfilExistente && normalizeRole(perfilExistente.cargo) !== 'TECNICO') {
+      await clearSession();
+      return loginUrl('google_apenas_tecnicos');
+    }
+
     if (perfilExistente?.user_id && perfilExistente.user_id !== authData.user.id) {
       await clearSession();
       return loginUrl('perfil_vinculado');
     }
 
     if (perfilExistente) {
-      const { error } = await admin
+      const { data: linkedProfile, error } = await admin
         .from('perfis')
         .update({ user_id: authData.user.id })
-        .eq('id', perfilExistente.id);
+        .eq('id', perfilExistente.id)
+        .is('user_id', null)
+        .select('id')
+        .maybeSingle();
 
       if (error) {
         console.error('Erro ao vincular conta Google ao pré-cadastro:', error);
         await clearSession();
         return loginUrl('erro_perfil');
+      }
+      if (!linkedProfile) {
+        await clearSession();
+        return loginUrl('perfil_vinculado');
       }
 
       perfil = { cargo: perfilExistente.cargo, status: perfilExistente.status };
@@ -152,23 +180,12 @@ export async function GET(request: Request) {
     return loginUrl('acesso_negado');
   }
 
-  const cargoNormalizado = normalizeRole(perfil.cargo);
-  const roleBasePaths: Record<string, string> = {
-    TECNICO: '/tecnico/os',
-    FINANCEIRO: '/financeiro',
-    COMERCIAL: '/comercial',
-    ANALISTA: '/analista',
-    ADMIN: '/dashboard',
-    SUPER_ADMIN: '/dashboard',
-  };
-  const basePath = roleBasePaths[cargoNormalizado];
-
-  if (!basePath) {
+  if (normalizeRole(perfil.cargo) !== 'TECNICO') {
     await clearSession();
-    return loginUrl('acesso_negado');
+    return loginUrl('google_apenas_tecnicos');
   }
 
-  const response = NextResponse.redirect(`${origin}/pt${basePath}`);
+  const response = NextResponse.redirect(`${origin}/pt/tecnico/os`);
   response.cookies.set('user_cargo', perfil.cargo, { path: '/', maxAge: 60 * 60 * 8 });
   return response;
 }

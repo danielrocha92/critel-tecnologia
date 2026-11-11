@@ -1,5 +1,5 @@
 'use client';
-import { useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 
 import { LogOut, Clock } from 'lucide-react';
 import { createBrowserClient } from '@supabase/ssr';
@@ -11,45 +11,54 @@ export default function PendentePage() {
   const params = useParams();
   const lang = params.lang as string;
 
-  const supabase = createBrowserClient(
+  const supabase = useMemo(() => createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  ), []);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.push(`/${lang}/login`);
   };
 
-  useEffect(() => {
-    const checkStatus = async () => {
+  const checkStatus = useCallback(async () => {
+    try {
       const { data: userData } = await supabase.auth.getUser();
-      if (userData?.user) {
-        const { data: perfilData } = await supabase
-          .from('perfis')
-          .select('cargo, status')
-          .eq('user_id', userData.user.id)
-          .single();
-          
-        if (perfilData?.status === 'ATIVO') {
-          const normalizedCargo = perfilData.cargo
-            ?.normalize('NFD')
-            .replace(/\p{Diacritic}/gu, '')
-            .trim()
-            .toUpperCase();
-          if (normalizedCargo === 'TECNICO') {
-            router.push(`/${lang}/tecnico/os`);
-          } else {
-            router.push(`/${lang}/dashboard`);
-          }
-        } else if (perfilData?.status === 'BANIDO') {
-          await supabase.auth.signOut();
-          router.push(`/${lang}/login`);
-        }
+      if (!userData.user) {
+        router.replace(`/${lang}/login`);
+        return;
       }
-    };
-    checkStatus();
-  }, [router, lang, supabase]);
+
+      const { data: perfilData, error } = await supabase
+        .from('perfis')
+        .select('cargo, status')
+        .eq('user_id', userData.user.id)
+        .single();
+
+      if (error) throw error;
+
+      const normalizedCargo = perfilData.cargo
+        ?.normalize('NFD')
+        .replace(/\p{Diacritic}/gu, '')
+        .trim()
+        .toUpperCase();
+
+      if (perfilData.status === 'ATIVO' && normalizedCargo === 'TECNICO') {
+        router.replace(`/${lang}/tecnico/os`);
+      } else if (perfilData.status !== 'PENDENTE' || normalizedCargo !== 'TECNICO') {
+        await supabase.auth.signOut();
+        router.replace(`/${lang}/login`);
+      }
+    } catch (error) {
+      console.error('Erro ao verificar aprovação do técnico:', error);
+    }
+  }, [lang, router, supabase]);
+
+  useEffect(() => {
+    void checkStatus();
+    const intervalId = window.setInterval(() => void checkStatus(), 5000);
+    return () => window.clearInterval(intervalId);
+  }, [checkStatus]);
 
   return (
     <div className={styles.container}>

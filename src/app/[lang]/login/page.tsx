@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { LogIn } from 'lucide-react';
 import styles from './login.module.css';
 import ThemeToggle from '@/components/ThemeToggle/ThemeToggle';
 
-export default function LoginPage() {
+function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -15,7 +15,19 @@ export default function LoginPage() {
 
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
   const lang = params.lang as string;
+  const oauthErrors: Record<string, string> = {
+    dominio_restrito: 'Acesse com uma conta Google do domínio @criteltecnologia.com.br.',
+    erro_perfil: 'Não foi possível concluir seu cadastro. Peça ajuda a um analista.',
+    google_apenas_tecnicos: 'O acesso com Google está disponível somente para técnicos.',
+    google_obrigatorio: 'Para acessar como técnico, entre usando o botão Google.',
+    login_google: 'Não foi possível concluir o login com Google. Tente novamente.',
+    perfil_vinculado: 'Esta conta Google está vinculada a outro cadastro. Peça ajuda a um analista.',
+    provider_error: 'O Google não autorizou o acesso. Confirme que selecionou a conta corporativa e tente novamente.',
+    acesso_negado: 'Sua conta técnica está bloqueada ou não possui acesso ativo. Contate um analista.',
+  };
+  const oauthError = oauthErrors[searchParams.get('error') || ''];
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -44,6 +56,18 @@ export default function LoginPage() {
 
       if (perfilError) throw perfilError;
 
+      const normalizedCargo = perfilData?.cargo
+        ?.normalize('NFD')
+        .replace(/\p{Diacritic}/gu, '')
+        .trim()
+        .toUpperCase();
+      const isTecnico = normalizedCargo === 'TECNICO';
+
+      if (isTecnico) {
+        await supabase.auth.signOut();
+        throw new Error('Técnicos devem entrar exclusivamente com a conta Google corporativa.');
+      }
+
       if (perfilData.status === 'BLOQUEADO') {
         await supabase.auth.signOut();
         throw new Error('Acesso bloqueado. Contate o administrador.');
@@ -54,19 +78,7 @@ export default function LoginPage() {
         return;
       }
 
-      // Redirecionamento baseado em cargo
-      const normalizedCargo = perfilData?.cargo
-        ?.normalize('NFD')
-        .replace(/\p{Diacritic}/gu, '')
-        .trim()
-        .toUpperCase();
-      const isTecnico = normalizedCargo === 'TECNICO';
-
-      if (isTecnico) {
-        router.push(`/${lang}/tecnico/os`);
-      } else {
-        router.push(`/${lang}/dashboard`);
-      }
+      router.push(`/${lang}/dashboard`);
 
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Erro ao fazer login. Verifique suas credenciais.');
@@ -83,7 +95,10 @@ export default function LoginPage() {
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/api/auth/callback`,
-          queryParams: { hd: 'criteltecnologia.com.br' },
+          queryParams: {
+            hd: 'criteltecnologia.com.br',
+            prompt: 'select_account',
+          },
         }
       });
       if (error) throw error;
@@ -104,12 +119,12 @@ export default function LoginPage() {
             <img src="/400PngdpiLogoCropped.png" alt="Critel Tecnologia" className={styles.logoImage} />
           </div>
           <h1 className={styles.title}>Plataforma de Operações</h1>
-          <p className={styles.subtitle}>Use uma conta @criteltecnologia.com.br. Novos técnicos aguardam aprovação.</p>
+          <p className={styles.subtitle}>Técnicos: usem somente a conta Google corporativa. O primeiro acesso aguarda aprovação.</p>
         </div>
 
-        {error && (
+        {(error || oauthError) && (
           <div className={styles.errorBox}>
-            {error}
+            {error || oauthError}
           </div>
         )}
 
@@ -130,7 +145,7 @@ export default function LoginPage() {
         </button>
 
         <div className={styles.divider}>
-          <span>ou</span>
+          <span>Login dos demais colaboradores</span>
         </div>
 
         <form onSubmit={handleLogin} className={styles.form}>
@@ -169,5 +184,13 @@ export default function LoginPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className={styles.container} />}>
+      <LoginForm />
+    </Suspense>
   );
 }
