@@ -6,8 +6,6 @@ import { cookies } from 'next/headers';
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
 
-const TECHNICIAN_DOMAIN = 'criteltecnologia.com.br';
-
 function normalizeRole(role: string | null) {
   return role
     ?.normalize('NFD')
@@ -67,9 +65,9 @@ export async function GET(request: Request) {
 
   const email = authData.user.email?.trim().toLowerCase();
   const emailParts = email?.split('@') || [];
-  if (emailParts.length !== 2 || emailParts[1] !== TECHNICIAN_DOMAIN) {
+  if (!email || emailParts.length !== 2 || !emailParts[0] || !emailParts[1]) {
     await clearSession();
-    return loginUrl('dominio_restrito');
+    return loginUrl('email_google_invalido');
   }
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;

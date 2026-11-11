@@ -18,13 +18,13 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const lang = params.lang as string;
   const oauthErrors: Record<string, string> = {
-    dominio_restrito: 'Acesse com uma conta Google do domínio @criteltecnologia.com.br.',
     erro_perfil: 'Não foi possível concluir seu cadastro. Peça ajuda a um analista.',
+    email_google_invalido: 'A conta Google não retornou um endereço de e-mail válido.',
     google_apenas_tecnicos: 'O acesso com Google está disponível somente para técnicos.',
     google_obrigatorio: 'Para acessar como técnico, entre usando o botão Google.',
     login_google: 'Não foi possível concluir o login com Google. Tente novamente.',
     perfil_vinculado: 'Esta conta Google está vinculada a outro cadastro. Peça ajuda a um analista.',
-    provider_error: 'O Google não autorizou o acesso. Confirme que selecionou a conta corporativa e tente novamente.',
+    provider_error: 'O Google não autorizou o acesso. Selecione sua conta Google e tente novamente.',
     acesso_negado: 'Sua conta técnica está bloqueada ou não possui acesso ativo. Contate um analista.',
   };
   const oauthError = oauthErrors[searchParams.get('error') || ''];
@@ -65,7 +65,7 @@ function LoginForm() {
 
       if (isTecnico) {
         await supabase.auth.signOut();
-        throw new Error('Técnicos devem entrar exclusivamente com a conta Google corporativa.');
+        throw new Error('Técnicos devem entrar exclusivamente pelo botão “Entrar com Google”.');
       }
 
       if (perfilData.status === 'BLOQUEADO') {
@@ -116,7 +116,7 @@ function LoginForm() {
             <img src="/400PngdpiLogoCropped.png" alt="Critel Tecnologia" className={styles.logoImage} />
           </div>
           <h1 className={styles.title}>Plataforma de Operações</h1>
-          <p className={styles.subtitle}>Técnicos: usem somente a conta Google corporativa. O primeiro acesso aguarda aprovação.</p>
+          <p className={styles.subtitle}>Técnicos: usem sua conta Google. No primeiro acesso, o cadastro aguarda aprovação. Os demais colaboradores entram com e-mail corporativo.</p>
         </div>
 
         {(error || oauthError) && (
