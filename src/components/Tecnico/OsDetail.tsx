@@ -244,12 +244,12 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
     };
   }, [ticket?.id, ticket?.status, ticket?.pausa_atual_id, activePause]);
 
-  // Watch position para check-out automático
+  // Monitora a distância do check-in para avisar o técnico sem alterar o status da OS.
   useEffect(() => {
     if (ticket?.check_in_at && ticket?.status === 'EM_ANDAMENTO') {
       if ('geolocation' in navigator && ticket.check_in_lat && ticket.check_in_lng) {
         watchId.current = navigator.geolocation.watchPosition(
-          async (position) => {
+          (position) => {
             const dist = getDistanceFromLatLonInMeters(
               ticket.check_in_lat!,
               ticket.check_in_lng!,
@@ -257,24 +257,6 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
               position.coords.longitude
             );
             setDistanciaAtual(dist);
-
-            if (dist > 500) {
-              navigator.geolocation.clearWatch(watchId.current!);
-              alert('Atenção: Você se afastou mais de 500m do local do Check-in. O chamado está sendo fechado automaticamente por segurança.');
-
-              // Executa Finalização Automática Nativa
-              await supabase.from('tickets').update({
-                status: 'RESOLVIDO',
-                resolucao: { autoFinalizado: true, dist: dist }
-              }).eq('id', ticket.id);
-              await supabase.from('ticket_transitions').insert({
-                ticket_id: ticket.id,
-                from_status: ticket.status,
-                to_status: 'RESOLVIDO',
-                reason: 'Auto-finalizado devido a distanciamento do local do check-in.'
-              });
-              router.replace(`/${lang}/tecnico/historico`);
-            }
           },
           (err) => console.warn(err),
           { enableHighAccuracy: true, maximumAge: 10000, timeout: 5000 }
@@ -285,7 +267,7 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
     return () => {
       if (watchId.current !== null) navigator.geolocation.clearWatch(watchId.current);
     };
-  }, [ticket?.check_in_at, ticket?.status, ticket?.check_in_lat, ticket?.check_in_lng, ticket?.id, lang, router]);
+  }, [ticket?.check_in_at, ticket?.status, ticket?.check_in_lat, ticket?.check_in_lng]);
 
   const handleAcceptTicket = async () => {
     if (!currentUser) return;
@@ -670,10 +652,17 @@ export default function OsDetail({ ticketId, lang }: { ticketId: string, lang: s
             ) : (
               <div className={styles.actionsContainer}>
                 {distanciaAtual !== null && (
-                  <div className={styles.distanceInfo}>
-                    {distanciaAtual > 400 ? <AlertTriangle size={14} color="#f59e0b" /> : <MapPin size={14} />}
-                    Distância do check-in: {Math.round(distanciaAtual)}m
-                  </div>
+                  <>
+                    <div className={styles.distanceInfo}>
+                      {distanciaAtual > 500 ? <AlertTriangle size={14} color="#f59e0b" /> : <MapPin size={14} />}
+                      Distância do check-in: {Math.round(distanciaAtual)}m
+                    </div>
+                    {distanciaAtual > 500 && (
+                      <p className={styles.distanceWarning} role="status">
+                        Você está longe do local registrado no check-in. O chamado continuará aberto.
+                      </p>
+                    )}
+                  </>
                 )}
                 <button
                   onClick={() => setShowModal(true)}

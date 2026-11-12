@@ -25,6 +25,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 14px;
+  gap: 0.75rem;
 }
 
 .title {
@@ -41,10 +42,13 @@
   border: 1px solid var(--border-color);
   padding: 4px 8px;
   border-radius: 9px;
+  max-width: min(100%, 280px);
+  min-width: 0;
 }
 
 .calendarIcon {
   color: var(--text-secondary);
+  flex-shrink: 0;
 }
 
 .servicesIcon {
@@ -64,6 +68,8 @@
   outline: none;
   appearance: none;
   cursor: pointer;
+  width: 100%;
+  min-width: 0;
 }
 
 .periodOption {
@@ -114,6 +120,7 @@
   padding: 10px;
   border-radius: 12px;
   display: flex;
+  flex-shrink: 0;
 }
 
 .iconBox svg {
@@ -129,8 +136,10 @@
 .totalValue {
   margin: 0;
   color: var(--text-primary);
-  font-size: 1.45rem;
+  font-size: clamp(1.2rem, 4vw, 1.45rem);
   font-weight: 700;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
 }
 
 .detailsGrid {
@@ -149,12 +158,15 @@
   display: flex;
   align-items: center;
   gap: 4px;
+  min-width: 0;
 }
 
 .detailValue {
+  display: block;
   color: var(--text-primary);
-  font-size: 1.1rem;
+  font-size: clamp(0.9rem, 3vw, 1.1rem);
   font-weight: bold;
+  overflow-wrap: anywhere;
 }
 
 .transactionList {
@@ -193,9 +205,36 @@
 }
 
 @media (max-width: 540px) {
+  .container {
+    padding: 14px 12px;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .selectWrapper {
+    width: 100%;
+    max-width: none;
+  }
+
   .cycleNotice {
     align-items: flex-start;
     flex-direction: column;
     gap: 0.25rem;
+  }
+
+  .totalRow {
+    align-items: flex-start;
+  }
+
+  .detailsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .transactionList li {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }

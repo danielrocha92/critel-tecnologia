@@ -487,6 +487,14 @@
   gap: 4px;
 }
 
+.distanceWarning {
+  margin: 0;
+  color: var(--status-warning-text);
+  font-size: 0.8rem;
+  line-height: 1.4;
+  text-align: center;
+}
+
 .btnFinalize {
   width: 100%;
   padding: 16px;

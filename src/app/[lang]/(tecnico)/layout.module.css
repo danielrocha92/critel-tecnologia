@@ -70,7 +70,34 @@
     padding-left: max(14px, env(safe-area-inset-left));
     padding-right: max(14px, env(safe-area-inset-right));
   }
+
+  .userInfo {
+    gap: 6px;
+  }
+
+  .userName {
+    max-width: 40vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   .mainContent { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
+}
+
+@media (max-width: 390px) {
+  .header {
+    gap: 8px;
+  }
+
+  .title {
+    font-size: 0.9rem;
+  }
+
+  .userInfo {
+    flex: 1;
+    justify-content: flex-end;
+  }
 }
 
 @media print {

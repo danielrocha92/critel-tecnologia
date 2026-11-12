@@ -562,6 +562,35 @@
   }
 }
 
+@media (max-width: 390px) {
+  .pageContainer {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .metricsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .metricCard,
+  .metricCardLink {
+    min-height: 72px;
+  }
+
+  .filtersContainer {
+    grid-template-columns: 1fr;
+  }
+
+  .sectionHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .resultCount {
+    align-self: flex-start;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .historyLink,
   .metricCard,
