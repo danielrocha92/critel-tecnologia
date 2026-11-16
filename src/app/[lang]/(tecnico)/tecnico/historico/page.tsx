@@ -205,7 +205,6 @@ export default function HistoricoPage() {
     document.title = `Relatório de atendimentos ${printReport.inicio} a ${printReport.fim}`;
     const finishPrint = () => {
       document.title = previousTitle;
-      setPrintReport(null);
     };
     window.addEventListener('afterprint', finishPrint);
     const timeout = window.setTimeout(() => window.print(), 100);
